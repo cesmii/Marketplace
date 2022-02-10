@@ -1,0 +1,11 @@
+ul.sidebar-list {
+    padding: 0px;
+
+    li {
+        list-style-type: none;
+
+        &:last-child {
+            margin-bottom: 0px;
+        }
+    }
+}
