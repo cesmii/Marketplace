@@ -1,0 +1,44 @@
+@import "./constants";
+
+.slick-slider {
+    //matches up with the list item row treatment
+    box-shadow: 0px 4px 32px rgba(0, 0, 0, 0.1);
+    border-radius: $tile-radius;
+    margin: 0px auto;
+    //width: 95%;  //take this out b/c hide arrows
+
+    @media (max-width: 576px) {
+        width: 100%;
+    }
+
+    .slick-arrow.slick-prev, .slick-arrow.slick-next {
+
+        &:before {
+            color: color("selectedBg");
+            opacity: 0.3 !important;
+        }
+
+        &:hover:before {
+            opacity: 1 !important;
+        }
+
+        @media (max-width: 576px) {
+            display: none; //mobile screens don't show
+        }
+    }
+
+    .slick-dots li {
+        margin: 0px; //closer together on dots
+
+        button:before {
+            font-size: 8px;
+            color: color("selectedBg");
+            opacity: 0.3 !important; //need light blue bg
+        }
+
+        &.slick-active button:before, button:hover:before {
+            color: color("selectedBg");
+            opacity: 1 !important;
+        }
+    }
+}
