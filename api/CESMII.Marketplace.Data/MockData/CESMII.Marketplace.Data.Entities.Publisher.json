@@ -1,0 +1,86 @@
+[{
+  "_id": {
+    "$oid": "614b269c045c0ea705844de1"
+  },
+  "Name": "Palletizer Technologies, LLC",
+  "Verified": true,
+  "Description": "Test",
+  "CompanyUrl": "https://www.randstadusa.com/",
+  "SocialMediaLinks": [
+    {
+      "Icon": "faFacebook",
+      "Css": "facebook",
+      "Url": "https://www.facebook.com/"
+    },
+    {
+      "Icon": "faInstagram",
+      "Css": "instagram",
+      "Url": "https://www.instagram.com/"
+    },
+    {
+      "Icon": "faTwitter",
+      "Css": "twitter",
+      "Url": "https://www.twitter.com/"
+    }
+  ],
+  "LookupType": {
+    "EnumValue": 6,
+    "Name": "Publisher"
+  },
+  "IndustryVerticals": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d3"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d4"
+    }
+  ],
+  "Categories": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d0"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d1"
+    }
+  ]
+},{
+  "_id": {
+    "$oid": "614b3a74045c0ea705844e06"
+  },
+  "Name": "Micro Processor, Inc.",
+  "Verified": true,
+  "Description": "Test",
+  "CompanyUrl": "https://www.randstadusa.com/",
+  "SocialMediaLinks": [
+    {
+      "Icon": "faFacebook",
+      "Css": "facebook",
+      "Url": "https://www.facebook.com/"
+    },
+    {
+      "Icon": "faInstagram",
+      "Css": "instagram",
+      "Url": "https://www.instagram.com/"
+    }
+  ],
+  "LookupType": {
+    "EnumValue": 6,
+    "Name": "Publisher"
+  },
+  "IndustryVerticals": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d3"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d5"
+    }
+  ],
+  "Categories": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d0"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d2"
+    }
+  ]
+}]

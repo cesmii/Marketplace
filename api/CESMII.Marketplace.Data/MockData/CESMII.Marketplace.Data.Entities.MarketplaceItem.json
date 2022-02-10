@@ -1,0 +1,286 @@
+[{
+  "_id": {
+    "$oid": "611c40d96f069e7f409f62c2"
+  },
+  "CreatedById": 0,
+  "Created": {
+    "$date": "2020-11-04T00:00:00Z"
+  },
+  "CreatedBy": null,
+  "UpdatedById": 0,
+  "Updated": null,
+  "UpdatedBy": null,
+  "IsActive": true,
+  "Name": "Robot Harvester",
+  "Version": "1.1.0.0",
+  "Description": "Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. ",
+  "TypeId": 0,
+  "Type": null,
+  "StatusId": 0,
+  "Status": null,
+  "MarketplaceStatusId": 0,
+  "AuthorId": null,
+  "ExternalAuthor": null,
+  "MetaTags": [
+    "robotics",
+    "agriculture"
+  ],
+  "Categories": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d0"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d1"
+    }
+  ],
+  "IndustryVerticals": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d3"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d4"
+    }
+  ],
+  "MarketplaceStatus": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d7"
+    }
+  ],
+  "IsFeatured": false,
+  "IsVerified": false,
+  "PublisherId": {
+    "$oid": "614b269c045c0ea705844de1"
+  },
+  "Abstract": "Abstract here. Abstract here. Abstract here. Abstract here. Abstract here. Abstract here. ",
+  "PublishDate": {
+    "$date": "2020-08-14T05:00:00Z"
+  }
+},{
+  "_id": {
+    "$oid": "61379b2f7fa0aa686242dc30"
+  },
+  "CreatedById": 0,
+  "Created": {
+    "$date": "2020-11-04T00:00:00Z"
+  },
+  "CreatedBy": null,
+  "UpdatedById": 0,
+  "Updated": null,
+  "UpdatedBy": null,
+  "IsActive": false,
+  "Name": "Robot 2021",
+  "Version": "2.0.2.0",
+  "Description": "Very Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. ",
+  "TypeId": 0,
+  "Type": null,
+  "StatusId": 0,
+  "Status": null,
+  "MarketplaceStatusId": 0,
+  "AuthorId": null,
+  "ExternalAuthor": null,
+  "MetaTags": [
+    "agriculture",
+    "automation"
+  ],
+  "Categories": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d2"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d1"
+    }
+  ],
+  "IndustryVerticals": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d3"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d4"
+    }
+  ],
+  "MarketplaceStatus": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d7"
+    }
+  ],
+  "IsFeatured": false,
+  "IsVerified": false,
+  "PublisherId": {
+    "$oid": "614b3a74045c0ea705844e06"
+  },
+  "Abstract": "Abstract here. Abstract here. Abstract here. Abstract here. Abstract here. Abstract here. ",
+  "PublishDate": {
+    "$date": "2021-03-21T05:00:00Z"
+  }
+},{
+  "_id": {
+    "$oid": "6138eb4a053954b4649ea2eb"
+  },
+  "CreatedById": 0,
+  "Created": {
+    "$date": {
+      "$numberLong": "-62135596800000"
+    }
+  },
+  "CreatedBy": null,
+  "UpdatedById": 0,
+  "Updated": null,
+  "UpdatedBy": null,
+  "IsActive": true,
+  "Name": "Micro beverage dispenser",
+  "Version": null,
+  "Description": "Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. ",
+  "TypeId": 0,
+  "Type": null,
+  "StatusId": 0,
+  "Status": null,
+  "MarketplaceStatusId": 0,
+  "AuthorId": null,
+  "ExternalAuthor": null,
+  "MetaTags": [
+    "beverage",
+    "dispenser"
+  ],
+  "Categories": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d0"
+    }
+  ],
+  "IndustryVerticals": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d3"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d4"
+    }
+  ],
+  "MarketplaceStatus": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d6"
+    }
+  ],
+  "IsFeatured": false,
+  "IsVerified": false,
+  "PublisherId": {
+    "$oid": "614b269c045c0ea705844de1"
+  },
+  "Abstract": "Abstract here. Abstract here. Abstract here. Abstract here. Abstract here. Abstract here. ",
+  "PublishDate": {
+    "$date": "2019-09-04T05:00:00Z"
+  }
+},{
+  "_id": {
+    "$oid": "614379d77fa0aa686242dc82"
+  },
+  "CreatedById": 0,
+  "Created": {
+    "$date": {
+      "$numberLong": "-62135596800000"
+    }
+  },
+  "CreatedBy": null,
+  "UpdatedById": 0,
+  "Updated": null,
+  "UpdatedBy": null,
+  "IsActive": true,
+  "Name": "Petroleum Quality Tester",
+  "Version": null,
+  "Description": "Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. ",
+  "TypeId": 0,
+  "Type": null,
+  "StatusId": 0,
+  "Status": null,
+  "MarketplaceStatusId": 0,
+  "AuthorId": null,
+  "ExternalAuthor": null,
+  "MetaTags": [
+    "oil",
+    "gas",
+    "petroleum",
+    "energy"
+  ],
+  "Categories": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d2"
+    }
+  ],
+  "IndustryVerticals": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d4"
+    }
+  ],
+  "MarketplaceStatus": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d8"
+    }
+  ],
+  "IsFeatured": false,
+  "IsVerified": false,
+  "PublisherId": {
+    "$oid": "614b269c045c0ea705844de1"
+  },
+  "Abstract": "Abstract here. Abstract here. Abstract here. Abstract here. Abstract here. Abstract here. ",
+  "PublishDate": {
+    "$date": "2021-01-05T05:00:00Z"
+  }
+},{
+  "_id": {
+    "$oid": "61547d648dfe664057739027"
+  },
+  "CreatedById": 0,
+  "Created": {
+    "$date": "2020-11-04T00:00:00Z"
+  },
+  "CreatedBy": null,
+  "UpdatedById": 0,
+  "Updated": null,
+  "UpdatedBy": null,
+  "IsActive": true,
+  "Name": "Basic 2000",
+  "Version": "1.1.0.0",
+  "Description": "Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. ",
+  "TypeId": 0,
+  "Type": null,
+  "StatusId": 0,
+  "Status": null,
+  "MarketplaceStatusId": 0,
+  "AuthorId": null,
+  "ExternalAuthor": null,
+  "MetaTags": [
+    "robotics",
+    "agriculture"
+  ],
+  "Categories": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d0"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d1"
+    }
+  ],
+  "IndustryVerticals": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d3"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d4"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d5"
+    }
+  ],
+  "MarketplaceStatus": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d7"
+    }
+  ],
+  "IsFeatured": false,
+  "IsVerified": false,
+  "PublisherId": {
+    "$oid": "614b269c045c0ea705844de1"
+  },
+  "Abstract": "Abstract here. Abstract here. Abstract here. Abstract here. Abstract here. Abstract here. ",
+  "PublishDate": {
+    "$date": "2020-12-24T05:00:00Z"
+  }
+}]
