@@ -1,0 +1,598 @@
+[{
+  "_id": {
+    "$oid": "611c40d96f069e7f409f62c2"
+  },
+  "CreatedById": {
+    "$oid": "61a8c7de4d011686f8b6e2fc"
+  },
+  "Created": {
+    "$date": "2020-11-04T00:00:00Z"
+  },
+  "UpdatedById": {
+    "$oid": "613770ad4849a53d993fb97d"
+  },
+  "Updated": {
+    "$date": "2022-01-26T00:28:30.946Z"
+  },
+  "IsActive": true,
+  "Name": "plantweb-optics-analytics",
+  "DisplayName": "Plantweb™ Optics Analytics",
+  "Version": "1.1.0.0",
+  "Abstract": "<p><strong>Plantweb™ </strong>Optics Analytics is extensible software that leverages artificial intelligence, machine learning, and industry-based expertise...</p>",
+  "Description": "<p><strong>Plantweb™</strong> Optics Analytics is extensible software that leverages artificial intelligence, machine learning, and industry-based expertise to ensure operational health and optimize plant-wide performance by detecting abnormal behavior of processes and assets, identifying root causes of problems, and predicting future performance.&nbsp;</p>\n<figure><img src=\"https://cesmii-marketplace-api-dev.azurewebsites.net/api/image/61ddc1522e0f0f46205b5725\" alt=\"\" height=\"\" width=\"\"/></figure>\n<p><br>\n</p>",
+  "TypeId": 0,
+  "Type": null,
+  "StatusId": {
+    "$oid": "6123a2a96f069e7f409f62d8"
+  },
+  "AuthorId": null,
+  "ExternalAuthor": null,
+  "MetaTags": [
+    "Refining",
+    "Reliability",
+    "Pump Monitoring",
+    "Compressor Monitoring",
+    "Heat Exchanger Monitoring"
+  ],
+  "Categories": [
+    {
+      "$oid": "618aa924557c7b88d5fb487b"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d0"
+    },
+    {
+      "$oid": "618aa913557c7b88d5fb487a"
+    },
+    {
+      "$oid": "618aa883557c7b88d5fb4877"
+    }
+  ],
+  "IndustryVerticals": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d4"
+    },
+    {
+      "$oid": "618aa8e8557c7b88d5fb4879"
+    },
+    {
+      "$oid": "618aa8c0557c7b88d5fb4878"
+    }
+  ],
+  "PublisherId": {
+    "$oid": "618425a5ff118b749e33f5fe"
+  },
+  "IsFeatured": true,
+  "IsVerified": true,
+  "PublishDate": {
+    "$date": "2020-08-14T05:00:00Z"
+  },
+  "ImagePortraitId": {
+    "$oid": "61dca715c461317769130b73"
+  },
+  "ImageSquareId": {
+    "$oid": "61dca6c6c461317769130b71"
+  },
+  "ImageLandscapeId": {
+    "$oid": "61ddc1522e0f0f46205b5725"
+  }
+},{
+  "_id": {
+    "$oid": "61379b2f7fa0aa686242dc30"
+  },
+  "CreatedById": {
+    "$oid": "61a8ceb14d011686f8b6e2fd"
+  },
+  "Created": {
+    "$date": "2020-11-04T00:00:00Z"
+  },
+  "UpdatedById": {
+    "$oid": "613770ad4849a53d993fb97d"
+  },
+  "Updated": {
+    "$date": "2022-01-26T00:14:30.221Z"
+  },
+  "IsActive": true,
+  "Name": "smart-cooling-tunnel-monitoring",
+  "DisplayName": "Smart Cooling Tunnel Monitoring",
+  "Version": "2.0.2.0",
+  "Abstract": "<p>Monitor multiple sections of a Cooling Tunnel operation to ensure proper temperature, humidity, and speed.</p>",
+  "Description": "<p>Monitor multiple sections of a Cooling Tunnel operation to ensure proper temperature, humidity, and speed. Simply supply the operations ideal operating values for temperature, humidity, speed, and link to your SM Platform instance, and quickly gather the data needed to ensure a finished product is within the desired specifications.</p>",
+  "TypeId": 0,
+  "Type": null,
+  "StatusId": {
+    "$oid": "6123a2a96f069e7f409f62d8"
+  },
+  "AuthorId": null,
+  "ExternalAuthor": null,
+  "MetaTags": [
+    "cooling",
+    "performance",
+    "monitoring",
+    "industrial"
+  ],
+  "Categories": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d0"
+    }
+  ],
+  "IndustryVerticals": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d5"
+    }
+  ],
+  "PublisherId": {
+    "$oid": "614b3a74045c0ea705844e06"
+  },
+  "IsFeatured": true,
+  "IsVerified": true,
+  "PublishDate": {
+    "$date": "2021-03-21T05:00:00Z"
+  },
+  "ImagePortraitId": {
+    "$oid": "61dd9098e96737fe710f90a3"
+  },
+  "ImageSquareId": {
+    "$oid": "61dd9098e96737fe710f90a3"
+  },
+  "ImageLandscapeId": {
+    "$oid": "61dd9098e96737fe710f90a3"
+  }
+},{
+  "_id": {
+    "$oid": "6138eb4a053954b4649ea2eb"
+  },
+  "CreatedById": {
+    "$oid": "61a8ced14d011686f8b6e2ff"
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "-62135596800000"
+    }
+  },
+  "UpdatedById": {
+    "$oid": "613770ad4849a53d993fb97d"
+  },
+  "Updated": {
+    "$date": "2022-01-11T01:34:06.755Z"
+  },
+  "IsActive": true,
+  "Name": "micro-beverage-dispenser",
+  "DisplayName": "Micro Beverage Dispenser",
+  "Version": null,
+  "Abstract": "Micro beverage dispenser abstract. Micro beverage dispenser abstract.",
+  "Description": "Micro beverage dispenser long description here. Micro beverage dispenser long description here. Micro beverage dispenser long description here. Micro beverage dispenser long description here. Micro beverage dispenser long description here. Micro beverage dispenser long description here. Micro beverage dispenser long description here. ",
+  "TypeId": 0,
+  "Type": null,
+  "StatusId": {
+    "$oid": "6123a2a96f069e7f409f62d8"
+  },
+  "AuthorId": null,
+  "ExternalAuthor": null,
+  "MetaTags": [
+    "beverage",
+    "dispenser"
+  ],
+  "Categories": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d0"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d1"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d2"
+    }
+  ],
+  "IndustryVerticals": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d4"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d3"
+    }
+  ],
+  "PublisherId": {
+    "$oid": "614b269c045c0ea705844de1"
+  },
+  "IsFeatured": false,
+  "IsVerified": true,
+  "PublishDate": {
+    "$date": "2019-09-04T05:00:00Z"
+  },
+  "ImagePortraitId": {
+    "$oid": "61dcdbf6184f422afc43558c"
+  },
+  "ImageSquareId": {
+    "$oid": "61dc4165cf40be2136386abc"
+  },
+  "ImageLandscapeId": {
+    "$oid": "61dcda9f184f422afc435588"
+  }
+},{
+  "_id": {
+    "$oid": "614379d77fa0aa686242dc82"
+  },
+  "CreatedById": {
+    "_csharpnull": true
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "-62135596800000"
+    }
+  },
+  "UpdatedById": {
+    "$oid": "613770ad4849a53d993fb97d"
+  },
+  "Updated": {
+    "$date": "2022-01-11T01:34:58.308Z"
+  },
+  "IsActive": true,
+  "Name": "petroleum-quality-tester",
+  "DisplayName": "Petroleum Quality Tester",
+  "Version": null,
+  "Abstract": "Abstract here. Abstract here. Abstract here. Abstract here. Abstract here. Abstract here. ",
+  "Description": "Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. ",
+  "TypeId": 0,
+  "Type": null,
+  "StatusId": {
+    "$oid": "6123a2a96f069e7f409f62d6"
+  },
+  "AuthorId": null,
+  "ExternalAuthor": null,
+  "MetaTags": [
+    "Petroleum",
+    "Energy"
+  ],
+  "Categories": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d2"
+    }
+  ],
+  "IndustryVerticals": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d4"
+    }
+  ],
+  "PublisherId": {
+    "$oid": "614b269c045c0ea705844de1"
+  },
+  "IsFeatured": false,
+  "IsVerified": true,
+  "PublishDate": {
+    "$date": "2021-01-05T05:00:00Z"
+  },
+  "ImagePortraitId": {
+    "$oid": "61dcce2b184f422afc435581"
+  },
+  "ImageSquareId": {
+    "$oid": "61dcce2f184f422afc435582"
+  },
+  "ImageLandscapeId": {
+    "$oid": "61dcd1e8184f422afc435583"
+  }
+},{
+  "_id": {
+    "$oid": "61547d648dfe664057739027"
+  },
+  "CreatedById": {
+    "_csharpnull": true
+  },
+  "Created": {
+    "$date": "2020-11-04T00:00:00Z"
+  },
+  "UpdatedById": {
+    "$oid": "613770ad4849a53d993fb97d"
+  },
+  "Updated": {
+    "$date": "2022-01-11T16:07:46.436Z"
+  },
+  "IsActive": true,
+  "Name": "smart-flow-monitoring",
+  "DisplayName": "Smart Flow Monitoring",
+  "Version": "1.1.0.0",
+  "Abstract": "<p>Monitor Asset Utilization and Performance (for batch systems) with our updated Smart Flow Monitoring App.&nbsp;</p>",
+  "Description": "Monitor Asset Utilization and Performance (for batch systems) with our updated Smart Flow Monitoring App. Just add the number of tanks in your operation, the link to your SM Platform instance, and quickly visualize each tanks’ Asset Utilization and Performance.",
+  "TypeId": 0,
+  "Type": null,
+  "StatusId": {
+    "$oid": "6123a2a96f069e7f409f62d8"
+  },
+  "AuthorId": null,
+  "ExternalAuthor": null,
+  "MetaTags": [
+    "asset utilization",
+    "performance",
+    "batch system",
+    "flow",
+    "monitoring",
+    "industrial"
+  ],
+  "Categories": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d0"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d1"
+    }
+  ],
+  "IndustryVerticals": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d5"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d4"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d3"
+    }
+  ],
+  "PublisherId": {
+    "$oid": "614b3a74045c0ea705844e06"
+  },
+  "IsFeatured": true,
+  "IsVerified": false,
+  "PublishDate": {
+    "$date": "2020-12-24T05:00:00Z"
+  },
+  "ImagePortraitId": {
+    "$oid": "61dcdbf6184f422afc43558b"
+  },
+  "ImageSquareId": {
+    "$oid": "61dc415dcf40be2136386abb"
+  },
+  "ImageLandscapeId": {
+    "$oid": "61dcda9f184f422afc435587"
+  }
+},{
+  "_id": {
+    "$oid": "6184183c800636bc43c76e57"
+  },
+  "CreatedById": {
+    "$oid": "61a8cf404d011686f8b6e301"
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "-62135596800000"
+    }
+  },
+  "UpdatedById": {
+    "$oid": "613770ad4849a53d993fb97d"
+  },
+  "Updated": {
+    "$date": "2022-01-12T16:40:24.292Z"
+  },
+  "IsActive": true,
+  "Name": "portable-water-spectrophometer",
+  "DisplayName": "Portable Water Spectrophometer ",
+  "Version": null,
+  "Abstract": "Designed for drinking water and wastewater method analysis",
+  "Description": "Accuracy and dependability in a portable meter designed for routine visible (340 to 800 nm) water and wastewater methods. The programmable water quality methods offer absorbance, % transmittance, and concentration measurements. Collect up to 100 data sets with GLP compliance. ",
+  "TypeId": 0,
+  "Type": null,
+  "StatusId": {
+    "$oid": "6123a2a96f069e7f409f62d8"
+  },
+  "AuthorId": null,
+  "ExternalAuthor": null,
+  "MetaTags": [
+    "beverage",
+    "water",
+    "analysis"
+  ],
+  "Categories": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d0"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d2"
+    }
+  ],
+  "IndustryVerticals": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d3"
+    }
+  ],
+  "PublisherId": {
+    "$oid": "614b3a74045c0ea705844e06"
+  },
+  "IsFeatured": false,
+  "IsVerified": false,
+  "PublishDate": {
+    "$date": "2021-01-20T05:00:00Z"
+  },
+  "ImagePortraitId": {
+    "$oid": "61ddc4132e0f0f46205b5727"
+  },
+  "ImageSquareId": {
+    "$oid": "61ddc4132e0f0f46205b5728"
+  },
+  "ImageLandscapeId": {
+    "$oid": "61ddc4132e0f0f46205b5726"
+  }
+},{
+  "_id": {
+    "$oid": "61843d361046a1acc0f11b4d"
+  },
+  "CreatedById": {
+    "$oid": "61a8cf554d011686f8b6e303"
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "-62135596800000"
+    }
+  },
+  "UpdatedById": {
+    "$oid": "613770ad4849a53d993fb97d"
+  },
+  "Updated": {
+    "$date": "2022-01-12T00:04:56.830Z"
+  },
+  "IsActive": true,
+  "Name": "liquid-batch-ph-analyzer",
+  "DisplayName": "Liquid Batch pH Analyzer",
+  "Version": "1.0.0.0",
+  "Abstract": " This is a new and innovative quality assurance approach to evaluate consistency of batches during the initial phase. ",
+  "Description": "Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. ",
+  "TypeId": 0,
+  "Type": null,
+  "StatusId": {
+    "$oid": "6123a2a96f069e7f409f62d8"
+  },
+  "AuthorId": null,
+  "ExternalAuthor": null,
+  "MetaTags": [
+    "liquid",
+    "bulk"
+  ],
+  "Categories": [
+    {
+      "$oid": "618aa924557c7b88d5fb487b"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d0"
+    }
+  ],
+  "IndustryVerticals": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d3"
+    }
+  ],
+  "PublisherId": {
+    "$oid": "61a7fa47d33d6576d8a6a3f2"
+  },
+  "IsFeatured": false,
+  "IsVerified": true,
+  "PublishDate": {
+    "$date": "2021-05-01T04:00:00Z"
+  },
+  "ImagePortraitId": {
+    "$oid": "61ddc4132e0f0f46205b5727"
+  },
+  "ImageSquareId": {
+    "$oid": "61ddc4132e0f0f46205b5728"
+  },
+  "ImageLandscapeId": {
+    "$oid": "61ddc4132e0f0f46205b5726"
+  }
+},{
+  "_id": {
+    "$oid": "61a806989207dd229ff4178a"
+  },
+  "CreatedById": {
+    "$oid": "61a8cf7a4d011686f8b6e306"
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "-62135596800000"
+    }
+  },
+  "UpdatedById": {
+    "$oid": "613770ad4849a53d993fb97d"
+  },
+  "Updated": {
+    "$date": "2022-01-12T16:23:22.466Z"
+  },
+  "IsActive": false,
+  "Name": "new-item",
+  "DisplayName": "New Item",
+  "Version": null,
+  "Abstract": "New item description. New item description. New item description. ",
+  "Description": "Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. Long description here. ",
+  "TypeId": 0,
+  "Type": null,
+  "StatusId": {
+    "$oid": "6123a2a96f069e7f409f62d8"
+  },
+  "AuthorId": null,
+  "ExternalAuthor": null,
+  "MetaTags": null,
+  "Categories": [
+    {
+      "$oid": "618aa924557c7b88d5fb487b"
+    }
+  ],
+  "IndustryVerticals": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d3"
+    }
+  ],
+  "PublisherId": {
+    "$oid": "61a7fe8d9207dd229ff41789"
+  },
+  "IsFeatured": false,
+  "IsVerified": false,
+  "PublishDate": null,
+  "ImagePortraitId": {
+    "_csharpnull": true
+  },
+  "ImageSquareId": {
+    "_csharpnull": true
+  },
+  "ImageLandscapeId": {
+    "_csharpnull": true
+  }
+},{
+  "_id": {
+    "$oid": "61a960e58073ce86a4fe1afc"
+  },
+  "CreatedById": {
+    "$oid": "613770ad4849a53d993fb97d"
+  },
+  "Created": {
+    "$date": "2021-12-03T00:00:00Z"
+  },
+  "UpdatedById": {
+    "$oid": "613770ad4849a53d993fb97d"
+  },
+  "Updated": {
+    "$date": "2022-01-26T00:22:18.336Z"
+  },
+  "IsActive": true,
+  "Name": "tank-bacteria-analyzer-2021",
+  "DisplayName": "Tank Bacteria Analyzer v. 2021 ",
+  "Version": "1.0.2021.0",
+  "Abstract": "<p>A non-invasive food-safe alternative to draining tanks to measure bacteria levels within food processing tanks.</p>",
+  "Description": "<p>Over time, bacteria can accumulate on the interior walls of food and beverage processing tanks. This tool will help manufacturers detect and analyze bacteria levels in accordance with regulations.</p>",
+  "TypeId": 0,
+  "Type": null,
+  "StatusId": {
+    "$oid": "6123a2a96f069e7f409f62d8"
+  },
+  "AuthorId": null,
+  "ExternalAuthor": null,
+  "MetaTags": [
+    "bacteria",
+    "quantifiable measurement"
+  ],
+  "Categories": [
+    {
+      "$oid": "618aa924557c7b88d5fb487b"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d2"
+    }
+  ],
+  "IndustryVerticals": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d3"
+    }
+  ],
+  "PublisherId": {
+    "$oid": "61a7fe8d9207dd229ff41789"
+  },
+  "IsFeatured": false,
+  "IsVerified": true,
+  "PublishDate": {
+    "$date": "2021-12-02T05:00:00Z"
+  },
+  "ImagePortraitId": {
+    "$oid": "61ddc4132e0f0f46205b5727"
+  },
+  "ImageSquareId": {
+    "$oid": "61ddc4132e0f0f46205b5728"
+  },
+  "ImageLandscapeId": {
+    "$oid": "61ddc4132e0f0f46205b5726"
+  }
+}]
