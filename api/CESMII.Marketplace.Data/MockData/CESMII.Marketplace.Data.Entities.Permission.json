@@ -1,0 +1,25 @@
+[{
+  "_id": {
+    "$oid": "613776a14849a53d993fb98b"
+  },
+  "PermissionEnum": 1,
+  "Name": "Can Manage Marketplace",
+  "Description": null,
+  "CodeName": "CanManageMarketplace"
+},{
+  "_id": {
+    "$oid": "613776a14849a53d993fb98c"
+  },
+  "PermissionEnum": 2,
+  "Name": "Can Manage Users",
+  "Description": null,
+  "CodeName": "CanManageUsers"
+},{
+  "_id": {
+    "$oid": "613776a14849a53d993fb98d"
+  },
+  "PermissionEnum": 3,
+  "Name": "Can Manage System Settings",
+  "Description": null,
+  "CodeName": "CanManageSystemSettings"
+}]

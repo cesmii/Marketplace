@@ -1,0 +1,118 @@
+[{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d0"
+  },
+  "Id": 101,
+  "Name": "Robot Assessment",
+  "Code": "RA",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d1"
+  },
+  "Id": 102,
+  "Name": "Palletizing",
+  "Code": "PAL",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d2"
+  },
+  "Id": 103,
+  "Name": "Predictive Maintenance",
+  "Code": "PM",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d3"
+  },
+  "Id": 201,
+  "Name": "Food & Beverage",
+  "Code": "F&B",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d4"
+  },
+  "Id": 202,
+  "Name": "Energy (Oil & Gas)",
+  "Code": "EOG",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d5"
+  },
+  "Id": 203,
+  "Name": "Aerospace",
+  "Code": "AER",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d6"
+  },
+  "Id": 301,
+  "Name": "Draft",
+  "Code": "D",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 5,
+    "Name": "Marketplace Status"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d7"
+  },
+  "Id": 302,
+  "Name": "Retire",
+  "Code": "R",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 5,
+    "Name": "Marketplace Status"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d8"
+  },
+  "Id": 303,
+  "Name": "Live",
+  "Code": "MS3",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 5,
+    "Name": "Marketplace Status"
+  },
+  "IsActive": true
+}]

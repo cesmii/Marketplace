@@ -24,7 +24,13 @@
 	\api - This contains a .NET web API back end for marketplace. Within this solution, the DB database connections to Mongo DB will occur. 
 </li>
 <li>
-	\front-end - This contains the REACT front end for the marketplace app.
+	\frontend - This contains the REACT front end for the marketplace app.
+</li>
+<li>
+	\images - These are starter images loaded into the system to be used in content areas.
+</li>
+<li>
+	\sample-data - This contains JSON data that mimics the data in the stage Azure Cosmos Mongo DB.
 </li>
 </ul>
 

@@ -1,0 +1,163 @@
+[{
+  "_id": {
+    "$oid": "613770ad4849a53d993fb97d"
+  },
+  "UserName": "seanc",
+  "Password": "1$duvSse0MBDwrhvIByZ0xiA==$N8V8SPIWjbXRuuDabnaWxv5tk+Lko2WB2AWmoP5zOvM=",
+  "FirstName": "Sean",
+  "LastName": "C",
+  "Email": null,
+  "Permissions": [
+    {
+      "$oid": "613776a14849a53d993fb98b"
+    },
+    {
+      "$oid": "613776a14849a53d993fb98c"
+    },
+    {
+      "$oid": "613776a14849a53d993fb98d"
+    }
+  ],
+  "IsActive": true,
+  "Created": {
+    "$date": "2021-09-07T04:00:00Z"
+  },
+  "LastLogin": {
+    "$date": "2021-10-06T16:54:47.419Z"
+  },
+  "RegistrationComplete": {
+    "$date": "2021-09-07T04:00:00Z"
+  }
+},{
+  "_id": {
+    "$oid": "613770ad4849a53d993fb97e"
+  },
+  "UserName": "cesmii",
+  "Password": "1$3lTaUg36+zsz0N/gMZpfNg==$4eTSJOPtf51PAaXKVej5MsOEwU8ZCmoBGf8SnaEpLx0=",
+  "FirstName": "Cesmii",
+  "LastName": "User",
+  "Email": null,
+  "Permissions": [],
+  "IsActive": true,
+  "Created": {
+    "$date": "2021-09-07T04:00:00Z"
+  },
+  "LastLogin": {
+    "$date": "2021-09-07T18:47:13.560Z"
+  },
+  "RegistrationComplete": {
+    "$date": "2021-09-07T04:00:00Z"
+  }
+},{
+  "_id": {
+    "$oid": "613770ad4849a53d993fb97f"
+  },
+  "UserName": "jimw",
+  "Email": null,
+  "FirstName": "Jim",
+  "OrganizationId": null,
+  "IsActive": true,
+  "Permissions": [],
+  "LastLogin": {
+    "$date": "2021-09-07T04:00:00Z"
+  },
+  "Created": {
+    "$date": "2021-09-07T04:00:00Z"
+  },
+  "RegistrationComplete": {
+    "$date": "2021-09-07T04:00:00Z"
+  },
+  "Password": "1$nSqDKkab4zJXOE72lkpN2Q==$b/xlvLvgqb0U0Shf4Ng1ce1g0zysYhur7vq9/08wsrk="
+},{
+  "_id": {
+    "$oid": "613770ad4849a53d993fb980"
+  },
+  "UserName": "jonathanw",
+  "Email": null,
+  "FirstName": "Jonathan",
+  "LastName": "W",
+  "OrganizationId": null,
+  "IsActive": true,
+  "Permissions": [
+    {
+      "$oid": "613776a14849a53d993fb98b"
+    },
+    {
+      "$oid": "613776a14849a53d993fb98c"
+    },
+    {
+      "$oid": "613776a14849a53d993fb98d"
+    }
+  ],
+  "LastLogin": {
+    "$date": "2021-09-07T04:00:00Z"
+  },
+  "Created": {
+    "$date": "2021-09-07T04:00:00Z"
+  },
+  "RegistrationComplete": {
+    "$date": "2021-09-07T04:00:00Z"
+  },
+  "Password": "1$GzKJZxnZMi/zNVQv+Cekcg==$ivh2G9DIGkvr3vCc7bOmJYNdGsO16yYgtasK/VRxCKc="
+},{
+  "_id": {
+    "$oid": "613770ad4849a53d993fb981"
+  },
+  "UserName": "davidw",
+  "Email": null,
+  "FirstName": "David",
+  "LastName": "W",
+  "OrganizationId": null,
+  "IsActive": true,
+  "Permissions": [
+    {
+      "$oid": "613776a14849a53d993fb98b"
+    },
+    {
+      "$oid": "613776a14849a53d993fb98c"
+    },
+    {
+      "$oid": "613776a14849a53d993fb98d"
+    }
+  ],
+  "LastLogin": {
+    "$date": "2021-09-07T04:00:00Z"
+  },
+  "Created": {
+    "$date": "2021-09-07T04:00:00Z"
+  },
+  "RegistrationComplete": {
+    "$date": "2021-09-07T04:00:00Z"
+  },
+  "Password": "1$XQ/YclW2P7R46V05athhdQ==$GmcGjiRco881SPnN1gpp9q22XREyj/GK1SLJHW+i340="
+},{
+  "_id": {
+    "$oid": "613770ad4849a53d993fb982"
+  },
+  "UserName": "colinp",
+  "Password": "1$3lTaUg36+zsz0N/gMZpfNg==$4eTSJOPtf51PAaXKVej5MsOEwU8ZCmoBGf8SnaEpLx0=",
+  "FirstName": "Colin",
+  "LastName": "P",
+  "Email": null,
+  "Permissions": [
+    {
+      "$oid": "613776a14849a53d993fb98b"
+    },
+    {
+      "$oid": "613776a14849a53d993fb98c"
+    },
+    {
+      "$oid": "613776a14849a53d993fb98d"
+    }
+  ],
+  "IsActive": true,
+  "Created": {
+    "$date": "2021-09-07T04:00:00Z"
+  },
+  "LastLogin": {
+    "$date": "2021-09-27T13:20:03.555Z"
+  },
+  "RegistrationComplete": {
+    "$date": "2021-09-07T04:00:00Z"
+  }
+}]

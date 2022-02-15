@@ -1,0 +1,33 @@
+@import "./constants";
+
+.wysiwyg-toolbar {
+    margin-bottom: 0px;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border-bottom: none;
+}
+
+.wysiwyg-editor {
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    min-height: 250px;
+
+    &.short {
+        min-height: 125px;
+    }
+
+    &.invalid-field {
+        border-color: #dc3545;
+    }
+}
