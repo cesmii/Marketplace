@@ -1,0 +1,112 @@
+[{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d0"
+  },
+  "MarketplaceItemId": {
+    "$oid": "611c40d96f069e7f409f62c2"
+  },
+  "PageVisitCount": 33,
+  "SearchResultCount": 0,
+  "LikeCount": 0,
+  "DislikeCount": 1,
+  "MoreInfoCount": 0,
+  "ShareCount": 0,
+  "DownloadCount": 0
+},{
+  "_id": {
+    "$oid": "6189561a557c7b88d5fb4874"
+  },
+  "MarketplaceItemId": {
+    "$oid": "6138eb4a053954b4649ea2eb"
+  },
+  "PageVisitCount": 1,
+  "LikeCount": 0,
+  "DislikeCount": 0,
+  "MoreInfoCount": 0,
+  "ShareCount": 0,
+  "DownloadCount": 0
+},{
+  "_id": {
+    "$oid": "618abddb2016ef7d9c24cff7"
+  },
+  "MarketplaceItemId": {
+    "$oid": "614379d77fa0aa686242dc82"
+  },
+  "PageVisitCount": 4,
+  "SearchResultCount": 0,
+  "LikeCount": 0,
+  "DislikeCount": 1,
+  "MoreInfoCount": 0,
+  "ShareCount": 0,
+  "DownloadCount": 0
+},{
+  "_id": {
+    "$oid": "618bed31ac0b6522a71ff308"
+  },
+  "MarketplaceItemId": {
+    "$oid": "61547d648dfe664057739027"
+  },
+  "PageVisitCount": 10,
+  "SearchResultCount": 0,
+  "LikeCount": 2,
+  "DislikeCount": 0,
+  "MoreInfoCount": 0,
+  "ShareCount": 0,
+  "DownloadCount": 0
+},{
+  "_id": {
+    "$oid": "61df0544db7ec22901f11ffd"
+  },
+  "MarketplaceItemId": {
+    "$oid": "6184183c800636bc43c76e57"
+  },
+  "PageVisitCount": 5,
+  "SearchResultCount": 0,
+  "LikeCount": 0,
+  "DislikeCount": 0,
+  "MoreInfoCount": 0,
+  "ShareCount": 0,
+  "DownloadCount": 0
+},{
+  "_id": {
+    "$oid": "61df0d960969640b36723495"
+  },
+  "MarketplaceItemId": {
+    "$oid": "61843d361046a1acc0f11b4d"
+  },
+  "PageVisitCount": 5,
+  "SearchResultCount": 0,
+  "LikeCount": 0,
+  "DislikeCount": 0,
+  "MoreInfoCount": 0,
+  "ShareCount": 0,
+  "DownloadCount": 0
+},{
+  "_id": {
+    "$oid": "61e6f7b8d8070cc6079638ee"
+  },
+  "MarketplaceItemId": {
+    "$oid": "61a960e58073ce86a4fe1afc"
+  },
+  "PageVisitCount": 12,
+  "SearchResultCount": 0,
+  "LikeCount": 0,
+  "DislikeCount": 0,
+  "MoreInfoCount": 0,
+  "ShareCount": 0,
+  "DownloadCount": 0
+},{
+  "_id": {
+    "$oid": "6203c69d6f22740413345135"
+  },
+  "MarketplaceItemId": {
+    "$oid": "61379b2f7fa0aa686242dc30"
+  },
+  "PageVisitCount": 1,
+  "SearchResultCount": 0,
+  "LikeCount": 0,
+  "DislikeCount": 0,
+  "MoreInfoCount": 1,
+  "ShareCount": 0,
+  "DownloadCount": 0
+}]

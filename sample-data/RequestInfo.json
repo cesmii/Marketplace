@@ -1,0 +1,424 @@
+[{
+  "_id": {
+    "$oid": "61ae9b15132c502561b2da38"
+  },
+  "Created": {
+    "$date": "2021-12-06T23:21:57.384Z"
+  },
+  "UpdatedById": {
+    "_csharpnull": true
+  },
+  "Updated": null,
+  "IsActive": true,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61928d19557c7b88d5fb4880"
+  },
+  "FirstName": "",
+  "LastName": "",
+  "CompanyName": "",
+  "CompanyUrl": "",
+  "Description": "",
+  "Email": "zzzzzzzzz@gmail.com",
+  "Phone": "",
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "61af7e24cc544d299389db55"
+  },
+  "Created": {
+    "$date": "2021-12-07T15:30:43.934Z"
+  },
+  "UpdatedById": {
+    "_csharpnull": true
+  },
+  "Updated": null,
+  "IsActive": true,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61ae4e3e1c65b79debe7a009"
+  },
+  "FirstName": "Test",
+  "LastName": "User",
+  "CompanyName": "TEST",
+  "CompanyUrl": "zzzzzz",
+  "Description": "publisher",
+  "Email": "testuser@gmail.com",
+  "Phone": "7705551212",
+  "Industries": "energy, oil & gas",
+  "MembershipStatusId": {
+    "$oid": "61af70c7e6d640316cfa108d"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "61af7eaccc544d299389db56"
+  },
+  "Created": {
+    "$date": "2021-12-07T15:33:00.499Z"
+  },
+  "UpdatedById": {
+    "_csharpnull": true
+  },
+  "Updated": null,
+  "IsActive": true,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61ae54cd1c65b79debe7a00e"
+  },
+  "FirstName": "Test",
+  "LastName": "User",
+  "CompanyName": "TEST",
+  "CompanyUrl": "",
+  "Description": "request-demo - 10.32",
+  "Email": "testuser@gmail.com",
+  "Phone": "7705551212",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "61af70e4e6d640316cfa108e"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "61af7edacc544d299389db57"
+  },
+  "Created": {
+    "$date": "2021-12-07T15:33:46.661Z"
+  },
+  "UpdatedById": {
+    "_csharpnull": true
+  },
+  "Updated": null,
+  "IsActive": true,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "61a7fa47d33d6576d8a6a3f2"
+  },
+  "RequestTypeId": {
+    "$oid": "61928d2d557c7b88d5fb4881"
+  },
+  "FirstName": "Test",
+  "LastName": "User",
+  "CompanyName": "TEST",
+  "CompanyUrl": "",
+  "Description": "request info - publisher 10.33",
+  "Email": "testuser@gmail.com",
+  "Phone": "7705551212",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "61af70c7e6d640316cfa108d"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "61af7f10cc544d299389db58"
+  },
+  "Created": {
+    "$date": "2021-12-07T15:34:40.129Z"
+  },
+  "Updated": {
+    "$date": "2021-12-07T22:07:18.030Z"
+  },
+  "IsActive": true,
+  "MarketplaceItemId": {
+    "$oid": "61843d361046a1acc0f11b4d"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61928d19557c7b88d5fb4880"
+  },
+  "FirstName": "Test",
+  "LastName": "User",
+  "CompanyName": "TEST",
+  "CompanyUrl": "",
+  "Description": "add to platform - 10.34",
+  "Email": "testuser@gmail.com",
+  "Phone": "7705551212",
+  "Industries": "oil & gas, food & beverage",
+  "MembershipStatusId": {
+    "$oid": "61af70c7e6d640316cfa108d"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "61af81c3cc544d299389db59"
+  },
+  "Created": {
+    "$date": "2021-12-07T15:46:11.763Z"
+  },
+  "Updated": {
+    "$date": "2021-12-07T17:45:17.488Z"
+  },
+  "IsActive": true,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61ae934e1c65b79debe7a037"
+  },
+  "FirstName": "",
+  "LastName": "",
+  "CompanyName": "",
+  "CompanyUrl": "",
+  "Description": "",
+  "Email": "testuser@gmail.com",
+  "Phone": "",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "000000000000000000000000"
+  },
+  "Notes": "test notes - added to subscription email",
+  "StatusId": {
+    "$oid": "61ae5c081c65b79debe7a017"
+  }
+},{
+  "_id": {
+    "$oid": "61af829ecc544d299389db5a"
+  },
+  "Created": {
+    "$date": "2021-12-07T15:49:50.605Z"
+  },
+  "Updated": {
+    "$date": "2021-12-07T15:51:24.080Z"
+  },
+  "IsActive": true,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61ae54f21c65b79debe7a00f"
+  },
+  "FirstName": "Test",
+  "LastName": "User",
+  "CompanyName": "",
+  "CompanyUrl": "",
+  "Description": "support - 10.49",
+  "Email": "testuser@gmail.com",
+  "Phone": "7705551212",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "000000000000000000000000"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "61af9d254d5c621d3d333182"
+  },
+  "Created": {
+    "$date": "2021-12-07T17:43:01.698Z"
+  },
+  "Updated": {
+    "$date": "2021-12-07T21:26:07.389Z"
+  },
+  "IsActive": true,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61ae4e3e1c65b79debe7a009"
+  },
+  "FirstName": "Test",
+  "LastName": "User",
+  "CompanyName": "TEST",
+  "CompanyUrl": "",
+  "Description": "contribute - 12.42",
+  "Email": "testuser@gmail.com",
+  "Phone": "7705551212",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "61af70aae6d640316cfa108c"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5be81c65b79debe7a016"
+  }
+},{
+  "_id": {
+    "$oid": "61af9d504d5c621d3d333183"
+  },
+  "Created": {
+    "$date": "2021-12-07T17:43:44.418Z"
+  },
+  "UpdatedById": {
+    "_csharpnull": true
+  },
+  "Updated": null,
+  "IsActive": true,
+  "MarketplaceItemId": {
+    "$oid": "61843d361046a1acc0f11b4d"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61928d19557c7b88d5fb4880"
+  },
+  "FirstName": "Test",
+  "LastName": "User",
+  "CompanyName": "TEST",
+  "CompanyUrl": "",
+  "Description": "add to platform - 12.43",
+  "Email": "testuser@gmail.com",
+  "Phone": "7705551212",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "61af70c7e6d640316cfa108d"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "61af9d664d5c621d3d333184"
+  },
+  "Created": {
+    "$date": "2021-12-07T17:44:06.766Z"
+  },
+  "Updated": {
+    "$date": "2022-01-10T15:13:13.628Z"
+  },
+  "IsActive": true,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61ae934e1c65b79debe7a037"
+  },
+  "FirstName": "",
+  "LastName": "",
+  "CompanyName": "",
+  "CompanyUrl": "",
+  "Description": "",
+  "Email": "testuser@gmail.com",
+  "Phone": "",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "000000000000000000000000"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5be81c65b79debe7a016"
+  }
+},{
+  "_id": {
+    "$oid": "61df07c0db7ec22901f11fff"
+  },
+  "Created": {
+    "$date": "2022-01-12T16:54:24.007Z"
+  },
+  "UpdatedById": {
+    "_csharpnull": true
+  },
+  "Updated": null,
+  "IsActive": true,
+  "MarketplaceItemId": {
+    "$oid": "61379b2f7fa0aa686242dc30"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61928d19557c7b88d5fb4880"
+  },
+  "FirstName": "Test",
+  "LastName": "User",
+  "CompanyName": "TEST",
+  "CompanyUrl": "",
+  "Description": "n/a",
+  "Email": "testuser@gmail.com",
+  "Phone": "7705551212",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "61af70c7e6d640316cfa108d"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "61df0dd30969640b36723496"
+  },
+  "Created": {
+    "$date": "2022-01-12T17:20:19.408Z"
+  },
+  "UpdatedById": {
+    "_csharpnull": true
+  },
+  "Updated": null,
+  "IsActive": true,
+  "MarketplaceItemId": {
+    "$oid": "6184183c800636bc43c76e57"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61928d19557c7b88d5fb4880"
+  },
+  "FirstName": "Test",
+  "LastName": "User",
+  "CompanyName": "TEST",
+  "CompanyUrl": "",
+  "Description": "test",
+  "Email": "testuser@gmail.com",
+  "Phone": "7705551212",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "61af70c7e6d640316cfa108d"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+}]

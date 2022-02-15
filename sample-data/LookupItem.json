@@ -1,0 +1,413 @@
+[{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d0"
+  },
+  "Id": 101,
+  "Name": "Asset Monitoring",
+  "Code": "AM",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d1"
+  },
+  "Id": 102,
+  "Name": "Palletizing",
+  "Code": "PAL",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d2"
+  },
+  "Name": "Predictive Maintenance",
+  "Code": "PM",
+  "TypeId": 0,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes",
+    "Code": null
+  },
+  "DisplayOrder": 99,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d3"
+  },
+  "Name": "Food & Beverage",
+  "Code": "F&B",
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 99,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d4"
+  },
+  "Id": 202,
+  "Name": "Energy (Oil & Gas)",
+  "Code": "EOG",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d5"
+  },
+  "Name": "Aerospace",
+  "Code": "AER",
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 99,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d6"
+  },
+  "Id": 301,
+  "Name": "Draft",
+  "Code": "D",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 5,
+    "Name": "Marketplace Status"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d7"
+  },
+  "Id": 302,
+  "Name": "Retire",
+  "Code": "R",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 5,
+    "Name": "Marketplace Status"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6123a2a96f069e7f409f62d8"
+  },
+  "Id": 303,
+  "Name": "Live",
+  "Code": "MS3",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 5,
+    "Name": "Marketplace Status"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "618aa883557c7b88d5fb4877"
+  },
+  "Id": 200,
+  "Name": "Machine Learning",
+  "Code": "AM",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "618aa8c0557c7b88d5fb4878"
+  },
+  "Id": 300,
+  "Name": "Petrochemical",
+  "Code": "PC",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "618aa8e8557c7b88d5fb4879"
+  },
+  "Id": 301,
+  "Name": "Industrial Gas",
+  "Code": "IG",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "618aa913557c7b88d5fb487a"
+  },
+  "Id": 201,
+  "Name": "IIoT",
+  "Code": "IIoT",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "618aa924557c7b88d5fb487b"
+  },
+  "Id": 202,
+  "Name": "Analytics",
+  "Code": "AM",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "61928d19557c7b88d5fb4880"
+  },
+  "Id": 601,
+  "Name": "Marketplace Item",
+  "Code": "marketplaceitem",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 7,
+    "Name": "RequestInfo"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "61928d2d557c7b88d5fb4881"
+  },
+  "Id": 602,
+  "Name": "Publisher",
+  "Code": "publisher",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 7,
+    "Name": "RequestInfo"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "61928d59557c7b88d5fb4882"
+  },
+  "Id": 603,
+  "Name": "Become a Partner",
+  "Code": "membership",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 7,
+    "Name": "RequestInfo"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "61ae4e3e1c65b79debe7a009"
+  },
+  "Id": 604,
+  "Name": "Become a Publisher",
+  "Code": "contribute",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 7,
+    "Name": "RequestInfo"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "61ae54cd1c65b79debe7a00e"
+  },
+  "Id": 605,
+  "Name": "Request a Demo",
+  "Code": "request-demo",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 7,
+    "Name": "RequestInfo"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "61ae54f21c65b79debe7a00f"
+  },
+  "Id": 606,
+  "Name": "Support",
+  "Code": "support",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 7,
+    "Name": "RequestInfo"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "61ae55061c65b79debe7a010"
+  },
+  "Id": 607,
+  "Name": "General Inquiry",
+  "Code": "general",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 7,
+    "Name": "RequestInfo"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  },
+  "Id": 700,
+  "Name": "Not Started",
+  "Code": "not-started",
+  "DisplayOrder": 1,
+  "LookupType": {
+    "EnumValue": 8,
+    "Name": "Status"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "61ae5be81c65b79debe7a016"
+  },
+  "Id": 701,
+  "Name": "In Progress",
+  "Code": "in-progress",
+  "DisplayOrder": 2,
+  "LookupType": {
+    "EnumValue": 8,
+    "Name": "Status"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "61ae5c081c65b79debe7a017"
+  },
+  "Id": 702,
+  "Name": "Complete",
+  "Code": "complete",
+  "DisplayOrder": 3,
+  "LookupType": {
+    "EnumValue": 8,
+    "Name": "Status"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "61ae5c221c65b79debe7a018"
+  },
+  "Id": 703,
+  "Name": "Blocked",
+  "Code": "blocked",
+  "DisplayOrder": 4,
+  "LookupType": {
+    "EnumValue": 8,
+    "Name": "Status"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "61ae5c2f1c65b79debe7a019"
+  },
+  "Id": 702,
+  "Name": "Deferred",
+  "Code": "deferred",
+  "DisplayOrder": 4,
+  "LookupType": {
+    "EnumValue": 8,
+    "Name": "Status"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "61ae934e1c65b79debe7a037"
+  },
+  "Id": 607,
+  "Name": "Subscribe",
+  "Code": "subscribe",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 7,
+    "Name": "RequestInfo"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "61af70aae6d640316cfa108c"
+  },
+  "Name": "Current Member",
+  "Code": "member-current",
+  "LookupType": {
+    "EnumValue": 9,
+    "Name": "MembershipStatus"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "61af70c7e6d640316cfa108d"
+  },
+  "Id": 902,
+  "Name": "Not a Member",
+  "Code": "member-no",
+  "DisplayOrder": 2,
+  "LookupType": {
+    "EnumValue": 9,
+    "Name": "MembershipStatus"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "61af70e4e6d640316cfa108e"
+  },
+  "Id": 902,
+  "Name": "Previous Member",
+  "Code": "member-previous",
+  "DisplayOrder": 1,
+  "LookupType": {
+    "EnumValue": 9,
+    "Name": "MembershipStatus"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "61df00efdb7ec22901f11ffc"
+  },
+  "Name": "A process",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 100,
+  "IsActive": false
+},{
+  "_id": {
+    "$oid": "61e6fb0bd8070cc6079638ef"
+  },
+  "Name": "A new process",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 100,
+  "IsActive": false
+}]
