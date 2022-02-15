@@ -1,5 +1,6 @@
 import React from "react";
 import facebook from './img/facebook.svg'
+import github from './img/github.svg'
 import instagram from './img/instagram.svg'
 import linkedin from './img/linkedin.svg'
 import pinterest from './img/pinterest.svg'
@@ -32,6 +33,8 @@ export default function SocialMedia(props) {
             case "falinkedin":
             case "linkedin":
                 return linkedin;
+            case "github":
+                return github;
             default:
                 return null;
         }

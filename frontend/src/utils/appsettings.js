@@ -65,14 +65,19 @@ export const AppSettings = {
 export const LookupData = {
     socialMediaLinks: [
         {
-            icon: "faTwitter",
+            icon: "twitter",
             css: "twitter",
             url: "https://twitter.com/cesmii_sm?lang=en"
         },
         {
-            icon: "faLinkedIn",
+            icon: "linkedIn",
             css: "linkedin",
             url: "https://www.linkedin.com/company/clean-energy-smart-manufacturing-innovation-institute/"
+        },
+        {
+            icon: "github",
+            css: "github",
+            url: "https://github.com/cesmii"
         }
     ],
     searchFields: [
