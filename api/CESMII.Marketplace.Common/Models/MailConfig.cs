@@ -8,6 +8,8 @@
 
         public bool Debug { get; set; }
 
+        public List<string> ToAddresses { get; set; }
+
         public List<string> DebugToAddresses { get; set; }
 
         public string BaseUrl { get; set; }
@@ -25,6 +27,10 @@
         public string Password { get; set; }
 
         public List<TemplateUrlsConfig> TemplateUrls { get; set; }
+
+        public string Provider { get; set; }
+
+        public string ApiKey { get; set; }
     }
 
     public class TemplateUrlsConfig
