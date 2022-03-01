@@ -4,7 +4,7 @@
 export const AppSettings = {
     BASE_API_URL: process.env.REACT_APP_BASE_API_URL  //mock api server url - environment specific
     , Titles: { Anonymous: 'CESMII | Marketplace', Main: 'CESMII | Marketplace', Caption: "SM Marketplace"}
-    , GoogleAnalyticsId: 'G-EPPSP1B05X'
+    , GoogleAnalyticsId: 'G-M6FGMLFKM7'
     , PageSize: 10
     , PageSizeOptions: [10,25,50]
     , DateSettings: {
