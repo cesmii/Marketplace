@@ -1,16 +1,22 @@
-﻿namespace CESMII.Marketplace.Api.Shared.Utils
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+using CESMII.Marketplace.DAL.Models;
+using SendGrid;
+using SendGrid.Helpers.Mail;
+
+namespace CESMII.Marketplace.Api.Shared.Utils
 {
     using System;
     using System.Net;
     using System.Net.Mail;
-
     using CESMII.Marketplace.Common;
     using CESMII.Marketplace.Common.Models;
 
     public class MailRelayService
     {
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-        
+
         private readonly MailConfig _config;
 
         public MailRelayService(ConfigUtil configUtil)
@@ -29,13 +35,13 @@
 
             // Configure the SMTP client and send the message
             var client = new SmtpClient
-             {
-                 Host = _config.Address,
-                 Port = _config.Port,
+            {
+                Host = _config.Address,
+                Port = _config.Port,
 
-                 // Use whatever SSL mode is set.
-                 EnableSsl = _config.EnableSsl,
-                 DeliveryMethod = SmtpDeliveryMethod.Network
+                // Use whatever SSL mode is set.
+                EnableSsl = _config.EnableSsl,
+                DeliveryMethod = SmtpDeliveryMethod.Network
             };
 
             if (_config.EnableSsl)
@@ -45,7 +51,7 @@
 
             Logger.Debug($"Email configuration | Server: {_config.Address} Port: {_config.Port} SSL: {_config.EnableSsl}");
 
-            message.From = new MailAddress(_config.MailFromAddress, "Profile Designer Portal");
+            message.From = new MailAddress(_config.MailFromAddress, "SM Marketplace");
 
             // If Mail Relay is in debug mode set all addresses to the configuration file.
             if (_config.Debug)
@@ -54,7 +60,16 @@
                 message.To.Clear();
                 foreach (var address in _config.DebugToAddresses)
                 {
-                    message.To.Add(new MailAddress(address));
+                    message.To.Add(address);
+                }
+            }
+
+            else
+            {
+                message.To.Clear();
+                foreach (var address in _config.ToAddresses)
+                {
+                    message.To.Add(address);
                 }
             }
 
@@ -90,6 +105,76 @@
 
             Logger.Info("Message relay complete.");
             return true;
+        }
+
+        public async Task<bool> SendEmailSendGrid(MailMessage message)
+        {
+            var client = new SendGridClient(_config.ApiKey);
+            var from = new EmailAddress(_config.MailFromAddress, "SM Marketplace");
+            var subject = message.Subject;
+            List<EmailAddress> mailTo = new List<EmailAddress>();
+            // If Mail Relay is in debug mode set all addresses to the configuration file.
+            if (_config.Debug)
+            {
+                Logger.Debug($"Mail relay is in debug mode. Redirecting target email to: {string.Join("|", _config.DebugToAddresses)}");
+                foreach (var address in _config.DebugToAddresses)
+                {
+                    mailTo.Add(new EmailAddress(address));
+                }
+            }
+            else
+            {
+                foreach (var address in _config.ToAddresses)
+                {
+                    mailTo.Add(new EmailAddress(address));
+                }
+            }
+
+            var msg = MailHelper.CreateSingleEmailToMultipleRecipients(from, mailTo, subject, null, message.Body);
+
+            var response = await client.SendEmailAsync(msg);
+            if (response != null)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public string GenerateMessageBodyFromTemplate(RequestInfoModel model, string template = "Default")
+        {
+            // TODO Add support for more than one template.
+
+            var filePath = Directory.GetCurrentDirectory() + $"\\Templates\\Email\\{template}.html";
+            var stream = new StreamReader(filePath);
+            var fileText = stream.ReadToEnd();
+            stream.Close();
+
+            // Now replace each item.
+            foreach (var property in model.GetType().GetProperties())
+            {
+                fileText = fileText.Replace($"[{property.Name}]", property.GetValue(model)?.ToString());
+            }
+            // TODO these are hardcoded for the default email template, in later versions we'll add better nesting iteration for this to be more automatic.
+            fileText = fileText.Replace("[MembershipStatus.Name]", model.MembershipStatus.Name);
+            fileText = fileText.Replace("[RequestType.Name]", model.RequestType == null ? "General" : model.RequestType.Name);
+
+            if (model.MarketplaceItem != null)
+            {
+                fileText = fileText.Replace("[RelatedTo.DisplayName]", model.MarketplaceItem.DisplayName);
+                fileText = fileText.Replace("[RelatedTo.Abstract]", model.MarketplaceItem.Abstract);
+            }
+            else if (model.Publisher != null)
+            {
+                fileText = fileText.Replace("[RelatedTo.DisplayName]", model.Publisher.DisplayName);
+                fileText = fileText.Replace("[RelatedTo.Abstract]", "");
+            }
+            else
+            {
+                fileText = fileText.Replace("[RelatedTo.DisplayName]", "N/A");
+                fileText = fileText.Replace("[RelatedTo.Abstract]", "");
+            }
+
+            return fileText;
         }
     }
 }
