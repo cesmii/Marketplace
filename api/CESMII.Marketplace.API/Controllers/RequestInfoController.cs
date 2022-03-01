@@ -202,7 +202,7 @@ namespace CESMII.Marketplace.Api.Controllers
             var message = new MailMessage
             {
                 From = new MailAddress(_mailConfig.MailFromAddress),
-                Subject = $"New Request Info Item Added - {DateTime.Now.ToShortTimeString()} ",
+                Subject = $"CESMII - Marketplace - Request Info Item Submitted - {DateTime.Now.ToShortTimeString()} ",
                 Body = _mailRelayService.GenerateMessageBodyFromTemplate(item, "Default"),
                 IsBodyHtml = true
             };
