@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import ReactGA from 'react-ga';
+import ReactGA from 'react-ga4';
 
 import './index.css';
 import App from './App';
@@ -13,19 +13,21 @@ import { AppSettings } from './utils/appsettings';
 require('dotenv').config()
 
 //#region - Analytics
-//Analytics - only run the initialize once
-const _analyticsId = AppSettings.GoogleAnalyticsId;
-ReactGA.initialize(_analyticsId, {
-    debug: true,
-    testMode: false
-});
-console.log(generateLogMessageString(`Analytics||Init`, 'Index'));
+//Analytics - only run the initialize once, only run in prod
+if (AppSettings.TrackAnalytics === "true") {
+    const _analyticsId = AppSettings.GoogleAnalyticsId;
+    ReactGA.initialize(_analyticsId, {
+        debug: true,
+        testMode: false
+    });
+    console.log(generateLogMessageString(`Analytics||Init`, 'Index'));
 
-// This would be how you check that the calls are made correctly
-//console.log(ReactGA.testModeAPI.calls);
-//expect(ReactGA.testModeAPI.calls).toEqual([
-//    ['create', _analyticsId, 'auto']
-//]);
+    // This would be how you check that the calls are made correctly
+    //console.log(ReactGA.testModeAPI.calls);
+    //expect(ReactGA.testModeAPI.calls).toEqual([
+    //    ['create', _analyticsId, 'auto']
+    //]);
+}
 //#endregion
 
 //var express = require('express');
