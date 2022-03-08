@@ -9,7 +9,7 @@ import { MarketplaceBreadcrumbs } from './shared/MarketplaceBreadcrumbs';
 import { useLoadingContext, UpdateRecentFileList, toggleFavoritesList } from "../components/contexts/LoadingContext";
 import { useAuthState } from "../components/authentication/AuthContext";
 
-import { SVGIcon, SvgVisibilityIcon } from "../components/SVGIcon";
+import { SvgVisibilityIcon } from "../components/SVGIcon";
 import color from "../components/Constants";
 import SocialMedia from "../components/SocialMedia";
 import { clearSearchCriteria, toggleSearchFilterSelected } from '../services/MarketplaceService';

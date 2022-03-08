@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import ReactGA from 'react-ga';
+import ReactGA from 'react-ga4';
 import { generateLogMessageString } from '../utils/UtilityService';
+import { AppSettings } from '../utils/appsettings';
 
 const CLASS_NAME = "onRouteChange";
 
@@ -18,17 +19,19 @@ export const OnRouteChange = () => {
     //-------------------------------------------------------------------
     useEffect(() => {
 
-        //log the page view
-        //var url = window.location.pathname + window.location.search;
-        var url = location.pathname + location.search;
-        console.log(generateLogMessageString(`Analytics||PageView||${url}`, CLASS_NAME));
-        ReactGA.pageview(url);
+        if (AppSettings.TrackAnalytics === "true") {
+            //log the page view
+            //var url = window.location.pathname + window.location.search;
+            var url = location.pathname + location.search;
+            console.log(generateLogMessageString(`Analytics||PageView||${url}`, CLASS_NAME));
+            ReactGA.pageview(url);
 
-        // This would be how you check that the calls are made correctly
-        //console.log(ReactGA.testModeAPI.calls);
-        //expect(ReactGA.testModeAPI.calls).toEqual([
-        //    ['send', 'pageview', url]
-        //]);
+            // This would be how you check that the calls are made correctly
+            //console.log(ReactGA.testModeAPI.calls);
+            //expect(ReactGA.testModeAPI.calls).toEqual([
+            //    ['send', 'pageview', url]
+            //]);
+        }
 
     }, [location.pathname]);
 
