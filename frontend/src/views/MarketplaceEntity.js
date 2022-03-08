@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet"
 import axiosInstance from "../services/AxiosService";
 
 import { AppSettings } from '../utils/appsettings';
-import { useLoadingContext, UpdateRecentFileList, toggleFavoritesList } from "../components/contexts/LoadingContext";
+import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
 import { useAuthState } from "../components/authentication/AuthContext";
 
 import { MarketplaceBreadcrumbs } from './shared/MarketplaceBreadcrumbs';
@@ -12,7 +12,7 @@ import SocialMedia from "../components/SocialMedia";
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
 import MarketplaceEntitySidebar from './shared/MarketplaceEntitySidebar';
 
-import { generateLogMessageString, getMarketplaceIconName, getMarketplaceCaption } from '../utils/UtilityService'
+import { generateLogMessageString, getMarketplaceIconName } from '../utils/UtilityService'
 import { clearSearchCriteria, toggleSearchFilterSelected } from '../services/MarketplaceService';
 import MarketplaceTileList from './shared/MarketplaceTileList';
 import { SvgVisibilityIcon } from '../components/SVGIcon';
@@ -252,7 +252,8 @@ function MarketplaceEntity() {
     //-------------------------------------------------------------------
     // Region: Render
     //-------------------------------------------------------------------
-    var caption = getMarketplaceCaption(item);
+    //var caption = getMarketplaceCaption(item);
+    var caption = item != null && item.displayName != null ? item.displayName : id;
 
     //return final ui
     return (

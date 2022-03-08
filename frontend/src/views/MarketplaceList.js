@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { useHistory } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 import axiosInstance from "../services/AxiosService";
+import ReactGA from 'react-ga4';
 
 import { clearSearchCriteria, setMarketplacePageSize } from '../services/MarketplaceService';
 import { AppSettings } from '../utils/appsettings'
@@ -117,6 +118,12 @@ function MarketplaceList() {
 
             var url = `marketplace/search/advanced`;
             console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
+
+            //analytics - capture search criteria 
+            ReactGA.event({
+                category: "Marketplace|Search",
+                action: "marketplace_search"
+            });
 
             await axiosInstance.post(url, loadingProps.searchCriteria).then(result => {
                 if (result.status === 200) {
