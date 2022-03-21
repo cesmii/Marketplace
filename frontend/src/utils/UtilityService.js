@@ -163,10 +163,10 @@ export function getUserPreferences() {
     //handle null of individual preference items
     var needsUpdate = (item.marketplacePreferences == null || item.requestInfoPreferences == null
         || item.lookupPreferences == null || item.publisherPreferences == null);
-    if (item.marketplacePreferences == null) item.marketplacePreferences = { pageSize: AppSettings.PageSize };
-    if (item.requestInfoPreferences == null) item.requestInfoPreferences = { pageSize: AppSettings.PageSize };
-    if (item.lookupPreferences == null) item.lookupPreferences = { pageSize: AppSettings.PageSize };
-    if (item.publisherPreferences == null) item.publisherPreferences = { pageSize: AppSettings.PageSize };
+    if (item.marketplacePreferences == null || item.marketplacePreferences.pageSize == null) item.marketplacePreferences = { pageSize: AppSettings.PageSize };
+    if (item.requestInfoPreferences == null || item.requestInfoPreferences.pageSize == null) item.requestInfoPreferences = { pageSize: AppSettings.PageSize };
+    if (item.lookupPreferences == null || item.lookupPreferences.pageSize == null) item.lookupPreferences = { pageSize: AppSettings.PageSize };
+    if (item.publisherPreferences == null || item.publisherPreferences.pageSize == null) item.publisherPreferences = { pageSize: AppSettings.PageSize };
     if (needsUpdate) localStorage.setItem('userPreferences', JSON.stringify(item));
 
     return item;
