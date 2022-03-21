@@ -333,7 +333,7 @@ function AdminPubisherEntity() {
             case "name":
                 item[e.target.id] = e.target.value.toLowerCase();
                 break;
-            case "isVerified":
+            case "verified":
                 item[e.target.id] = e.target.checked;
                 break;
             //case "publisher":
@@ -492,7 +492,7 @@ function AdminPubisherEntity() {
                     <div className="col-sm-6 col-lg-4">
                         <div className="d-flex h-100">
                             <Form.Group>
-                                <Form.Check className="align-self-end" type="checkbox" id="isVerified" label="Verified" checked={item.isVerified}
+                                <Form.Check className="align-self-end" type="checkbox" id="verified" label="Verified" checked={item.verified}
                                     onChange={onChange} readOnly={isReadOnly} />
                             </Form.Group>
                         </div>
