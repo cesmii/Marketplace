@@ -24,7 +24,7 @@ body {
     color: color("textPrimary");
     background-color: color("white");
     background: url('./components/img/curved-bg-top.png');
-    background-size:contain;
+    background-size: contain;
     background-repeat: no-repeat;
     font-size: .9rem;
 }
@@ -85,7 +85,9 @@ h3 {
     line-height: 1.25rem;
 }
 
-p {line-height: 24px;}
+p {
+    line-height: 24px;
+}
 
 /// ::::::::::::::::::::::::
 /// Custom global components
@@ -121,8 +123,8 @@ p {line-height: 24px;}
 .headline-4 {
     font-family: $font-family-headings;
     font-weight: bold;
-    font-size: 18px;
-    line-height: 24px;
+    font-size: 16px;
+    line-height: 20px;
     /* or 133% */
     letter-spacing: -0.014em;
 }
@@ -179,7 +181,47 @@ a {
     }
 }
 
+.processing {
+    &.spin {
+        -webkit-animation: spinzilla 2.4s infinite linear both;
+        animation: spinzilla 2.4s infinite linear both;
+        -webkit-transform-origin: 100% 100%;
+        -ms-transform-origin: 100% 100%;
+        transform-origin: 100% 100%;
+    }
+}
 
+.favorite {
+    color: color("forestGreen");
+
+    &:hover {
+        color: color("forestGreen");
+        opacity: 0.8;
+    }
+}
+
+@keyframes spinzilla {
+    0%, 50% {
+        opacity: 0.3;
+    }
+}
+
+@-webkit-keyframes spinzilla {
+    0%, 50% {
+        opacity: 0.3;
+    }
+}
+
+//forms
+.form-label {
+    font-size: .813rem;
+    line-height: 1.23rem;
+    margin-bottom: 0px;
+}
+
+.form-group {
+    margin-bottom: 0.5rem;
+}
 
 // input fields
 .input-with-prepend {
@@ -216,8 +258,7 @@ a {
     max-height: 48px;
 }
 
-.input-prepend.readonly,
-.input-append.readonly {
+.input-prepend.readonly, .input-append.readonly {
     background-color: #e9ecef;
 }
 
@@ -234,15 +275,17 @@ a {
         border-radius: 12px;
         border-color: #D8DFEA;
         padding: 12px 16px;
-        line-height:16px;
-        height:unset;
+        line-height: 16px;
+        height: unset;
 
         &.with-append {
             border-top-right-radius: 0px;
             border-bottom-right-radius: 0px;
         }
 
-        &:focus {box-shadow:none;}
+        &:focus {
+            box-shadow: none;
+        }
     }
 
     .input-group-append button {
@@ -291,13 +334,20 @@ option.selected {
 .btn {
     font-family: $font-family-headings;
     padding: 10px 44px;
+    line-height: 20px;
+
+    .show > &.dropdown-toggle {
+        border: 1px solid #ced4da;
+        background-color: color("cararra");
+        color: color("textPrimary");
+    }
 }
 
 .btn-text-solo {
     background-color: transparent;
     color: color("oslo-gray");
     min-width: 128px;
-    border-radius: 38px;
+    border-radius: $button-radius;
 
     &.auto-width {
         min-width: unset;
@@ -308,17 +358,25 @@ option.selected {
 .btn-primary, .btn-secondary {
     color: white;
     font-weight: 700;
-    font-size:16px;
-    line-height:20px;
+    font-size: 16px;
     min-width: 128px;
-    border-radius: 38px;
-    border:none;
+    border-radius: $button-radius;
+    border: none;
 
     &.auto-width {
         min-width: unset;
+        white-space: nowrap;
     }
 
-    &.dropdown-toggle {font-weight:normal;}
+    &.dropdown-toggle {
+        font-weight: normal;
+    }
+}
+
+.btn-secondary-red {
+    color: white;
+    background-color: red;
+    min-width: 128px;
 }
 
 .btn-subscribe {
@@ -357,7 +415,6 @@ option.selected {
         height: 24px !important;
         width: 24px !important;
     }
-
 }
 
 .btn-icon-outline {
@@ -422,6 +479,7 @@ option.selected {
 .btn-accordion {
     background-color: transparent;
     color: color("textPrimary");
+    padding: 3px 6px;
 
     &:focus {
         box-shadow: none;
@@ -488,6 +546,24 @@ option.selected {
 
 .btn-link-prepend-icon {
     color: color("link");
+}
+
+// Search
+.global-search {
+    min-width: 120px;
+    max-width: 400px;
+
+    @media (min-width: 992px) {
+        width: 220px;
+    }
+
+    @media (min-width: 1200px) {
+        width: 300px;
+    }
+}
+
+.quick-search {
+    //max-width: 320px;
 }
 
 // Select box
