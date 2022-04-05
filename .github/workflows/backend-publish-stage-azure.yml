@@ -23,8 +23,7 @@ on:
   workflow_dispatch:
   #when we merge back up to main line, build and deploy
   push:
-    branches:
-      - develop  
+    branches: develop  
   #release:
   #  types: [created]
 
