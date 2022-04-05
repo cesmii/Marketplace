@@ -22,9 +22,9 @@ on:
   #manually trigger deploy
   workflow_dispatch:
   #when we merge back up to main line, build and deploy
-  #push:
-  #  branches:
-  #    - main  
+  push:
+    branches:
+      - develop  
   #release:
   #  types: [created]
 
