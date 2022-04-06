@@ -220,7 +220,7 @@ function MarketplaceEntity() {
     //
     const renderSubTitle = () => {
         return (
-            <span onClick={onBack} className="btn btn-text-solo auto-width ml-auto justify-content-end d-flex clickable hover" ><i className="material-icons">chevron_left</i>Back</span>
+            <span onClick={onBack} className="px-2 btn btn-text-solo align-items-center auto-width ml-auto justify-content-end d-flex clickable hover" ><i className="material-icons">chevron_left</i>Back</span>
         );
     }
 
@@ -267,7 +267,7 @@ function MarketplaceEntity() {
                     {renderHeaderRow()}
                     <div className="row" >
                     <div className="col-sm-3 order-2 order-sm-1" >
-                            <MarketplaceEntitySidebar item={item} />
+                        <MarketplaceEntitySidebar item={item} className="inline light" />
                         </div>
                     <div className="col-sm-9 mb-4 order-1 order-sm-2" >
                             {(!loadingProps.isLoading && !isLoading) &&

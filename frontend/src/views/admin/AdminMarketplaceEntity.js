@@ -898,7 +898,7 @@ function AdminMarketplaceEntity() {
     const renderSubTitle = () => {
         if (mode === "new" || mode === "copy") return;
         return (
-            <a className="btn btn-text-solo auto-width ml-auto justify-content-end d-flex" href={`/library/${item.name}`} ><i className="material-icons">visibility</i>View</a>
+            <a className="px-2 btn btn-text-solo align-items-center auto-width ml-auto justify-content-end d-flex" href={`/library/${item.name}`} ><i className="material-icons">visibility</i>View</a>
         );
     }
 
