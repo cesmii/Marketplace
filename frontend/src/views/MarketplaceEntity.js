@@ -268,7 +268,7 @@ function MarketplaceEntity() {
                     {renderHeaderRow()}
                     <div className="row" >
                     <div className="col-sm-3 order-2 order-sm-1" >
-                        <MarketplaceEntitySidebar item={item} className="inline light" />
+                        <MarketplaceEntitySidebar item={item} className="light" />
                         </div>
                     <div className="col-sm-9 mb-4 order-1 order-sm-2" >
                             {(!loadingProps.isLoading && !isLoading) &&

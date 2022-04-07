@@ -19,7 +19,7 @@ function MarketplaceEntitySidebar(props) {
     const renderSectionHeader = (caption) => {
         return (
             <div className="headline-3" >
-                <span key="caption" className="caption font-weight-bold">
+                <span key="caption" className="caption">
                     {caption}
                 </span>
             </div>
