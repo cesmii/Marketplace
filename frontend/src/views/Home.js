@@ -19,15 +19,10 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import '../components/styles/SlickSlider.scss';
 import { clearSearchCriteria } from '../services/MarketplaceService';
+import './styles/Home.scss';
 
 
 const CLASS_NAME = "Home";
-const entityInfo = {
-    name: "Marketplace Item",
-    namePlural: "Marketplace Items",
-    entityUrl: "/marketplace/:id",
-    listUrl: "/marketplace/all"
-}
 
 function Home() {
 

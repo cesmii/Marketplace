@@ -17,6 +17,7 @@ import { clearSearchCriteria, toggleSearchFilterSelected } from '../services/Mar
 import MarketplaceTileList from './shared/MarketplaceTileList';
 import { SvgVisibilityIcon } from '../components/SVGIcon';
 import color from '../components/Constants';
+import './styles/MarketplaceEntity.scss';
 
 const CLASS_NAME = "MarketplaceEntity";
 

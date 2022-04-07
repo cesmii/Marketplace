@@ -5,6 +5,7 @@ import { AppSettings } from '../utils/appsettings';
 import { generateLogMessageString } from '../utils/UtilityService'
 //import { First } from 'react-bootstrap/esm/PageItem';
 import { Dropdown } from 'react-bootstrap'
+import './styles/GridPager.scss';
 
 const CLASS_NAME = "GridPager";
 
