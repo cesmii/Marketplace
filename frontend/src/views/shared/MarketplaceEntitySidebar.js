@@ -76,7 +76,7 @@ function MarketplaceEntitySidebar(props) {
 
 
     return (
-        <div className="info-panel" >
+        <div className={`info-panel ${props.className == null ? '' : props.className}`} >
             {renderSections()}
         </div>
     )

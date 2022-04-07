@@ -14,6 +14,7 @@ import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/
 
 import MarketplaceFilter from './shared/MarketplaceFilter';
 import HeaderSearch from '../components/HeaderSearch';
+import './styles/MarketplaceList.scss';
 
 const CLASS_NAME = "MarketplaceList";
 const entityInfo = {

@@ -160,14 +160,21 @@ a {
 }
 
 .small-size {
-    font-size: .813rem;
-    line-height: 1.923rem;
+    font-size: .8rem;
+    line-height: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 0.1rem;
 }
 
 .form-label {
     font-size: .9rem;
     line-height: 1.2rem;
     font-weight: 500; // added this for fw of labels
+}
+
+.metatag.badge {
+    font-size: .8rem;
+    font-weight: normal;
 }
 
 .clickable:hover {
@@ -357,7 +364,6 @@ option.selected {
 .btn-primary, .btn-secondary {
     color: white;
     font-weight: 700;
-    font-size: 16px;
     min-width: 128px;
     border-radius: $button-radius;
     border: none;
@@ -472,6 +478,7 @@ option.selected {
     border-radius: 0.25rem;
     max-width: 48px;
     max-height: 48px;
+    padding: 6px;
 }
 
 //small button, no border - see profile explorer
@@ -685,12 +692,6 @@ select.minimal:focus {
 @import "./components/styles/RightPanel.scss";
 @import "./components/styles/LeftContent.scss";
 @import "./components/styles/FlexGridShared.scss";
-@import "./components/styles/GridPager.scss";
 @import "./components/styles/ActionMenu.scss";
 @import './components/styles/Loading.scss';
 
-/// VIEW SCSS FILES
-@import "./views/styles/MarketplaceList.scss";
-@import "./views/styles/MarketplaceEntity.scss";
-@import "./views/styles/LoginScreen.scss";
-@import "./views/styles/Home.scss";
