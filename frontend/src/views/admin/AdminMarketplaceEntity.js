@@ -847,16 +847,16 @@ function AdminMarketplaceEntity() {
         if (item == null) return;
         return (
             <>
-                <MultiSelect items={item.industryVerticals} caption="IndustryVerticals" onItemSelect={onItemSelectIndustryVertical} />
-                <MultiSelect items={item.categories} caption="Processes" onItemSelect={onItemSelectCategory} />
+                <MultiSelect items={item.industryVerticals} caption="Industry Verticals" onItemSelect={onItemSelectIndustryVertical} className="light" />
+                <MultiSelect items={item.categories} caption="Processes" onItemSelect={onItemSelectCategory} className="light" />
 
-                <div className="info-panel">
+                <div className="info-panel light">
                     <div className="info-section mb-4 px-1 rounded">
                         <div className="headline-3 mb-2">
                             <span className="pr-2 w-100 d-block rounded">
                             Meta tags (optional)</span></div>
                         <Form.Group>
-                            <Form.Control id="metaTagsConcatenated" as="textarea" style={{ height: '100px' }} placeholder="Enter tags seperated by a comma" value={item.metaTagsConcatenated} onChange={onChange} readOnly={isReadOnly} />
+                            <Form.Control id="metaTagsConcatenated" as="textarea" style={{ height: '300px' }} placeholder="Enter tags seperated by a comma" value={item.metaTagsConcatenated} onChange={onChange} readOnly={isReadOnly} />
                         </Form.Group>
                     </div>
                 </div>
