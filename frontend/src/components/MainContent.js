@@ -5,6 +5,7 @@ import Routes from './Routes'
 import { OnRouteChange } from './OnRouteChange';
 import { ScrollToTop } from './ScrollToTop';
 import { OnRefreshEvent } from './OnRefreshEvent';
+import './styles/MainContent.scss';
 
 //const CLASS_NAME = "MainContent";
 

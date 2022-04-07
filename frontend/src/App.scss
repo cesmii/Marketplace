@@ -500,6 +500,15 @@ option.selected {
     box-shadow: none;
 }
 
+.dismiss-btn {
+    float: right;
+    margin-top: -6px;
+}
+
+.alert .dismiss-btn .btn:hover {
+    color: inherit;
+    @include background-opacity(color("white"), .3);
+}
 
 .btn.btn-inline-add:hover,
 .btn.btn-icon-solo:hover,
@@ -683,15 +692,6 @@ select.minimal:focus {
 /// IMPORT PARTIALS
 @import "./components/styles/HexOpacityValues";
 
-
 /// IMPORT GLOBAL SCSS FILES
-@import "./components/styles/Fab.scss";
-@import "./components/styles/SideMenu.scss";
-@import "./components/styles/SideMenuItem.scss";
-@import "./components/styles/MainContent.scss";
-@import "./components/styles/RightPanel.scss";
-@import "./components/styles/LeftContent.scss";
-@import "./components/styles/FlexGridShared.scss";
 @import "./components/styles/ActionMenu.scss";
-@import './components/styles/Loading.scss';
 
