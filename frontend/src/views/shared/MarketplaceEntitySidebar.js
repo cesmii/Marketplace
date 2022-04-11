@@ -79,8 +79,8 @@ function MarketplaceEntitySidebar(props) {
                     {choices}
                 </ul>
                 {section.items.length > 7 &&
-                    <button className="btn btn-link mr-2 ml-auto justify-content-end d-flex" data-enumvalue={section.enumValue} onClick={toggleViewAll} >
-                        {section.viewAll ? 'Show less...' : 'Show more...'}
+                    <button className="btn btn-link mr-2 ml-auto justify-content-end align-items-center d-flex" data-enumvalue={section.enumValue} onClick={toggleViewAll} >
+                        {section.viewAll ? '+ See all' : '- See less'}
                     </button>
                 }
             </div>
