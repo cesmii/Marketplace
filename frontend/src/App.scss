@@ -207,6 +207,14 @@ a {
     }
 }
 
+.material-icons {
+    //font-size: 24px !important;
+
+    &.sizeText {
+        font-size: .9rem !important;
+    }
+}
+
 @keyframes spinzilla {
     0%, 50% {
         opacity: 0.3;
