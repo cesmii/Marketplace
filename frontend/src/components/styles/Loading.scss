@@ -1,3 +1,6 @@
+/// Shared Files & Constants
+@import "./constants";
+
 .preloader {
     align-items: center;
     @include background-opacity(color("white"), .6);
@@ -39,14 +42,4 @@
 
     // width: 100vw;
     // height: 100vh;
-}
-
-.dismiss-btn {
-    float: right;
-    margin-top: -6px;
-}
-
-.alert .dismiss-btn .btn:hover {
-    color: inherit;
-    @include background-opacity(color("white"), .3);
 }

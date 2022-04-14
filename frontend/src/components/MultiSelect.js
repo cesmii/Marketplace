@@ -84,7 +84,7 @@ function MultiSelect(props) {
     if (_items == null) return;
 
     return (
-        <div className="info-panel" >
+        <div className={`info-panel ${props.className == null ? '' : props.className}`} >
             {renderSection(props.caption, _items)}
         </div>
     )

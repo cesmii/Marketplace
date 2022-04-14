@@ -37,7 +37,7 @@ $colors: (
 $grid-gutter-width: 24px;
 $navbarHeight: 80px;
 $footerHeight: 80px;
-//$headerNavHeight: 238px;
+$headerNavHeight: 238px;
 // $sideMenuWidthOpen: 282px;
 $sideMenuWidthOpen-sm: 72px;
 $sideMenuWidthOpen-md: 200px;
@@ -46,6 +46,8 @@ $sideMenuWidthCollapsed: 72px;
 $rightPanelWidth: 350px;
 $globalTransition: all 200ms ease-in-out;
 $tile-radius: 28px;
+$button-radius: 38px;
+$inputControl-radius: 12px;
 
 @mixin globalShadow {
     -webkit-box-shadow: 10px 10px 20px 0px rgba(0,0,0,0.15);
@@ -87,26 +89,4 @@ $tile-radius: 28px;
 .avatar-unlocked {
     @include background-opacity(color("cornflower"), .2);
     border: 2px solid color("white");
-}
-
-
-.mat-icon {
-    font-size: 1.25rem;
-    font-weight: normal;
-    align-content: flex-start;
-    font-family: 'Material Icons';
-    -webkit-font-feature-settings: 'liga';
-    color: color("shark");
-
-    &:hover {
-        text-decoration: none;
-    }
-
-    &.icon-info {
-        &:before {
-            margin-left: 0px;
-            padding-right: 2px;
-            content: "info_outline";
-        }
-    }
 }

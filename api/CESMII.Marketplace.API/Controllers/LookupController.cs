@@ -39,7 +39,8 @@ namespace CESMII.Marketplace.Api.Controllers
         [ProducesResponseType(400)]
         public IActionResult GetAll()
         {
-            var result = _dal.GetAll().OrderBy(x => x.LookupType.EnumValue.ToString()).ToList();
+            var result = _dal.GetAll().OrderBy(x => x.LookupType.EnumValue.ToString()).ThenBy(x => x.DisplayOrder )
+                .ThenBy(x => x.Name).ToList();
 
             //append publishers
             var publishers = _dalPublisher.GetAll();
@@ -88,7 +89,7 @@ namespace CESMII.Marketplace.Api.Controllers
                         IsActive = itm.IsActive,
                         DisplayOrder = itm.DisplayOrder
                         //tbd any other lookup fields
-                    }).ToList()                    
+                    }).OrderBy(x => x.DisplayOrder).ThenBy(x => x.Name).ToList()                    
                 });
             }
 

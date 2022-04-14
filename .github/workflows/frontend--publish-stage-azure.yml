@@ -21,8 +21,8 @@ name: Stage|Front End|Marketplace - Deploy to Azure
 on:
   #manually trigger deploy
   workflow_dispatch:
-  #push:
-  #  branches: main
+  push:
+    branches: develop
   #release:
   #  types: [created]
 
