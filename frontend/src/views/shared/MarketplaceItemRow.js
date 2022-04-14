@@ -2,7 +2,7 @@ import React from 'react'
 import { useHistory } from 'react-router-dom'
 import { Button } from 'react-bootstrap'
 
-import { formatDate, generateLogMessageString, getImageUrl } from '../../utils/UtilityService';
+import { formatDate, generateLogMessageString, getImageUrl, getRandomArrayIndexes } from '../../utils/UtilityService';
 import { clearSearchCriteria, toggleSearchFilterSelected } from '../../services/MarketplaceService'
 import { useLoadingContext } from '../../components/contexts/LoadingContext'
 import { SvgVisibilityIcon } from '../../components/SVGIcon'
@@ -46,39 +46,85 @@ function MarketplaceItemRow(props) { //props are item, showActions
     //-------------------------------------------------------------------
     // Region: Render helpers
     //-------------------------------------------------------------------
-    const renderMetaTagItem = (item) => {
-        if (item.metaTags == null) return;
+    const renderMetaTagsRandom = (items, limit) => {
+        if (items == null) return;
+
+        var randomIndexes = getRandomArrayIndexes(items, limit);
+        if (randomIndexes == null || randomIndexes.length === 0) return;
         return (
-            item.metaTags.map((tag) => {
+            randomIndexes.map((i) => {
                 return (
-                    <span key={tag} className="metatag badge meta">
-                        {tag}
+                    <span key={items[i]} className="metatag badge meta border">
+                        {items[i]}
                     </span>
                 )
             })
         )
     }
-    const renderCategoryItem = (item) => {
+
+    /*
+    const renderMetaTags = (items, limit) => {
+        if (items == null) return;
         return (
-            item.categories.map((tag) => {
+            items.map((tag, counter) => {
+                if (counter < limit) {
+                    return (
+                        <span key={tag} className="metatag badge meta">
+                            {tag}
+                        </span>
+                    )
+                }
+            })
+        )
+    }
+
+    const renderCategoryTags = (items, limit) => {
+        if (items == null) return;
+        return (
+            items.map((tag, counter) => {
+                if (counter < limit) {
+                    return (
+                        <span key={tag.id} className="metatag badge meta">
+                            {tag.name}
+                        </span>
+                    )
+                }
+            })
+        )
+    }
+    */
+
+    const renderCategoryTagsRandom = (items, limit) => {
+        if (items == null) return;
+
+        var randomIndexes = getRandomArrayIndexes(items, limit);
+        if (randomIndexes == null || randomIndexes.length === 0) return;
+        return (
+            randomIndexes.map((i) => {
                 return (
-                    <span key={tag.id} className="metatag badge meta">
-                        {tag.name}
+                    <span key={items[i].id} className="metatag badge meta border">
+                        {items[i].name}
                     </span>
                 )
             })
         )
+    }
+
+    const renderMetaTagItem = (item) => {
+        if (item == null || item.metaTags == null) return;
+        //return renderMetaTags(item.metaTags, 6);
+        return renderMetaTagsRandom(item.metaTags, 3);
+    }
+
+    const renderCategoryItem = (item) => {
+        if (item == null || item.categories == null) return;
+        //return renderCategoryTags(item.categories, 6);
+        return renderCategoryTagsRandom(item.categories, 3);
     }
     const renderIndustryVerticalItem = (item) => {
-        return (
-            item.industryVerticals.map((tag) => {
-                return (
-                    <span key={tag.id} className="metatag badge meta">
-                        {tag.name}
-                    </span>
-                )
-            })
-        )
+        if (item == null || item.industryVerticals == null) return;
+        //return renderCategoryTags(item.industryVerticals, 6);
+        return renderCategoryTagsRandom(item.industryVerticals, 3);
     }
 
     const renderImageBg = () => {

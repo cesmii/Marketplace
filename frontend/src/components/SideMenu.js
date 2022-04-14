@@ -8,6 +8,8 @@ import { useLoadingContext } from './contexts/LoadingContext'
 import color from './Constants'
 import { generateLogMessageString } from '../utils/UtilityService'
 import SideMenuLinkList from './SideMenuLinkList'
+import './styles/SideMenu.scss';
+import './styles/SideMenuItem.scss';
 
 const CLASS_NAME = "SideMenu";
 function SideMenu() {
