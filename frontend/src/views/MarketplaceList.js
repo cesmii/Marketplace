@@ -268,7 +268,7 @@ function MarketplaceList() {
 
             <div className="row" >
                 <div className={`col-sm-3 d-sm-block ${_filterToggle ? "" : "d-none"}`} >
-                    <MarketplaceFilter searchCriteria={loadingProps.searchCriteria} selectMode="selectable" onItemClick={filterOnItemClick} />
+                    <MarketplaceFilter searchCriteria={loadingProps.searchCriteria} selectMode="selectable" onItemClick={filterOnItemClick} showLimited={true} />
                 </div>
                 <div ref={_scrollToRef} className="col-sm-9 mb-4" >
                     {/*<MarketplaceFilterSelected />*/}

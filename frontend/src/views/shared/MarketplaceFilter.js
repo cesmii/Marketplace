@@ -17,7 +17,7 @@ function MarketplaceFilter(props) {
     //doing it this way so that the parent component can either use the global search criteria or use a local version unique to 
     //their component
     const [_searchCriteriaLocal, setSearchCriteriaLocal] = useState(props.searchCriteria);
-    const _viewAllMax = 10;
+    const _viewAllMax = 4;
 
     //-------------------------------------------------------------------
     // Region: Get data 
