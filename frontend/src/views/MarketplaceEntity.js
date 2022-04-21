@@ -180,7 +180,7 @@ function MarketplaceEntity() {
                         <h2 className="m-0 mr-2">
                             <span className="d-none d-md-inline">Smart Manufacturing App </span> Details
                         </h2>
-                        <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/add-to-platform/${item.id}`} >Add to SM Platform</a>
+                        <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/add-to-platform/${item.id}`} >Request More Info</a>
                     </div>
                 </div>
                 <div className="row" >

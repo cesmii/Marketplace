@@ -409,7 +409,7 @@ function Home() {
             {renderHeaderRow()}
             <div className="row" >
                 <div className="col-sm-3 order-2 order-sm-1" >
-                    <MarketplaceFilter searchCriteria={_searchCriteriaLocal} selectMode="linkable" onItemClick={filterOnItemClick} />
+                    <MarketplaceFilter searchCriteria={_searchCriteriaLocal} selectMode="linkable" onItemClick={filterOnItemClick} showLimited={true} />
                 </div>
                 <div className="col-sm-9 mb-4 order-1 order-sm-2" >
                     {renderFeatured()}

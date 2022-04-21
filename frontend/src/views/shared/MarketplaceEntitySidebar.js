@@ -10,10 +10,11 @@ function MarketplaceEntitySidebar(props) {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
+    const _viewAllMax = 7;
     const [_viewAll, setViewAll] = useState({
-        industryVerticals: props.item.industryVerticals == null || props.item.industryVerticals.length <= 7,
-        categories: props.item.categories == null || props.item.categories.length <= 7,
-        metaTags: props.item.metaTags == null || props.item.metaTags.length <= 7
+        industryVerticals: props.item.industryVerticals == null || props.item.industryVerticals.length <= _viewAllMax,
+        categories: props.item.categories == null || props.item.categories.length <= _viewAllMax,
+        metaTags: props.item.metaTags == null || props.item.metaTags.length <= _viewAllMax
     });
 
     //-------------------------------------------------------------------
@@ -55,8 +56,8 @@ function MarketplaceEntitySidebar(props) {
 
         console.log(section.name);
         const choices = section.items.map((item, counter) => {
-            console.log(`....${counter}`);
-            if (counter < 7) {  //0-based
+            //console.log(`....${counter}`);
+            if (counter < _viewAllMax) {  //0-based
                 return (
                     <li key={`${section.enumValue}-${item.id}`} className='my-1 tag' >
                         <span className="section-item">{item.name}</span>
@@ -78,7 +79,7 @@ function MarketplaceEntitySidebar(props) {
                 <ul className="section-items m-0 pt-1 px-0" >
                     {choices}
                 </ul>
-                {section.items.length > 7 &&
+                {section.items.length > _viewAllMax &&
                     <button className="btn btn-link mr-2 ml-auto justify-content-end align-items-center d-flex" data-enumvalue={section.enumValue} onClick={toggleViewAll} >
                         {section.viewAll ? '- See less' : '+ See all'}
                     </button>
