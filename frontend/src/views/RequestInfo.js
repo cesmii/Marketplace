@@ -124,7 +124,7 @@ function RequestInfo() {
             item.marketplaceItemId = id;
             item.requestTypeCode = "marketplaceitem";
             setFormDisplay({
-                ..._formDisplay, caption: 'Add to SM Platform', captionDescription: 'Tell Us About Your Project(s)'
+                ..._formDisplay, caption: 'Request More Info', captionDescription: 'Tell Us About Your Project(s)'
                 , showMembershipStatus: true, showIndustry: true
             });
         }
