@@ -17,6 +17,7 @@ function MarketplaceFilter(props) {
     //doing it this way so that the parent component can either use the global search criteria or use a local version unique to 
     //their component
     const [_searchCriteriaLocal, setSearchCriteriaLocal] = useState(props.searchCriteria);
+    const _viewAllMax = 10;
 
     //-------------------------------------------------------------------
     // Region: Get data 
@@ -60,6 +61,14 @@ function MarketplaceFilter(props) {
         if (props.onItemClick != null) props.onItemClick(criteria);
     }
 
+    const toggleViewAll = (e) => {
+        console.log(generateLogMessageString('toggleViewAll', CLASS_NAME));
+        var id = e.currentTarget.getAttribute('data-id');
+        var toggleState = _toggleState.find(x => { return x.enumValue.toString() === id; });
+        toggleState.viewAll = !toggleState.viewAll;
+        setToggleState(JSON.parse(JSON.stringify(_toggleState)));
+    };
+
     //-------------------------------------------------------------------
     // Region: Render helpders
     //-------------------------------------------------------------------
@@ -91,25 +100,46 @@ function MarketplaceFilter(props) {
 
     const renderSection = (section) => {
 
-        const choices = section.items.map((item) => {
-            return (
-                <li key={`${section.enumValue}-${item.id}`} className={`${props.selectMode == null ? "selectable" : props.selectMode } my-1 ${item.selected ? 'selected' : ''}`}
-                    onClick={onItemClick} data-parentid={section.enumValue} data-id={item.id} >
-                    <button className="btn section-item" title={item.selected ? `Remove ${item.name} filter` : `Filter by ${item.name}`} >
-                        <span className="" >{item.name}</span>
-                    </button>
-                </li>
-            )
-        });
         //get toggle state for this item
-        var toggleState = _toggleState == null || _toggleState.length === 0 ? { enumValue: section.enumValue, name: section.name, expanded: true } :
+        var toggleState = _toggleState == null || _toggleState.length === 0 ? {
+            enumValue: section.enumValue, name: section.name, expanded: true,
+            viewAll: !props.showLimited || section.items.length <= _viewAllMax} :
             _toggleState.find(x => { return x.enumValue === section.enumValue; });
+
+        const choices = section.items.map((item, counter) => {
+            if (counter < _viewAllMax) {  //0-based
+                return (
+                    <li key={`${section.enumValue}-${item.id}`} className={`${props.selectMode == null ? "selectable" : props.selectMode} my-1 ${item.selected ? 'selected' : ''}`}
+                        onClick={onItemClick} data-parentid={section.enumValue} data-id={item.id} >
+                        <button className="btn section-item" title={item.selected ? `Remove ${item.name} filter` : `Filter by ${item.name}`} >
+                            <span className="" >{item.name}</span>
+                        </button>
+                    </li>
+                )
+            }
+            else {
+                return (
+                    <li key={`${section.enumValue}-${item.id}`} className={`${props.selectMode == null ? "selectable" : props.selectMode} my-1 ${item.selected ? 'selected' : ''} ${toggleState.viewAll ? '' : 'd-none'}`}
+                        onClick={onItemClick} data-parentid={section.enumValue} data-id={item.id} >
+                        <button className="btn section-item" title={item.selected ? `Remove ${item.name} filter` : `Filter by ${item.name}`} >
+                            <span className="" >{item.name}</span>
+                        </button>
+                    </li>
+                )
+            }
+        });
+
         return (
             <div key={`${section.name}-${section.enumValue}`} className="info-section mb-4 px-1 rounded">
                 {renderSectionHeader(section.name, toggleState, section.items.length)}
                 <ul className={toggleState.expanded ? "section-items m-0 pt-1 px-0" : "section-items collapsed m-0 p-0"} >
                     {choices}
                 </ul>
+                {(props.showLimited && section.items.length > _viewAllMax) &&
+                    <button className="btn btn-link mr-2 ml-auto justify-content-end align-items-center d-flex" data-id={section.enumValue} onClick={toggleViewAll} >
+                        {toggleState.viewAll ? '- See less' : '+ See all'}
+                    </button>
+                }
             </div>
         )
     }
