@@ -13,6 +13,7 @@ using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.Api.Shared.Controllers;
+using CESMII.Marketplace.Api.Shared.Extensions;
 using CESMII.Marketplace.Api.Shared.Models;
 using CESMII.Marketplace.Api.Shared.Utils;
 
@@ -124,7 +125,9 @@ namespace CESMII.Marketplace.Api.Controllers
                     //populate some fields that may not be present on the add model. (request type code, created date). 
                     var modelNew = _dal.GetById(result);
 
-                    if (!EmailRequestInfo(modelNew))
+                    var emailResult = await EmailRequestInfo(modelNew);
+
+                    if (!emailResult)
                     {
                         _logger.LogCritical($"RequestInfoController|Add|RequestInfo Item added (good)|Error: send failed.");
                     }
@@ -167,7 +170,9 @@ namespace CESMII.Marketplace.Api.Controllers
             //Don't fail to user submitting request if email send fails, log critical. 
             try
             {
-                if (!EmailRequestInfo(model))
+                var emailResult = await EmailRequestInfo(model);
+
+                if (!emailResult)
                 {
                     _logger.LogCritical($"RequestInfoController|EmailTest|Error: send failed.");
                     return Ok(new ResultMessageWithDataModel()
@@ -197,13 +202,14 @@ namespace CESMII.Marketplace.Api.Controllers
             });
         }
 
-        private bool EmailRequestInfo(RequestInfoModel item)
+        private async Task<bool> EmailRequestInfo(RequestInfoModel item)
         {
+            var body = await this.RenderViewAsync("~/Views/Template/RequestInfo.cshtml", item);
             var message = new MailMessage
             {
                 From = new MailAddress(_mailConfig.MailFromAddress),
-                Subject = $"CESMII - Marketplace - Request Info Item Submitted - {DateTime.Now.ToShortTimeString()} ",
-                Body = _mailRelayService.GenerateMessageBodyFromTemplate(item, "Default"),
+                Subject = $"CESMII - SM Marketplace - Request Info Item Submitted",
+                Body = body,
                 IsBodyHtml = true
             };
 
