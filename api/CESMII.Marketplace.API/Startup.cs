@@ -181,6 +181,7 @@ namespace CESMII.Marketplace.Api
 
             services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
 
+            services.AddMvc(); //add this to permit emailing to bind models to view templates.
             services.AddHttpsRedirection(options =>
             {
                 options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
