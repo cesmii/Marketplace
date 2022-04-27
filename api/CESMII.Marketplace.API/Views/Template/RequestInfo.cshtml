@@ -3,57 +3,56 @@
 @{
     Layout = "_EmailLayout";
 }
-<tr>
-    <td class="wrapper">
-        <table role="presentation">
-            <tr>
-                <td>
-                    <div>
-                        <h1>Request Info Item</h1>
-                        <p>Request Type: @Model.RequestType.Name</p>
-                        <p>Submitted: @Model.Created.ToString("MM-dd-yyyy hh:mm")</p>
-                    </div>
 
-                    @if (Model.MarketplaceItem != null)
-                    {
-                        <div>
-                            <h2><bold>Related To</bold></h2>
-                            <p>Name: @Model.MarketplaceItem.DisplayName</p>
-                            @Model.MarketplaceItem.Abstract
-                        </div>
-                    }
-                    else if (Model.Publisher != null)
-                    {
-                        <div>
-                            <h2><bold>Related To</bold></h2>
-                            <p>Name: @Model.Publisher.DisplayName</p>
-                        </div>
-                    }
+<div>
+    <h1>Request Info Item</h1>
+    <p>Request Type: @Model.RequestType.Name</p>
+    <p>Submitted: @Model.Created.ToString("MM-dd-yyyy hh:mm")</p>
+</div>
 
-                    <div>
-                        <h2>Contact Info</h2>
-                        <p>First Name: @Model.FirstName</p>
-                        <p>Last Name: @Model.LastName</p>
-                        <p>Email: @Model.Email</p>
-                        <p>Phone: @Model.Phone</p>
-                        @if (Model.MembershipStatus != null)
-                        {
-                        <p>Membership Status: @Model.MembershipStatus.Name</p>
-                        }
-                    </div>
-                    @if (!string.IsNullOrEmpty(Model.CompanyName))
-                    {
-                    <div>
-                        <h2>Company Info</h2>
-                        <p>Name: @Model.CompanyName</p>
-                    </div>
-                    }
-                    <div>
-                        <h2>Message</h2>
-                        <p>@Model.Description</p>
-                    </div>
-                </td>
-            </tr>
-        </table>
-    </td>
-</tr>
+@if (Model.MarketplaceItem != null)
+{
+    <div>
+        <h2>Related To</h2>
+        <p>Name: @Model.MarketplaceItem.DisplayName</p>
+        @Html.Raw(Html.Encode(@Model.MarketplaceItem.Abstract))
+    </div>
+}
+else if (Model.Publisher != null)
+{
+    <div>
+        <h2>Related To</h2>
+        <p>Name: @Model.Publisher.DisplayName</p>
+    </div>
+}
+
+<div>
+    <h2>Contact Info</h2>
+    <p>First Name: @Model.FirstName</p>
+    <p>Last Name: @Model.LastName</p>
+    <p>Email: @Model.Email</p>
+    <p>Phone: @Model.Phone</p>
+    @if (Model.MembershipStatus != null)
+    {
+    <p>Membership Status: @Model.MembershipStatus.Name</p>
+    }
+</div>
+@if (!string.IsNullOrEmpty(Model.CompanyName))
+{
+    <div>
+        <h2>Company Info</h2>
+        <p>Name: @Model.CompanyName</p>
+        @if (!string.IsNullOrEmpty(Model.Industries))
+        {
+            <p>Industry(s): @Model.Industries</p>
+        }
+        @if (!string.IsNullOrEmpty(Model.CompanyUrl))
+        {
+            <p>Website: @Model.CompanyUrl</p>
+        }
+    </div>
+}
+<div>
+    <h2>Message</h2>
+    <p>@Model.Description</p>
+</div>

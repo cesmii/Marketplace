@@ -7,7 +7,7 @@ import axiosInstance from "../services/AxiosService";
 import Button from 'react-bootstrap/Button'
 
 import { AppSettings, LookupData } from '../utils/appsettings';
-import { generateLogMessageString, formatDate, validate_Email } from '../utils/UtilityService'
+import { generateLogMessageString, formatDate, validate_Email, scrollTopScreen } from '../utils/UtilityService'
 import { useLoadingContext } from "../components/contexts/LoadingContext";
 import { useAuthState } from "../components/authentication/AuthContext";
 
@@ -276,6 +276,8 @@ function RequestInfo() {
                         { id: new Date().getTime(), severity: "success", body: `Your inquiry was submitted. A CESMII representative will contact you regarding this inquiry.`, isTimed: false }
                     ]
                 });
+
+                scrollTopScreen();
 
                 //now refresh page with empty form
                 setForceReload(_forceReload + 1);
