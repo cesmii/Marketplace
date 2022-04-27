@@ -181,7 +181,7 @@ function GridPager(props) { //(currentPage, pageSize, itemCount, onChangePage)
     // Region: Render 
     //-------------------------------------------------------------------
     return (
-        <div className="pagination-wrapper mt-4">
+        <div className="pagination-wrapper mt-4 d-flex">
             {renderPageItems()}
             {renderPageSizeOptions(props.pageSize)}
         </div>
