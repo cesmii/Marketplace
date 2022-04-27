@@ -1,0 +1,39 @@
+﻿@using CESMII.Marketplace.Api.Shared.Models
+@model TokenModel
+@{
+    Layout = "_EmailLayout";
+    var url = Model.BaseUrl;
+}
+<tr>
+    <td class="wrapper">
+        <table role="presentation">
+            <tr>
+                <td>
+                    <p>Welcome!</p>
+                    <p>You were recently added as a user within the SM Marketplace Admin area.</p>
+                    <p>Your username is: <strong>@Model.UserName</strong>.</p>
+                    <p>Please click the link below, enter your username and set your new password to access the system.</p>
+                    <table role="presentation" class="btn btn-primary">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table role="presentation">
+                                        <tbody>
+                                            <tr>
+                                                <td><a href="@url/Registration/@Model.Token" target="_blank">Complete your Registration</a></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p>
+                        If you experience any issues in setting up your account, or have any questions please contact the support team at
+                        <a href="mailto:devops@cesmii.org">CESMII Smart Innovation Platform Team</a>
+                    </p>
+                </td>
+            </tr>
+        </table>
+    </td>
+</tr>
