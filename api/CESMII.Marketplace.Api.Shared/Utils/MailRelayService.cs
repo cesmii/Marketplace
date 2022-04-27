@@ -144,41 +144,5 @@ namespace CESMII.Marketplace.Api.Shared.Utils
             return false;
         }
 
-        //public string GenerateMessageBodyFromTemplate(RequestInfoModel model, string template = "Default")
-        //{
-        //    // TODO Add support for more than one template.
-
-        //    var filePath = Directory.GetCurrentDirectory() + $"\\Templates\\Email\\{template}.html";
-        //    var stream = new StreamReader(filePath);
-        //    var fileText = stream.ReadToEnd();
-        //    stream.Close();
-
-        //    // Now replace each item.
-        //    foreach (var property in model.GetType().GetProperties())
-        //    {
-        //        fileText = fileText.Replace($"[{property.Name}]", property.GetValue(model)?.ToString());
-        //    }
-        //    // TODO these are hardcoded for the default email template, in later versions we'll add better nesting iteration for this to be more automatic.
-        //    fileText = fileText.Replace("[MembershipStatus.Name]", model.MembershipStatus.Name);
-        //    fileText = fileText.Replace("[RequestType.Name]", model.RequestType == null ? "General" : model.RequestType.Name);
-
-        //    if (model.MarketplaceItem != null)
-        //    {
-        //        fileText = fileText.Replace("[RelatedTo.DisplayName]", model.MarketplaceItem.DisplayName);
-        //        fileText = fileText.Replace("[RelatedTo.Abstract]", model.MarketplaceItem.Abstract);
-        //    }
-        //    else if (model.Publisher != null)
-        //    {
-        //        fileText = fileText.Replace("[RelatedTo.DisplayName]", model.Publisher.DisplayName);
-        //        fileText = fileText.Replace("[RelatedTo.Abstract]", "");
-        //    }
-        //    else
-        //    {
-        //        fileText = fileText.Replace("[RelatedTo.DisplayName]", "N/A");
-        //        fileText = fileText.Replace("[RelatedTo.Abstract]", "");
-        //    }
-
-        //    return fileText;
-        //}
     }
 }
