@@ -130,6 +130,23 @@ export function formatDate(val) {
   ///#endregion: Logging Helper Methods
 
 ///--------------------------------------------------------------------------
+/// Scroll to top of screen
+///--------------------------------------------------------------------------
+export function scrollTopScreen() {
+    try {
+        // trying to use new API - https://developer.mozilla.org/en-US/docs/Web/API/Window/scrollTo
+        window.scroll({
+            top: 0,
+            left: 0,
+            behavior: 'smooth',
+        });
+    } catch (error) {
+        // just a fallback for older browsers
+        window.scrollTo(0, 0);
+    }
+}
+
+///--------------------------------------------------------------------------
 /// Paging - Take an incoming datarows array and page it based on a start index, page size and array length
 /// Client side paging - this assumes we have all the data pulled down. Only do this for smaller data sets. 
 ///--------------------------------------------------------------------------
