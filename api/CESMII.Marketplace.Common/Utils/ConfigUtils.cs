@@ -83,5 +83,15 @@
             }
         }
 
+        public MarketplaceConfig MarketplaceSettings
+        {
+            get
+            {
+                var result = new MarketplaceConfig();
+                _configuration.GetSection("MarketplaceSettings").Bind(result);
+                return result;
+            }
+        }
+
     }
 }

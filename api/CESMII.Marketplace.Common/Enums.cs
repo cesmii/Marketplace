@@ -17,7 +17,9 @@
         [Description("Status")]
         TaskStatus = 8,
         [Description("Membership Status")]
-        MembershipStatus = 9
+        MembershipStatus = 9,
+        [Description("SM Type")]
+        SmItemType = 10,
     }
 
     //TBD - update these...adjust to align with this data. 
