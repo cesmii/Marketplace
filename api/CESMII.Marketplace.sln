@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.DAL", "C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.Data", "CESMII.Marketplace.Data\CESMII.Marketplace.Data.csproj", "{71ECE5E2-70AE-4F53-9784-C7A8F5B1EFBF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CESMII.Marketplace.CloudLibClient", "CESMII.Marketplace.CloudLibClient\CESMII.Marketplace.CloudLibClient.csproj", "{7702D6AE-83BB-4456-9808-EED12E73CC74}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,12 @@ Global
 		{71ECE5E2-70AE-4F53-9784-C7A8F5B1EFBF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{71ECE5E2-70AE-4F53-9784-C7A8F5B1EFBF}.Staging|Any CPU.ActiveCfg = Staging|Any CPU
 		{71ECE5E2-70AE-4F53-9784-C7A8F5B1EFBF}.Staging|Any CPU.Build.0 = Staging|Any CPU
+		{7702D6AE-83BB-4456-9808-EED12E73CC74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7702D6AE-83BB-4456-9808-EED12E73CC74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7702D6AE-83BB-4456-9808-EED12E73CC74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7702D6AE-83BB-4456-9808-EED12E73CC74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7702D6AE-83BB-4456-9808-EED12E73CC74}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
+		{7702D6AE-83BB-4456-9808-EED12E73CC74}.Staging|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -26,12 +26,14 @@ namespace CESMII.Marketplace.Api.Controllers
         private readonly IDal<Publisher, PublisherModel> _dalPublisher;
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
         private readonly IDal<ImageItem, ImageItemModel> _dalImages;
+        private readonly CloudLibClient.ICloudLibWrapper _cloudLib;
 
         public MarketplaceController(IDal<MarketplaceItem, MarketplaceItemModel> dal,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IDal<Publisher, PublisherModel> dalPublisher,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
             IDal<ImageItem, ImageItemModel> dalImages,
+            CloudLibClient.ICloudLibWrapper cloudLib,
             ConfigUtil config, ILogger<MarketplaceController> logger)
             : base(config, logger)
         {
@@ -40,6 +42,7 @@ namespace CESMII.Marketplace.Api.Controllers
             _dalPublisher = dalPublisher;
             _dalAnalytics = dalAnalytics;
             _dalImages = dalImages;
+            _cloudLib = cloudLib;
         }
 
         [HttpGet, Route("All")]
@@ -272,7 +275,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <returns></returns>
         [HttpPost, Route("Search/Advanced")]
         [ProducesResponseType(200, Type = typeof(DALResult<MarketplaceItemModel>))]
-        public IActionResult AdvancedSearch([FromBody] MarketplaceSearchModel model)
+        public async Task<IActionResult> AdvancedSearch([FromBody] MarketplaceSearchModel model)
         {
             if (model == null)
             {
@@ -356,7 +359,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 predicates.Add(x => combinedPubs.Any(p => p == x.PublisherId.ToString()));
             }
 
-            //TBD - add where clause for the search terms - check against more fields
+            //add where clause for the search terms - check against more fields
             Func<MarketplaceItem, bool> predicateQuery = null;
             if (!string.IsNullOrEmpty(model.Query))
             {
@@ -376,10 +379,28 @@ namespace CESMII.Marketplace.Api.Controllers
             //each individual predicate (predicateCat, predicateVert, predicateQuery) acts as an OR within. Collectively,
             //the 3 predicates operate like an AND operator
             //(ie (if cat == 'foo' || cat == 'bar') AND (if vert == 'a' || vert == 'b') AND (name.contains('blah') || description.contains('blah'))
-            var result = predicates.Count == 0 ? _dal.GetAllPaged(model.Skip, model.Take, true, false) :
-                _dal.Where(predicates, model.Skip, model.Take, true, false,
+            ///--------------------------------------------------------------------------------------------------------
+            /// NOTE:
+            /// Because we are unifying two sources of information from separate sources, we need to wait on paging, sorting 
+            /// and do not do this at the DB level. We have to get the filtered set of info and then apply a sort 
+            /// and then the page. 
+            ///--------------------------------------------------------------------------------------------------------
+            //var result = predicates.Count == 0 ? _dal.GetAllPaged(model.Skip, model.Take, true, false) :
+            //    _dal.Where(predicates, model.Skip, model.Take, true, false,
+            //        new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
+            //        new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName });
+            //new - no paging,sorting
+            var result = predicates.Count == 0 ? _dal.GetAllPaged(null, null, true, false) :
+                _dal.Where(predicates, null, null, true, false,
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName });
+
+            //NEW: now search CloudLib.
+            //TBD - add flag to search model to skip over this in certain scenarios. ie. admin section
+            var resultCloudLib = await this.SearchCloudLib(model.Query);
+            
+            //unify the results, sort, handle paging
+            result = MergeSortPageSearchedItems(result.Data, resultCloudLib, model);
 
             if (result == null)
             {
@@ -388,8 +409,77 @@ namespace CESMII.Marketplace.Api.Controllers
             }
             return Ok(result);
         }
- 
-        
+
+        #region CloudLibHelperMethods
+        private async Task<List<MarketplaceItemModel>> SearchCloudLib(string query)
+        {
+            //Note - splitting out each word in query into a separate string in the list
+            var result = new List<MarketplaceItemModel>();
+            var matches = await _cloudLib.Search(string.IsNullOrEmpty(query) ? new List<string>() : query.Split(" ").ToList());
+            if (matches.Count == 0) return result;
+
+            var config = _configUtil.MarketplaceSettings.SmProfile;
+            //get SM Profile type
+            var lookupItemType = _dalLookup.Where(
+                x => x.LookupType.EnumValue.Equals(LookupTypeEnum.SmItemType) &&
+                x.ID.Equals(config.TypeId)
+                , null, null, false, false).Data.FirstOrDefault();
+
+            //get default images
+            var images = _dalImages.Where(
+                x => x.ID.Equals(config.DefaultImageIdLandscape) ||
+                x.ID.Equals(config.DefaultImageIdPortrait) ||
+                x.ID.Equals(config.DefaultImageIdSquare)
+                , null, null, false, false).Data;
+
+            //map results to a format that is common with marketplace items
+            foreach (var ns in matches)
+            {
+                result.Add(new MarketplaceItemModel()
+                {
+                    //Abstract = ns.Title,
+                    ExternalAuthor = ns.Contributor,
+                    Publisher = new PublisherModel() { DisplayName = ns.Contributor, Name = ns.Contributor },
+                    //TBD
+                    Description = "Description..." + ns.Title,
+                    DisplayName = ns.Title,
+                    Name = ns.NameSpaceUri,
+                    PublishDate = ns.CreationTime,
+                    Type = lookupItemType,
+                    Version = ns.Version,
+                    ImagePortrait = images.Where(x => x.ID.Equals(config.DefaultImageIdPortrait)).FirstOrDefault(),
+                    ImageSquare = images.Where(x => x.ID.Equals(config.DefaultImageIdSquare)).FirstOrDefault(),
+                    ImageLandscape = images.Where(x => x.ID.Equals(config.DefaultImageIdLandscape)).FirstOrDefault()
+                });
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Because we are unifying two sources of information from separate sources, we need to wait on paging 
+        /// and do not do this at the DB level. We have to get the filtered set of info and then apply a sort 
+        /// and then the page. 
+        /// </summary>
+        /// <param name="set1"></param>
+        /// <param name="set2"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        private DALResult<MarketplaceItemModel> MergeSortPageSearchedItems(List<MarketplaceItemModel> set1, List<MarketplaceItemModel> set2,
+            MarketplaceSearchModel model)
+        {
+            //combine the data, get the total count
+            var combined = set1.Union(set2);
+            //order by the unified result
+            combined = combined.OrderByDescending(x => x.IsFeatured).ThenBy(x => x.DisplayName);
+            //now page the data. 
+            combined = combined.Take(model.Take).Skip(model.Skip);
+            return new DALResult<MarketplaceItemModel>() { 
+                Count = combined.LongCount(),
+                Data = combined.ToList()
+            };
+        }
+        #endregion
+
         #region Analytics endpoints
         /// <summary>
         /// Increment LikeCount for MarketplaceItem that is maintained within this system.

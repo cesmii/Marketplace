@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNet.WebApi.Cors" Version="5.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.4" />
     <PackageReference Include="NLog" Version="4.7.10" />
     <PackageReference Include="NLog.Extensions.Logging" Version="1.7.3" />
@@ -17,9 +16,16 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CESMII.Marketplace.Api.Shared\CESMII.Marketplace.Api.Shared.csproj" />
+    <ProjectReference Include="..\CESMII.Marketplace.CloudLibClient\CESMII.Marketplace.CloudLibClient.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Common\CESMII.Marketplace.Common.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.DAL\CESMII.Marketplace.DAL.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Data\CESMII.Marketplace.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Opc.Ua.CloudLib.Client">
+      <HintPath>..\..\packages-local\Opc.Ua.CloudLib.Client\Opc.Ua.CloudLib.Client.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>

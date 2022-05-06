@@ -93,6 +93,10 @@ namespace CESMII.Marketplace.Api
             services.AddSingleton<MailRelayService>();  //helper for emailing
             services.AddSingleton<MongoClientGlobal>();  //helper for emailing
 
+            //Cloud Lib
+            services.AddSingleton<Opc.Ua.CloudLib.Client.UACloudLibClient>();
+            services.AddSingleton<CESMII.Marketplace.CloudLibClient.ICloudLibWrapper,CloudLibClient.CloudLibWrapper>();
+
             // Add token builder.
             var configUtil = new ConfigUtil(Configuration);
             services.AddTransient(provider => new TokenUtils(configUtil));
