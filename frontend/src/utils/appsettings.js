@@ -58,7 +58,8 @@ export const AppSettings = {
         phone: '',
         industries: '',
         membershipStatusId: null
-    }
+    },
+    itemTypeCode: { smApp: 'sm-app', smProfile: 'sm-profile' }
 
 
     
