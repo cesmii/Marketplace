@@ -129,7 +129,7 @@ function ProfileEntity() {
         return (
             <>
                 <h1 className="m-0 mr-2">
-                    {item.displayName}
+                    Profile: {item.displayName}
                 </h1>
                 {/*<SVGIcon name={isFavorite ? "favorite" : "favorite-border"} size="24" fill={color.forestGreen} onClick={toggleFavoritesList} />*/}
                 {authTicket.user != null &&
