@@ -34,6 +34,8 @@ function MarketplaceEntitySidebar(props) {
             case 3:
                 setViewAll({ ..._viewAll, metaTags: !_viewAll.metaTags });
                 return;
+            default:
+                return;
         }
     };
 
