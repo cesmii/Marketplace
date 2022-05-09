@@ -84,8 +84,6 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IDal<RequestInfo, RequestInfoModel>, RequestInfoDAL>();
             services.AddScoped<IDal<ImageItem, ImageItemModel>, ImageItemDAL>();
 
-            //services.AddScoped<IDal<Organization, OrganizationModel>, OrganizationDAL>();
-
 
             // Configuration, utils, one off objects
             services.AddSingleton<IConfiguration>(Configuration);
@@ -95,7 +93,8 @@ namespace CESMII.Marketplace.Api
 
             //Cloud Lib
             services.AddSingleton<Opc.Ua.CloudLib.Client.UACloudLibClient>();
-            services.AddSingleton<CESMII.Marketplace.CloudLibClient.ICloudLibWrapper,CloudLibClient.CloudLibWrapper>();
+            services.AddSingleton<CloudLibClient.ICloudLibWrapper,CloudLibClient.CloudLibWrapper>();
+            services.AddScoped<ICloudLibDAL<MarketplaceItemModel>, CloudLibDAL>();
 
             // Add token builder.
             var configUtil = new ConfigUtil(Configuration);

@@ -22,27 +22,18 @@ namespace CESMII.Marketplace.Api.Controllers
     public class MarketplaceController : BaseController<MarketplaceController>
     {
         private readonly IDal<MarketplaceItem, MarketplaceItemModel> _dal;
-        private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
-        private readonly IDal<Publisher, PublisherModel> _dalPublisher;
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
-        private readonly IDal<ImageItem, ImageItemModel> _dalImages;
-        private readonly CloudLibClient.ICloudLibWrapper _cloudLib;
+        private readonly ICloudLibDAL<MarketplaceItemModel> _dalCloudLib;
 
         public MarketplaceController(IDal<MarketplaceItem, MarketplaceItemModel> dal,
-            IDal<LookupItem, LookupItemModel> dalLookup,
-            IDal<Publisher, PublisherModel> dalPublisher,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
-            IDal<ImageItem, ImageItemModel> dalImages,
-            CloudLibClient.ICloudLibWrapper cloudLib,
+            ICloudLibDAL<MarketplaceItemModel> dalCloudLib,
             ConfigUtil config, ILogger<MarketplaceController> logger)
             : base(config, logger)
         {
             _dal = dal;
-            _dalLookup = dalLookup;
-            _dalPublisher = dalPublisher;
             _dalAnalytics = dalAnalytics;
-            _dalImages = dalImages;
-            _cloudLib = cloudLib;
+            _dalCloudLib = dalCloudLib;
         }
 
         [HttpGet, Route("All")]
@@ -395,12 +386,15 @@ namespace CESMII.Marketplace.Api.Controllers
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName });
 
-            //NEW: now search CloudLib.
-            //TBD - add flag to search model to skip over this in certain scenarios. ie. admin section
-            var resultCloudLib = await this.SearchCloudLib(model.Query);
-            
-            //unify the results, sort, handle paging
-            result = MergeSortPageSearchedItems(result.Data, resultCloudLib, model);
+            //add flag to skip over this in certain scenarios. ie. admin section
+            if (_configUtil.MarketplaceSettings.EnableCloudLibSearch)
+            {
+                //NEW: now search CloudLib.
+                var resultCloudLib = await _dalCloudLib.Where(model.Query);
+
+                //unify the results, sort, handle paging
+                result = MergeSortPageSearchedItems(result.Data, resultCloudLib, model);
+            }
 
             if (result == null)
             {
@@ -410,50 +404,6 @@ namespace CESMII.Marketplace.Api.Controllers
             return Ok(result);
         }
 
-        #region CloudLibHelperMethods
-        private async Task<List<MarketplaceItemModel>> SearchCloudLib(string query)
-        {
-            //Note - splitting out each word in query into a separate string in the list
-            var result = new List<MarketplaceItemModel>();
-            var matches = await _cloudLib.Search(string.IsNullOrEmpty(query) ? new List<string>() : query.Split(" ").ToList());
-            if (matches.Count == 0) return result;
-
-            var config = _configUtil.MarketplaceSettings.SmProfile;
-            //get SM Profile type
-            var lookupItemType = _dalLookup.Where(
-                x => x.LookupType.EnumValue.Equals(LookupTypeEnum.SmItemType) &&
-                x.ID.Equals(config.TypeId)
-                , null, null, false, false).Data.FirstOrDefault();
-
-            //get default images
-            var images = _dalImages.Where(
-                x => x.ID.Equals(config.DefaultImageIdLandscape) ||
-                x.ID.Equals(config.DefaultImageIdPortrait) ||
-                x.ID.Equals(config.DefaultImageIdSquare)
-                , null, null, false, false).Data;
-
-            //map results to a format that is common with marketplace items
-            foreach (var ns in matches)
-            {
-                result.Add(new MarketplaceItemModel()
-                {
-                    //Abstract = ns.Title,
-                    ExternalAuthor = ns.Contributor,
-                    Publisher = new PublisherModel() { DisplayName = ns.Contributor, Name = ns.Contributor },
-                    //TBD
-                    Description = "Description..." + ns.Title,
-                    DisplayName = ns.Title,
-                    Name = ns.NameSpaceUri,
-                    PublishDate = ns.CreationTime,
-                    Type = lookupItemType,
-                    Version = ns.Version,
-                    ImagePortrait = images.Where(x => x.ID.Equals(config.DefaultImageIdPortrait)).FirstOrDefault(),
-                    ImageSquare = images.Where(x => x.ID.Equals(config.DefaultImageIdSquare)).FirstOrDefault(),
-                    ImageLandscape = images.Where(x => x.ID.Equals(config.DefaultImageIdLandscape)).FirstOrDefault()
-                });
-            }
-            return result;
-        }
 
         /// <summary>
         /// Because we are unifying two sources of information from separate sources, we need to wait on paging 
@@ -478,7 +428,6 @@ namespace CESMII.Marketplace.Api.Controllers
                 Data = combined.ToList()
             };
         }
-        #endregion
 
         #region Analytics endpoints
         /// <summary>

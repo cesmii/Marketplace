@@ -10,5 +10,6 @@ namespace CESMII.Marketplace.CloudLibClient
     {
         Task<IEnumerable<string>> ResolveNodeSetsAsync(List<ModelNameAndVersion> missingModels);
         Task<List<UANodesetResult>> Search(List<string> keywords);
+        Task<UANameSpace> GetById(string id);
     }
 }
