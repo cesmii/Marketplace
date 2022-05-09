@@ -43,7 +43,7 @@ function Routes() {
             <PublicRouteWFilter exact path="/library" component={MarketplaceList} />
             <PublicRouteWFilter exact path="/all" component={MarketplaceList} />
             <PublicRoute exact path="/publisher/:id" component={PublisherEntity} />
-            <PublicRoute exact path="/add-to-platform/:id" component={RequestInfo} />
+            <PublicRoute exact path="/more-info/:itemType/:id" component={RequestInfo} />
             <PublicRoute exact path="/request-info/publisher/:publisherId" component={RequestInfo} />
             <PublicRoute exact path="/contact-us/" component={RequestInfo} />
             <PublicRoute exact path="/contact-us/:type" component={RequestInfo} />

@@ -110,7 +110,11 @@ function ProfileItemRow(props) { //props are item, showActions
                     }
                     <p className="my-4" ><Button variant="secondary" type="button" className="px-4" href={`/profile/${props.item.id}`} >More Info</Button>
                     </p>
-                    <p className="mb-2" ><b className="mr-2" >Namespace:</b><a href={props.item.namespace} target="_blank" rel="noreferrer" >{props.item.namespace}</a></p>
+                    {(props.item.namespace != null && props.item.namespace !== '') &&
+                        <p className="mb-2" ><b className="mr-2" >Namespace:</b>
+                            <span style={{ wordBreak: "break-word" }} >{props.item.namespace}</span>
+                        </p>
+                    }
                     <p className="mb-2" ><b className="mr-2" >Published By:</b>{props.item.publisher.displayName}</p>
                     <p className="mb-2" ><b className="mr-2" >Published:</b>{formatDate(props.item.publishDate)}</p>
                     <p className="mb-2" ><b className="mr-2" >Version:</b>{props.item.version}</p>

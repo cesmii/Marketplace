@@ -27,7 +27,7 @@ function RequestInfo() {
     //can access this form for specific marketplace item (id) or for a specific publisher (publisherId)
     //TBD - update form to pull publisher info if coming from that angle.
     const authTicket = useAuthState();
-    const { id, publisherId, type } = useParams();
+    const { id, publisherId, type, itemType } = useParams();
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_item, setItem] = useState(JSON.parse(JSON.stringify(AppSettings.requestInfoNew)));
     const [_referrerItem, setReferrerItem] = useState(null);
@@ -56,6 +56,8 @@ function RequestInfo() {
             try {
                 var data = { id: id != null ? id : publisherId };
                 var url = id != null ? `marketplace/getbyid` : `publisher/getbyid`;
+                //if profile item, override url
+                if (itemType != null && itemType === 'profile' && id != null) url = `profile/getbyid`;
                 result = await axiosInstance.post(url, data);
                // console.log("Log result ",result);
             }

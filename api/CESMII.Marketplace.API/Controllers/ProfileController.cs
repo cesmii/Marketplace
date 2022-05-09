@@ -30,7 +30,7 @@ namespace CESMII.Marketplace.Api.Controllers
         [HttpPost, Route("GetByID")]
         [ProducesResponseType(200, Type = typeof(MarketplaceItemModel))]
         [ProducesResponseType(400)]
-        public IActionResult GetByID([FromBody] IdStringWithTrackingModel model)
+        public async Task<IActionResult> GetByID([FromBody] IdStringWithTrackingModel model)
         {
             if (model == null)
             {
@@ -38,7 +38,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest($"Invalid model (null)");
             }
 
-            var result = _dalCloudLib.GetById(model.ID);
+            var result = await _dalCloudLib.GetById(model.ID);
             return Ok(result);
         }
 

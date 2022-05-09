@@ -417,6 +417,7 @@ namespace CESMII.Marketplace.Api.Controllers
         private DALResult<MarketplaceItemModel> MergeSortPageSearchedItems(List<MarketplaceItemModel> set1, List<MarketplaceItemModel> set2,
             MarketplaceSearchModel model)
         {
+            var count = set1.Count + set2.Count;
             //combine the data, get the total count
             var combined = set1.Union(set2);
             //order by the unified result
@@ -424,7 +425,7 @@ namespace CESMII.Marketplace.Api.Controllers
             //now page the data. 
             combined = combined.Take(model.Take).Skip(model.Skip);
             return new DALResult<MarketplaceItemModel>() { 
-                Count = combined.LongCount(),
+                Count = count,
                 Data = combined.ToList()
             };
         }
