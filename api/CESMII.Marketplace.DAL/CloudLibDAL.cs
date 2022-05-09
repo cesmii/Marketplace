@@ -144,7 +144,7 @@
                     {
                         DisplayName = entity.Contributor.Name,
                         Name = entity.Contributor.Name,
-                        CompanyUrl = entity.Contributor.Website?.PathAndQuery,
+                        CompanyUrl = entity.Contributor.Website?.ToString(),
                         Description = entity.Contributor.Description
                     },
                     //TBD
@@ -152,11 +152,11 @@
                     DisplayName = entity.Title,
                     Namespace = entity.Nodeset.NamespaceUri.ToString(),
                     MetaTags = entity.Keywords.ToList(),
-                    Categories = entity.Category == null ? null : new System.Collections.Generic.List<LookupItemModel>() {
+                    Categories = entity.Category == null ? null : new List<LookupItemModel>() {
                     new LookupItemModel() {Name = entity.Category.Name}},
-                    //PublishDate = ns.,
+                    PublishDate = entity.Nodeset.PublicationDate,
                     Type = _smItemType,
-                    //Version = ns.Version,
+                    Version = entity.Nodeset.Version,
                     ImagePortrait = _images.Where(x => x.ID.Equals(_config.DefaultImageIdPortrait)).FirstOrDefault(),
                     ImageSquare = _images.Where(x => x.ID.Equals(_config.DefaultImageIdSquare)).FirstOrDefault(),
                     ImageLandscape = _images.Where(x => x.ID.Equals(_config.DefaultImageIdLandscape)).FirstOrDefault()

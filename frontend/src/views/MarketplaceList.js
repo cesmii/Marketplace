@@ -223,10 +223,10 @@ function MarketplaceList() {
             )
         }
         const mainBody = _dataRows.all.map((item) => {
-            if (_itemTypeProfile == null || item.type?.id !== _itemTypeProfile.id) {
+            if (item.type == null || item.type?.code === AppSettings.itemTypeCode.smApp) {
                 return (<MarketplaceItemRow key={item.id} item={item} currentUserId={authTicket.user == null ? null : authTicket.user.id} showActions={true} cssClass="marketplace-list-item" />)
             }
-            else {
+            else if (item.type?.code === AppSettings.itemTypeCode.smProfile) {
                 return (<ProfileItemRow key={item.id} item={item} currentUserId={authTicket.user == null ? null : authTicket.user.id} showActions={true} cssClass="marketplace-list-item" />)
             }
         });

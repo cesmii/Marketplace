@@ -158,7 +158,8 @@ function ProfileEntity() {
                         <span className="m-0 mr-2 mb-2 mb-md-0">
                             <b className="mr-1" >Published By:</b>
                             <br className="d-block d-md-none" />
-                            <a href={`/publisher/${item.publisher.name}`} >{item.publisher.displayName}</a></span>
+                            {item.publisher.displayName}
+                        </span>
                     </div>
                 {/*    {(item.publisher.socialMediaLinks != null && item.publisher.socialMediaLinks.length > 0) && */}
                 {/*        <div className="col-sm-4 d-flex justify-content-md-end mb-2 mb-md-0 align-items-center">*/}
@@ -175,7 +176,9 @@ function ProfileEntity() {
         if (!loadingProps.isLoading && (item == null)) {
             return;
         }
-        return (<MarketplaceItemEntityHeader key={item.id} item={item} currentUserId={authTicket.user == null ? null : authTicket.user.id} showActions={true} cssClass="marketplace-list-item" />)
+        return (
+            <MarketplaceItemEntityHeader key={item.id} item={item} currentUserId={null} showActions={true} cssClass="marketplace-list-item" />
+        )
     }
 
     //
