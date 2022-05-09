@@ -78,5 +78,11 @@ namespace CESMII.Marketplace.CloudLibClient
             //}
             return result;
         }
+
+        public async Task<UANameSpace> GetById(string id)
+        {
+            var result = await _client.DownloadNodesetAsync(id).ConfigureAwait(false);
+            return result;
+        }
     }
 }

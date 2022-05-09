@@ -15,6 +15,7 @@ import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/
 import MarketplaceFilter from './shared/MarketplaceFilter';
 import HeaderSearch from '../components/HeaderSearch';
 import './styles/MarketplaceList.scss';
+import ProfileItemRow from './shared/ProfileItemRow';
 
 const CLASS_NAME = "MarketplaceList";
 const entityInfo = {
@@ -40,6 +41,11 @@ function MarketplaceList() {
     
     const caption = 'Library';
     const { loadingProps, setLoadingProps } = useLoadingContext();
+    //get look up types for sm-type
+    var [_itemTypeProfile] = useState(loadingProps == null || loadingProps.lookupDataStatic == null ? null :
+        loadingProps.lookupDataStatic.find((g) => {
+        return g.lookupType.enumValue === AppSettings.LookupTypeEnum.SmItemType && g.code === 'sm-profile'
+    }));
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
@@ -217,7 +223,12 @@ function MarketplaceList() {
             )
         }
         const mainBody = _dataRows.all.map((item) => {
-            return (<MarketplaceItemRow key={item.id} item={item} currentUserId={authTicket.user == null ? null : authTicket.user.id} showActions={true} cssClass="marketplace-list-item" />)
+            if (_itemTypeProfile == null || item.type?.id !== _itemTypeProfile.id) {
+                return (<MarketplaceItemRow key={item.id} item={item} currentUserId={authTicket.user == null ? null : authTicket.user.id} showActions={true} cssClass="marketplace-list-item" />)
+            }
+            else {
+                return (<ProfileItemRow key={item.id} item={item} currentUserId={authTicket.user == null ? null : authTicket.user.id} showActions={true} cssClass="marketplace-list-item" />)
+            }
         });
 
         return mainBody;

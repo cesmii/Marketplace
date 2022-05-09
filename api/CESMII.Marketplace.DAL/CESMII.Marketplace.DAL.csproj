@@ -10,8 +10,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CESMII.Marketplace.CloudLibClient\CESMII.Marketplace.CloudLibClient.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Common\CESMII.Marketplace.Common.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Data\CESMII.Marketplace.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Opc.Ua.CloudLib.Client">
+      <HintPath>..\..\packages-local\Opc.Ua.CloudLib.Client\Opc.Ua.CloudLib.Client.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

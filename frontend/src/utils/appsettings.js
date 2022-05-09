@@ -42,7 +42,8 @@ export const AppSettings = {
         Publisher: 6,
         RequestInfo: 7,
         TaskStatus: 8,
-        MembershipStatus: 9
+        MembershipStatus: 9,
+        SmItemType: 10
     },
      requestInfoNew: {
         marketplaceItemId: null,
