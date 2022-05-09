@@ -22,13 +22,13 @@
     <ProjectReference Include="..\CESMII.Marketplace.Data\CESMII.Marketplace.Data.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Opc.Ua.CloudLib.Client">
-      <HintPath>..\..\packages-local\Opc.Ua.CloudLib.Client\Opc.Ua.CloudLib.Client.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+	<ItemGroup>
+		<Reference Include="Opc.Ua.CloudLib.Client">
+			<HintPath>..\..\packages-local\Opc.Ua.CloudLib.Client\Opc.Ua.CloudLib.Client.dll</HintPath>
+		</Reference>
+	</ItemGroup>
 
-  <ItemGroup>
+	<ItemGroup>
     <Content Update="NLog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

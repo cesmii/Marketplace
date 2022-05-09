@@ -69,6 +69,8 @@
 
         public async Task<List<MarketplaceItemModel>> Where(string query)
         {
+            //inject wildcard to get all if null string
+            query = string.IsNullOrEmpty(query) ? "*" : query;
             //Note - splitting out each word in query into a separate string in the list
             var matches = await _cloudLib.Search(string.IsNullOrEmpty(query) ? new List<string>() : query.Split(" ").ToList());
             if (matches.Count == 0) return new List<MarketplaceItemModel>();

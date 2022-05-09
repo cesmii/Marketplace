@@ -132,9 +132,6 @@ function ProfileEntity() {
                     Profile: {item.displayName}
                 </h1>
                 {/*<SVGIcon name={isFavorite ? "favorite" : "favorite-border"} size="24" fill={color.forestGreen} onClick={toggleFavoritesList} />*/}
-                {authTicket.user != null &&
-                    <a className="btn btn-icon-outline circle ml-auto" href={`/admin/library/${item.id}`} ><i className="material-icons">edit</i></a>
-                }
             </>
         )
     }
@@ -146,9 +143,9 @@ function ProfileEntity() {
                 <div className="row mb-2 mb-md-3" >
                     <div className="col-sm-12 d-flex align-items-center">
                         <h2 className="m-0 mr-2">
-                            <span className="d-none d-md-inline">Smart Manufacturing App </span> Details
+                            <span className="d-none d-md-inline">Smart Manufacturing Profile </span> Details
                         </h2>
-                        <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/add-to-platform/${item.id}`} >Request More Info</a>
+                        <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/profile/${item.id}`} >Request More Info</a>
                     </div>
                 </div>
                 <div className="row" >
