@@ -56,7 +56,6 @@ function MarketplaceEntitySidebar(props) {
     const renderSection = (section) => {
         if (section.items == null || section.items.length === 0) return;
 
-        console.log(section.name);
         const choices = section.items.map((item, counter) => {
             //console.log(`....${counter}`);
             if (counter < _viewAllMax) {  //0-based

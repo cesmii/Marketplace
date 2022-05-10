@@ -59,7 +59,7 @@
             var entity = await _cloudLib.GetById(id);
             if (entity == null) return null;
             //manually assign id
-            return MapToModelNamespace(entity, id);
+            return MapToModelNamespace(entity);
         }
 
         public async Task<List<MarketplaceItemModel>> GetAll() {
@@ -129,15 +129,19 @@
         /// <param name="entity"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        protected MarketplaceItemModel MapToModelNamespace(UANameSpace entity, string id)
+        protected MarketplaceItemModel MapToModelNamespace(UANameSpace entity)
         {
             if (entity != null)
             {
+                //metatags
+                var metatags = entity.Keywords.ToList();
+                if (entity.Category != null) metatags.Add(entity.Category.Name);
+
                 //map results to a format that is common with marketplace items
                 return new MarketplaceItemModel()
                 {
-                    ID = id,
-                    Name = id,  //in marketplace items, name is used for navigation in friendly url
+                    ID = entity.Nodeset.Identifier.ToString(),
+                    Name = entity.Nodeset.Identifier.ToString(),  //in marketplace items, name is used for navigation in friendly url
                     //Abstract = ns.Title,
                     ExternalAuthor = entity.Contributor.Name,
                     Publisher = new PublisherModel()
@@ -145,21 +149,26 @@
                         DisplayName = entity.Contributor.Name,
                         Name = entity.Contributor.Name,
                         CompanyUrl = entity.Contributor.Website?.ToString(),
-                        Description = entity.Contributor.Description
+                        Description = entity.Contributor.Description,
                     },
                     //TBD
-                    Description = entity.Description,
+                    Description =
+                        (string.IsNullOrEmpty(entity.Description) ? "" : $"<p>{entity.Description}</p>") +
+                        (entity.DocumentationUrl == null ? "" : $"<p><a href='{entity.DocumentationUrl.ToString()}' target='_blank' rel='noreferrer' >Documentation</a></p>") +
+                        (entity.LicenseUrl == null ? "" : $"<p><a href='{entity.LicenseUrl.ToString()}' target='_blank' rel='noreferrer' >License Information</a></p>") +
+                        (string.IsNullOrEmpty(entity.CopyrightText) ? "" : $"<p>{entity.CopyrightText}</p>"),
                     DisplayName = entity.Title,
                     Namespace = entity.Nodeset.NamespaceUri.ToString(),
-                    MetaTags = entity.Keywords.ToList(),
-                    Categories = entity.Category == null ? null : new List<LookupItemModel>() {
-                    new LookupItemModel() {Name = entity.Category.Name}},
+                    MetaTags = metatags,
+                    //Categories = entity.Category == null ? null : new List<LookupItemModel>() {
+                    //new LookupItemModel() {Name = entity.Category.Name}},
                     PublishDate = entity.Nodeset.PublicationDate,
                     Type = _smItemType,
                     Version = entity.Nodeset.Version,
                     ImagePortrait = _images.Where(x => x.ID.Equals(_config.DefaultImageIdPortrait)).FirstOrDefault(),
                     ImageSquare = _images.Where(x => x.ID.Equals(_config.DefaultImageIdSquare)).FirstOrDefault(),
-                    ImageLandscape = _images.Where(x => x.ID.Equals(_config.DefaultImageIdLandscape)).FirstOrDefault()
+                    ImageLandscape = _images.Where(x => x.ID.Equals(_config.DefaultImageIdLandscape)).FirstOrDefault(),
+                    Updated = entity.Nodeset.LastModifiedDate
                 };
             }
             else
