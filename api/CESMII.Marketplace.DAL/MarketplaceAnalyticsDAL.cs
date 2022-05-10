@@ -147,6 +147,7 @@
                 {
                     ID = entity.ID,
                     MarketplaceItemId = entity.MarketplaceItemId.ToString(),
+                    CloudLibId = entity.CloudLibId,
                     PageVisitCount = entity.PageVisitCount,
                     LikeCount = entity.LikeCount,
                     DislikeCount = entity.DislikeCount,
@@ -165,7 +166,10 @@
 
         protected override void MapToEntity(ref MarketplaceItemAnalytics entity, MarketplaceItemAnalyticsModel model)
         {
-            entity.MarketplaceItemId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.MarketplaceItemId));
+            entity.MarketplaceItemId = string.IsNullOrEmpty(model.MarketplaceItemId) ?
+                new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY)) :
+                new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.MarketplaceItemId));
+            entity.CloudLibId = model.CloudLibId;
             entity.PageVisitCount = model.PageVisitCount;
             entity.LikeCount = model.LikeCount;
             entity.DislikeCount = model.DislikeCount;

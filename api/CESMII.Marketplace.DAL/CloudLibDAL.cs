@@ -58,8 +58,14 @@
         public async Task<MarketplaceItemModel> GetById(string id) {
             var entity = await _cloudLib.GetById(id);
             if (entity == null) return null;
-            //manually assign id
             return MapToModelNamespace(entity);
+        }
+
+        public async Task<string> Export(string id)
+        {
+            var entity = await _cloudLib.GetById(id);
+            if (entity == null) return null;
+            return entity.Nodeset?.NodesetXml;
         }
 
         public async Task<List<MarketplaceItemModel>> GetAll() {
@@ -135,7 +141,7 @@
             {
                 //metatags
                 var metatags = entity.Keywords.ToList();
-                if (entity.Category != null) metatags.Add(entity.Category.Name);
+                //if (entity.Category != null) metatags.Add(entity.Category.Name);
 
                 //map results to a format that is common with marketplace items
                 return new MarketplaceItemModel()
@@ -158,7 +164,7 @@
                         (entity.LicenseUrl == null ? "" : $"<p><a href='{entity.LicenseUrl.ToString()}' target='_blank' rel='noreferrer' >License Information</a></p>") +
                         (string.IsNullOrEmpty(entity.CopyrightText) ? "" : $"<p>{entity.CopyrightText}</p>"),
                     DisplayName = entity.Title,
-                    Namespace = entity.Nodeset.NamespaceUri.ToString(),
+                    Namespace = entity.Nodeset.NamespaceUri?.ToString(),
                     MetaTags = metatags,
                     //Categories = entity.Category == null ? null : new List<LookupItemModel>() {
                     //new LookupItemModel() {Name = entity.Category.Name}},

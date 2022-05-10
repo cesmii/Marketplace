@@ -102,8 +102,8 @@ function ProfileItemRow(props) { //props are item, showActions
                 </div>
                 <div className="col-sm-6 col-md-7 p-4" >
                     <div className="d-flex align-items-center mb-2" >
-                        <h2 className="mb-0" >Profile: {props.item.displayName}
-                        </h2>
+                        <h2 className="mb-0" >{props.item.displayName} 
+                        </h2><span className="headline-2 ml-auto">(SM Profile)</span>
                     </div>
                     {props.item.abstract != null &&
                         <div className="mb-0" dangerouslySetInnerHTML={{ __html: props.item.abstract }} ></div>

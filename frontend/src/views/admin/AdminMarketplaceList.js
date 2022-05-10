@@ -69,7 +69,7 @@ function AdminMarketplaceList() {
             //show a spinner
             setLoadingProps({ isLoading: true, message: null });
 
-            var url = `marketplace/search/advanced`;
+            var url = `marketplace/search/admin`;
             console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
 
             //get copy of search criteria structure from session storage

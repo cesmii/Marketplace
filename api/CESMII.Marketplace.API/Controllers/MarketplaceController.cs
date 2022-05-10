@@ -274,6 +274,40 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest($"Invalid model (null)");
             }
 
+            return await AdvancedSearch(model, true);
+        }
+
+        /// <summary>
+        /// Admin Search for marketplace items matching criteria passed in. This is an advanced search and the front end
+        /// would pass a collection of fields, operators, values to use in the search.  
+        /// The admin difference is that it will not include CloudLib profiles in the search
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost, Route("Search/Admin")]
+        [Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        [ProducesResponseType(200, Type = typeof(DALResult<MarketplaceItemModel>))]
+        public async Task<IActionResult> AdminSearch([FromBody] MarketplaceSearchModel model)
+        {
+            if (model == null)
+            {
+                _logger.LogWarning($"MarketplaceController|AdminSearch|Invalid model (null)");
+                return BadRequest($"Invalid model (null)");
+            }
+
+            return await AdvancedSearch(model, false);
+        }
+
+
+        /// <summary>
+        /// Search for marketplace items matching criteria passed in. This is an advanced search and the front end
+        /// would pass a collection of fields, operators, values to use in the search.  
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        private async Task<IActionResult> AdvancedSearch([FromBody] MarketplaceSearchModel model, bool includeCloudLib = true)
+        {
+
             //lowercase model.query
             model.Query = string.IsNullOrEmpty(model.Query) ? model.Query : model.Query.ToLower();
 
@@ -387,7 +421,7 @@ namespace CESMII.Marketplace.Api.Controllers
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName });
 
             //add flag to skip over this in certain scenarios. ie. admin section
-            if (_configUtil.MarketplaceSettings.EnableCloudLibSearch)
+            if (_configUtil.MarketplaceSettings.EnableCloudLibSearch && includeCloudLib)
             {
                 //NEW: now search CloudLib.
                 var resultCloudLib = await _dalCloudLib.Where(model.Query);
@@ -404,7 +438,6 @@ namespace CESMII.Marketplace.Api.Controllers
             return Ok(result);
         }
 
-
         /// <summary>
         /// Because we are unifying two sources of information from separate sources, we need to wait on paging 
         /// and do not do this at the DB level. We have to get the filtered set of info and then apply a sort 
@@ -417,7 +450,10 @@ namespace CESMII.Marketplace.Api.Controllers
         private DALResult<MarketplaceItemModel> MergeSortPageSearchedItems(List<MarketplaceItemModel> set1, List<MarketplaceItemModel> set2,
             MarketplaceSearchModel model)
         {
+            //get count before paging
             var count = set1.Count + set2.Count;
+            //sort 2nd set but always put it after the regular marketplace items.  
+            //set2 = set2.OrderByDescending(x => x.IsFeatured).ThenBy(x => x.DisplayName).ToList();
             //combine the data, get the total count
             var combined = set1.Union(set2);
             //order by the unified result

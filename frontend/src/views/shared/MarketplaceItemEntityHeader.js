@@ -66,6 +66,11 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         {props.item.abstract != null &&
                             <div className="mb-2" dangerouslySetInnerHTML={{ __html: props.item.abstract }} ></div>
                         }
+                        {(props.item.namespace != null && props.item.namespace !== '') &&
+                            <p className="mb-2" ><b className="mr-2" >Namespace:</b>
+                                <span style={{ wordBreak: "break-word" }} >{props.item.namespace}</span>
+                            </p>
+                        }
                         <p className="mb-0" ><b className="mr-2" >Published:</b>{formatDate(props.item.publishDate)}</p>
                         <p className="mb-2" ><b className="mr-2" >Version:</b>{props.item.version}</p>
                         <p className="my-4" ><Button variant="secondary" type="button" className="px-4" onClick={onDownload} >Download Nodeset</Button></p>
