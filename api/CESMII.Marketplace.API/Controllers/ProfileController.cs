@@ -109,7 +109,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns>Returns the OPC UA models in XML format</returns>
         [HttpPost, Route("Export")]
-        [ProducesResponseType(200, Type = typeof(string))]
+        [ProducesResponseType(200, Type = typeof(ResultMessageExportModel))]
         public async Task<IActionResult> Export([FromBody] IdStringWithTrackingModel model)
         {
             if (model == null)
@@ -124,7 +124,13 @@ namespace CESMII.Marketplace.Api.Controllers
             if (result == null)
             {
                 _logger.LogWarning($"ProfileController|GetById|No nodeset data found matching this ID: {model.ID}");
-                return BadRequest($"No records found matching this ID: {model.ID}");
+                return Ok(
+                    new ResultMessageExportModel()
+                    {
+                        IsSuccess = false,
+                        Message = "Profile not found."
+                    }
+                );
             }
             if (model.IsTracking)
             {
@@ -145,8 +151,13 @@ namespace CESMII.Marketplace.Api.Controllers
                 }
             }
 
-            return Ok(result);
-
+            return Ok(new ResultMessageExportModel()
+            {
+                IsSuccess = true,
+                Message = "",
+                Data = result,
+                Warnings = null
+            });
         }
     }
 }

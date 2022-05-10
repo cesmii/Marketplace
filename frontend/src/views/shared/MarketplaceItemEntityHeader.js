@@ -2,18 +2,17 @@ import React from 'react'
 import { Button } from 'react-bootstrap';
 
 import { AppSettings } from '../../utils/appsettings';
-import { formatDate, generateLogMessageString, getImageUrl } from '../../utils/UtilityService';
+import { formatDate, getImageUrl } from '../../utils/UtilityService';
 
-const CLASS_NAME = "MarketplaceItemEntityHeader";
+//const CLASS_NAME = "MarketplaceItemEntityHeader";
 
 function MarketplaceItemEntityHeader(props) { //props are item, showActions
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
-    const onDownload = () => {
-        console.log(generateLogMessageString('onDownload', CLASS_NAME));
-        alert('Under Construction');
+    const downloadProfile = () => {
+        if (props.onDownload) props.onDownload(props.item);
     }
 
     //-------------------------------------------------------------------
@@ -73,7 +72,9 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         }
                         <p className="mb-0" ><b className="mr-2" >Published:</b>{formatDate(props.item.publishDate)}</p>
                         <p className="mb-2" ><b className="mr-2" >Version:</b>{props.item.version}</p>
-                        <p className="my-4" ><Button variant="secondary" type="button" className="px-4" onClick={onDownload} >Download Nodeset</Button></p>
+                        {props.onDownload &&
+                            <p className="my-4" ><Button variant="secondary" type="button" className="px-4" onClick={downloadProfile} >Download Nodeset</Button></p>
+                        }
                     </div>
                 </div>
             </>

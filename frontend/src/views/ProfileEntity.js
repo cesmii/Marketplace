@@ -11,7 +11,7 @@ import { MarketplaceBreadcrumbs } from './shared/MarketplaceBreadcrumbs';
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
 import MarketplaceEntitySidebar from './shared/MarketplaceEntitySidebar';
 
-import { generateLogMessageString, getMarketplaceIconName } from '../utils/UtilityService'
+import { cleanFileName, generateLogMessageString, getMarketplaceIconName } from '../utils/UtilityService'
 import MarketplaceTileList from './shared/MarketplaceTileList';
 import './styles/MarketplaceEntity.scss';
 
@@ -23,7 +23,6 @@ function ProfileEntity() {
     // Region: Initialization
     //-------------------------------------------------------------------
     const history = useHistory();
-
     const { id } = useParams();
     const [item, setItem] = useState({});
     const [isLoading, setIsLoading] = useState(true);
@@ -94,6 +93,14 @@ function ProfileEntity() {
         console.log(generateLogMessageString('onBack', CLASS_NAME));
         history.goBack();
     };
+
+    const downloadProfile = async (p) => {
+        console.log(generateLogMessageString(`downloadProfile||start`, CLASS_NAME));
+        //add a row to download messages and this will kick off download
+        var msgs = loadingProps.downloadItems || [];
+        msgs.push({ profileId: p.id, fileName: cleanFileName(p.namespace || p.displayName), immediateDownload: true });
+        setLoadingProps({ downloadItems: JSON.parse(JSON.stringify(msgs)) });
+    }
 
     //-------------------------------------------------------------------
     // Region: Render Helpers
@@ -177,7 +184,7 @@ function ProfileEntity() {
             return;
         }
         return (
-            <MarketplaceItemEntityHeader key={item.id} item={item} currentUserId={null} showActions={true} cssClass="marketplace-list-item" />
+            <MarketplaceItemEntityHeader key={item.id} item={item} currentUserId={null} showActions={true} cssClass="marketplace-list-item" onDownload={downloadProfile} />
         )
     }
 
