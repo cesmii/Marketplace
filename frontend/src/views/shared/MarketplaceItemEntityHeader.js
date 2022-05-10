@@ -70,7 +70,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                                 <span style={{ wordBreak: "break-word" }} >{props.item.namespace}</span>
                             </p>
                         }
-                        <p className="mb-0" ><b className="mr-2" >Published:</b>{formatDate(props.item.publishDate)}</p>
+                        <p className="mb-2" ><b className="mr-2" >Published:</b>{formatDate(props.item.publishDate)}</p>
                         <p className="mb-2" ><b className="mr-2" >Version:</b>{props.item.version}</p>
                         {props.onDownload &&
                             <p className="my-4" ><Button variant="secondary" type="button" className="px-4" onClick={downloadProfile} >Download Nodeset</Button></p>
