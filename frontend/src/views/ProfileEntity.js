@@ -136,8 +136,9 @@ function ProfileEntity() {
         return (
             <>
                 <h1 className="m-0 mr-2">
-                    Profile: {item.displayName}
+                    {item.displayName}
                 </h1>
+                <span className="headline-2 ml-auto">(SM Profile)</span>
                 {/*<SVGIcon name={isFavorite ? "favorite" : "favorite-border"} size="24" fill={color.forestGreen} onClick={toggleFavoritesList} />*/}
             </>
         )
