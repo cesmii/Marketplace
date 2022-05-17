@@ -17,7 +17,9 @@ function WysiwygEditor(props) {
     // Region: Initialization
     //-------------------------------------------------------------------
     const initContent = (val) => {
-        console.log(generateLogMessageString('initContent', CLASS_NAME));
+        //console.log(generateLogMessageString('initContent', CLASS_NAME));
+
+        if (val == null) return;
 
         val = val.replace(/<figure>/g, "").replace(/<\/figure>/g, "");
 
@@ -49,16 +51,16 @@ function WysiwygEditor(props) {
     // Region: Render helpers
     //-------------------------------------------------------------------
     const onChange = (state) => {
-        console.log(generateLogMessageString('onChange', CLASS_NAME));
+        //console.log(generateLogMessageString('onChange', CLASS_NAME));
         setValue(state);
 
         if (props.onChange) {
-            var valSimpleHtml = convertToHTML(_value.getCurrentContent());
-            var valRaw = convertToRaw(_value.getCurrentContent());
+            //var valSimpleHtml = convertToHTML(_value.getCurrentContent());
+            //var valRaw = convertToRaw(_value.getCurrentContent());
             var valHtml = stateToHTML(state.getCurrentContent());
-            console.log(generateLogMessageString(`onChange||value:${valSimpleHtml}`, CLASS_NAME));
-            console.log(generateLogMessageString(`onChange||raw:${JSON.stringify(valRaw)}`, CLASS_NAME));
-            console.log(generateLogMessageString(`onChange||stateToHTML:${valHtml}`, CLASS_NAME));
+            //console.log(generateLogMessageString(`onChange||value:${valSimpleHtml}`, CLASS_NAME));
+            //console.log(generateLogMessageString(`onChange||raw:${JSON.stringify(valRaw)}`, CLASS_NAME));
+            //console.log(generateLogMessageString(`onChange||stateToHTML:${valHtml}`, CLASS_NAME));
             var item = {
                 target: { id: props.id, value: valHtml === '<p></p>' ? '' : valHtml }
             };
