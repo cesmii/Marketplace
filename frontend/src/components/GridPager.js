@@ -146,7 +146,9 @@ function GridPager(props) { //(currentPage, pageSize, itemCount, onChangePage)
 
         //console.log(generateLogMessageString(`renderPageSizeOptions||Val: ${pageSize}`, CLASS_NAME));
         //make copy of options. If current page size is not represented, add it to options
-        var pageSizeOptions = JSON.parse(JSON.stringify(AppSettings.PageSizeOptions));
+        //either use some passed in from props or use a default list.
+        var pageSizeOptions = props.pageSizeOptions != null ? props.pageSizeOptions : AppSettings.PageSizeOptions.FrontEnd;
+        var pageSizeOptions = JSON.parse(JSON.stringify(pageSizeOptions));
         if (pageSizeOptions.find(item => { return item === pageSize; }) == null) {
             pageSizeOptions.push(pageSize);
             pageSizeOptions.sort((a, b) => { return parseFloat(a) - parseFloat(b) }); //force numeric sort
@@ -170,8 +172,12 @@ function GridPager(props) { //(currentPage, pageSize, itemCount, onChangePage)
                 {toggleHTML}
                 <Dropdown.Menu>
                     {pageOptionsHTML}
-                    <Dropdown.Divider />
-                    <Dropdown.Item key="all" onSelect={() => onPageSizeSelect(null)} >Show all</Dropdown.Item>
+                    {props.showAll &&
+                        <>
+                            <Dropdown.Divider />
+                            <Dropdown.Item key="all" onSelect={() => onPageSizeSelect(null)} >Show all</Dropdown.Item>
+                        </>
+                    }
                 </Dropdown.Menu>
             </Dropdown>
         )
