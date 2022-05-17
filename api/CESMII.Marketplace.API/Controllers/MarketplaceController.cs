@@ -67,7 +67,7 @@ namespace CESMII.Marketplace.Api.Controllers
             result.NewItems = _dal.Where(x => x.IsActive , null, 3, false, false,
                 new OrderByExpression<MarketplaceItem>() { Expression = x => x.PublishDate, IsDescending = true }).Data;
             //calculate most popular based on analytics counts
-            var util = new MarketplaceUtil(_dal,_dalAnalytics);
+            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
             result.PopularItems = util.PopularItems();
 
             return Ok(result);
@@ -78,7 +78,14 @@ namespace CESMII.Marketplace.Api.Controllers
         [ProducesResponseType(400)]
         public IActionResult GetFeatured()
         {
-            var result = _dal.Where(x => x.IsFeatured && x.IsActive, null, null, false, false,
+            List<Func<MarketplaceItem, bool>> predicates = new List<Func<MarketplaceItem, bool>>();
+            //limit to featured and isActive
+            predicates.Add(x => x.IsFeatured && x.IsActive);
+            //limit to publish status of live
+            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
+            predicates.Add(util.BuildStatusFilterPredicate());
+
+            var result = _dal.Where(predicates, null, null, false, false,
                 new OrderByExpression<MarketplaceItem>() { Expression = x => x.PublishDate, IsDescending = true }).Data;
             return Ok(result);
         }
@@ -88,8 +95,15 @@ namespace CESMII.Marketplace.Api.Controllers
         [ProducesResponseType(400)]
         public IActionResult GetRecentItems()
         {
-            //trim down to 4 most recent 
-            var result = _dal.Where(x => x.IsActive, null, 3, false, false,
+            List<Func<MarketplaceItem, bool>> predicates = new List<Func<MarketplaceItem, bool>>();
+            //limit to isActive
+            predicates.Add(x => x.IsActive);
+            //limit to publish status of live
+            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
+            predicates.Add(util.BuildStatusFilterPredicate());
+
+            //trim down to 3 most recent 
+            var result = _dal.Where(predicates, null, 3, false, false,
                 new OrderByExpression<MarketplaceItem>() { Expression = x => x.PublishDate, IsDescending = true }).Data;
             return Ok(result);
         }
@@ -100,7 +114,7 @@ namespace CESMII.Marketplace.Api.Controllers
         public IActionResult GetPopular()
         {
             //calculate most popular based on analytics counts
-            var util = new MarketplaceUtil(_dal, _dalAnalytics);
+            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
             var result = util.PopularItems();
             return Ok(result);
         }
@@ -147,7 +161,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 result.Analytics = analytic;
             }
             //get related items
-            var util = new MarketplaceUtil(_dal, _dalAnalytics);
+            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
             result.SimilarItems = util.SimilarItems(result);
 
             return Ok(result);
@@ -200,7 +214,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 result.Analytics = analytic;
             }
             //get related items
-            var util = new MarketplaceUtil(_dal, _dalAnalytics);
+            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
             result.SimilarItems = util.SimilarItems(result);
 
             return Ok(result);
@@ -312,6 +326,8 @@ namespace CESMII.Marketplace.Api.Controllers
             , bool includeCloudLib = true, bool liveOnly = true)
         {
 
+            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
+
             //lowercase model.query
             model.Query = string.IsNullOrEmpty(model.Query) ? model.Query : model.Query.ToLower();
 
@@ -358,9 +374,7 @@ namespace CESMII.Marketplace.Api.Controllers
             //limit to publish status of live
             if (liveOnly)
             {
-                var luStatusLive = _dalLookup.GetAll().Where(x => x.LookupType.EnumValue == LookupTypeEnum.MarketplaceStatus &&
-                    x.Code.ToLower() == "live").Select(x => x.ID).ToList();
-                predicates.Add(x => luStatusLive.Any(y => y.Equals(x.StatusId.ToString())));
+                predicates.Add(util.BuildStatusFilterPredicate());
             }
 
             //build list of where clauses - one for each cat passed in
