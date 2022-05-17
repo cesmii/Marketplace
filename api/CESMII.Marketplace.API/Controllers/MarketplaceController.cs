@@ -22,16 +22,19 @@ namespace CESMII.Marketplace.Api.Controllers
     public class MarketplaceController : BaseController<MarketplaceController>
     {
         private readonly IDal<MarketplaceItem, MarketplaceItemModel> _dal;
+        private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
         private readonly ICloudLibDAL<MarketplaceItemModel> _dalCloudLib;
 
         public MarketplaceController(IDal<MarketplaceItem, MarketplaceItemModel> dal,
+            IDal<LookupItem, LookupItemModel> dalLookup,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
             ICloudLibDAL<MarketplaceItemModel> dalCloudLib,
             ConfigUtil config, ILogger<MarketplaceController> logger)
             : base(config, logger)
         {
             _dal = dal;
+            _dalLookup = dalLookup;
             _dalAnalytics = dalAnalytics;
             _dalCloudLib = dalCloudLib;
         }
@@ -274,7 +277,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest($"Invalid model (null)");
             }
 
-            return await AdvancedSearch(model, true);
+            return await AdvancedSearch(model, true, true);
         }
 
         /// <summary>
@@ -295,7 +298,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest($"Invalid model (null)");
             }
 
-            return await AdvancedSearch(model, false);
+            return await AdvancedSearch(model, false, false);
         }
 
 
@@ -305,7 +308,8 @@ namespace CESMII.Marketplace.Api.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private async Task<IActionResult> AdvancedSearch([FromBody] MarketplaceSearchModel model, bool includeCloudLib = true)
+        private async Task<IActionResult> AdvancedSearch([FromBody] MarketplaceSearchModel model
+            , bool includeCloudLib = true, bool liveOnly = true)
         {
 
             //lowercase model.query
@@ -351,6 +355,14 @@ namespace CESMII.Marketplace.Api.Controllers
             //limit to isActive
             predicates.Add(x => x.IsActive);
 
+            //limit to publish status of live
+            if (liveOnly)
+            {
+                var luStatusLive = _dalLookup.GetAll().Where(x => x.LookupType.EnumValue == LookupTypeEnum.MarketplaceStatus &&
+                    x.Code.ToLower() == "live").Select(x => x.ID).ToList();
+                predicates.Add(x => luStatusLive.Any(y => y.Equals(x.StatusId.ToString())));
+            }
+
             //build list of where clauses - one for each cat passed in
             Func<MarketplaceItem, bool> predicateCat = null;
             if (combinedCats != null && combinedCats.Length > 0)//model.Categories != null)
@@ -394,7 +406,7 @@ namespace CESMII.Marketplace.Api.Controllers
                     || x.DisplayName.ToLower().Contains(model.Query)
                     || x.Description.ToLower().Contains(model.Query)
                     || x.Abstract.ToLower().Contains(model.Query)
-                    || x.MetaTags.Contains(model.Query)
+                    || (x.MetaTags != null && x.MetaTags.Contains(model.Query))
                     || (x.Author != null && (x.Author.FirstName.Contains(model.Query) || x.Author.LastName.Contains(model.Query)));
 
                 predicates.Add(predicateQuery);
