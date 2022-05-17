@@ -67,6 +67,9 @@ function AdminMarketplaceRow(props) { //props are item, showActions
                     {props.item.displayName}
                     <br/>
                     <a href={`/library/${props.item.name}`} >View in Library</a>
+                    <br/>
+                    <span className="font-weight-bold mr-2" >Status:</span>
+                    <span className={`${props.item.status.code.toLowerCase() === "live" ? "text-success" : "text-warning"}`} >{props.item.status.name}</span>
                 </td>
                 <td className="py-2 d-none d-sm-table-cell align-text-top" >
                     {renderAnalytics()}
