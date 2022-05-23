@@ -2,8 +2,7 @@ import React from 'react'
 import { Card } from 'react-bootstrap';
 
 import stockTilePhoto from '../../components/img/icon-molecule-landscape.svg'
-import iconMolecule from '../../components/img/icon-molecule-square.svg'
-import iconMoleculePortrait from '../../components/img/icon-molecule-portrait.svg'
+import iconMolecule from '../../components/img/icon-molecule-portrait.svg'
 import { getImageAlt, getImageUrl } from '../../utils/UtilityService';
 import '../styles/MarketplaceTileList.scss';
 
@@ -75,7 +74,7 @@ function MarketplaceTileList(props) {
     }
 
     const renderImageBg = (item) => {
-        var imgSrc = item.imagePortrait == null ? iconMoleculePortrait : getImageUrl(item.imagePortrait);
+        var imgSrc = item.imagePortrait == null ? iconMolecule : getImageUrl(item.imagePortrait);
         var bgImageStyle = 
             {
                 backgroundImage: `url(${imgSrc})`
