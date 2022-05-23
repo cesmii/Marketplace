@@ -266,7 +266,7 @@ function AdminMarketplaceEntity() {
         setIsValid({
             ..._isValid, images: {
                 "imagePortrait": e.target.id === "imagePortrait" ? isValid : _isValid.images.imagePortrait,
-                "imageSquare": e.target.id === "imageSquare" ? isValid : _isValid.images.imageSquare,
+                "imageSquare": true, //e.target.id === "imageSquare" ? isValid : _isValid.images.imageSquare,
                 "imageLandscape": e.target.id === "imageLandscape" ? isValid : _isValid.images.imageLandscape
             }
         });
@@ -284,7 +284,7 @@ function AdminMarketplaceEntity() {
         _isValid.publisher = item.publisher != null && item.publisher.id.toString() !== "-1";
         _isValid.publishDate = item.publishDate != null && item.publishDate.trim().length > 0;
         _isValid.images.imagePortrait = item.imagePortrait != null && item.imagePortrait.id.toString() !== "-1";
-        _isValid.images.imageSquare = item.imageSquare != null && item.imageSquare.id.toString() !== "-1";
+        _isValid.images.imageSquare = true; //item.imageSquare != null && item.imageSquare.id.toString() !== "-1";
         _isValid.images.imageLandscape = item.imageLandscape != null && item.imageLandscape.id.toString() !== "-1";
 
         setIsValid(JSON.parse(JSON.stringify(_isValid)));
@@ -824,14 +824,14 @@ function AdminMarketplaceEntity() {
                     <div className="col-12">
                         <h3 className="mb-4">Image Selection</h3>
                     </div>
-                    <div className="col-md-4">
-                        {renderImageSelection("imagePortrait", "Portrait Image", "Recommended aspect ratio 3:4")}
+                    <div className="col-md-6">
+                        {renderImageSelection("imagePortrait", "Portrait Image", "Recommended aspect ratio 3:4. Used by: Home page ('Featured Solution' banner image, 'Popular' items tiles), Library page (result tiles)")}
                     </div>
-                    <div className="col-md-4">
-                        {renderImageSelection("imageSquare", "Square Image", "Recommended aspect ratio 1:1")}
-                    </div>
-                    <div className="col-md-4">
-                        {renderImageSelection("imageLandscape", "Landscape Image", "Recommended: 320px w by 180px h (16:9)")}
+                    {/*<div className="col-md-6">*/}
+                    {/*    {renderImageSelection("imageSquare", "Square Image (Deprecated)", "Recommended aspect ratio 1:1. Deprecated.")}*/}
+                    {/*</div>*/}
+                    <div className="col-md-6">
+                        {renderImageSelection("imageLandscape", "Landscape Image", "Recommended: 320px w by 180px h (16:9) Used by: Home page ('New' items tiles), Marketplace item page (banner image, 'Related' items tiles)")}
                     </div>
                 </div>
                 <div className="row mt-2">
