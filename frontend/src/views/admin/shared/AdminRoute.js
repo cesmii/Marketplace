@@ -2,6 +2,7 @@ import React from "react";
 import { Route, Redirect } from "react-router-dom";
 
 import { useAuthState } from "../../../components/authentication/AuthContext";
+import DownloadMessage from "../../../components/DownloadMessage";
 //import AdminSideMenu from "./AdminSideMenu";
 import { InlineMessage } from "../../../components/InlineMessage";
 
@@ -17,6 +18,7 @@ const AdminLayout = ({ children }) => (
     <div className="container-fluid container-md" >
         <div className="main-panel m-4">
             <InlineMessage />
+            <DownloadMessage />
             {children}
         </div>
     </div>

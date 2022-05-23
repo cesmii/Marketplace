@@ -8,17 +8,22 @@
     using CESMII.Marketplace.DAL;
     using CESMII.Marketplace.DAL.Models;
     using CESMII.Marketplace.Data.Extensions;
+    using CESMII.Marketplace.Common.Enums;
 
     public class MarketplaceUtil
     {
         private readonly IDal<MarketplaceItem, MarketplaceItemModel> _dalMarketplace;
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
+        private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
 
         public MarketplaceUtil(IDal<MarketplaceItem, MarketplaceItemModel> dalMarketplace,
-            IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics)
+            IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
+            IDal<LookupItem, LookupItemModel> dalLookup
+            )
         {
             _dalMarketplace = dalMarketplace;
             _dalAnalytics = dalAnalytics;
+            _dalLookup = dalLookup;
         }
 
         public List<MarketplaceItemModel> SimilarItems(MarketplaceItemModel item)
@@ -69,6 +74,8 @@
             predFinal = predFinal.And(x => x.IsActive);
             //remove self
             predFinal = predFinal.And(x => !x.ID.Equals(item.ID));
+            //limit to publish status of live
+            predFinal = predFinal.And(this.BuildStatusFilterPredicate());
 
             //TBD - future - weight certain factors more than others and potentially sort by most similar.
             //now execute the search 
@@ -92,9 +99,30 @@
 
             //throw new NotImplementedException("Under Construction");
             var popular = _dalAnalytics.GetAllPaged(null, 4, false, false, orderBys.ToArray()).Data.Select(x => x.MarketplaceItemId).ToArray();
+
             //now get the marketplace items with popular rankings
-            return _dalMarketplace.Where(x => popular.Any(m => m == x.ID.ToString()), null, 4, false, false).Data;
+            //filter our inactive and non-live items
+            List<Func<MarketplaceItem, bool>> predicates = new List<Func<MarketplaceItem, bool>>();
+            //limit to isActive
+            predicates.Add(x => x.IsActive);
+            //limit to publish status of live
+            predicates.Add(this.BuildStatusFilterPredicate());
+            //only get items which are most popular based on previous query of analytics
+            predicates.Add(x => popular.Any(m => m == x.ID.ToString()));
+
+            return _dalMarketplace.Where(predicates, null, 4, false, false).Data;
         }
 
+        /// <summary>
+        /// Generate a filter predicate which filters marketplace item on a status
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        public Func<MarketplaceItem, bool> BuildStatusFilterPredicate(string code = "live")
+        {
+                var luStatusLive = _dalLookup.GetAll().Where(x => x.LookupType.EnumValue == LookupTypeEnum.MarketplaceStatus &&
+                    x.Code.ToLower() == code.ToLower()).Select(x => x.ID).ToList();
+                return x => luStatusLive.Any(y => y.Equals(x.StatusId.ToString()));
+        }
     }
 }

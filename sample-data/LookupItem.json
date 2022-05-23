@@ -410,4 +410,28 @@
   },
   "DisplayOrder": 100,
   "IsActive": false
+},{
+  "_id": {
+    "$oid": "6275769bb7e0831201e5c3e2"
+  },
+  "Name": "SM App",
+  "Code": "sm-app",
+  "DisplayOrder": 1,
+  "LookupType": {
+    "EnumValue": 10,
+    "Name": "SmItemType"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6275769bb7e0831201e5c3e3"
+  },
+  "Name": "SM Profile",
+  "Code": "sm-profile",
+  "DisplayOrder": 2,
+  "LookupType": {
+    "EnumValue": 10,
+    "Name": "SmItemType"
+  },
+  "IsActive": true
 }]

@@ -84,14 +84,17 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IDal<RequestInfo, RequestInfoModel>, RequestInfoDAL>();
             services.AddScoped<IDal<ImageItem, ImageItemModel>, ImageItemDAL>();
 
-            //services.AddScoped<IDal<Organization, OrganizationModel>, OrganizationDAL>();
-
 
             // Configuration, utils, one off objects
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddSingleton<ConfigUtil>();  //helper to allow us to bind to app settings data 
             services.AddSingleton<MailRelayService>();  //helper for emailing
             services.AddSingleton<MongoClientGlobal>();  //helper for emailing
+
+            //Cloud Lib
+            services.AddSingleton<Opc.Ua.CloudLib.Client.UACloudLibClient>();
+            services.AddSingleton<CloudLibClient.ICloudLibWrapper,CloudLibClient.CloudLibWrapper>();
+            services.AddScoped<ICloudLibDAL<MarketplaceItemModel>, CloudLibDAL>();
 
             // Add token builder.
             var configUtil = new ConfigUtil(Configuration);
