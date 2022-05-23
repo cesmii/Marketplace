@@ -29,6 +29,11 @@
         public string DisplayName { get; set; }
 
         public string Version { get; set; }
+        
+        /// <summary>
+        /// Namespace URI. Only applies to profiles pulled from CloudLib
+        /// </summary>
+        public string Namespace { get; set; }
 
         public string Abstract { get; set; }
 

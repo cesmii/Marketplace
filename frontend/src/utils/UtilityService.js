@@ -393,6 +393,27 @@ export function onChangeNumericKeysOnly(e) {
 }
 
 ///--------------------------------------------------------------------------
+// Prepare a properly formatted download link to download the profile nodeset XML
+//--------------------------------------------------------------------------
+export function cleanFileName(val) {
+    if (val == null) return "";
+    val = val.toLowerCase();
+    var result = val.trim().replace(" ", "_");
+    result = result.replace('https://', '');
+    result = result.replace('http://', '');
+    result = result.replaceAll('/', '.');
+    result = result.replaceAll('\\', '');
+    result = result.replaceAll('<', '');
+    result = result.replaceAll('>', '');
+
+    //trim off last period if present in result
+    if (result.lastIndexOf('.') === result.length - 1) {
+        result = result.substring(0, result.length - 2);
+    }
+    return `${result}.nodeset2`; 
+}
+
+///--------------------------------------------------------------------------
 //  This is used in conjunction with the boostrap date control.
 //  Dates will come in two formats:
 //  a. W/ Timezone info (typically from server): 2021-09-24T00:00:00

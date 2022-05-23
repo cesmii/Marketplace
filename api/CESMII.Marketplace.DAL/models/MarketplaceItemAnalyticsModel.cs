@@ -11,6 +11,10 @@
     public class MarketplaceItemAnalyticsModel : AbstractModel
     {
         public string MarketplaceItemId { get; set; }
+        /// <summary>
+        /// Id of SM Profile from CloudLib
+        /// </summary>
+        public string CloudLibId { get; set; }
         public string Url { get; set; }
         public int PageVisitCount { get; set; }
         public int SearchResultCount { get; set; }

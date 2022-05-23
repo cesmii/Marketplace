@@ -7,7 +7,7 @@ export const AppSettings = {
     , GoogleAnalyticsId: 'G-M6FGMLFKM7' //'G-EPPSP1B05X'
     , TrackAnalytics: process.env.REACT_APP_USE_GOOGLE_ANALYTICS  //false in dev, true in prod
     , PageSize: 10
-    , PageSizeOptions: [10,25,50]
+    , PageSizeOptions: { FrontEnd: [10, 25, 50], Admin: [10, 25, 50, 1000] }
     , DateSettings: {
         DateFormat: 'M/d/yyyy'
         , DateFormat_Grid: 'MM/dd/yyyy'
@@ -42,7 +42,8 @@ export const AppSettings = {
         Publisher: 6,
         RequestInfo: 7,
         TaskStatus: 8,
-        MembershipStatus: 9
+        MembershipStatus: 9,
+        SmItemType: 10
     },
      requestInfoNew: {
         marketplaceItemId: null,
@@ -57,7 +58,8 @@ export const AppSettings = {
         phone: '',
         industries: '',
         membershipStatusId: null
-    }
+    },
+    itemTypeCode: { smApp: 'sm-app', smProfile: 'sm-profile' }
 
 
     

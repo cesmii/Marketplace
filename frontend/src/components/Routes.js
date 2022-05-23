@@ -10,6 +10,7 @@ import Login from "../views/Login"
 import PageNotFound from "../views/PageNotFound"
 import MarketplaceList from '../views/MarketplaceList';
 import MarketplaceEntity from '../views/MarketplaceEntity'
+import ProfileEntity from '../views/ProfileEntity'
 import PublisherEntity from '../views/PublisherEntity';
 import AdminMarketplaceEntity from '../views/admin/AdminMarketplaceEntity'
 import AdminPubisherEntity from '../views/admin/AdminPubisherEntity'
@@ -38,10 +39,11 @@ function Routes() {
             <PublicRouteWFilter exact path="/" component={Home} />
             {/*<PublicRoute exact path="/about" component={About} />*/}
             <PublicRoute exact path="/library/:id" component={MarketplaceEntity} />
+            <PublicRoute exact path="/profile/:id" component={ProfileEntity} />
             <PublicRouteWFilter exact path="/library" component={MarketplaceList} />
             <PublicRouteWFilter exact path="/all" component={MarketplaceList} />
             <PublicRoute exact path="/publisher/:id" component={PublisherEntity} />
-            <PublicRoute exact path="/add-to-platform/:id" component={RequestInfo} />
+            <PublicRoute exact path="/more-info/:itemType/:id" component={RequestInfo} />
             <PublicRoute exact path="/request-info/publisher/:publisherId" component={RequestInfo} />
             <PublicRoute exact path="/contact-us/" component={RequestInfo} />
             <PublicRoute exact path="/contact-us/:type" component={RequestInfo} />

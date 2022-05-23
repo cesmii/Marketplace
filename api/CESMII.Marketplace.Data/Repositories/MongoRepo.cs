@@ -287,7 +287,7 @@
                 }
             }
             //now convert it back to iqueryable
-            query = queryOrdered.AsQueryable<TEntity>();
+            query = queryOrdered == null ? query : queryOrdered.AsQueryable<TEntity>();
         }
 
         #endregion

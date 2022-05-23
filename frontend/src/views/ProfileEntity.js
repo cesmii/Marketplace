@@ -8,26 +8,21 @@ import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/
 import { useAuthState } from "../components/authentication/AuthContext";
 
 import { MarketplaceBreadcrumbs } from './shared/MarketplaceBreadcrumbs';
-import SocialMedia from "../components/SocialMedia";
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
 import MarketplaceEntitySidebar from './shared/MarketplaceEntitySidebar';
 
-import { generateLogMessageString, getMarketplaceIconName } from '../utils/UtilityService'
-import { clearSearchCriteria, toggleSearchFilterSelected } from '../services/MarketplaceService';
+import { cleanFileName, generateLogMessageString, getMarketplaceIconName } from '../utils/UtilityService'
 import MarketplaceTileList from './shared/MarketplaceTileList';
-import { SvgVisibilityIcon } from '../components/SVGIcon';
-import color from '../components/Constants';
 import './styles/MarketplaceEntity.scss';
 
-const CLASS_NAME = "MarketplaceEntity";
+const CLASS_NAME = "ProfileEntity";
 
-function MarketplaceEntity() {
+function ProfileEntity() {
 
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
     const history = useHistory();
-
     const { id } = useParams();
     const [item, setItem] = useState({});
     const [isLoading, setIsLoading] = useState(true);
@@ -45,15 +40,15 @@ function MarketplaceEntity() {
             var result = null;
             try {
                 var data = { id: id, isTracking: true };
-                var url = `marketplace/getbyname`;
+                var url = `profile/getbyid`;
                 result = await axiosInstance.post(url, data);
             }
             catch (err) {
-                var msg = 'An error occurred retrieving this marketplace item.';
+                var msg = 'An error occurred retrieving this profile item.';
                 console.log(generateLogMessageString('useEffect||fetchData||error', CLASS_NAME, 'error'));
                 //console.log(err.response.status);
                 if (err != null && err.response != null && err.response.status === 404) {
-                    msg += ' This marketplace item was not found.';
+                    msg += ' This profile item was not found.';
                     history.push('/404');
                 }
                 setLoadingProps({
@@ -99,34 +94,14 @@ function MarketplaceEntity() {
         history.goBack();
     };
 
-    //const onToggleFavorite = () => {
-    //    console.log(generateLogMessageString('onToggleFavorite', CLASS_NAME));
+    const downloadProfile = async (p) => {
+        console.log(generateLogMessageString(`downloadProfile||start`, CLASS_NAME));
+        //add a row to download messages and this will kick off download
+        var msgs = loadingProps.downloadItems || [];
+        msgs.push({ profileId: p.id, fileName: cleanFileName(p.namespace || p.displayName), immediateDownload: true });
+        setLoadingProps({ downloadItems: JSON.parse(JSON.stringify(msgs)) });
+    }
 
-    //    //add to the favorite list to keep track of where we have been
-    //    var revisedList = toggleFavoritesList(loadingProps.favoritesList, { url: history.location.pathname, caption: item.displayName, iconName: getMarketplaceIconName(item), authorId: item.author?.id });
-    //    setLoadingProps({ favoritesList: revisedList });
-    //    setIsFavorite(revisedList != null && revisedList.findIndex(x => x.url === history.location.pathname) > -1);
-    //};
-
-    const filterByPublisher = (e) => {
-
-        e.preventDefault();
-        console.log(generateLogMessageString('filterByPublisher', CLASS_NAME));
-
-        //clear out the selected, the query val
-        var criteria = clearSearchCriteria(loadingProps.searchCriteria);
-
-        //loop through filters and their items and find the publisher id
-        toggleSearchFilterSelected(criteria, item.publisher.id);
-
-        //update state for other components to see
-        setLoadingProps({ searchCriteria: criteria });
-
-        //navigate to marketplace list
-        history.push({ pathname: `/library` });
-    };
-
- 
     //-------------------------------------------------------------------
     // Region: Render Helpers
     //-------------------------------------------------------------------
@@ -163,10 +138,8 @@ function MarketplaceEntity() {
                 <h1 className="m-0 mr-2">
                     {item.displayName}
                 </h1>
+                <span className="headline-2 ml-auto">(SM Profile)</span>
                 {/*<SVGIcon name={isFavorite ? "favorite" : "favorite-border"} size="24" fill={color.forestGreen} onClick={toggleFavoritesList} />*/}
-                {authTicket.user != null &&
-                    <a className="btn btn-icon-outline circle ml-auto" href={`/admin/library/${item.id}`} ><i className="material-icons">edit</i></a>
-                }
             </>
         )
     }
@@ -178,9 +151,9 @@ function MarketplaceEntity() {
                 <div className="row mb-2 mb-md-3" >
                     <div className="col-sm-12 d-flex align-items-center">
                         <h2 className="m-0 mr-2">
-                            <span className="d-none d-md-inline">Smart Manufacturing App </span> Details
+                            <span className="d-none d-md-inline">Smart Manufacturing Profile </span> Details
                         </h2>
-                        <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/app/${item.id}`} >Request More Info</a>
+                        <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/profile/${item.id}`} >Request More Info</a>
                     </div>
                 </div>
                 <div className="row" >
@@ -193,18 +166,14 @@ function MarketplaceEntity() {
                         <span className="m-0 mr-2 mb-2 mb-md-0">
                             <b className="mr-1" >Published By:</b>
                             <br className="d-block d-md-none" />
-                            <a href={`/publisher/${item.publisher.name}`} >{item.publisher.displayName}</a></span>
-                        <span className="m-0 mr-2 my-2 mb-md-0 d-flex align-items-center">
-                            <SvgVisibilityIcon fill={color.link} />
-                            <button className="btn btn-link" onClick={filterByPublisher} >
-                            View all by this publisher</button>
+                            {item.publisher.displayName}
                         </span>
                     </div>
-                    {(item.publisher.socialMediaLinks != null && item.publisher.socialMediaLinks.length > 0) && 
-                        <div className="col-sm-4 d-flex justify-content-md-end mb-2 mb-md-0 align-items-center">
-                            <SocialMedia items={item.publisher.socialMediaLinks} />
-                        </div>
-                    }
+                {/*    {(item.publisher.socialMediaLinks != null && item.publisher.socialMediaLinks.length > 0) && */}
+                {/*        <div className="col-sm-4 d-flex justify-content-md-end mb-2 mb-md-0 align-items-center">*/}
+                {/*            <SocialMedia items={item.publisher.socialMediaLinks} />*/}
+                {/*        </div>*/}
+                {/*    }*/}
                 </div>
             </>
         )
@@ -215,7 +184,9 @@ function MarketplaceEntity() {
         if (!loadingProps.isLoading && (item == null)) {
             return;
         }
-        return (<MarketplaceItemEntityHeader key={item.id} item={item} currentUserId={authTicket.user == null ? null : authTicket.user.id} showActions={true} cssClass="marketplace-list-item" />)
+        return (
+            <MarketplaceItemEntityHeader key={item.id} item={item} currentUserId={null} showActions={true} cssClass="marketplace-list-item" onDownload={downloadProfile} />
+        )
     }
 
     //
@@ -286,4 +257,4 @@ function MarketplaceEntity() {
     )
 }
 
-export default MarketplaceEntity;
+export default ProfileEntity;

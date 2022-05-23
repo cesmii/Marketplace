@@ -72,12 +72,14 @@ function ImageUploader(props) {
                 if (result.data.isSuccess) {
                     //inform parent component of the new images. 
                     if (props.onImageUpload) props.onImageUpload(result.data.data);
+                    setLoadingProps({ isLoading: false });
                 }
                 else {
-                    //setError({ show: true, caption: 'Import Error', message: `An error occurred processing the import file(s): ${result.data.message}` });
+                    setLoadingProps({
+                        isLoading: false, message: null, inlineMessages: [
+                            { id: new Date().getTime(), severity: "danger", body: result.data?.message, isTimed: false }]
+                    });
                 }
-                setLoadingProps({ isLoading: false });
-
             } else {
                 //hide a spinner, show a message
                 setLoadingProps({isLoading: false });

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30804.86
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32414.318
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.API", "CESMII.Marketplace.API\CESMII.Marketplace.API.csproj", "{0590CD8B-3AE1-48FE-A120-A564B5ECD30A}"
 EndProject
@@ -12,6 +12,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.DAL", "CESMII.Marketplace.DAL\CESMII.Marketplace.DAL.csproj", "{9CE0F804-5BCA-4FE6-A489-F959FE221EED}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.Data", "CESMII.Marketplace.Data\CESMII.Marketplace.Data.csproj", "{71ECE5E2-70AE-4F53-9784-C7A8F5B1EFBF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.CloudLibClient", "CESMII.Marketplace.CloudLibClient\CESMII.Marketplace.CloudLibClient.csproj", "{7702D6AE-83BB-4456-9808-EED12E73CC74}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -50,6 +52,12 @@ Global
 		{71ECE5E2-70AE-4F53-9784-C7A8F5B1EFBF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{71ECE5E2-70AE-4F53-9784-C7A8F5B1EFBF}.Staging|Any CPU.ActiveCfg = Staging|Any CPU
 		{71ECE5E2-70AE-4F53-9784-C7A8F5B1EFBF}.Staging|Any CPU.Build.0 = Staging|Any CPU
+		{7702D6AE-83BB-4456-9808-EED12E73CC74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7702D6AE-83BB-4456-9808-EED12E73CC74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7702D6AE-83BB-4456-9808-EED12E73CC74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7702D6AE-83BB-4456-9808-EED12E73CC74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7702D6AE-83BB-4456-9808-EED12E73CC74}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
+		{7702D6AE-83BB-4456-9808-EED12E73CC74}.Staging|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

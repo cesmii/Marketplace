@@ -1,21 +1,3 @@
-# This workflow will build and push a .NET 5 web API to an Azure Web App that is manually triggered by user.
-#
-# This workflow assumes you have already created the target Azure App Service web app.
-# For instructions see https://docs.microsoft.com/azure/app-service/app-service-plan-manage#create-an-app-service-plan
-#
-# To configure this workflow:
-#
-# 1. For Linux apps, add an app setting called WEBSITE_WEBDEPLOY_USE_SCM and set it to true in your app **before downloading the file**.
-#      For more instructions see: https://docs.microsoft.com/azure/app-service/configure-common#configure-app-settings
-#
-# 2. Set up a secret in your repository named AZURE_WEBAPP_PUBLISH_PROFILE with the value of your Azure publish profile.
-#    For instructions on obtaining the publish profile see: https://docs.microsoft.com/azure/app-service/deploy-github-actions#configure-the-github-secret
-#
-# 3. Change the values for the AZURE_WEBAPP_NAME, AZURE_WEBAPP_PACKAGE_PATH and NODE_VERSION environment variables  (below).
-#
-# For more information on GitHub Actions for Azure, refer to https://github.com/Azure/Actions
-# For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
-
 name: Prod|API|Marketplace - Deploy to Azure
 
 on:
@@ -42,7 +24,7 @@ env:
   PUBLISH_FOLDER_RELATIVE: "./publish"
   PUBLISH_FOLDER: "/publish"
   # set this to the .NET core version to use
-  NETCORE_VERSION: "5.0.100"
+  NETCORE_VERSION: "6.0.x"
   
 jobs:
   build:

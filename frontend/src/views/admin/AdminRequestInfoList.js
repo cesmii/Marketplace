@@ -153,7 +153,8 @@ function AdminRequestInfoList() {
     //render pagination ui
     const renderPagination = () => {
         if (_dataRows == null || _dataRows.all.length === 0) return;
-        return <GridPager currentPage={_pager.currentPage} pageSize={_pager.pageSize} itemCount={_dataRows.itemCount} onChangePage={onChangePage} />
+        return <GridPager currentPage={_pager.currentPage} pageSize={_pager.pageSize} itemCount={_dataRows.itemCount} onChangePage={onChangePage}
+                    pageSizeOptions={AppSettings.PageSizeOptions.Admin} />
     }
 
     const renderItemsGridHeader = () => {

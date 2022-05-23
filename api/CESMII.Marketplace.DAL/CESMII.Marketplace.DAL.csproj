@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Configurations>Debug;Release;Staging</Configurations>
   </PropertyGroup>
 
@@ -10,8 +10,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CESMII.Marketplace.CloudLibClient\CESMII.Marketplace.CloudLibClient.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Common\CESMII.Marketplace.Common.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Data\CESMII.Marketplace.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Opc.Ua.CloudLib.Client">
+      <HintPath>..\..\packages-local\Opc.Ua.CloudLib.Client\Opc.Ua.CloudLib.Client.dll</HintPath>
+      <CopyLocal>True</CopyLocal>
+    </Reference>
   </ItemGroup>
 
 </Project>
