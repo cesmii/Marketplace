@@ -3,6 +3,7 @@ import { Card } from 'react-bootstrap';
 
 import stockTilePhoto from '../../components/img/icon-molecule-landscape.svg'
 import iconMolecule from '../../components/img/icon-molecule-square.svg'
+import iconMoleculePortrait from '../../components/img/icon-molecule-portrait.svg'
 import { getImageAlt, getImageUrl } from '../../utils/UtilityService';
 import '../styles/MarketplaceTileList.scss';
 
@@ -34,26 +35,58 @@ function MarketplaceTileList(props) {
         );
     }
 
+    //square image
+    //const renderCardThumbnail = (item, isfirst, isLast) => {
+    //    var imgSrc = item.imageSquare == null ? iconMolecule : getImageUrl(item.imageSquare);
+    //    return (
+    //        <Card className="h-100 border-0 mb-0 marketplace-tile">
+    //            <Card.Body className="h-100 p-0 tile-body">
+    //                <div className="row body-content p-4 pb-0" >
+    //                    {imgSrc != null &&
+    //                        <div className="col-3 col-sm-4" >
+    //                            <img className={`card-img-thumb p-1 p-lg-2`} src={imgSrc} alt={`${item.name}-${getImageAlt(item.imageSquare)}`} />
+    //                        </div>
+    //                    }
+    //                    <div className={`${imgSrc != null ? "col-9 col-sm-8" : "col-12 p-0"}`} >
+    //                        <span className="card-title font-weight-bold mb-3 d-block bitter">{item.displayName}</span>
+    //                        <div className="card-text mb-0" dangerouslySetInnerHTML={{ __html: item.abstract }} ></div>
+    //                    </div>
+    //                </div>
+    //            </Card.Body>
+    //        </Card>
+    //    );
+    //}
+
+    //portrait image down left side of tile
     const renderCardThumbnail = (item, isfirst, isLast) => {
-        var imgSrc = item.imageSquare == null ? iconMolecule : getImageUrl(item.imageSquare);
         return (
-            <Card className="h-100 border-0 mb-0 marketplace-tile">
-                <Card.Body className="h-100 p-0 tile-body">
-                    <div className="row body-content p-4 pb-0" >
-                        {imgSrc != null &&
-                            <div className="col-3 col-sm-4" >
-                                <img className={`card-img-thumb p-1 p-lg-2`} src={imgSrc} alt={`${item.name}-${getImageAlt(item.imageSquare)}`} />
-                            </div>
-                        }
-                        <div className={`${imgSrc != null ? "col-9 col-sm-8" : "col-12 p-0"}`} >
-                            <span className="card-title font-weight-bold mb-3 d-block bitter">{item.displayName}</span>
-                            <div className="card-text mb-0" dangerouslySetInnerHTML={{ __html: item.abstract }} ></div>
-                        </div>
+            <Card className="h-100 border-0 mb-0 marketplace-tile marketplace-list-item">
+                <Card.Body className="h-100 p-0 tile-body d-flex">
+                    <div className="col-md-6 col-lg-5 p-0 d-none d-lg-block" >
+                        {renderImageBg(item)}
+                    </div>
+                    <div className="col-md-12 col-lg-7 p-4" >
+                        <span className="card-title font-weight-bold mb-3 d-block bitter">{item.displayName}</span>
+                        <div className="card-text mb-0" dangerouslySetInnerHTML={{ __html: item.abstract }} ></div>
                     </div>
                 </Card.Body>
             </Card>
         );
     }
+
+    const renderImageBg = (item) => {
+        var imgSrc = item.imagePortrait == null ? iconMoleculePortrait : getImageUrl(item.imagePortrait);
+        var bgImageStyle = 
+            {
+                backgroundImage: `url(${imgSrc})`
+            };
+
+        return (
+            <div className="image-bg" >
+                <div className="overlay-icon cover" style={bgImageStyle} >&nbsp;</div>
+            </div>
+        );
+    };
 
     const renderTiles = () => {
         if (props.items == null || props.items.length === 0) {
