@@ -6,6 +6,7 @@ import linkedin from './img/linkedin.svg'
 import pinterest from './img/pinterest.svg'
 import twitter from './img/twitter.svg'
 import youtube from './img/youtube.svg'
+import website from './img/website.svg'
 import './styles/SocialMedia.scss';
 
 export default function SocialMedia(props) {
@@ -35,6 +36,8 @@ export default function SocialMedia(props) {
                 return linkedin;
             case "github":
                 return github;
+            case "website":
+                return website;
             default:
                 return null;
         }
