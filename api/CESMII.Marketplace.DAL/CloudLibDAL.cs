@@ -5,14 +5,15 @@
     using System.Linq;
     using System.Threading.Tasks;
 
+    using Microsoft.Extensions.Configuration;
     using NLog;
 
     using CESMII.Marketplace.Common;
     using CESMII.Marketplace.Common.Enums;
     using CESMII.Marketplace.Common.Models;
-    using CESMII.Marketplace.Data.Repositories;
     using CESMII.Marketplace.DAL.Models;
     using CESMII.Marketplace.Data.Entities;
+    using CESMII.Marketplace.CloudLibClient;
 
     using Opc.Ua.CloudLib.Client;
 
@@ -23,7 +24,7 @@
     {
         protected bool _disposed = false;
         protected static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-        private readonly CloudLibClient.ICloudLibWrapper _cloudLib;
+        private readonly ICloudLibWrapper _cloudLib;
         private readonly MarketplaceItemConfig _config;
         private readonly LookupItemModel _smItemType;
 
@@ -31,7 +32,6 @@
         protected List<ImageItemModel> _images;
 
         public CloudLibDAL(CloudLibClient.ICloudLibWrapper cloudLib,
-            IMongoRepository<LookupItem> repoLookup,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IDal<ImageItem, ImageItemModel> dalImages,
             ConfigUtil configUtil)
@@ -73,13 +73,34 @@
             return result;
         }
 
-        public async Task<List<MarketplaceItemModel>> Where(string query)
+        public async Task<List<MarketplaceItemModel>> Where(string query, 
+            List<string> processes = null, List<string> verticals = null, List<string> exclude = null)
         {
-            //inject wildcard to get all if null string
-            query = string.IsNullOrEmpty(query) ? "*" : query;
             //Note - splitting out each word in query into a separate string in the list
-            var matches = await _cloudLib.Search(string.IsNullOrEmpty(query) ? new List<string>() : query.Split(" ").ToList());
-            if (matches.Count == 0) return new List<MarketplaceItemModel>();
+            //Per team, don't split out query into multiple keyword items
+            //var keywords = string.IsNullOrEmpty(query) ? new List<string>() : query.Split(" ").ToList();
+            var keywords = new List<string>();
+
+            //append processes, verticals
+            if (processes != null)
+            { 
+                keywords = keywords.Union(processes).ToList();
+            }
+            if (verticals != null)
+            {
+                keywords = keywords.Union(verticals).ToList();
+            }
+
+            //inject wildcard to get all if keywords count == 0 or inject query
+            if (string.IsNullOrEmpty(query) && keywords.Count == 0) keywords.Add("*");
+            if (!string.IsNullOrEmpty(query)) keywords.Add(query);
+
+            var matches = await _cloudLib.Search(keywords, exclude);
+            if (matches ==null || matches.Count == 0) return new List<MarketplaceItemModel>();
+
+            //TBD - exclude some nodesets which are core nodesets - list defined in appSettings
+
+
             return MapToModelsNodesetResult(matches);
         }
 
