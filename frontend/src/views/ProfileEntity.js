@@ -105,27 +105,12 @@ function ProfileEntity() {
     //-------------------------------------------------------------------
     // Region: Render Helpers
     //-------------------------------------------------------------------
-    const renderMarketplaceBreadcrumbs = () => {
-        if (item == null || item.parent == null) return;
-
-        return (
-            <>
-                <MarketplaceBreadcrumbs item={item} currentUserId={authTicket.currentUserId} />
-            </>
-        );
-    };
-
     const renderHeaderRow = () => {
         return (
             <div className="row py-2 pb-3">
-                <div className="col-sm-3" >
-                    <div className="header-title-block d-flex align-items-center">
-                        <span className="headline-1 d-none d-md-block">Library</span>
-                        {renderSubTitle()}
-                    </div>
-                </div>
-                <div className="col-sm-9 d-flex align-items-center" >
+                <div className="col-sm-9 m-auto d-flex align-items-center" >
                     {renderHeaderBlock()}
+                    {renderSubTitle()}
                 </div>
             </div>
         );
@@ -136,9 +121,8 @@ function ProfileEntity() {
         return (
             <>
                 <h1 className="m-0 mr-2">
-                    {item.displayName}
+                    SM Profile: {item.displayName}
                 </h1>
-                <span className="headline-2 ml-auto">(SM Profile)</span>
                 {/*<SVGIcon name={isFavorite ? "favorite" : "favorite-border"} size="24" fill={color.forestGreen} onClick={toggleFavoritesList} />*/}
             </>
         )
@@ -235,13 +219,9 @@ function ProfileEntity() {
             </Helmet>
             {(!loadingProps.isLoading && !isLoading) &&
                 <>
-                    {renderMarketplaceBreadcrumbs()}
                     {renderHeaderRow()}
                     <div className="row" >
-                    <div className="col-sm-3 order-2 order-sm-1" >
-                        <MarketplaceEntitySidebar item={item} className="light" />
-                        </div>
-                    <div className="col-sm-9 mb-4 order-1 order-sm-2" >
+                    <div className="col-sm-9 m-auto mb-4" >
                             {(!loadingProps.isLoading && !isLoading) &&
                                 <div className="marketplace-entity">
                                     {renderItemRow()}
