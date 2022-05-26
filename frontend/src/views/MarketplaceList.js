@@ -206,8 +206,7 @@ function MarketplaceList() {
                     <HeaderSearch filterVal={loadingProps.searchCriteria == null ? null : loadingProps.searchCriteria.query} onSearch={handleOnSearchChange} searchMode="standard" currentUserId={authTicket.user == null ? null : authTicket.user.id} />
                 </div>
                 <div className="col-sm-4 pl-0">
-                    <MarketplaceItemTypeFilter onSearchCriteriaChanged={onTypeSelectionChange}
-                        cssClass={""} searchCriteria={loadingProps.searchCriteria} />
+                    <MarketplaceItemTypeFilter onSearchCriteriaChanged={onTypeSelectionChange} searchCriteria={loadingProps.searchCriteria} />
                 </div>
             </div>
         );
