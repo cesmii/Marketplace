@@ -216,3 +216,51 @@
         }
     }
 }
+
+//this appears horizontally across screen above marketplace list
+.type-filter-panel {
+
+    li {
+        list-style-type: none;
+        font-size: .9rem;
+        display: inline;
+        margin-right: 2px;
+
+        span {
+            @include background-opacity(color("silver"), .3);
+            border: 1px solid color('silver');
+            border-radius: $button-radius;
+
+            &:hover {
+                @include background-opacity(color("subHeadingBg"), .5);
+                border: 1px solid color('subHeadingBg');
+                border-radius: $button-radius;
+                cursor: pointer;
+            }
+
+            &.selected {
+                @include background-opacity(color("subHeadingBg"), 1);
+                border: 1px solid color('selectedBg');
+                border-radius: $button-radius;
+                //push the close icon over to edge
+                &.toggle {
+                    padding-right: 6px !important;
+                }
+
+                &.toggle:after {
+                    font-size: 0.9rem;
+                    font-weight: normal;
+                    margin-left: 6px;
+                    font-family: 'Material Icons';
+                    content: "close";
+                    -webkit-font-feature-settings: 'liga';
+                }
+
+                &:hover {
+                    @include background-opacity(color("subHeadingBg"), 1);
+                    border: 1px solid color('selectedBg');
+                }
+            }
+        }
+    }
+}
