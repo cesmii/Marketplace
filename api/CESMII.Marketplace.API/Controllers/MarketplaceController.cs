@@ -449,11 +449,27 @@ namespace CESMII.Marketplace.Api.Controllers
             //add flag to skip over this in certain scenarios. ie. admin section
             if (_configUtil.MarketplaceSettings.EnableCloudLibSearch && includeCloudLib)
             {
-                //NEW: now search CloudLib.
-                var resultCloudLib = await _dalCloudLib.Where(model.Query);
+                //if publishers is a filter, then we skip CloudLib for now because search is trying to only show 
+                //items for that publisher. In future, remove this once we store our own metadata. 
+                //only search CloudLib if no publisher filter
+                if (pubs.Count == 0)
+                {
+                    //NEW: now search CloudLib.
+                    var resultCloudLib = await _dalCloudLib.Where(model.Query,
+                        cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
+                        verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList(), 
+                        _configUtil.CloudLibSettings?.ExcludedNodeSets);
 
-                //unify the results, sort, handle paging
-                result = MergeSortPageSearchedItems(result.Data, resultCloudLib, model);
+                    //check to see if the CloudLib returned data. 
+                    if (cats.Count == 0 && verts.Count == 0 && string.IsNullOrEmpty(model.Query)
+                        && resultCloudLib.Count == 0)
+                    {
+                        _logger.LogWarning($"MarketplaceController|AdvancedSearch|No CloudLib records found yet search criteria was wildcard.");
+                    }
+
+                    //unify the results, sort, handle paging
+                    result = MergeSortPageSearchedItems(result.Data, resultCloudLib, model);
+                }
             }
 
             if (result == null)
