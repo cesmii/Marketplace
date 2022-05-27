@@ -422,7 +422,9 @@ function RequestInfo() {
                         <p className="mb-0">Published: {formatDate(_referrerItem.publishDate)}</p>
                     </div>
                 </div>
-                <PublisherSidebar item={_referrerItem.publisher} />
+                {itemType != "profile" && 
+                    <PublisherSidebar item={_referrerItem.publisher} />
+                }
             </div>
         )
     }
