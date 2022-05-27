@@ -81,8 +81,13 @@ function RequestInfo() {
             if (id != null) {
                 result.data.metaTagsConcatenated = result.data == null || result.data.metaTags == null ? "" : result.data.metaTags.join(', ');
             }
-            //set item state value - this is either marketplace item or publisher item based on mode
+            //set item state value - this is either marketplace item, sm profile or publisher item based on mode
             setReferrerItem(result.data);
+
+            //for SmProfile, update namespace value in request info object
+            //if (itemType === "profile") {
+            //    setItem({ ..._item, smProfile: { id: result.data.id, namespace: result.data.namespace } });
+            //}
 
             setLoadingProps({ isLoading: false, message: null });
         }
@@ -122,9 +127,18 @@ function RequestInfo() {
         //init to blank object
         var item = JSON.parse(JSON.stringify(AppSettings.requestInfoNew));
 
-        if (id != null) {
+        //itemType - either marketplace or sm profile
+        if (itemType === "marketplace" && id != null) {
             item.marketplaceItemId = id;
             item.requestTypeCode = "marketplaceitem";
+            setFormDisplay({
+                ..._formDisplay, caption: 'Request More Info', captionDescription: 'Tell Us About Your Project(s)'
+                , showMembershipStatus: true, showIndustry: true
+            });
+        }
+        else if (itemType === "profile" && id != null) {
+            item.smProfileId = id;
+            item.requestTypeCode = "smprofile";
             setFormDisplay({
                 ..._formDisplay, caption: 'Request More Info', captionDescription: 'Tell Us About Your Project(s)'
                 , showMembershipStatus: true, showIndustry: true
@@ -183,7 +197,7 @@ function RequestInfo() {
         return () => {
             console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
         };
-    }, [id, publisherId, type, _forceReload]);
+    }, [id, publisherId, type, itemType, _forceReload]);
 
 
     //-------------------------------------------------------------------

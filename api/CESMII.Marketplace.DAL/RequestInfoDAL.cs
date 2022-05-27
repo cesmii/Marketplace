@@ -191,6 +191,7 @@
                     PublisherId = entity.PublisherId.ToString(),
                     Publisher = entity.PublisherId.ToString().Equals(Common.Constants.BSON_OBJECTID_EMPTY) ? null :
                         MapToModelPublisher(entity.PublisherId),
+                    SmProfileId = entity.SmProfileId,
                     //RequestTypeCode = entity.RequestTypeId.ToString() == null ? null : entity.RequestTypeId.ToString(),
                     RequestType = MapToModelLookupItem(entity.RequestTypeId, _lookupItemsAll),
                     MembershipStatus = MapToModelLookupItem(entity.MembershipStatusId, _lookupItemsAll),
@@ -273,6 +274,7 @@
             entity.PublisherId = (model.PublisherId == null) ?
                 new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY)) : 
                 new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.PublisherId));
+            entity.SmProfileId = model.SmProfileId;
             entity.FirstName = model.FirstName;
             entity.LastName = model.LastName;
             entity.CompanyName = model.CompanyName;
