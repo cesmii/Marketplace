@@ -6,13 +6,10 @@ import axiosInstance from "../services/AxiosService";
 import { AppSettings } from '../utils/appsettings';
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
 import { useAuthState } from "../components/authentication/AuthContext";
-
-import { MarketplaceBreadcrumbs } from './shared/MarketplaceBreadcrumbs';
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
-import MarketplaceEntitySidebar from './shared/MarketplaceEntitySidebar';
-
 import { cleanFileName, generateLogMessageString, getMarketplaceIconName } from '../utils/UtilityService'
 import MarketplaceTileList from './shared/MarketplaceTileList';
+
 import './styles/MarketplaceEntity.scss';
 
 const CLASS_NAME = "ProfileEntity";
@@ -94,11 +91,12 @@ function ProfileEntity() {
         history.goBack();
     };
 
-    const downloadProfile = async (p) => {
+    const downloadProfile = async (req) => {
         console.log(generateLogMessageString(`downloadProfile||start`, CLASS_NAME));
         //add a row to download messages and this will kick off download
         var msgs = loadingProps.downloadItems || [];
-        msgs.push({ profileId: p.id, fileName: cleanFileName(p.namespace || p.displayName), immediateDownload: true });
+        //msgs.push({ profileId: p.id, fileName: cleanFileName(p.namespace || p.displayName), immediateDownload: true });
+        msgs.push({ requestInfo: req, fileName: cleanFileName(req.smProfile.namespace || req.smProfile.displayName), immediateDownload: true });
         setLoadingProps({ downloadItems: JSON.parse(JSON.stringify(msgs)) });
     }
 

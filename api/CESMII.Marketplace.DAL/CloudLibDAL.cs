@@ -61,11 +61,19 @@
             return MapToModelNamespace(entity);
         }
 
-        public async Task<string> Export(string id)
+        public async Task<ProfileItemExportModel> Export(string id)
         {
             var entity = await _cloudLib.GetById(id);
             if (entity == null) return null;
-            return entity.Nodeset?.NodesetXml;
+            //return the whole thing because we also email some info to request info and use
+            //other data in this entity.
+            var result = new ProfileItemExportModel()
+            {
+                Item = MapToModelNamespace(entity),
+                NodesetXml = entity.Nodeset?.NodesetXml
+            };
+            return result;
+            //return entity.Nodeset?.NodesetXml;
         }
 
         public async Task<List<MarketplaceItemModel>> GetAll() {

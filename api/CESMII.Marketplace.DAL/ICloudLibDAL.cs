@@ -17,7 +17,7 @@
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        Task<string> Export(string id);
+        Task<ProfileItemExportModel> Export(string id);
 
         Task<List<TModel>> GetAll();
 
