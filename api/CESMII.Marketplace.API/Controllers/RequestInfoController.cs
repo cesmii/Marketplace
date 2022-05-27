@@ -93,7 +93,6 @@ namespace CESMII.Marketplace.Api.Controllers
             }
 
             //if we are getting a request info of smprofile type, then also get the associated sm profile.
-            //get request type id based on request type code
             if (result.SmProfileId.HasValue)
             {
                 result.SmProfile = await _dalCloudLib.GetById(result.SmProfileId.Value.ToString());
@@ -135,6 +134,12 @@ namespace CESMII.Marketplace.Api.Controllers
                 {
                     //populate some fields that may not be present on the add model. (request type code, created date). 
                     var modelNew = _dal.GetById(result);
+
+                    //if we are adding a request info of smprofile type, then also get the associated sm profile.
+                    if (modelNew.SmProfileId.HasValue)
+                    {
+                        modelNew.SmProfile = await _dalCloudLib.GetById(modelNew.SmProfileId.Value.ToString());
+                    }
 
                     var emailResult = await EmailRequestInfo(modelNew);
 
