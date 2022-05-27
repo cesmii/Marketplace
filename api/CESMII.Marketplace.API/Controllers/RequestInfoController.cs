@@ -25,18 +25,21 @@ namespace CESMII.Marketplace.Api.Controllers
 
         private readonly IDal<RequestInfo, RequestInfoModel> _dal;
         private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
+        private readonly ICloudLibDAL<MarketplaceItemModel> _dalCloudLib;
         private readonly MailRelayService _mailRelayService;
 
         public RequestInfoController(
             IDal<RequestInfo, RequestInfoModel> dal,
             // IDal<Publisher, AdminPublisherModel> dalAdmin,
             IDal<LookupItem, LookupItemModel> dalLookup,
+            ICloudLibDAL<MarketplaceItemModel> dalCloudLib,
             ConfigUtil config, ILogger<RequestInfoController> logger,
             MailRelayService mailRelayService)
             : base(config, logger)
         {
             _dal = dal;
             _dalLookup = dalLookup;
+            _dalCloudLib = dalCloudLib;
             _mailRelayService = mailRelayService;
         }
 
@@ -74,7 +77,7 @@ namespace CESMII.Marketplace.Api.Controllers
         [Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
         [ProducesResponseType(200, Type = typeof(RequestInfoModel))]
         [ProducesResponseType(400)]
-        public IActionResult GetByID([FromBody] IdStringModel model)
+        public async Task<IActionResult> GetByID([FromBody] IdStringModel model)
         {
             if (model == null)
             {
@@ -88,6 +91,14 @@ namespace CESMII.Marketplace.Api.Controllers
                 _logger.LogWarning($"RequestInfoController|GetById|No records found matching this ID: {model.ID}");
                 return BadRequest($"No records found matching this ID: {model.ID}");
             }
+
+            //if we are getting a request info of smprofile type, then also get the associated sm profile.
+            //get request type id based on request type code
+            if (result.SmProfileId.HasValue)
+            {
+                result.SmProfile = await _dalCloudLib.GetById(result.SmProfileId.Value.ToString());
+            }
+
             return Ok(result);
         }
 

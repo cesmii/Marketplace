@@ -27,8 +27,12 @@
             }
         }
 
-        public BsonObjectId RequestTypeId { get; set; } //map like statusid for marketplaceitem
+        /// <summary>
+        /// Simple high level information related to an SM profile from CloudLib
+        /// </summary>
+        public uint? SmProfileId { get; set; }
 
+        public BsonObjectId RequestTypeId { get; set; } //map like statusid for marketplaceitem
        
         public string FirstName { get; set; }
 
@@ -57,6 +61,4 @@
 
         public BsonObjectId StatusId { get; set; }
     }
-
-
 }

@@ -20,6 +20,13 @@ namespace CESMII.Marketplace.DAL.Models
 
         public string PublisherId { get; set; }
 
+        /// <summary>
+        /// This is only populated if this request info is associated with a particular SM Profile
+        /// Only map on get
+        /// </summary>
+        public MarketplaceItemModel SmProfile { get; set; }
+        public uint? SmProfileId { get; set; }
+
         public string RequestTypeCode { get; set; }
 
         public string FirstName { get; set; }
