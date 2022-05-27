@@ -116,4 +116,15 @@
 
         //public List<ImageItemModel> Images { get; set; }
     }
+
+    /// <summary>
+    /// Extend marketplaceitemmodel for the export scenario.
+    /// </summary>
+    public class ProfileItemExportModel
+    {
+        public MarketplaceItemModel Item { get; set; }
+        public string NodesetXml { get; set; }
+    }
+
+
 }

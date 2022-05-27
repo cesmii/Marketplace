@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Net.Mail;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -141,7 +140,8 @@ namespace CESMII.Marketplace.Api.Controllers
                         modelNew.SmProfile = await _dalCloudLib.GetById(modelNew.SmProfileId.Value.ToString());
                     }
 
-                    var emailResult = await EmailRequestInfo(modelNew);
+                    var body = await this.RenderViewAsync("~/Views/Template/RequestInfo.cshtml", modelNew);
+                    var emailResult = await EmailRequestInfo(body, _mailRelayService);
 
                     if (!emailResult)
                     {
@@ -152,10 +152,6 @@ namespace CESMII.Marketplace.Api.Controllers
                 {
                     _logger.LogCritical($"RequestInfoController|Add|RequestInfo Item added (good)|Error: Email send error: {e.Message}.");
                 }
-
-                //TODO https://tmsrandstadusa.atlassian.net/jira/software/c/projects/CMPT/issues/CMPT-94
-                // take model and email.
-                // include most relevant information from requestinfomodel and possibly a link based on the type.
 
                 return Ok(new ResultMessageWithDataModel()
                 {
@@ -186,7 +182,8 @@ namespace CESMII.Marketplace.Api.Controllers
             //Don't fail to user submitting request if email send fails, log critical. 
             try
             {
-                var emailResult = await EmailRequestInfo(model);
+                var body = await this.RenderViewAsync("~/Views/Template/RequestInfo.cshtml", model);
+                var emailResult = await EmailRequestInfo(body, _mailRelayService);
 
                 if (!emailResult)
                 {
@@ -218,38 +215,6 @@ namespace CESMII.Marketplace.Api.Controllers
             });
         }
 
-        private async Task<bool> EmailRequestInfo(RequestInfoModel item)
-        {
-            var body = await this.RenderViewAsync("~/Views/Template/RequestInfo.cshtml", item);
-            var message = new MailMessage
-            {
-                From = new MailAddress(_mailConfig.MailFromAddress),
-                Subject = $"CESMII - SM Marketplace - Request Info Item Submitted",
-                Body = body,
-                IsBodyHtml = true
-            };
-
-            switch (_mailConfig.Provider)
-            {
-                case "SMTP":
-                    if (!_mailRelayService.SendEmail(message))
-                    {
-                        return false;
-                    }
-
-                    break;
-                case "SendGrid":
-                    if (!_mailRelayService.SendEmailSendGrid(message).Result)
-                    {
-                        return false;
-                    }
-                    break;
-                default:
-                    throw new InvalidOperationException("The configured email provider is invalid.");
-            }
-
-            return true;
-        }
 
         /// <summary>
         /// </summary>
