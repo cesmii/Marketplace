@@ -25,7 +25,7 @@ namespace CESMII.Marketplace.DAL.Models
         /// Only map on get
         /// </summary>
         public MarketplaceItemModel SmProfile { get; set; }
-        public uint? SmProfileId { get; set; }
+        public long? SmProfileId { get; set; }
 
         public string RequestTypeCode { get; set; }
 

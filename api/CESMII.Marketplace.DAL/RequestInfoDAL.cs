@@ -66,6 +66,11 @@
                 IncrementMarketplaceAnalytics(new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.MarketplaceItemId)));
             }
 
+            else if (model.SmProfileId.HasValue)
+            {
+                IncrementSmProfileAnalytics(model.SmProfileId.Value.ToString());
+            }
+
             //this will add and call saveChanges
             await _repo.AddAsync(entity);
 
@@ -299,6 +304,24 @@
             if (analytic == null)
             {
                 analytic = new MarketplaceItemAnalytics() { MarketplaceItemId = marketplaceItemId, MoreInfoCount = 1 };
+                _repoAnalytics.Add(analytic);
+            }
+            else
+            {
+                analytic.MoreInfoCount += 1;
+                _repoAnalytics.Update(analytic);
+            }
+        }
+
+        private void IncrementSmProfileAnalytics(string id)
+        {
+            //Increment Page Count
+            //Check if MpItem is there if not add a new one then increment count and save
+            var analytic = _repoAnalytics.FindByCondition(x => x.CloudLibId == id).FirstOrDefault();
+
+            if (analytic == null)
+            {
+                analytic = new MarketplaceItemAnalytics() { CloudLibId = id, MoreInfoCount = 1 };
                 _repoAnalytics.Add(analytic);
             }
             else
