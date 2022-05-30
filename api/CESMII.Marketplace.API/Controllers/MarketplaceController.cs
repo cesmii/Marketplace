@@ -329,12 +329,17 @@ namespace CESMII.Marketplace.Api.Controllers
             //init and then flags set by user or system will determine which of the following get applied
             var result = new DALResult<MarketplaceItemModel>() { Data = new List<MarketplaceItemModel>() };
 
+            //extract selected items within a list of items
+            var cats = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.Where(x => x.EnumValue == LookupTypeEnum.Process).FirstOrDefault().Items.Where(x => x.Selected).ToList();
+            var verts = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.Where(x => x.EnumValue == LookupTypeEnum.IndustryVertical).FirstOrDefault().Items.Where(x => x.Selected).ToList();
+            var pubs = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.Where(x => x.EnumValue == LookupTypeEnum.Publisher).FirstOrDefault().Items.Where(x => x.Selected).ToList();
+
             //SM Apps
             //User driven flag to select only a certain type. Determine if none are selected or if item type of sm app is selected.
             var includeAppProfileTypes = model.ItemTypes == null || model.ItemTypes.Where(x => x.Selected).Count() == 0 ||
                 model.ItemTypes.Where(x => x.Selected && x.ID.Equals(_configUtil.MarketplaceSettings.SmApp.TypeId)).Count() > 0;
             if (includeAppProfileTypes) {
-                result = AdvancedSearchMarketplace(model, liveOnly);
+                result = AdvancedSearchMarketplace(model, cats, verts, pubs, liveOnly);
             }
 
             //SM Profiles
@@ -344,7 +349,7 @@ namespace CESMII.Marketplace.Api.Controllers
             //Skip over this in certain scenarios. ie. admin section
             if (_configUtil.MarketplaceSettings.EnableCloudLibSearch && includeCloudLib && includeSmProfileTypes)
             {
-                var resultCloudLib = await AdvancedSearchCloudLib(model);
+                var resultCloudLib = await AdvancedSearchCloudLib(model, cats, verts, pubs);
 
                 //unify the results, sort, handle paging
                 result = MergeSortPageSearchedItems(result.Data, resultCloudLib, model);
@@ -365,17 +370,16 @@ namespace CESMII.Marketplace.Api.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private DALResult<MarketplaceItemModel> AdvancedSearchMarketplace([FromBody] MarketplaceSearchModel model, bool liveOnly = true)
+        private DALResult<MarketplaceItemModel> AdvancedSearchMarketplace([FromBody] MarketplaceSearchModel model
+            , List<LookupItemFilterModel> cats
+            , List<LookupItemFilterModel> verts
+            , List<LookupItemFilterModel> pubs
+            , bool liveOnly = true)
         {
             var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
 
             //lowercase model.query
             model.Query = string.IsNullOrEmpty(model.Query) ? model.Query : model.Query.ToLower();
-
-            //extract selected items within a list of items
-            var cats = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.Where(x => x.EnumValue == LookupTypeEnum.Process).FirstOrDefault().Items.Where(x => x.Selected).ToList();
-            var verts = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.Where(x => x.EnumValue == LookupTypeEnum.IndustryVertical).FirstOrDefault().Items.Where(x => x.Selected).ToList();
-            var pubs = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.Where(x => x.EnumValue == LookupTypeEnum.Publisher).FirstOrDefault().Items.Where(x => x.Selected).ToList();
 
             //union passed in list w/ lookup list.
             var combinedCats = cats == null ? null : cats.Select(x => x.ID).ToArray();
@@ -469,22 +473,16 @@ namespace CESMII.Marketplace.Api.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private async Task<List<MarketplaceItemModel>> AdvancedSearchCloudLib([FromBody] MarketplaceSearchModel model)
+        private async Task<List<MarketplaceItemModel>> AdvancedSearchCloudLib([FromBody] MarketplaceSearchModel model
+            , List<LookupItemFilterModel> cats
+            , List<LookupItemFilterModel> verts
+            , List<LookupItemFilterModel> pubs
+            )
         {
             var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
 
             //lowercase model.query
             model.Query = string.IsNullOrEmpty(model.Query) ? model.Query : model.Query.ToLower();
-
-            //extract selected items within a list of items
-            var cats = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.Where(x => x.EnumValue == LookupTypeEnum.Process).FirstOrDefault().Items.Where(x => x.Selected).ToList();
-            var verts = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.Where(x => x.EnumValue == LookupTypeEnum.IndustryVertical).FirstOrDefault().Items.Where(x => x.Selected).ToList();
-            var pubs = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.Where(x => x.EnumValue == LookupTypeEnum.Publisher).FirstOrDefault().Items.Where(x => x.Selected).ToList();
-
-            //union passed in list w/ lookup list.
-            var combinedCats = cats == null ? null : cats.Select(x => x.ID).ToArray();
-            var combinedVerts = verts == null ? null : verts.Select(x => x.ID).ToArray();
-            var combinedPubs = pubs == null ? null : pubs.Select(x => x.ID).ToArray();
 
             var result = new List<MarketplaceItemModel>();
             //if publishers is a filter, then we skip CloudLib for now because search is trying to only show 
@@ -529,9 +527,9 @@ namespace CESMII.Marketplace.Api.Controllers
             //combine the data, get the total count
             var combined = set1.Union(set2);
             //order by the unified result
-            combined = combined.OrderByDescending(x => x.IsFeatured).ThenBy(x => x.DisplayName);
+            combined = combined.OrderByDescending(x => x.IsFeatured).ThenBy(x => x.DisplayName); //.ToList();
             //now page the data. 
-            combined = combined.Take(model.Take).Skip(model.Skip);
+            combined = combined.Skip(model.Skip).Take(model.Take);
             return new DALResult<MarketplaceItemModel>() { 
                 Count = count,
                 Data = combined.ToList()
