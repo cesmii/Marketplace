@@ -146,6 +146,7 @@
                     PublishDate = entity.CreationTime,
                     Type = _smItemType,
                     Version = entity.Version,
+                    IsFeatured = false,
                     ImagePortrait = _images.Where(x => x.ID.Equals(_config.DefaultImageIdPortrait)).FirstOrDefault(),
                     //ImageSquare = _images.Where(x => x.ID.Equals(_config.DefaultImageIdSquare)).FirstOrDefault(),
                     ImageLandscape = _images.Where(x => x.ID.Equals(_config.DefaultImageIdLandscape)).FirstOrDefault()
@@ -203,6 +204,7 @@
                     PublishDate = entity.Nodeset.PublicationDate,
                     Type = _smItemType,
                     Version = entity.Nodeset.Version,
+                    IsFeatured = false,
                     ImagePortrait = entity.IconUrl == null ? 
                         _images.Where(x => x.ID.Equals(_config.DefaultImageIdPortrait)).FirstOrDefault() :
                         new ImageItemModel() { Src= entity.IconUrl.ToString()},
