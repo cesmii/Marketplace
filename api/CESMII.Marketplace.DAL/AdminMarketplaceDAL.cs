@@ -243,7 +243,7 @@
                     Publisher = MapToModelPublisher(entity.PublisherId, _publishersAll),
                     IsActive = entity.IsActive,
                     ImagePortrait = entity.ImagePortraitId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImagePortraitId.ToString()), _imagesAll),
-                    ImageSquare = entity.ImageSquareId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageSquareId.ToString()), _imagesAll),
+                    //ImageSquare = entity.ImageSquareId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageSquareId.ToString()), _imagesAll),
                     ImageLandscape = entity.ImageLandscapeId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageLandscapeId.ToString()), _imagesAll)
                 };
                 if (verbose)
@@ -283,9 +283,9 @@
             entity.ImagePortraitId = model.ImagePortrait == null ?
                 MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY) :
                 MongoDB.Bson.ObjectId.Parse(model.ImagePortrait.ID);
-            entity.ImageSquareId = model.ImageSquare == null ?
-                MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY) :
-                MongoDB.Bson.ObjectId.Parse(model.ImageSquare.ID);
+            //entity.ImageSquareId = model.ImageSquare == null ?
+            //    MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY) :
+            //    MongoDB.Bson.ObjectId.Parse(model.ImageSquare.ID);
             entity.ImageLandscapeId = model.ImageLandscape == null ?
                 MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY) :
                 MongoDB.Bson.ObjectId.Parse(model.ImageLandscape.ID); 

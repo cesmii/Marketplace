@@ -95,6 +95,8 @@
         public List<MarketplaceItemModel> SimilarItems { get; set; }
 
         public ImageItemSimpleModel ImagePortrait { get; set; }
+        
+        [Obsolete("Retire ImageSquare")]
         public ImageItemSimpleModel ImageSquare { get; set; }
         public ImageItemSimpleModel ImageLandscape { get; set; }
     }

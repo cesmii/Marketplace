@@ -10,7 +10,7 @@
     public class MarketplaceItemConfig
     {
         public string TypeId { get; set; }
-        public string DefaultImageIdSquare { get; set; }
+        //public string DefaultImageIdSquare { get; set; }
         public string DefaultImageIdPortrait { get; set; }
         public string DefaultImageIdLandscape { get; set; }
     }

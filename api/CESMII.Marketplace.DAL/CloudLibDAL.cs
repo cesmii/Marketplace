@@ -50,8 +50,8 @@
             //get default images
             _images = dalImages.Where(
                 x => x.ID.Equals(_config.DefaultImageIdLandscape) ||
-                x.ID.Equals(_config.DefaultImageIdPortrait) ||
-                x.ID.Equals(_config.DefaultImageIdSquare)
+                x.ID.Equals(_config.DefaultImageIdPortrait) 
+                //|| x.ID.Equals(_config.DefaultImageIdSquare)
                 , null, null, false, false).Data;
         }
 
@@ -147,7 +147,7 @@
                     Type = _smItemType,
                     Version = entity.Version,
                     ImagePortrait = _images.Where(x => x.ID.Equals(_config.DefaultImageIdPortrait)).FirstOrDefault(),
-                    ImageSquare = _images.Where(x => x.ID.Equals(_config.DefaultImageIdSquare)).FirstOrDefault(),
+                    //ImageSquare = _images.Where(x => x.ID.Equals(_config.DefaultImageIdSquare)).FirstOrDefault(),
                     ImageLandscape = _images.Where(x => x.ID.Equals(_config.DefaultImageIdLandscape)).FirstOrDefault()
                 };
             }
@@ -203,9 +203,13 @@
                     PublishDate = entity.Nodeset.PublicationDate,
                     Type = _smItemType,
                     Version = entity.Nodeset.Version,
-                    ImagePortrait = _images.Where(x => x.ID.Equals(_config.DefaultImageIdPortrait)).FirstOrDefault(),
-                    ImageSquare = _images.Where(x => x.ID.Equals(_config.DefaultImageIdSquare)).FirstOrDefault(),
-                    ImageLandscape = _images.Where(x => x.ID.Equals(_config.DefaultImageIdLandscape)).FirstOrDefault(),
+                    ImagePortrait = entity.IconUrl == null ? 
+                        _images.Where(x => x.ID.Equals(_config.DefaultImageIdPortrait)).FirstOrDefault() :
+                        new ImageItemModel() { Src= entity.IconUrl.ToString()},
+                    //ImageSquare = _images.Where(x => x.ID.Equals(_config.DefaultImageIdSquare)).FirstOrDefault(),
+                    ImageLandscape = entity.IconUrl == null ?
+                        _images.Where(x => x.ID.Equals(_config.DefaultImageIdLandscape)).FirstOrDefault() :
+                        new ImageItemModel() { Src = entity.IconUrl.ToString() },
                     Updated = entity.Nodeset.LastModifiedDate
                 };
             }
