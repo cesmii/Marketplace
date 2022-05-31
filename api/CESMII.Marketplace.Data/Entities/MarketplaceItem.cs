@@ -40,9 +40,7 @@
         /// <summary>
         /// Type of marketplace item: profile, app
         /// </summary>
-        public int TypeId { get; set; }
-
-        public virtual LookupItem Type { get; set; }
+        public BsonObjectId ItemTypeId { get; set; }
 
         /// <summary>
         /// This is the status associated with the item in a more general context. ie: Under Review, Approved, Peer Reviewed)

@@ -42,8 +42,6 @@
         /// <summary>
         /// Type of marketplace item: profile, app
         /// </summary>
-        public int TypeId { get; set; }
-
         public virtual LookupItemModel Type { get; set; }
 
         /// <summary>

@@ -8,6 +8,7 @@
     using CESMII.Marketplace.DAL.Models;
     using CESMII.Marketplace.Data.Entities;
     using CESMII.Marketplace.Data.Repositories;
+    using CESMII.Marketplace.Common;
     using CESMII.Marketplace.Common.Enums;
 
     /// <summary>
@@ -30,18 +31,25 @@
         //protected List<ImageItem> _imagesAll;
         protected List<ImageItemSimple> _imagesAll;
         //protected bool _updateImages = false;
+        //default type - use if none assigned yet.
+        private readonly MongoDB.Bson.BsonObjectId _smItemTypeIdDefault;
 
         public AdminMarketplaceDAL(IMongoRepository<MarketplaceItem> repo, 
             IMongoRepository<LookupItem> repoLookup, 
             IMongoRepository<Publisher> repoPublisher, 
-            IMongoRepository<ImageItemSimple> repoImages
+            IMongoRepository<ImageItemSimple> repoImages,
+            ConfigUtil configUtil
             ) : base(repo)
         {
             _repoLookup = repoLookup;
             _repoPublisher = repoPublisher;
             _repoImages = repoImages;
+
+            //init some stuff we will use during the mapping methods
+            _smItemTypeIdDefault = new MongoDB.Bson.BsonObjectId(
+                MongoDB.Bson.ObjectId.Parse(configUtil.MarketplaceSettings.SmApp.TypeId));
         }
-        
+
         public async Task<string> Add(AdminMarketplaceItemModel model, string userId)
         {
             MarketplaceItem entity = new MarketplaceItem
@@ -227,7 +235,8 @@
                     IsVerified = entity.IsVerified,
                     Abstract = entity.Abstract,
                     Description = entity.Description,
-                    TypeId = entity.TypeId,
+                    Type = MapToModelLookupItem(entity.ItemTypeId == null ? _smItemTypeIdDefault : entity.ItemTypeId,
+                        _lookupItemsAll.Where(x => x.LookupType.EnumValue.Equals(LookupTypeEnum.SmItemType)).ToList()),
                     AuthorId = entity.AuthorId,
                     Created = entity.Created,
                     PublishDate = entity.PublishDate,
@@ -268,7 +277,10 @@
             entity.IsVerified = model.IsVerified;
             entity.Abstract = model.Abstract;
             entity.Description = model.Description;
-            entity.TypeId = model.TypeId;
+            //backward compatible - assign sm app if no type is assigned
+            entity.ItemTypeId = model.Type != null ?
+                new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.Type.ID)) :
+                _smItemTypeIdDefault;
             entity.StatusId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.Status.ID)); ;
             entity.Version = model.Version;
             entity.MetaTags = model.MetaTags;
