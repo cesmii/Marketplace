@@ -1,19 +1,39 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Button } from 'react-bootstrap';
+import DownloadNodesetModal from '../../components/DownloadNodesetModal';
 
 import { AppSettings } from '../../utils/appsettings';
-import { formatDate, getImageUrl } from '../../utils/UtilityService';
+import { formatDate, generateLogMessageString, getImageUrl } from '../../utils/UtilityService';
 
-//const CLASS_NAME = "MarketplaceItemEntityHeader";
+const CLASS_NAME = "MarketplaceItemEntityHeader";
 
 function MarketplaceItemEntityHeader(props) { //props are item, showActions
 
     //-------------------------------------------------------------------
+    // Region: Initialization
+    //-------------------------------------------------------------------
+    //used in popup profile add/edit ui. Default to new version
+    const [_downloadModalShow, setDownloadModal] = useState(false);
+
+    //-------------------------------------------------------------------
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
-    const downloadProfile = () => {
-        if (props.onDownload) props.onDownload(props.item);
+    const onDownloadStart = (e) => {
+        console.log(generateLogMessageString(`onAdd`, CLASS_NAME));
+        setDownloadModal(true);
+        e.preventDefault();
+    };
+
+    const onDownload = (itm) => {
+        if (props.onDownload) props.onDownload(itm);
+        setDownloadModal(false);
     }
+
+    const onDownloadCancel = () => {
+        console.log(generateLogMessageString(`onDownloadCancel`, CLASS_NAME));
+        setDownloadModal(false);
+    };
+
 
     //-------------------------------------------------------------------
     // Region: Render helpers
@@ -73,7 +93,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         <p className="mb-2" ><b className="mr-2" >Published:</b>{formatDate(props.item.publishDate)}</p>
                         <p className="mb-2" ><b className="mr-2" >Version:</b>{props.item.version}</p>
                         {props.onDownload &&
-                            <p className="my-4" ><Button variant="secondary" type="button" className="px-4" onClick={downloadProfile} >Download Nodeset</Button></p>
+                            <p className="my-4" ><Button variant="secondary" type="button" className="px-4" onClick={onDownloadStart} >Download Nodeset XML</Button></p>
                         }
                     </div>
                 </div>
@@ -81,20 +101,34 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
         );
     };
 
+    //renderDownloadModal as a modal to force user to say ok.
+    const renderDownloadModal = () => {
+
+        if (!_downloadModalShow) return;
+
+        return (
+            <DownloadNodesetModal item={props.item} showModal={_downloadModalShow} onDownload={onDownload} onCancel={onDownloadCancel} showSavedMessage={true} />
+        );
+    };
+
+
     //-------------------------------------------------------------------
     // Region: Render final output
     //-------------------------------------------------------------------
     if (props.item === null || props.item === {}) return null;
     if (props.item.name == null) return null;
 
-    if (props.item.type == null || props.item.type?.code === AppSettings.itemTypeCode.smApp) {
+    if (props.item.type?.code === AppSettings.itemTypeCode.smProfile) {
         return (
-            renderMarketplaceHeader()
+            <>
+                {renderProfileHeader()}
+                {renderDownloadModal()}
+            </>
         )
     }
-    else if (props.item.type?.code === AppSettings.itemTypeCode.smProfile) {
+    else {
         return (
-            renderProfileHeader()
+            renderMarketplaceHeader()
         )
     }
 

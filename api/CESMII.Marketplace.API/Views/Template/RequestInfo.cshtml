@@ -26,6 +26,15 @@ else if (Model.Publisher != null)
     </div>
 }
 
+else if (Model.SmProfile != null)
+{
+    <div>
+        <h2>Related To</h2>
+        <p>SM Profile: @Model.SmProfile.DisplayName</p>
+        <p>Namespace: @Model.SmProfile.Namespace</p>
+    </div>
+}
+
 <div>
     <h2>Contact Info</h2>
     <p>First Name: @Model.FirstName</p>

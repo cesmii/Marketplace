@@ -93,5 +93,15 @@
             }
         }
 
+        public CloudLibraryConfig CloudLibSettings
+        {
+            get
+            {
+                var result = new CloudLibraryConfig();
+                _configuration.GetSection("CloudLibConfig").Bind(result);
+                return result;
+            }
+        }
+
     }
 }

@@ -5,14 +5,15 @@
     using System.Linq;
     using System.Threading.Tasks;
 
+    using Microsoft.Extensions.Configuration;
     using NLog;
 
     using CESMII.Marketplace.Common;
     using CESMII.Marketplace.Common.Enums;
     using CESMII.Marketplace.Common.Models;
-    using CESMII.Marketplace.Data.Repositories;
     using CESMII.Marketplace.DAL.Models;
     using CESMII.Marketplace.Data.Entities;
+    using CESMII.Marketplace.CloudLibClient;
 
     using Opc.Ua.CloudLib.Client;
 
@@ -23,7 +24,7 @@
     {
         protected bool _disposed = false;
         protected static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-        private readonly CloudLibClient.ICloudLibWrapper _cloudLib;
+        private readonly ICloudLibWrapper _cloudLib;
         private readonly MarketplaceItemConfig _config;
         private readonly LookupItemModel _smItemType;
 
@@ -31,7 +32,6 @@
         protected List<ImageItemModel> _images;
 
         public CloudLibDAL(CloudLibClient.ICloudLibWrapper cloudLib,
-            IMongoRepository<LookupItem> repoLookup,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IDal<ImageItem, ImageItemModel> dalImages,
             ConfigUtil configUtil)
@@ -50,8 +50,8 @@
             //get default images
             _images = dalImages.Where(
                 x => x.ID.Equals(_config.DefaultImageIdLandscape) ||
-                x.ID.Equals(_config.DefaultImageIdPortrait) ||
-                x.ID.Equals(_config.DefaultImageIdSquare)
+                x.ID.Equals(_config.DefaultImageIdPortrait) 
+                //|| x.ID.Equals(_config.DefaultImageIdSquare)
                 , null, null, false, false).Data;
         }
 
@@ -61,11 +61,19 @@
             return MapToModelNamespace(entity);
         }
 
-        public async Task<string> Export(string id)
+        public async Task<ProfileItemExportModel> Export(string id)
         {
             var entity = await _cloudLib.GetById(id);
             if (entity == null) return null;
-            return entity.Nodeset?.NodesetXml;
+            //return the whole thing because we also email some info to request info and use
+            //other data in this entity.
+            var result = new ProfileItemExportModel()
+            {
+                Item = MapToModelNamespace(entity),
+                NodesetXml = entity.Nodeset?.NodesetXml
+            };
+            return result;
+            //return entity.Nodeset?.NodesetXml;
         }
 
         public async Task<List<MarketplaceItemModel>> GetAll() {
@@ -73,13 +81,34 @@
             return result;
         }
 
-        public async Task<List<MarketplaceItemModel>> Where(string query)
+        public async Task<List<MarketplaceItemModel>> Where(string query, 
+            List<string> processes = null, List<string> verticals = null, List<string> exclude = null)
         {
-            //inject wildcard to get all if null string
-            query = string.IsNullOrEmpty(query) ? "*" : query;
             //Note - splitting out each word in query into a separate string in the list
-            var matches = await _cloudLib.Search(string.IsNullOrEmpty(query) ? new List<string>() : query.Split(" ").ToList());
-            if (matches.Count == 0) return new List<MarketplaceItemModel>();
+            //Per team, don't split out query into multiple keyword items
+            //var keywords = string.IsNullOrEmpty(query) ? new List<string>() : query.Split(" ").ToList();
+            var keywords = new List<string>();
+
+            //append processes, verticals
+            if (processes != null)
+            { 
+                keywords = keywords.Union(processes).ToList();
+            }
+            if (verticals != null)
+            {
+                keywords = keywords.Union(verticals).ToList();
+            }
+
+            //inject wildcard to get all if keywords count == 0 or inject query
+            if (string.IsNullOrEmpty(query) && keywords.Count == 0) keywords.Add("*");
+            if (!string.IsNullOrEmpty(query)) keywords.Add(query);
+
+            var matches = await _cloudLib.Search(keywords, exclude);
+            if (matches ==null || matches.Count == 0) return new List<MarketplaceItemModel>();
+
+            //TBD - exclude some nodesets which are core nodesets - list defined in appSettings
+
+
             return MapToModelsNodesetResult(matches);
         }
 
@@ -117,8 +146,9 @@
                     PublishDate = entity.CreationTime,
                     Type = _smItemType,
                     Version = entity.Version,
+                    IsFeatured = false,
                     ImagePortrait = _images.Where(x => x.ID.Equals(_config.DefaultImageIdPortrait)).FirstOrDefault(),
-                    ImageSquare = _images.Where(x => x.ID.Equals(_config.DefaultImageIdSquare)).FirstOrDefault(),
+                    //ImageSquare = _images.Where(x => x.ID.Equals(_config.DefaultImageIdSquare)).FirstOrDefault(),
                     ImageLandscape = _images.Where(x => x.ID.Equals(_config.DefaultImageIdLandscape)).FirstOrDefault()
                 };
             }
@@ -160,8 +190,11 @@
                     //TBD
                     Description =
                         (string.IsNullOrEmpty(entity.Description) ? "" : $"<p>{entity.Description}</p>") +
-                        (entity.DocumentationUrl == null ? "" : $"<p><a href='{entity.DocumentationUrl.ToString()}' target='_blank' rel='noreferrer' >Documentation</a></p>") +
-                        (entity.LicenseUrl == null ? "" : $"<p><a href='{entity.LicenseUrl.ToString()}' target='_blank' rel='noreferrer' >License Information</a></p>") +
+                        (entity.DocumentationUrl == null ? "" : $"<p><a href='{entity.DocumentationUrl.ToString()}' target='_blank' rel='noreferrer' >Documentation: {entity.DocumentationUrl.ToString()}</a></p>") +
+                        (entity.ReleaseNotesUrl == null ? "" : $"<p><a href='{entity.ReleaseNotesUrl.ToString()}' target='_blank' rel='noreferrer' >Release Notes: {entity.ReleaseNotesUrl.ToString()}</a></p>") +
+                        (entity.LicenseUrl == null ? "" : $"<p><a href='{entity.LicenseUrl.ToString()}' target='_blank' rel='noreferrer' >License Information: {entity.LicenseUrl.ToString()}</a></p>") +
+                        (entity.TestSpecificationUrl == null ? "" : $"<p><a href='{entity.TestSpecificationUrl.ToString()}' target='_blank' rel='noreferrer' >Test Specification: {entity.TestSpecificationUrl.ToString()}</a></p>") +
+                        (entity.PurchasingInformationUrl == null ? "" : $"<p><a href='{entity.PurchasingInformationUrl.ToString()}' target='_blank' rel='noreferrer' >Purchasing Information: {entity.PurchasingInformationUrl.ToString()}</a></p>") +
                         (string.IsNullOrEmpty(entity.CopyrightText) ? "" : $"<p>{entity.CopyrightText}</p>"),
                     DisplayName = entity.Title,
                     Namespace = entity.Nodeset.NamespaceUri?.ToString(),
@@ -171,9 +204,14 @@
                     PublishDate = entity.Nodeset.PublicationDate,
                     Type = _smItemType,
                     Version = entity.Nodeset.Version,
-                    ImagePortrait = _images.Where(x => x.ID.Equals(_config.DefaultImageIdPortrait)).FirstOrDefault(),
-                    ImageSquare = _images.Where(x => x.ID.Equals(_config.DefaultImageIdSquare)).FirstOrDefault(),
-                    ImageLandscape = _images.Where(x => x.ID.Equals(_config.DefaultImageIdLandscape)).FirstOrDefault(),
+                    IsFeatured = false,
+                    ImagePortrait = entity.IconUrl == null ? 
+                        _images.Where(x => x.ID.Equals(_config.DefaultImageIdPortrait)).FirstOrDefault() :
+                        new ImageItemModel() { Src= entity.IconUrl.ToString()},
+                    //ImageSquare = _images.Where(x => x.ID.Equals(_config.DefaultImageIdSquare)).FirstOrDefault(),
+                    ImageLandscape = entity.IconUrl == null ?
+                        _images.Where(x => x.ID.Equals(_config.DefaultImageIdLandscape)).FirstOrDefault() :
+                        new ImageItemModel() { Src = entity.IconUrl.ToString() },
                     Updated = entity.Nodeset.LastModifiedDate
                 };
             }

@@ -1,0 +1,17 @@
+@import "./constants";
+
+.modal-content {
+    .modal-header {
+        color: white;
+        background-color: color("cornflower");
+        border-bottom: 1px solid color("blue-8");
+        font-family: $font-family-base;
+
+        .icon {max-height:1.3rem;}
+
+        button {
+            color: white; text-shadow:none;
+        }
+    }
+}
+

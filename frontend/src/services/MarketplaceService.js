@@ -31,6 +31,11 @@ export function clearSearchCriteria(criteria) {
         });
     });
 
+    //loop over item types and set selected to false
+    result.itemTypes?.forEach(item => {
+        item.selected = false;
+    });
+
     result.query = null;
     result.skip = 0;
     return result;

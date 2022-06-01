@@ -417,6 +417,25 @@ function AdminRequestInfoEntity() {
         );
     }
 
+    const renderSmProfile = () => {
+        if (item.smProfile == null) return;
+        return (
+            <div className="row mb-3 alert-info-custom rounded p-2">
+                <div className="col-md-12 border-bottom">
+                    <h2 className="headline-3" >Related To</h2>
+                </div>
+                <div className="col-md-12">
+                    <Form.Label>SM Profile:</Form.Label>
+                    <span className="ml-2">{item.smProfile.displayName}</span>
+                </div>
+                <div className="col-md-12">
+                    <Form.Label>Namespace:</Form.Label>
+                    <span className="ml-2">{item.smProfile.namespace}</span>
+                </div>
+            </div>
+        );
+    }
+
     const renderForm = () => {
         if (item == null) return;
         //console.log(item);
@@ -441,6 +460,7 @@ function AdminRequestInfoEntity() {
                 </div>
                 { renderMarketplaceItem()}
                 { renderPublisher()}
+                { renderSmProfile()}
                 <div className="row mb-3">
                     <div className="col-md-12 border-bottom">
                         <h2 className="headline-3" >Contact Info</h2>

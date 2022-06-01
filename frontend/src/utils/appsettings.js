@@ -48,6 +48,7 @@ export const AppSettings = {
      requestInfoNew: {
         marketplaceItemId: null,
         publisherId: null,
+        smProfileId: null,
         requestTypeCode: null,
         firstName: '',
         lastName: '',
