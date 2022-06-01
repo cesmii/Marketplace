@@ -128,7 +128,7 @@ function RequestInfo() {
         var item = JSON.parse(JSON.stringify(AppSettings.requestInfoNew));
 
         //itemType - either marketplace or sm profile
-        if (itemType === "marketplace" && id != null) {
+        if (itemType === "app" && id != null) {
             item.marketplaceItemId = id;
             item.requestTypeCode = "marketplaceitem";
             setFormDisplay({

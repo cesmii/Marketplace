@@ -6,7 +6,7 @@ import { useLoadingContext } from '../../components/contexts/LoadingContext';
 import { clearSearchCriteria, toggleSearchFilterSelected } from '../../services/MarketplaceService';
 import { generateLogMessageString } from '../../utils/UtilityService';
 
-import { SVGIcon } from '../../components/SVGIcon';
+import { SVGIcon, SvgVisibilityIcon } from '../../components/SVGIcon';
 import color from '../../components/Constants';
 import '../../components/styles/InfoPanel.scss';
 
@@ -50,7 +50,7 @@ function PublisherSidebar(props) {
             <div className="col-sm-12 mb-2">
                 <p className="mb-2 headline-3 p-1 px-2 w-100 d-block rounded">{ props.caption == null ? "Publisher" : props.caption }</p>
                 <p className="mb-2 px-2"><a href={`/publisher/${props.item.name}`} >{props.item.displayName}</a></p>
-                <p className="mb-0 px-2"><button className="btn btn-link" onClick={filterByPublisher} ><span className="mr-1" alt="view"><SVGIcon name="visibility" size="24" fill={color.shark} /></span>All by this publisher</button></p>
+                <p className="mb-0 px-2"><button className="btn btn-link" onClick={filterByPublisher} ><span className="mr-1" alt="view"><SvgVisibilityIcon fill={color.link} /></span>All by this publisher</button></p>
             </div>
             <div className="col-sm-12">
                 <SocialMedia items={props.item.socialMediaLinks} />
