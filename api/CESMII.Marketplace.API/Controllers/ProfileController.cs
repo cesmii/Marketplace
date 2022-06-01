@@ -210,8 +210,9 @@ namespace CESMII.Marketplace.Api.Controllers
                 //we are adding a request info with an smprofile, get the associated sm profile.
                 modelNew.SmProfile = smProfile; //await _dalCloudLib.GetById(model.SmProfileId.Value.ToString()); 
 
+                var subject = REQUESTINFO_SUBJECT.Replace("{{RequestType}}", modelNew.RequestType.Name);
                 var body = await this.RenderViewAsync("~/Views/Template/RequestInfo.cshtml", modelNew);
-                var emailResult = await EmailRequestInfo(body, _mailRelayService);
+                var emailResult = await EmailRequestInfo(subject, body, _mailRelayService);
 
                 if (!emailResult)
                 {
