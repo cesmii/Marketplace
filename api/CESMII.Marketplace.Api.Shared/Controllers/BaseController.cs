@@ -19,6 +19,7 @@
     public class BaseController<TController> : Controller where TController : Controller
     {
         protected bool _disposed = false;
+        protected const string REQUESTINFO_SUBJECT = "SM Marketplace - {{RequestType}} - Request Info Item Submitted";
 
         /// <summary>
         /// Logger available to all controllers, simplifies referencing but will show origin as BaseController.
@@ -73,7 +74,7 @@
             return sb;
         }
 
-        protected async Task<bool> EmailRequestInfo(string body, Utils.MailRelayService _mailRelayService)
+        protected async Task<bool> EmailRequestInfo(string subject, string body, Utils.MailRelayService _mailRelayService)
         {
             var message = new MailMessage
             {

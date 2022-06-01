@@ -131,6 +131,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 //Don't fail to user submitting request if email send fails, log critical. 
                 try
                 {
+
                     //populate some fields that may not be present on the add model. (request type code, created date). 
                     var modelNew = _dal.GetById(result);
 
@@ -140,8 +141,9 @@ namespace CESMII.Marketplace.Api.Controllers
                         modelNew.SmProfile = await _dalCloudLib.GetById(modelNew.SmProfileId.Value.ToString());
                     }
 
+                    var subject = REQUESTINFO_SUBJECT.Replace("{{RequestType}}", modelNew.RequestType.Name);
                     var body = await this.RenderViewAsync("~/Views/Template/RequestInfo.cshtml", modelNew);
-                    var emailResult = await EmailRequestInfo(body, _mailRelayService);
+                    var emailResult = await EmailRequestInfo(subject, body, _mailRelayService);
 
                     if (!emailResult)
                     {
@@ -183,7 +185,7 @@ namespace CESMII.Marketplace.Api.Controllers
             try
             {
                 var body = await this.RenderViewAsync("~/Views/Template/RequestInfo.cshtml", model);
-                var emailResult = await EmailRequestInfo(body, _mailRelayService);
+                var emailResult = await EmailRequestInfo(REQUESTINFO_SUBJECT.Replace("{{RequestType}}", "TEST"), body, _mailRelayService);
 
                 if (!emailResult)
                 {
