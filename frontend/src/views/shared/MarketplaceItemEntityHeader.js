@@ -118,17 +118,17 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
     if (props.item === null || props.item === {}) return null;
     if (props.item.name == null) return null;
 
-    if (props.item.type == null || props.item.type?.code === AppSettings.itemTypeCode.smApp) {
-        return (
-            renderMarketplaceHeader()
-        )
-    }
-    else if (props.item.type?.code === AppSettings.itemTypeCode.smProfile) {
+    if (props.item.type?.code === AppSettings.itemTypeCode.smProfile) {
         return (
             <>
                 {renderProfileHeader()}
                 {renderDownloadModal()}
             </>
+        )
+    }
+    else {
+        return (
+            renderMarketplaceHeader()
         )
     }
 
