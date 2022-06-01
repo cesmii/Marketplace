@@ -333,14 +333,11 @@ namespace CESMII.Marketplace.Api.Controllers
             var cats = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.Where(x => x.EnumValue == LookupTypeEnum.Process).FirstOrDefault().Items.Where(x => x.Selected).ToList();
             var verts = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.Where(x => x.EnumValue == LookupTypeEnum.IndustryVertical).FirstOrDefault().Items.Where(x => x.Selected).ToList();
             var pubs = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.Where(x => x.EnumValue == LookupTypeEnum.Publisher).FirstOrDefault().Items.Where(x => x.Selected).ToList();
+            var types = model.ItemTypes.Count == 0 ? new List<LookupItemFilterModel>() : model.ItemTypes.Where(x => x.Selected).ToList();
 
-            //SM Apps
+            //SM Apps, Hardware, etc. - anything other than sm profile types
             //User driven flag to select only a certain type. Determine if none are selected or if item type of sm app is selected.
-            var includeAppProfileTypes = model.ItemTypes == null || model.ItemTypes.Where(x => x.Selected).Count() == 0 ||
-                model.ItemTypes.Where(x => x.Selected && x.ID.Equals(_configUtil.MarketplaceSettings.SmApp.TypeId)).Count() > 0;
-            if (includeAppProfileTypes) {
-                result = AdvancedSearchMarketplace(model, cats, verts, pubs, liveOnly);
-            }
+            result = AdvancedSearchMarketplace(model, types, cats, verts, pubs, liveOnly);
 
             //SM Profiles
             //User driven flag to select only a certain type. Determine if none are selected or if item type of sm profile is selected.
@@ -371,6 +368,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         private DALResult<MarketplaceItemModel> AdvancedSearchMarketplace([FromBody] MarketplaceSearchModel model
+            , List<LookupItemFilterModel> types
             , List<LookupItemFilterModel> cats
             , List<LookupItemFilterModel> verts
             , List<LookupItemFilterModel> pubs
@@ -397,6 +395,12 @@ namespace CESMII.Marketplace.Api.Controllers
             if (liveOnly)
             {
                 predicates.Add(util.BuildStatusFilterPredicate());
+            }
+
+            //build where clause - one for each type passed in
+            if (types != null && types.Count() > 0)//model.Categories != null)
+            {
+                predicates.Add(x => x.ItemTypeId != null && types.Any(y => y.ID.Equals(x.ItemTypeId.ToString())));
             }
 
             //build list of where clauses - one for each cat passed in
@@ -526,8 +530,16 @@ namespace CESMII.Marketplace.Api.Controllers
             //set2 = set2.OrderByDescending(x => x.IsFeatured).ThenBy(x => x.DisplayName).ToList();
             //combine the data, get the total count
             var combined = set1.Union(set2);
-            //order by the unified result
-            combined = combined.OrderByDescending(x => x.IsFeatured).ThenBy(x => x.DisplayName); //.ToList();
+            //TBD - order by the unified result - order by type, then by featured then by name
+            //combined = combined
+            //    .OrderBy(x => x.Type?.DisplayOrder)
+            //    .ThenBy(x => x.Type?.Name)
+            //    .ThenByDescending(x => x.IsFeatured)
+            //    .ThenBy(x => x.DisplayName); //.ToList();
+            combined = combined
+                .OrderByDescending(x => x.IsFeatured)
+                .ThenBy(x => x.DisplayName); //.ToList();
+
             //now page the data. 
             combined = combined.Skip(model.Skip).Take(model.Take);
             return new DALResult<MarketplaceItemModel>() { 
