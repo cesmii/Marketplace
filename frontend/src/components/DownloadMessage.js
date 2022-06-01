@@ -287,13 +287,15 @@ function DownloadMessage() {
                         <Button id={`btn-inline-msg-dismiss-${msg.id}`} variant="icon-solo square small" data-id={msg.id} onClick={onDismiss} className="align-items-center" ><i className="material-icons">close</i></Button>
                     </div>
                     <div className="d-flex align-items-center" >
-                        {isProcessing &&
-                            <span className={`processing spin`} >
-                                <LoadingIcon size="20" />
-                            </span>
-                        }
-                        <span className={isProcessing ? 'ml-1' : ''} dangerouslySetInnerHTML={{ __html: caption }} />
-                        {renderFileLink(msg)}
+                        <div className="d-inline" >
+                            {isProcessing &&
+                                <span className={`processing spin`} >
+                                    <LoadingIcon size="20" />
+                                </span>
+                            }
+                            <span className={isProcessing ? 'ml-1' : ''} dangerouslySetInnerHTML={{ __html: caption }} />
+                            {renderFileLink(msg)}
+                        </div>
                     </div>
                     {renderWarnings(msg)}
                 </div>
