@@ -24,7 +24,8 @@ export const OnRefreshEvent = () => {
         if (performance.navigation.type === 1 && _triggerRefresh) {
             console.log(generateLogMessageString(`useEffect||navigation||f5||Page is reloaded`, CLASS_NAME));
             setTriggerRefresh(false);
-            setLoadingProps({ isLoading: false });
+            //turn off processing ui and then also re-get lookup, search criteria on f5/refresh
+            setLoadingProps({ isLoading: false, refreshLookupData: true, refreshSearchCriteria: true });
         }
         //else {
         //    console.log(generateLogMessageString(`useEffect||navigation||Page not reloaded`, CLASS_NAME));
