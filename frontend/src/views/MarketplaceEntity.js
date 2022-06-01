@@ -173,12 +173,16 @@ function MarketplaceEntity() {
 
     const renderSolutionDetails = () => {
 
+        //show heading based on type
+        var subHeading = item.type == null || item.type.name === null ? 'Smart Manufacturing App'
+            : item.type.name.replace('SM ', 'Smart Manufacturing ');
+
         return (
             <>
                 <div className="row mb-2 mb-md-3" >
                     <div className="col-sm-12 d-flex align-items-center">
                         <h2 className="m-0 mr-2">
-                            <span className="d-none d-md-inline">Smart Manufacturing App </span> Details
+                            <span className="d-none d-md-inline">{subHeading} </span> Details
                         </h2>
                         <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/app/${item.id}`} >Request More Info</a>
                     </div>

@@ -4,6 +4,8 @@
     {
         public MarketplaceItemConfig SmApp { get; set; }
         public MarketplaceItemConfig SmProfile { get; set; }
+        public MarketplaceItemConfig SmHardware { get; set; }
+        public MarketplaceItemConfig SmDatasource { get; set; }
         public bool EnableCloudLibSearch { get; set; }
     }
 

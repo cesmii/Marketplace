@@ -39,8 +39,8 @@ function AdminMarketplaceEntity() {
     const authTicket = useAuthState();
     const [_isValid, setIsValid] = useState({
         name: true, nameFormat: true, displayName: true, abstract: true, description: true,
-        status: true, publisher: true, publishDate: true,
-        images: { imagePortrait: true, imageSquare: true, imageLandscape: true }
+        status: true, type: true, publisher: true, publishDate: true,
+        images: { imagePortrait: true, imageSquare: true, imageLandscape: true}
     });
     const [_deleteModal, setDeleteModal] = useState({ show: false, items: null });
     const [_error, setError] = useState({ show: false, message: null, caption: null });
@@ -255,6 +255,11 @@ function AdminMarketplaceEntity() {
         setIsValid({ ..._isValid, status: isValid });
     };
 
+    const validateForm_type = (e) => {
+        var isValid = e.target.value.toString() !== "-1";
+        setIsValid({ ..._isValid, type: isValid });
+    };
+
     const validateForm_publisher = (e) => {
         var isValid = e.target.value.toString() !== "-1";
         setIsValid({ ..._isValid, publisher: isValid });
@@ -281,6 +286,7 @@ function AdminMarketplaceEntity() {
         _isValid.displayName = item.displayName != null && item.displayName.trim().length > 0;
         _isValid.description = true; //item.description != null && item.description.trim().length > 0;
         _isValid.status = item.status != null && item.status.id.toString() !== "-1";
+        _isValid.type = item.type != null && item.type.id.toString() !== "-1";
         _isValid.publisher = item.publisher != null && item.publisher.id.toString() !== "-1";
         _isValid.publishDate = item.publishDate != null && item.publishDate.trim().length > 0;
         _isValid.images.imagePortrait = item.imagePortrait != null && item.imagePortrait.id.toString() !== "-1";
@@ -290,7 +296,8 @@ function AdminMarketplaceEntity() {
         setIsValid(JSON.parse(JSON.stringify(_isValid)));
         return (_isValid.name && _isValid.nameFormat && _isValid.displayName && _isValid.abstract && _isValid.description &&
             _isValid.status && _isValid.publisher && _isValid.publishDate &&
-            _isValid.images.imagePortrait && _isValid.images.imageSquare && _isValid.images.imageLandscape);
+            _isValid.images.imagePortrait && _isValid.images.imageSquare && _isValid.images.imageLandscape &&
+            _isValid.type);
     }
 
     //-------------------------------------------------------------------
@@ -443,15 +450,11 @@ function AdminMarketplaceEntity() {
                 item[e.target.id] = e.target.checked;
                 break;
             case "status":
-                if (e.target.value.toString() === "-1") item.status = null;
-                else {
-                    item.status = { id: e.target.value, name: e.target.options[e.target.selectedIndex].text };
-                }
-                break;
+            case "type":
             case "publisher":
-                if (e.target.value.toString() === "-1") item.publisher = null;
+                if (e.target.value.toString() === "-1") item[e.target.id] = null;
                 else {
-                    item.publisher = { id: e.target.value, name: e.target.options[e.target.selectedIndex].text };
+                    item[e.target.id] = { id: e.target.value, name: e.target.options[e.target.selectedIndex].text };
                 }
                 break;
             default:
@@ -546,6 +549,43 @@ function AdminMarketplaceEntity() {
                 }
                 <Form.Control id="status" as="select" className={(!_isValid.status ? 'invalid-field minimal pr-5' : 'minimal pr-5')} value={item.status == null ? "-1" : item.status.id}
                     onBlur={validateForm_status} onChange={onChange} >
+                    <option key="-1|Select One" value="-1" >--Select One--</option>
+                    {options}
+                </Form.Control>
+            </Form.Group>
+        )
+    };
+
+    const renderItemType = () => {
+        //show readonly input for view mode
+        if (isReadOnly) {
+            return (
+                <Form.Group>
+                    <Form.Label>Type</Form.Label>
+                    <Form.Control id="type" type="" value={item.type != null ? item.type.name : ""} readOnly={isReadOnly} />
+                </Form.Group>
+            )
+        }
+        if (loadingProps.lookupDataStatic == null) return;
+
+        //show drop down list for edit, copy mode
+        var items = loadingProps.lookupDataStatic.filter((g) => {
+            return g.lookupType.enumValue === AppSettings.LookupTypeEnum.SmItemType //
+        });
+        const options = items.map((item) => {
+            return (<option key={item.id} value={item.id} >{item.name}</option>)
+        });
+
+        return (
+            <Form.Group>
+                <Form.Label>Type</Form.Label>
+                {!_isValid.type &&
+                    <span className="invalid-field-message inline">
+                        Required
+                    </span>
+                }
+                <Form.Control id="type" as="select" className={(!_isValid.type ? 'invalid-field minimal pr-5' : 'minimal pr-5')} value={item.type == null ? "-1" : item.type.id}
+                    onBlur={validateForm_type} onChange={onChange} >
                     <option key="-1|Select One" value="-1" >--Select One--</option>
                     {options}
                 </Form.Control>
@@ -738,7 +778,7 @@ function AdminMarketplaceEntity() {
                     </div>
                 </div>
                 <div className="row">
-                    <div className="col-md-12">
+                    <div className="col-md-8">
                         <Form.Group>
                             <Form.Label>Display Name</Form.Label>
                             {!_isValid.displayName &&
@@ -750,6 +790,9 @@ function AdminMarketplaceEntity() {
                                 value={item.displayName} onBlur={validateForm_displayName} onChange={onChange} readOnly={isReadOnly} />
                             <span className="small text-muted" >This will be used on all screens for the display of this item. This can contain spaces, special characters, etc. </span>
                         </Form.Group>
+                    </div>
+                    <div className="col-md-4">
+                        {renderItemType()}
                     </div>
                 </div>
                 <div className="row mt-2">

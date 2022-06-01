@@ -202,10 +202,10 @@ function MarketplaceList() {
                 <div className="col-sm-3 mb-2 mb-sm-0">
                     {renderTitleBlock("Library", null, null)}
                 </div>
-                <div className="col-sm-5">
+                <div className="col-lg-4">
                     <HeaderSearch filterVal={loadingProps.searchCriteria == null ? null : loadingProps.searchCriteria.query} onSearch={handleOnSearchChange} searchMode="standard" currentUserId={authTicket.user == null ? null : authTicket.user.id} />
                 </div>
-                <div className="col-sm-4 pl-0">
+                <div className="col-lg-5 pl-0">
                     <MarketplaceItemTypeFilter onSearchCriteriaChanged={onTypeSelectionChange} searchCriteria={loadingProps.searchCriteria} />
                 </div>
             </div>
@@ -236,11 +236,11 @@ function MarketplaceList() {
             )
         }
         const mainBody = _dataRows.all.map((item) => {
-            if (item.type == null || item.type?.code === AppSettings.itemTypeCode.smApp) {
-                return (<MarketplaceItemRow key={item.id} item={item} currentUserId={authTicket.user == null ? null : authTicket.user.id} showActions={true} cssClass="marketplace-list-item" />)
-            }
-            else if (item.type?.code === AppSettings.itemTypeCode.smProfile) {
+            if (item.type != null && item.type.code === AppSettings.itemTypeCode.smProfile) {
                 return (<ProfileItemRow key={item.id} item={item} currentUserId={authTicket.user == null ? null : authTicket.user.id} showActions={true} cssClass="marketplace-list-item" />)
+            }
+            else {
+                return (<MarketplaceItemRow key={item.id} item={item} currentUserId={authTicket.user == null ? null : authTicket.user.id} showActions={true} cssClass="marketplace-list-item" />)
             }
         });
 
