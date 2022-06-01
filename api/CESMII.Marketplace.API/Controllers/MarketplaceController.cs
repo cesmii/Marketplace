@@ -326,40 +326,60 @@ namespace CESMII.Marketplace.Api.Controllers
             , bool includeCloudLib = true, bool liveOnly = true)
         {
 
-            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
-
-            //lowercase model.query
-            model.Query = string.IsNullOrEmpty(model.Query) ? model.Query : model.Query.ToLower();
-
-            /* Remove the filter of category using the model.query val. Reserve the final predicate for model.query filter.
-            //refine the category list by also adding any category id that contains the name of the model.query. 
-            // to do this, we will need to call lookup.get all categories and then filter on the name contains query.
-            //Then we have to append to our incoming list of categories. Once we do that, we plug in that to our model.Categories and 
-            // we will get both the cats they select and any item with a cat name in the query. 
-            var luCats = string.IsNullOrEmpty(model.Query) ? null :
-               _dalLookup.Where(l => l.LookupType.EnumValue.Equals(LookupTypeEnum.Process) && l.Name.ToLower().Contains(model.Query), null, null, false).Data.ToList();
-            var luCatIds = string.IsNullOrEmpty(model.Query) ? new List<string>() : luCats.Select(x => x.ID.ToString()).ToList();
-
-            //do same for industry verticals
-            var luVerts = string.IsNullOrEmpty(model.Query) ? null :
-                _dalLookup.Where(l => l.LookupType.EnumValue.Equals(LookupTypeEnum.IndustryVertical) && l.Name.ToLower().Contains(model.Query), null, null, false).Data.ToList();
-            var luVertIds = string.IsNullOrEmpty(model.Query) ? new List<string>() : luVerts.Select(x => x.ID.ToString()).ToList();
-
-            //do same for publishers
-            var luPubs = string.IsNullOrEmpty(model.Query) ? null :
-                _dalPublisher.Where(x => x.Name.ToLower().Contains(model.Query), null, null, false).Data.ToList();
-            var luPubIds = string.IsNullOrEmpty(model.Query) ? new List<string>() : luPubs.Select(x => x.ID.ToString()).ToList();
-            */
+            //init and then flags set by user or system will determine which of the following get applied
+            var result = new DALResult<MarketplaceItemModel>() { Data = new List<MarketplaceItemModel>() };
 
             //extract selected items within a list of items
             var cats = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.Where(x => x.EnumValue == LookupTypeEnum.Process).FirstOrDefault().Items.Where(x => x.Selected).ToList();
             var verts = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.Where(x => x.EnumValue == LookupTypeEnum.IndustryVertical).FirstOrDefault().Items.Where(x => x.Selected).ToList();
             var pubs = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.Where(x => x.EnumValue == LookupTypeEnum.Publisher).FirstOrDefault().Items.Where(x => x.Selected).ToList();
+            var types = model.ItemTypes.Count == 0 ? new List<LookupItemFilterModel>() : model.ItemTypes.Where(x => x.Selected).ToList();
+
+            //SM Apps, Hardware, etc. - anything other than sm profile types
+            //User driven flag to select only a certain type. Determine if none are selected or if item type of sm app is selected.
+            result = AdvancedSearchMarketplace(model, types, cats, verts, pubs, liveOnly);
+
+            //SM Profiles
+            //User driven flag to select only a certain type. Determine if none are selected or if item type of sm profile is selected.
+            var includeSmProfileTypes = model.ItemTypes == null || model.ItemTypes.Where(x => x.Selected).Count() == 0 ||
+                model.ItemTypes.Where(x => x.Selected && x.ID.Equals(_configUtil.MarketplaceSettings.SmProfile.TypeId)).Count() > 0;
+            //Skip over this in certain scenarios. ie. admin section
+            if (_configUtil.MarketplaceSettings.EnableCloudLibSearch && includeCloudLib && includeSmProfileTypes)
+            {
+                var resultCloudLib = await AdvancedSearchCloudLib(model, cats, verts, pubs);
+
+                //unify the results, sort, handle paging
+                result = MergeSortPageSearchedItems(result.Data, resultCloudLib, model);
+            }
+
+            if (result == null)
+            {
+                _logger.LogWarning($"MarketplaceController|AdvancedSearch|No records found matching the search criteria.");
+                return BadRequest($"No records found matching the search criteria.");
+            }
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// Search for marketplace items matching criteria passed in. This is an advanced search and the front end
+        /// would pass a collection of fields, operators, values to use in the search.  
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        private DALResult<MarketplaceItemModel> AdvancedSearchMarketplace([FromBody] MarketplaceSearchModel model
+            , List<LookupItemFilterModel> types
+            , List<LookupItemFilterModel> cats
+            , List<LookupItemFilterModel> verts
+            , List<LookupItemFilterModel> pubs
+            , bool liveOnly = true)
+        {
+            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
+
+            //lowercase model.query
+            model.Query = string.IsNullOrEmpty(model.Query) ? model.Query : model.Query.ToLower();
 
             //union passed in list w/ lookup list.
-            //var combinedCats = cats == null ? luCatIds : cats.Select(x => x.ID).ToArray().Union(luCatIds);
-            //var combinedVerts = verts == null ? luVertIds : verts.Select(x => x.ID).ToArray().Union(luVertIds);
-            //var combinedPubs = pubs == null ? luPubIds : pubs.Select(x => x.ID).ToArray().Union(luPubIds);
             var combinedCats = cats == null ? null : cats.Select(x => x.ID).ToArray();
             var combinedVerts = verts == null ? null : verts.Select(x => x.ID).ToArray();
             var combinedPubs = pubs == null ? null : pubs.Select(x => x.ID).ToArray();
@@ -377,16 +397,18 @@ namespace CESMII.Marketplace.Api.Controllers
                 predicates.Add(util.BuildStatusFilterPredicate());
             }
 
+            //build where clause - one for each type passed in
+            if (types != null && types.Count() > 0)//model.Categories != null)
+            {
+                predicates.Add(x => x.ItemTypeId != null && types.Any(y => y.ID.Equals(x.ItemTypeId.ToString())));
+            }
+
             //build list of where clauses - one for each cat passed in
             Func<MarketplaceItem, bool> predicateCat = null;
             if (combinedCats != null && combinedCats.Length > 0)//model.Categories != null)
             {
                 foreach (var cat in combinedCats)// model.Categories)
                 {
-                    //System.Linq.Expressions.BinaryExpression<Func<MarketplaceItem, bool>> expr = x => x.Categories.Any(c => c.ToString().Equals(cat));
-                    //    new System.Linq.Expressions.BinaryExpression<Func<MarketplaceItem, bool>>();
-                    //exprs.Add(x => x.Categories.Any(c => c.ToString().Equals(cat)));
-                    //predicateCat
                     if (predicateCat == null) predicateCat = x => x.Categories.Any(c => c.ToString().Equals(cat));
                     else predicateCat = predicateCat.Or(x => x.Categories.Any(c => c.ToString().Equals(cat)));
                 }
@@ -446,24 +468,50 @@ namespace CESMII.Marketplace.Api.Controllers
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName });
 
-            //add flag to skip over this in certain scenarios. ie. admin section
-            if (_configUtil.MarketplaceSettings.EnableCloudLibSearch && includeCloudLib)
-            {
-                //NEW: now search CloudLib.
-                var resultCloudLib = await _dalCloudLib.Where(model.Query);
-
-                //unify the results, sort, handle paging
-                result = MergeSortPageSearchedItems(result.Data, resultCloudLib, model);
-            }
-
-            if (result == null)
-            {
-                _logger.LogWarning($"MarketplaceController|AdvancedSearch|No records found matching the search criteria.");
-                return BadRequest($"No records found matching the search criteria.");
-            }
-            return Ok(result);
+            return result;
         }
 
+        /// <summary>
+        /// Search for marketplace items matching criteria passed in. This is an advanced search and the front end
+        /// would pass a collection of fields, operators, values to use in the search.  
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        private async Task<List<MarketplaceItemModel>> AdvancedSearchCloudLib([FromBody] MarketplaceSearchModel model
+            , List<LookupItemFilterModel> cats
+            , List<LookupItemFilterModel> verts
+            , List<LookupItemFilterModel> pubs
+            )
+        {
+            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
+
+            //lowercase model.query
+            model.Query = string.IsNullOrEmpty(model.Query) ? model.Query : model.Query.ToLower();
+
+            var result = new List<MarketplaceItemModel>();
+            //if publishers is a filter, then we skip CloudLib for now because search is trying to only show 
+            //items for that publisher. In future, remove this once we store our own metadata. 
+            //only search CloudLib if no publisher filter
+            if (pubs.Count == 0)
+            {
+                //NEW: now search CloudLib.
+                result = await _dalCloudLib.Where(model.Query,
+                    cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
+                    verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList(),
+                    _configUtil.CloudLibSettings?.ExcludedNodeSets);
+
+                //check to see if the CloudLib returned data. 
+                if (cats.Count == 0 && verts.Count == 0 && string.IsNullOrEmpty(model.Query)
+                    && result.Count == 0)
+                {
+                    _logger.LogWarning($"MarketplaceController|AdvancedSearch|No CloudLib records found yet search criteria was wildcard.");
+                }
+            }
+
+            return result;
+        }
+
+        
         /// <summary>
         /// Because we are unifying two sources of information from separate sources, we need to wait on paging 
         /// and do not do this at the DB level. We have to get the filtered set of info and then apply a sort 
@@ -482,10 +530,18 @@ namespace CESMII.Marketplace.Api.Controllers
             //set2 = set2.OrderByDescending(x => x.IsFeatured).ThenBy(x => x.DisplayName).ToList();
             //combine the data, get the total count
             var combined = set1.Union(set2);
-            //order by the unified result
-            combined = combined.OrderByDescending(x => x.IsFeatured).ThenBy(x => x.DisplayName);
+            //TBD - order by the unified result - order by type, then by featured then by name
+            //combined = combined
+            //    .OrderBy(x => x.Type?.DisplayOrder)
+            //    .ThenBy(x => x.Type?.Name)
+            //    .ThenByDescending(x => x.IsFeatured)
+            //    .ThenBy(x => x.DisplayName); //.ToList();
+            combined = combined
+                .OrderByDescending(x => x.IsFeatured)
+                .ThenBy(x => x.DisplayName); //.ToList();
+
             //now page the data. 
-            combined = combined.Take(model.Take).Skip(model.Skip);
+            combined = combined.Skip(model.Skip).Take(model.Take);
             return new DALResult<MarketplaceItemModel>() { 
                 Count = count,
                 Data = combined.ToList()

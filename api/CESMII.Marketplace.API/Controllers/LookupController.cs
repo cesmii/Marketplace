@@ -110,9 +110,20 @@ namespace CESMII.Marketplace.Api.Controllers
                 }).ToList()
             });
 
+            //get item types
+            var itemTypes = _dal.GetAll().Where(x => x.LookupType.EnumValue == LookupTypeEnum.SmItemType && x.IsActive);
+
             //leave query null, skip, take defaults
             var result = new MarketplaceSearchModel() { 
-                Filters = filters
+                Filters = filters, 
+                ItemTypes = itemTypes.Select(itm => new LookupItemFilterModel
+                {
+                    ID = itm.ID,
+                    Name = itm.Name,
+                    IsActive = itm.IsActive,
+                    DisplayOrder = itm.DisplayOrder
+                    //tbd any other lookup fields
+                }).OrderBy(x => x.DisplayOrder).ThenBy(x => x.Name).ToList()
             };
 
             //return result

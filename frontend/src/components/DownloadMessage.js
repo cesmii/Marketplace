@@ -20,11 +20,23 @@ function DownloadMessage() {
     // Region: Launch export - execute
     //-------------------------------------------------------------------
     useEffect(() => {
+        function updateMessageItemState(item) {
+            var x = loadingProps.downloadItems.findIndex(msg => { return msg.id.toString() === item.id.toString(); });
+            //no item found
+            if (x < 0) {
+                console.warn(generateLogMessageString(`downloadProfile||no item found with this id: ${item.id}`, CLASS_NAME));
+                return;
+            }
+            loadingProps.downloadItems[x] = JSON.parse(JSON.stringify(item));
+            setLoadingProps({ downloadItems: JSON.parse(JSON.stringify(loadingProps.downloadItems)) });
+        }
+
         async function downloadProfile(item) {
             var url = `profile/export`;
             console.log(generateLogMessageString(`downloadProfile||${url}`));
 
-            var data = { id: item.profileId };
+            //var data = { id: item.profileId };
+            var data = item.requestInfo;
             await axiosInstance.post(url, data).then(async result => {
                 console.log(generateLogMessageString(`downloadProfile||${result.data.isSuccess ? 'success' : 'fail'}`));
                 if (result.status === 200 && result.data.isSuccess) {
@@ -64,14 +76,15 @@ function DownloadMessage() {
                 }
 
                 //update state
-                var x = loadingProps.downloadItems.findIndex(msg => { return msg.id.toString() === item.id.toString(); });
-                //no item found
-                if (x < 0) {
-                    console.warn(generateLogMessageString(`downloadProfile||no item found to dismiss with this id: ${item.id}`, CLASS_NAME));
-                    return;
-                }
-                loadingProps.downloadItems[x] = JSON.parse(JSON.stringify(item));
-                setLoadingProps({ downloadItems: JSON.parse(JSON.stringify(loadingProps.downloadItems)) });
+                updateMessageItemState(item);
+                //var x = loadingProps.downloadItems.findIndex(msg => { return msg.id.toString() === item.id.toString(); });
+                ////no item found
+                //if (x < 0) {
+                //    console.warn(generateLogMessageString(`downloadProfile||no item found to dismiss with this id: ${item.id}`, CLASS_NAME));
+                //    return;
+                //}
+                //loadingProps.downloadItems[x] = JSON.parse(JSON.stringify(item));
+                //setLoadingProps({ downloadItems: JSON.parse(JSON.stringify(loadingProps.downloadItems)) });
 
             }).catch(e => {
                 item = {
@@ -84,9 +97,9 @@ function DownloadMessage() {
                     caption: '',
                     warnings: null
                 };
-                console.log(generateLogMessageString('downloadProfile||error||' + JSON.stringify(e), CLASS_NAME, 'error'));
+                console.error(generateLogMessageString('downloadProfile||error||' + JSON.stringify(e), CLASS_NAME, 'error'));
                 //update state
-                setLoadingProps({ downloadItems: JSON.parse(JSON.stringify(loadingProps.downloadItems)) });
+                updateMessageItemState(item);
             })
         } //end downloadProfile
 

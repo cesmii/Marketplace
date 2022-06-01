@@ -192,7 +192,7 @@
                 IsVerified = x.IsVerified,
                 Abstract = x.Abstract,
                 Description = x.Description,
-                TypeId = x.TypeId,
+                Type = MapToModelLookupItem(x.ItemTypeId, _lookupItemsAll.Where(x => x.LookupType.EnumValue.Equals(LookupTypeEnum.SmItemType)).ToList()),
                 AuthorId = x.AuthorId,
                 Created = x.Created,
                 PublishDate = x.PublishDate,

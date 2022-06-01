@@ -9,13 +9,14 @@ using Microsoft.Extensions.Logging;
 
 using Opc.Ua.CloudLib.Client;
 using CESMII.OpcUa.NodeSetImporter;
+using CESMII.Marketplace.Common.Models;
 
 namespace CESMII.Marketplace.CloudLibClient
 {
     public class CloudLibWrapper :ICloudLibWrapper
     {
         private readonly UACloudLibClient _client;
-        private readonly CloudLibraryOptions _config;
+        private readonly CloudLibraryConfig _config;
         private readonly ILogger<CloudLibWrapper> _logger;
         //private TokenResponseModel _token;
         private int _maxAuthorizationAttempts = 10;
@@ -24,7 +25,7 @@ namespace CESMII.Marketplace.CloudLibClient
             IConfiguration config, ILogger<CloudLibWrapper> logger)
         {
             _client = client;
-            _config = new CloudLibraryOptions();
+            _config = new CloudLibraryConfig();
             config.GetSection("CloudLibConfig").Bind(_config);
             _logger = logger;
 
@@ -68,7 +69,7 @@ namespace CESMII.Marketplace.CloudLibClient
             return downloadedNodeSets;
         }
 
-        public async Task<List<UANodesetResult>> Search(List<string> keywords)
+        public async Task<List<UANodesetResult>> Search(List<string> keywords, List<string> exclude)
         {
             var result = await _client.GetBasicNodesetInformationAsync(keywords).ConfigureAwait(false);
             //TBD - don't need this. Keep it here for now in case we temporarily need to get more data.
@@ -76,6 +77,13 @@ namespace CESMII.Marketplace.CloudLibClient
             //{
             //    //get more details
             //}
+
+            //if exclude has values, strip out nodesets where exclude value == nodeset uri
+            if (exclude != null && result != null)
+            {
+                result = result.Where(x => !exclude.Any(y => y.ToLower().Equals(x.NameSpaceUri.ToLower()))).ToList();
+            }
+
             return result;
         }
 

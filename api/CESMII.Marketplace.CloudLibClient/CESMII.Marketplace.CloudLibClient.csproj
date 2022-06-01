@@ -18,6 +18,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\CESMII.Marketplace.Common\CESMII.Marketplace.Common.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Reference Include="Opc.Ua.CloudLib.Client">
 	    <HintPath>..\..\packages-local\Opc.Ua.CloudLib.Client\Opc.Ua.CloudLib.Client.dll</HintPath>
 	  </Reference>

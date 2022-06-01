@@ -42,8 +42,6 @@
         /// <summary>
         /// Type of marketplace item: profile, app
         /// </summary>
-        public int TypeId { get; set; }
-
         public virtual LookupItemModel Type { get; set; }
 
         /// <summary>
@@ -95,6 +93,8 @@
         public List<MarketplaceItemModel> SimilarItems { get; set; }
 
         public ImageItemSimpleModel ImagePortrait { get; set; }
+        
+        [Obsolete("Retire ImageSquare")]
         public ImageItemSimpleModel ImageSquare { get; set; }
         public ImageItemSimpleModel ImageLandscape { get; set; }
     }
@@ -116,4 +116,15 @@
 
         //public List<ImageItemModel> Images { get; set; }
     }
+
+    /// <summary>
+    /// Extend marketplaceitemmodel for the export scenario.
+    /// </summary>
+    public class ProfileItemExportModel
+    {
+        public MarketplaceItemModel Item { get; set; }
+        public string NodesetXml { get; set; }
+    }
+
+
 }

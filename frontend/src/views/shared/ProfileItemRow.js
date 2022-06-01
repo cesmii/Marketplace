@@ -86,24 +86,30 @@ function ProfileItemRow(props) { //props are item, showActions
         );
     };
 
-    //build the row
-    //-------------------------------------------------------------------
-    // Region: Render final output
-    //-------------------------------------------------------------------
-    //TBD - improve this check
-    if (props.item === null || props.item === {}) return null;
-    if (props.item.name == null) return null;
+    const renderImageCompact = () => {
 
-    return (
-        <>
+        var style = 
+            {
+                width: '100%'
+            };
+
+        return (
+            <img src={getImageUrl(props.item.imagePortrait)} className="p-0" style={style} onClick={navigateToItem} alt={`icon-profile-${props.item.displayName}`} />
+        );
+    };
+
+
+    //-------------------------------------------------------------------
+    // Render row normal - more comparable to marketplace app rows
+    const renderRow = () => {
+        return (
             <div className={`row mx-0 p-0 ${props.cssClass}`}>
                 <div className="col-sm-6 col-md-5 p-0 d-none d-sm-block" >
                     {renderImageBg()}
                 </div>
                 <div className="col-sm-6 col-md-7 p-4" >
                     <div className="d-flex align-items-center mb-2" >
-                        <h2 className="mb-0" >{props.item.displayName} 
-                        </h2><span className="headline-2 ml-auto">(SM Profile)</span>
+                        <h2 className="mb-0" >SM Profile: {props.item.displayName}</h2>
                     </div>
                     {props.item.abstract != null &&
                         <div className="mb-0" dangerouslySetInnerHTML={{ __html: props.item.abstract }} ></div>
@@ -123,8 +129,47 @@ function ProfileItemRow(props) { //props are item, showActions
                     <div className="d-none d-lg-inline" >{renderMetaTagItem(props.item)}</div>
                 </div>
             </div>
-        </>
-    );
+        );
+    };
+
+    //-------------------------------------------------------------------
+    // Render row compact - smaller, less info, less lines
+    const renderRowCompact = () => {
+        return (
+            <div className={`row mx-0 p-0 py-3 ${props.cssClass} ${props.displayMode}`}>
+                <div className="col-2 col-md-1" >
+                    {renderImageCompact()}
+                </div>
+                <div className="col-10 col-md-11 d-flex" >
+                    <div className="d-inline">
+                        <h2 className="mb-2" >SM Profile: {props.item.displayName}</h2>
+                        {(props.item.namespace != null && props.item.namespace !== '') &&
+                            <p className="mb-1" ><b className="mr-2" >Namespace:</b>
+                                <span style={{ wordBreak: "break-word" }} >{props.item.namespace}</span>
+                            <span className="ml-2" >(v.{props.item.version}) </span>
+                            </p>
+                        }
+                        <p className="mb-0" >
+                            <b className="mr-2" >Published By:</b>{props.item.publisher.displayName},
+                            <b className="mx-2" >on:</b>{formatDate(props.item.publishDate)}
+                        </p>
+                    </div>
+                    <div className="ml-auto" >
+                        <Button variant="secondary" type="button" className="text-nowrap" href={`/profile/${props.item.id}`} >More Info</Button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    //-------------------------------------------------------------------
+    // Region: Render final output
+    //-------------------------------------------------------------------
+    if (props.item === null || props.item === {}) return null;
+    if (props.item.name == null) return null;
+
+    return props.displayMode === 'compact' ?
+            renderRowCompact() : renderRow();
 }
 
 export default ProfileItemRow;
