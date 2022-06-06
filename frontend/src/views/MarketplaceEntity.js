@@ -189,7 +189,7 @@ function MarketplaceEntity() {
                 </div>
                 <div className="row" >
                     <div className="col-sm-12">
-                        <div className="mb-3" dangerouslySetInnerHTML={{ __html: item.description }} ></div>
+                        <div className="mb-3 entity-description" dangerouslySetInnerHTML={{ __html: item.description }} ></div>
                     </div>
                 </div>
                 <div className="row" >
