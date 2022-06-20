@@ -25,12 +25,9 @@
         protected IMongoRepository<LookupItem> _repoLookup;
         protected List<LookupItem> _lookupItemsAll;
         protected IMongoRepository<Publisher> _repoPublisher;
-        public List<Publisher> _publishersAll;
-        //protected IMongoRepository<ImageItem> _repoImages;
+        protected List<Publisher> _publishersAll;
         protected IMongoRepository<ImageItemSimple> _repoImages;
-        //protected List<ImageItem> _imagesAll;
         protected List<ImageItemSimple> _imagesAll;
-        //protected bool _updateImages = false;
         //default type - use if none assigned yet.
         private readonly MongoDB.Bson.BsonObjectId _smItemTypeIdDefault;
 
@@ -136,10 +133,12 @@
                 data.Select(x => x.PublisherId.ToString()).Distinct().ToArray());
 
             //map the data to the final result
-            DALResult<AdminMarketplaceItemModel> result = new DALResult<AdminMarketplaceItemModel>();
-            result.Count = count;
-            result.Data = MapToModels(data, verbose);
-            result.SummaryData = null;
+            var result = new DALResult<AdminMarketplaceItemModel>
+            {
+                Count = count,
+                Data = MapToModels(data, verbose),
+                SummaryData = null
+            };
             return result;
         }
 
@@ -167,10 +166,12 @@
                 data.Select(x => x.PublisherId.ToString()).Distinct().ToArray());
 
             //map the data to the final result
-            DALResult<AdminMarketplaceItemModel> result = new DALResult<AdminMarketplaceItemModel>();
-            result.Count = count;
-            result.Data = MapToModels(data, verbose);
-            result.SummaryData = null;
+            var result = new DALResult<AdminMarketplaceItemModel>
+            {
+                Count = count,
+                Data = MapToModels(data, verbose),
+                SummaryData = null
+            };
             return result;
 
         }
@@ -182,7 +183,7 @@
         /// <param name="predicate"></param>
         /// <returns></returns>
         public override DALResult<AdminMarketplaceItemModel> Where(Func<MarketplaceItem, bool> predicate, int? skip, int? take,
-            bool returnCount = true, bool verbose = false)
+            bool returnCount = false, bool verbose = false)
         {
             //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
             var query = _repo.FindByCondition(
@@ -201,10 +202,12 @@
                 data.Select(x => x.PublisherId.ToString()).Distinct().ToArray());
 
             //map the data to the final result
-            DALResult<AdminMarketplaceItemModel> result = new DALResult<AdminMarketplaceItemModel>();
-            result.Count = count;
-            result.Data = MapToModels(data, verbose);
-            result.SummaryData = null;
+            var result = new DALResult<AdminMarketplaceItemModel>
+            {
+                Count = count,
+                Data = MapToModels(data, verbose),
+                SummaryData = null
+            };
             return result;
 
         }
@@ -235,7 +238,7 @@
                     IsVerified = entity.IsVerified,
                     Abstract = entity.Abstract,
                     Description = entity.Description,
-                    Type = MapToModelLookupItem(entity.ItemTypeId == null ? _smItemTypeIdDefault : entity.ItemTypeId,
+                    Type = MapToModelLookupItem(entity.ItemTypeId ?? _smItemTypeIdDefault,
                         _lookupItemsAll.Where(x => x.LookupType.EnumValue.Equals(LookupTypeEnum.SmItemType)).ToList()),
                     AuthorId = entity.AuthorId,
                     Created = entity.Created,
@@ -243,16 +246,12 @@
                     Version = entity.Version,
                     //Type = new LookupItemModel() { ID = entity.TypeId, Name = entity.Type.Name }
                     MetaTags = entity.MetaTags,
-                    // Categories = MapToModelLookupData(entity.Categories, _lookupItemsAll.Where(x => x.TypeId.Equals((int)LookupTypeEnum.Categories)).ToList()),
-                    // IndustryVerticals = MapToModelLookupData(entity.IndustryVerticals, _lookupItemsAll.Where(x => x.TypeId.Equals((int)LookupTypeEnum.IndustryVerticals)).ToList()),
-                    // MarketplaceStatus = MapToModelLookupData(entity.MarketplaceStatus, _lookupItemsAll.Where(x => x.TypeId.Equals((int)LookupTypeEnum.MarketplaceStatus)).ToList())
                     Categories = MapToModelLookupItemsSelectable(entity.Categories, _lookupItemsAll.Where(x => x.LookupType.EnumValue.Equals(LookupTypeEnum.Process)).ToList()),
                     IndustryVerticals = MapToModelLookupItemsSelectable(entity.IndustryVerticals, _lookupItemsAll.Where(x => x.LookupType.EnumValue.Equals(LookupTypeEnum.IndustryVertical)).ToList()),
                     Status = MapToModelLookupItem(entity.StatusId, _lookupItemsAll.Where(x => x.LookupType.EnumValue.Equals(LookupTypeEnum.MarketplaceStatus)).ToList()),
                     Publisher = MapToModelPublisher(entity.PublisherId, _publishersAll),
                     IsActive = entity.IsActive,
                     ImagePortrait = entity.ImagePortraitId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImagePortraitId.ToString()), _imagesAll),
-                    //ImageSquare = entity.ImageSquareId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageSquareId.ToString()), _imagesAll),
                     ImageLandscape = entity.ImageLandscapeId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageLandscapeId.ToString()), _imagesAll)
                 };
                 if (verbose)
@@ -295,13 +294,9 @@
             entity.ImagePortraitId = model.ImagePortrait == null ?
                 MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY) :
                 MongoDB.Bson.ObjectId.Parse(model.ImagePortrait.ID);
-            //entity.ImageSquareId = model.ImageSquare == null ?
-            //    MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY) :
-            //    MongoDB.Bson.ObjectId.Parse(model.ImageSquare.ID);
             entity.ImageLandscapeId = model.ImageLandscape == null ?
                 MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY) :
                 MongoDB.Bson.ObjectId.Parse(model.ImageLandscape.ID); 
-            //MapToEntityImages(entity, model.Images);
         }
 
         /// <summary>
