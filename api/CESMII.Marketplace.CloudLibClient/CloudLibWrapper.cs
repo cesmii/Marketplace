@@ -18,8 +18,7 @@ namespace CESMII.Marketplace.CloudLibClient
         private readonly UACloudLibClient _client;
         private readonly CloudLibraryConfig _config;
         private readonly ILogger<CloudLibWrapper> _logger;
-        //private TokenResponseModel _token;
-        private int _maxAuthorizationAttempts = 10;
+        private readonly int _maxAuthorizationAttempts = 10;
 
         public CloudLibWrapper(UACloudLibClient client,
             IConfiguration config, ILogger<CloudLibWrapper> logger)

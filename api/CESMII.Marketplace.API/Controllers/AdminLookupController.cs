@@ -262,7 +262,7 @@ namespace CESMII.Marketplace.Api.Controllers
             else
             {
                 var result = await _dal.Add(model, UserID);
-                if (String.IsNullOrEmpty(result) == true)
+                if (String.IsNullOrEmpty(result))
                 {
                     _logger.LogWarning($"AdminLookupController|Add|Could not add item");
                     return BadRequest("Could not add item. Invalid id.");
@@ -295,9 +295,6 @@ namespace CESMII.Marketplace.Api.Controllers
             //we will do a soft delete and leave the item present but hot shown in view. 
             //The admin will have to then go back and update any area which may have used that value. 
             return false;
-
-            //var numItems = _dalMarketplaceItem.Count(x => x.IsActive && !x.PublisherId.Equals(model.ID));
-            //return numItems > 0;
         }
 
 
