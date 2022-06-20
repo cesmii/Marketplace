@@ -82,7 +82,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 {
                     Name = item.Key.Name.ToString(),
                     EnumValue = item.Key.EnumValue,
-                    Items = item.ToList().Select(itm => new LookupItemFilterModel
+                    Items = item.Select(itm => new LookupItemFilterModel
                     {
                         ID = itm.ID,
                         Name = itm.Name,

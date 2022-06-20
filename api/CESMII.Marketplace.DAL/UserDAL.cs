@@ -32,7 +32,6 @@
             _configUtil = configUtil;
             //when mapping the results, we also get related data. For efficiency, get the orgs now and then
             _permissions = repoPermission.GetAll();
-            //_organizations = repoOrganization.GetAll();
         }
 
         /// <summary>
@@ -167,7 +166,7 @@
         /// <param name="user"></param>
         /// <param name="newPassword"></param>
         /// <returns></returns>
-        public async void ChangePassword(string id, string oldPassword, string newPassword)
+        public async Task ChangePassword(string id, string oldPassword, string newPassword)
         {
             var existingUser = _repo.GetByID(id);
             if (existingUser == null || !existingUser.IsActive) throw new ArgumentNullException($"User not found with id {id}");
@@ -211,7 +210,7 @@
         /// </summary>
         /// <param name="orgId"></param>
         /// <returns></returns>
-        public override DALResult<UserModel> GetAllPaged(int? skip = null, int? take = null, bool returnCount = false, bool verbose = false)
+        public override DALResult<UserModel> GetAllPaged(int? skip, int? take, bool returnCount = false, bool verbose = false)
         {
             //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
             var data = _repo.FindByCondition(
@@ -221,10 +220,12 @@
             var count = returnCount ? _repo.Count(x => x.IsActive) : 0;
 
             //map the data to the final result
-            DALResult<UserModel> result = new DALResult<UserModel>();
-            result.Count = count;
-            result.Data = MapToModels(data.ToList(), verbose);
-            result.SummaryData = null;
+            var result = new DALResult<UserModel>
+            {
+                Count = count,
+                Data = MapToModels(data.ToList(), verbose),
+                SummaryData = null
+            };
             return result;
         }
 
@@ -234,7 +235,7 @@
         /// <param name="predicate"></param>
         /// <returns></returns>
         public override DALResult<UserModel> Where(Func<User, bool> predicate, int? skip, int? take,
-            bool returnCount = true, bool verbose = false)
+            bool returnCount = false, bool verbose = false)
         {
             //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
             var data = _repo.FindByCondition(
@@ -244,10 +245,12 @@
             var count = returnCount ? _repo.Count(x => x.IsActive) : 0;
 
             //map the data to the final result
-            DALResult<UserModel> result = new DALResult<UserModel>();
-            result.Count = count;
-            result.Data = MapToModels(data.ToList(), verbose);
-            result.SummaryData = null;
+            var result = new DALResult<UserModel>
+            {
+                Count = count,
+                Data = MapToModels(data.ToList(), verbose),
+                SummaryData = null
+            };
             return result;
 
         }
@@ -264,7 +267,7 @@
             return 1;
         }
 
-        public async Task<int> Delete(string id, string userId)
+        public override async Task<int> Delete(string id, string userId)
         {
             //perform a soft delete by setting active to false
             var entity = _repo.FindByCondition(x => x.ID == id)
@@ -306,7 +309,7 @@
 
         protected OrganizationModel MapToModelOrganization(string id)
         {
-            var org = _organizations.Where(x => x.ID.Equals(id)).FirstOrDefault();
+            var org = _organizations.FirstOrDefault(x => x.ID.Equals(id));
             if (org == null) return null;
             return new OrganizationModel() { 
                 ID = id,
@@ -332,7 +335,6 @@
             entity.FirstName = model.FirstName;
             entity.LastName = model.LastName;
             entity.IsActive = model.IsActive;
-            //entity.LastLogin = model.LastLogin;
 
             //handle update of user permissions
             entity.Permissions = model.PermissionIds.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x))).ToList();

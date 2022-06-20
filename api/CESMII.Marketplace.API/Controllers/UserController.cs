@@ -25,16 +25,12 @@ namespace CESMII.Marketplace.Api.Controllers
     public class UserController : BaseController<UserController>
     {
         private readonly UserDAL _dal;
-        private readonly TokenUtils _tokenUtils;
-        private int _pageSize = 30;
 
         public UserController(UserDAL dal,
-            ConfigUtil config, TokenUtils tokenUtils, ILogger<UserController> logger)
+            ConfigUtil config, ILogger<UserController> logger)
             : base(config, logger)
         {
             _dal = dal;
-            _tokenUtils = tokenUtils;
-            //_pageSize = config.AdminSettings.UserSettings.PageSize;
         }
 
 
@@ -124,7 +120,6 @@ namespace CESMII.Marketplace.Api.Controllers
         {
             if (!ModelState.IsValid)
             {
-                //var errors = ExtractModelStateErrors();
                 return BadRequest("The profile record is invalid. Please correct the following:...join errors collection into string list.");
             }
 
@@ -155,20 +150,6 @@ namespace CESMII.Marketplace.Api.Controllers
 
             //return success message object
             return Ok(new ResultMessageModel() { IsSuccess = true, Message = "Item was deleted." });
-        }
-
-
-        /// <summary>
-        /// TBD - Perform server side validation prior to saving
-        /// </summary>
-        /// <param name="model"></param>
-        private void ValidateModel(UserModel model)
-        {
-            //Check for duplicate service and return model state error
-            //if (model.Attributes != null && model.Attributes.GroupBy(v => v.Name).Where(g => g.Count() > 1).Any())
-            //{
-            //    ModelState.AddModelError("", "Duplicate attribute names found. Remove the duplicates.");
-            //}
         }
 
     }

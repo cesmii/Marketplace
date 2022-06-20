@@ -229,7 +229,7 @@ namespace CESMII.Marketplace.Api.Controllers
             else
             {
                 var result = await _dal.Add(model, UserID);
-                if (String.IsNullOrEmpty(result) == true)
+                if (String.IsNullOrEmpty(result))
                 {
                     _logger.LogWarning($"AdminMarketplaceController|Add|Could not add MarketplaceItem");
                     return BadRequest("Could not add MarketplaceItem. Invalid id.");
