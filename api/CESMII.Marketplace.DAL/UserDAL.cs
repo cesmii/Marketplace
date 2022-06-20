@@ -210,7 +210,7 @@
         /// </summary>
         /// <param name="orgId"></param>
         /// <returns></returns>
-        public override DALResult<UserModel> GetAllPaged(int? skip, int? take, bool returnCount = false, bool verbose = false)
+        public override DALResult<UserModel> GetAllPaged(int? skip = null, int? take = null, bool returnCount = false, bool verbose = false)
         {
             //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
             var data = _repo.FindByCondition(

@@ -115,15 +115,17 @@
             var count = returnCount ? _repo.Count(x => x.Verified) : 0;
 
             //map the data to the final result
-            DALResult<AdminPublisherModel> result = new DALResult<AdminPublisherModel>();
-            result.Count = count;
-            result.Data = MapToModels(data.ToList(), verbose);
-            result.SummaryData = null;
+            var result = new DALResult<AdminPublisherModel>
+            {
+                Count = count,
+                Data = MapToModels(data.ToList(), verbose),
+                SummaryData = null
+            };
             return result;
         }
 
         public override DALResult<AdminPublisherModel> Where(Func<Publisher, bool> predicate, int? skip, int? take,
-            bool returnCount = true, bool verbose = false)
+            bool returnCount = false, bool verbose = false)
         {
             //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
             var data = _repo.FindByCondition(
@@ -133,10 +135,12 @@
             var count = returnCount ? _repo.Count(predicate) : 0;
 
             //map the data to the final result
-            DALResult<AdminPublisherModel> result = new DALResult<AdminPublisherModel>();
-            result.Count = count;
-            result.Data = MapToModels(data.ToList(), verbose);
-            result.SummaryData = null;
+            var result = new DALResult<AdminPublisherModel>
+            {
+                Count = count,
+                Data = MapToModels(data.ToList(), verbose),
+                SummaryData = null
+            };
             return result;
 
         }
@@ -154,8 +158,7 @@
                     Verified = entity.Verified,
                     Description = entity.Description,
                     CompanyUrl = entity.CompanyUrl,
-                    SocialMediaLinks = entity.SocialMediaLinks == null ? null :
-                        entity.SocialMediaLinks.Select(x => new SocialMediaLinkModel() { Css = x.Css, Icon = x.Icon, Url = x.Url }).ToList(),
+                    SocialMediaLinks = entity.SocialMediaLinks?.Select(x => new SocialMediaLinkModel() { Css = x.Css, Icon = x.Icon, Url = x.Url }).ToList(),
                     IsActive = entity.IsActive
                 };
                 if (verbose)

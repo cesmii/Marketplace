@@ -120,7 +120,7 @@ namespace CESMII.Marketplace.Api.Controllers
             else
             {
                 var result = await _dal.Add(model, null);
-                if (String.IsNullOrEmpty(result) == true)
+                if (String.IsNullOrEmpty(result))
                 {
                     _logger.LogWarning($"RequestInfoController|Add|Could not add RequestInfo");
                     return BadRequest("Could not add RequestInfo. Invalid id.");

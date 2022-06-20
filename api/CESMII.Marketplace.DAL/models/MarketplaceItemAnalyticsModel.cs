@@ -24,7 +24,5 @@
         public int ShareCount { get; set; }
 
         public int DownloadCount { get; set; }
-
-       // public List<MarketplaceDownloadHistory> DownloadHistory { get; set; }
     }
 }
