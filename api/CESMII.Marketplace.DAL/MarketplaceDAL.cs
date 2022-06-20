@@ -16,10 +16,9 @@
         protected IMongoRepository<LookupItem> _repoLookup;
         protected List<LookupItem> _lookupItemsAll;
         protected IMongoRepository<Publisher> _repoPublisher;
-        public List<Publisher> _publishersAll;
+        protected List<Publisher> _publishersAll;
         protected IMongoRepository<MarketplaceItemAnalytics> _repoAnalytics;
         protected List<MarketplaceItemAnalytics> _marketplaceItemAnalyticsAll;
-        //protected IMongoRepository<ImageItem> _repoImages;
         protected IMongoRepository<ImageItemSimple> _repoImages;  //get image info except the actual source data. 
         protected List<ImageItemSimple> _imagesAll;
         //default type - use if none assigned yet.
@@ -46,33 +45,11 @@
         public async Task<string> Add(MarketplaceItemModel model, string userId)
         {
             throw new NotSupportedException("For adding marketplace items, use AdminMarketplaceDAL");
-            //MarketplaceItem entity = new MarketplaceItem
-            //{
-            //    ID = ""
-            //    //,Created = DateTime.UtcNow
-            //    //,CreatedBy = userId
-            //};
-
-            //this.MapToEntity(ref entity, model);
-            ////do this after mapping to enforce isactive is true on add
-            //entity.IsActive = true;
-
-            ////this will add and call saveChanges
-            //await _repo.AddAsync(entity);
-
-            //// Return id for newly added user
-            //return entity.ID;
         }
 
         public async Task<int> Update(MarketplaceItemModel model, string userId)
         {
             throw new NotSupportedException("For saving marketplace items, use AdminMarketplaceDAL");
-            //MarketplaceItem entity = _repo.FindByCondition(x => x.ID == model.ID).FirstOrDefault();
-            ////model.Updated = DateTime.UtcNow;
-            //this.MapToEntity(ref entity, model);
-
-            //await _repo.UpdateAsync(entity);
-            //return 1;
         }
 
 
@@ -91,8 +68,6 @@
             GetMarketplaceRelatedData(
                 new List<MongoDB.Bson.BsonObjectId>() { new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(id)) },
                 new List<MongoDB.Bson.BsonObjectId>() { entity.PublisherId });
-            //new string[] { id } ,
-            //new string[] { entity.PublisherId.ToString() });
 
             return MapToModel(entity, true);
         }
@@ -130,14 +105,14 @@
             GetMarketplaceRelatedData(
                 data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList(),
                 data.Select(x => x.PublisherId).Distinct().ToList());
-                //data.Select(x => x.ID).ToArray(),
-                //data.Select(x => x.PublisherId.ToString()).Distinct().ToArray());
 
             //map the data to the final result
-            DALResult<MarketplaceItemModel> result = new DALResult<MarketplaceItemModel>();
-            result.Count = count;
-            result.Data = MapToModels(data, verbose);
-            result.SummaryData = null;
+            var result = new DALResult<MarketplaceItemModel>
+            {
+                Count = count,
+                Data = MapToModels(data, verbose),
+                SummaryData = null
+            };
             return result;
         }
 
@@ -163,14 +138,14 @@
             GetMarketplaceRelatedData(
                 data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList(),
                 data.Select(x => x.PublisherId).Distinct().ToList());
-                //data.Select(x => x.ID).ToArray(),
-                //data.Select(x => x.PublisherId.ToString()).Distinct().ToArray());
 
             //map the data to the final result
-            DALResult<MarketplaceItemModel> result = new DALResult<MarketplaceItemModel>();
-            result.Count = count;
-            result.Data = MapToModels(data, verbose);
-            result.SummaryData = null;
+            var result = new DALResult<MarketplaceItemModel>
+            {
+                Count = count,
+                Data = MapToModels(data, verbose),
+                SummaryData = null
+            };
             return result;
 
         }
@@ -183,8 +158,10 @@
         public override DALResult<MarketplaceItemModel> Where(Func<MarketplaceItem, bool> predicate, int? skip, int? take, bool returnCount = false, bool verbose = false,
             params OrderByExpression<MarketplaceItem>[] orderByExpressions)
         {
-            var predicates = new List<Func<MarketplaceItem, bool>>();
-            predicates.Add(predicate);
+            var predicates = new List<Func<MarketplaceItem, bool>>
+            {
+                predicate
+            };
             return this.Where(predicates, skip, take, returnCount, verbose, orderByExpressions);
         }
 
@@ -194,7 +171,7 @@
         /// <param name="predicate"></param>
         /// <returns></returns>
         public override DALResult<MarketplaceItemModel> Where(Func<MarketplaceItem, bool> predicate, int? skip, int? take,
-            bool returnCount = true, bool verbose = false)
+            bool returnCount = false, bool verbose = false)
         {
             //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
             var query = _repo.FindByCondition(
@@ -211,14 +188,14 @@
             GetMarketplaceRelatedData(
                 data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList(),
                 data.Select(x => x.PublisherId).Distinct().ToList());
-                //data.Select(x => x.ID).ToArray(),
-                //data.Select(x => x.PublisherId.ToString()).Distinct().ToArray());
 
             //map the data to the final result
-            DALResult<MarketplaceItemModel> result = new DALResult<MarketplaceItemModel>();
-            result.Count = count;
-            result.Data = MapToModels(data, verbose);
-            result.SummaryData = null;
+            var result = new DALResult<MarketplaceItemModel>
+            {
+                Count = count,
+                Data = MapToModels(data, verbose),
+                SummaryData = null
+            };
             return result;
 
         }
@@ -241,7 +218,7 @@
                     DisplayName = entity.DisplayName,
                     Abstract = entity.Abstract,
                     Description = entity.Description,
-                    Type = MapToModelLookupItem(entity.ItemTypeId == null ? _smItemTypeIdDefault : entity.ItemTypeId, 
+                    Type = MapToModelLookupItem(entity.ItemTypeId ?? _smItemTypeIdDefault, 
                         _lookupItemsAll.Where(x => x.LookupType.EnumValue.Equals(LookupTypeEnum.SmItemType)).ToList()),
                     AuthorId = entity.AuthorId,
                     Created = entity.Created,
@@ -275,10 +252,9 @@
 
         }
         // Add Maptomodelanalytics create new model
-        protected MarketplaceItemAnalyticsModel MapToModelMarketplaceItemAnalyticsData(string marketplaceItemId, List<MarketplaceItemAnalytics> allItems)
+        protected static MarketplaceItemAnalyticsModel MapToModelMarketplaceItemAnalyticsData(string marketplaceItemId, List<MarketplaceItemAnalytics> allItems)
         {
-
-            var entity = allItems.Where(x => x.MarketplaceItemId.ToString() == marketplaceItemId).FirstOrDefault();
+            var entity = allItems.FirstOrDefault(x => x.MarketplaceItemId.ToString() == marketplaceItemId);
 
             if (entity == null)
             {
@@ -330,22 +306,6 @@
             _publishersAll = _repoPublisher.FindByCondition(x => publisherIds.Any(y => y.Equals(x.ID)));
             _marketplaceItemAnalyticsAll = _repoAnalytics.FindByCondition(x => marketplaceIds.Any(y => y.Equals(x.MarketplaceItemId.ToString())));
             _imagesAll = _repoImages.FindByCondition(x => marketplaceIds.Any(y => y.Equals(x.MarketplaceItemId.ToString())));
-/*
-            var ids = new List<MongoDB.Bson.BsonObjectId>();
-            foreach (var id in marketplaceIds)
-            {
-                ids.Add(new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(id)));
-            }
-            var filter = MongoDB.Driver.Builders<ImageItemSimple>.Filter.In(x => x.MarketplaceItemId, ids );
-            _imagesAll = _repoImages.AggregateMatch(filter);
-            _imagesAll = _repoImages.FindByCondition(x => ids.Any(y => y.Equals(x.MarketplaceItemId)));
-
-             var pubIds = new List<MongoDB.Bson.BsonObjectId>();
-            foreach (var id in publisherIds)
-            {
-                pubIds.Add(new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(id)));
-            }
-*/
         }
 
         /// <summary>
@@ -364,7 +324,9 @@
             _publishersAll = _repoPublisher.AggregateMatch(filterPubs);
 
             var filterImages = MongoDB.Driver.Builders<ImageItemSimple>.Filter.In(x => x.MarketplaceItemId, marketplaceIds);
-            _imagesAll = _repoImages.AggregateMatch(filterImages);
+            var fieldList = MongoDB.Driver.Builders<ImageItemSimple>.Projection.Include("MarketplaceItemId: 1, Type: 1, FileName: 1");
+
+            _imagesAll = _repoImages.AggregateMatch(filterImages, fieldList);
 
             var filterAnalytics = MongoDB.Driver.Builders<MarketplaceItemAnalytics>.Filter.In(x => x.MarketplaceItemId, marketplaceIds);
             _marketplaceItemAnalyticsAll = _repoAnalytics.AggregateMatch(filterAnalytics);

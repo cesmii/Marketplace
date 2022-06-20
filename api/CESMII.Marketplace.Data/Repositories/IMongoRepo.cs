@@ -18,7 +18,6 @@
     public interface IMongoRepository<TEntity> : IDisposable where TEntity : AbstractEntity
     {
         TEntity GetByID(string id);
-        //TEntity GetByID(long id);
 
         /// <summary>
         /// Get all entities in a given collection. 
@@ -43,8 +42,7 @@
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        List<TEntity> AggregateMatch(MongoDB.Driver.FilterDefinition<TEntity> filter);
-        //List<TEntity> FindByCondition(Expression<Func<TEntity, bool>> predicate);
+        List<TEntity> AggregateMatch(MongoDB.Driver.FilterDefinition<TEntity> filter, MongoDB.Driver.ProjectionDefinition<TEntity> fieldList = null);
 
         /// <summary>
         /// Find entities in a given collection matching the criteria passed in the expression. 
@@ -52,7 +50,6 @@
         /// <param name="predicate"></param>
         /// <returns></returns>
         List<TEntity> FindByCondition(Func<TEntity, bool> predicate);
-        //List<TEntity> FindByCondition(Expression<Func<TEntity, bool>> predicate);
 
         /// <summary>
         /// Find entities in a given collection matching the criteria passed in the expression. 
@@ -75,14 +72,6 @@
 
         List<TEntity> FindByCondition(List<Func<TEntity, bool>> predicates, int? skip, int? take,
             params OrderByExpression<TEntity>[] orderByExpressions);
-
-        /// <summary>
-        /// Execute a stored procedure with a return type of <T>MongoAbstractEntity</T>
-        /// </summary>
-        /// <param name="query">The query to execute.</param>
-        /// <param name="parameters">Additional parameters to execute.</param>
-        /// <returns>A list of TEntity.</returns>
-        //IQueryable<TEntity> ExecStoredProcedure(string query, params object[] parameters);
 
         /// <summary>
         /// Add an entry to the database set of <T>MongoAbstractEntity</T>
@@ -112,12 +101,6 @@
         /// <returns>Task for update. Imagine this should return the number of records.</returns>
         Task UpdateAsync(TEntity entity);
 
-        /// <summary>
-        /// Async save to the database.
-        /// </summary>
-        /// <returns>The Generic Entity type of the repository. Must be an abstract entity.</returns>
-        //Task<int> SaveChanges();
-
         Task<int> Delete(TEntity entity);
 
         /// <summary>
@@ -125,6 +108,7 @@
         /// </summary>
         /// <returns></returns>
         long Count();
+
         /// <summary>
         /// Get a count of documents matching the expression
         /// </summary>

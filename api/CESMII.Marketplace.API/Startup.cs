@@ -37,8 +37,8 @@ namespace CESMII.Marketplace.Api
 {
     public class Startup
     {
-        private string _corsPolicyName = "SiteCorsPolicy";
-        private string _version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        private readonly string _corsPolicyName = "SiteCorsPolicy";
+        private readonly string _version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
         public Startup(IConfiguration configuration)
         {
