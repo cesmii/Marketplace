@@ -24,7 +24,6 @@
         public MongoClientGlobal(ConfigUtil configUtil, ILogger<MongoClient> logger)
         {
             //https://stackoverflow.com/questions/30333925/how-do-i-log-my-queries-in-mongodb-c-sharp-driver-2-0
-            //var client = new MongoClient(configUtil.MongoDBSettings.ConnectionString);
             var mongoConnectionUrl = new MongoUrl(configUtil.MongoDBSettings.ConnectionString);
             var mongoClientSettings = MongoClientSettings.FromUrl(mongoConnectionUrl);
             mongoClientSettings.ClusterConfigurator = cb =>
@@ -34,7 +33,7 @@
                     if (!e.CommandName.Equals("isMaster") && !e.CommandName.Equals("buildInfo")
                      && !e.CommandName.Equals("saslStart") && !e.CommandName.Equals("saslContinue"))
                     {
-                        logger.LogInformation($"{e.Command.ToString()}");
+                        logger.LogInformation($"{e.Command}");
                     }
                 });
             };
@@ -51,39 +50,15 @@
         private readonly string _collectionName;
         protected bool _disposed = false;
 
-        //get path of the executing data dll and the hardcoded files live in a folder called mock data 
-        //string _path = System.Reflection.Assembly.GetExecutingAssembly().AssemblyDirectory();
-        //string _collectionName = typeof(TEntity).ToString();
-
         public MongoRepository(MongoClientGlobal gClient, ILogger<MongoRepository<TEntity>> logger) 
         //public MongoRepository(MongoClientGlobal gClient, ConfigUtil configUtil, ILogger<MongoRepository<TEntity>> logger) 
         {
             _logger = logger;
 
-            /* moved initialization of client and DB to a global client that lasts lifetime of app
-            //https://stackoverflow.com/questions/30333925/how-do-i-log-my-queries-in-mongodb-c-sharp-driver-2-0
-            //var client = new MongoClient(configUtil.MongoDBSettings.ConnectionString);
-            var mongoConnectionUrl = new MongoUrl(configUtil.MongoDBSettings.ConnectionString);
-            var mongoClientSettings = MongoClientSettings.FromUrl(mongoConnectionUrl);
-            mongoClientSettings.ClusterConfigurator = cb => {
-                cb.Subscribe<CommandStartedEvent>(e => {
-                    if (!e.CommandName.Equals("isMaster") && !e.CommandName.Equals("buildInfo") 
-                     && !e.CommandName.Equals("saslStart") && !e.CommandName.Equals("saslContinue"))
-                    {
-                        _logger.LogInformation($"{e.Command.ToString()}");
-                        Console.WriteLine(e.Command.ToString());
-                    }
-                });
-            };
-            
-            var client = new MongoClient(mongoClientSettings);
-            var database = client.GetDatabase(configUtil.MongoDBSettings.DatabaseName);
-            */
-
             //generate the collection name based on TEntity OR the Table Attribute.
             //Using table attribute allows us to have a simple version of an entity and a more extensive version
             //of entity. Think of imageItem. sometimes I don't want the src which is large. I just want id, content type, etc. 
-            var tAttribute = typeof(TEntity).CustomAttributes.Where(x => x.AttributeType.Equals(typeof(TableAttribute))).FirstOrDefault();
+            var tAttribute = typeof(TEntity).CustomAttributes.FirstOrDefault(x => x.AttributeType.Equals(typeof(TableAttribute)));
             if (tAttribute != null)
             {
                 _collectionName = tAttribute.ConstructorArguments[0].Value.ToString();
@@ -95,7 +70,6 @@
             }
 
             //get the collection for use downstream
-            //_collection = database.GetCollection<TEntity>(_collectionName); 
             _collection = gClient.Database.GetCollection<TEntity>(_collectionName);
         }
 
@@ -116,37 +90,47 @@
             return result.Skip(skip).Limit(take).ToList();
         }
 
-        public List<TEntity> AggregateMatch(FilterDefinition<TEntity> filter)
-        //public List<TEntity> FindByCondition(Expression<Func<TEntity, bool>> predicate)
+        public List<TEntity> AggregateMatch(FilterDefinition<TEntity> filter, ProjectionDefinition<TEntity> fieldList = null)
         {
             //calling it this way so that the repo will accept .Any syntax. The find syntax commented out operates 
             //slightly different in how it forms the query
-            return _collection.Aggregate().Match(filter).ToList();
+            if (fieldList == null)
+            {
+                return _collection.Aggregate().Match(filter).ToList();
+            }
+            else
+            {
+                //performance improvement - limit columns being queried
+                return _collection.Aggregate().Match(filter).Project<TEntity>(fieldList).ToList();
+            }
+
         }
 
         public List<TEntity> FindByCondition(Func<TEntity, bool> predicate)
-        //public List<TEntity> FindByCondition(Expression<Func<TEntity, bool>> predicate)
         {
             //calling it this way so that the repo will accept .Any syntax. The find syntax commented out operates 
             //slightly different in how it forms the query
             IQueryable<TEntity> query = _collection.AsQueryable();
             return query.Where(predicate).ToList();
-            //return _collection.Find(predicate).ToList();
         }
 
         public List<TEntity> FindByCondition(Func<TEntity, bool> predicate, int? skip, int? take,
             params Expression<Func<TEntity, object>>[] orderByExpressions)
         {
-            var predicates = new List<Func<TEntity, bool>>();
-            predicates.Add(predicate);
+            var predicates = new List<Func<TEntity, bool>>
+            {
+                predicate
+            };
             return FindByCondition(predicates, skip, take, orderByExpressions);
 
         }
         public List<TEntity> FindByCondition(Func<TEntity, bool> predicate, int? skip, int? take,
             params OrderByExpression<TEntity>[] orderByExpressions)
         {
-            var predicates = new List<Func<TEntity, bool>>();
-            predicates.Add(predicate);
+            var predicates = new List<Func<TEntity, bool>>
+            {
+                predicate
+            };
             return FindByCondition(predicates, skip, take, orderByExpressions);
         }
 
@@ -155,7 +139,7 @@
             params Expression<Func<TEntity, object>>[] orderByExpressions)
         {
             var exprs = new List<OrderByExpression<TEntity>>();
-            if (orderByExpressions.Count() > 0)
+            if (orderByExpressions.Any())
             {
                 foreach (var expr in orderByExpressions)
                 {
@@ -168,7 +152,6 @@
         public List<TEntity> FindByCondition(List<Func<TEntity, bool>> predicates, int? skip, int? take,
             params OrderByExpression<TEntity>[] orderByExpressions)
         {
-            //IEnumerable<TEntity> query = _collection.AsQueryable();
             IQueryable<TEntity> query = _collection.AsQueryable();
 
             //append n where clauses go through the list of expressions and build up a query
@@ -182,7 +165,6 @@
 
             //append n sort by expressions (could be none)
             //apply sorts prior to applying paging
-            //IOrderedEnumerable<TEntity> result = (IOrderedEnumerable<TEntity>)query;
             ApplyOrderByExpressions(ref query, orderByExpressions);
 
             //apply paging
@@ -240,10 +222,11 @@
 
         public long Count(Func<TEntity, bool> predicate)
         {
-            var predicates = new List<Func<TEntity, bool>>();
-            predicates.Add(predicate);
+            var predicates = new List<Func<TEntity, bool>>
+            {
+                predicate
+            };
             return Count(predicates);
-            //return _collection.CountDocuments(predicate);
         }
 
         public long Count(List<Func<TEntity, bool>> predicates)
