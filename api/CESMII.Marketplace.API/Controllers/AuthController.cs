@@ -86,7 +86,7 @@ namespace CESMII.Marketplace.Api.Controllers
             }
 
             // If we get here, update the user data with new password
-            _dal.ChangePassword(user.ID, model.OldPassword, model.NewPassword);
+            await _dal.ChangePassword(user.ID, model.OldPassword, model.NewPassword);
 
             // Why do we expect a new token here? The user is already authenticated and just changing their password?
             var tokenModel = _tokenUtils.BuildToken(user);
