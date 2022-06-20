@@ -3,7 +3,7 @@
     using System;
     using System.ComponentModel;
 
-    public class EnumUtils
+    public static class EnumUtils
     {
         public static string GetEnumDescription(Enum value)
         {

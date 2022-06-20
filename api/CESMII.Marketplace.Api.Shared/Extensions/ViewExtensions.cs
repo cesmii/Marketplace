@@ -25,7 +25,7 @@
                 var viewEngine = controller.HttpContext.RequestServices.GetService(typeof(ICompositeViewEngine)) as ICompositeViewEngine;
                 var viewResult = GetViewEngineResult(controller, viewName, partial, viewEngine);
 
-                if (viewResult.Success == false)
+                if (!viewResult.Success)
                 {
                     return $"A view with the name {viewName} could not be found";
                 }

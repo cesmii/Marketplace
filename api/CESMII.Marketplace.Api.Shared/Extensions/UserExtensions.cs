@@ -55,7 +55,6 @@
 
             // Value cannot be null if user is authorized. If it is null, let it error occur as this would be a serious problem.
             //TBD - why is user.Identity.Name == null, There are claims but this is not transferring over to the expected identity.name as the user's id 
-            //return int.Parse(user.Identity.Name);
             return user.FindFirst(ClaimTypes.Sid).Value;
         }
 
