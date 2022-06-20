@@ -1,6 +1,5 @@
 ﻿namespace CESMII.Marketplace.DAL.Models
 {
-    // using CESMII.Marketplace.DAL.models;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -59,7 +58,7 @@
         /// TBD - May need to convert this to list.
         /// </summary>
         public virtual UserModel Author { get; set; }
-        //public virtual List<Author> Author { get; set; }
+        
         /// <summary>
         /// The author may not be someone within the system. In this case, show as a simple string field.
         /// TBD - May need to convert this to list.

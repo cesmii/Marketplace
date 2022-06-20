@@ -74,16 +74,9 @@ namespace CESMII.Marketplace.Api.Controllers
                 {
                     analytic.PageVisitCount += 1;
                     await _dalAnalytics.Update(analytic, model.ID);
-
-                    // _dalAnalytics.Update(analytic, model.ID);
-                    // _dalAnalytics.Update(analytic, analytic.ID.ToString());
                 }
                 result.Analytics = analytic;
             }
-            //TBD
-            //get related items
-            //var util = new MarketplaceUtil(_dal, _dalAnalytics);
-            //result.SimilarItems = util.SimilarItems(result);
 
             return Ok(result);
         }
@@ -191,7 +184,7 @@ namespace CESMII.Marketplace.Api.Controllers
         {
             var result = await _dalRequestInfo.Add(model, null);
             //error occurs on Add, don't stop download.
-            if (String.IsNullOrEmpty(result) == true)
+            if (String.IsNullOrEmpty(result))
             {
                 _logger.LogWarning($"ProfileController|Add|Could not add RequestInfo");
             }
@@ -208,7 +201,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 var modelNew = _dalRequestInfo.GetById(result);
 
                 //we are adding a request info with an smprofile, get the associated sm profile.
-                modelNew.SmProfile = smProfile; //await _dalCloudLib.GetById(model.SmProfileId.Value.ToString()); 
+                modelNew.SmProfile = smProfile;
 
                 var subject = REQUESTINFO_SUBJECT.Replace("{{RequestType}}", modelNew.RequestType.Name);
                 var body = await this.RenderViewAsync("~/Views/Template/RequestInfo.cshtml", modelNew);

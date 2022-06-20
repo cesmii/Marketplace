@@ -107,12 +107,12 @@ namespace CESMII.Marketplace.Api.Controllers
             //if we get more than one match, throw exception
             var matches = _dal.Where(x => x.Name.ToLower().Equals(model.ID.ToLower()), null, null, false, true).Data;
 
-            if (matches == null || matches.Count() == 0)
+            if (matches == null || !matches.Any())
             {
                 _logger.LogWarning($"PublisherController|GetByName|No records found matching this name: {model.ID}");
                 return BadRequest($"No records found matching this name: {model.ID}");
             }
-            if (matches.Count() > 1)
+            if (matches.Count > 1)
             {
                 _logger.LogWarning($"PublisherController|GetByName|Multiple records found matching this name: {model.ID}");
                 return BadRequest($"Multiple records found matching this name: {model.ID}");
