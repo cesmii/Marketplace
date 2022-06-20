@@ -18,8 +18,8 @@ function PublisherEntitySidebar(props) {
     //-------------------------------------------------------------------
     const renderSectionHeader = (caption) => {
         return (
-            <div className="headline-3 d-flex align-items-center p-1 px-2 rounded" >
-                <span key="caption" className="caption font-weight-bold">
+            <div className="headline-3" >
+                <span key="caption" className="caption">
                     {caption}
                 </span>
             </div>
@@ -31,15 +31,15 @@ function PublisherEntitySidebar(props) {
 
         const choices = section.items.map((item) => {
             return (
-                <li key={`${section.enumValue}-${item.id}`} className='my-2 tag' >
-                    <span className="p-0 px-2">{item.name}</span>
+                <li key={`${section.enumValue}-${item.id}`} className='my-1 tag' >
+                    <span className="section-item">{item.name}</span>
                 </li>
             )
         });
         return (
             <div key={`${section.name}-${section.enumValue}`} className="mb-4">
                 {renderSectionHeader(section.name)}
-                <ul className="section-items m-0 px-0" >
+                <ul className="section-items m-0 pt-1 px-0" >
                     {choices}
                 </ul>
             </div>
@@ -76,7 +76,7 @@ function PublisherEntitySidebar(props) {
 
 
     return (
-        <div className="info-panel" >
+        <div className={`info-panel ${props.className == null ? '' : props.className}`} >
             {renderSections()}
         </div>
     )
