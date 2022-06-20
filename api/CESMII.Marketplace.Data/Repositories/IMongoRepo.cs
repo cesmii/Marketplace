@@ -42,7 +42,7 @@
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        List<TEntity> AggregateMatch(MongoDB.Driver.FilterDefinition<TEntity> filter, MongoDB.Driver.ProjectionDefinition<TEntity> fieldList = null);
+        List<TEntity> AggregateMatch(MongoDB.Driver.FilterDefinition<TEntity> filter, List<string> fieldList = null);
 
         /// <summary>
         /// Find entities in a given collection matching the criteria passed in the expression. 
