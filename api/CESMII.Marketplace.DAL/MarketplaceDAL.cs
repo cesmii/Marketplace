@@ -324,8 +324,8 @@
             _publishersAll = _repoPublisher.AggregateMatch(filterPubs);
 
             var filterImages = MongoDB.Driver.Builders<ImageItemSimple>.Filter.In(x => x.MarketplaceItemId, marketplaceIds);
-            var fieldList = MongoDB.Driver.Builders<ImageItemSimple>.Projection.Include("MarketplaceItemId: 1, Type: 1, FileName: 1");
-
+            var fieldList = new List<string>() 
+                { nameof(ImageItemSimple.MarketplaceItemId), nameof(ImageItemSimple.FileName), nameof(ImageItemSimple.Type)};
             _imagesAll = _repoImages.AggregateMatch(filterImages, fieldList);
 
             var filterAnalytics = MongoDB.Driver.Builders<MarketplaceItemAnalytics>.Filter.In(x => x.MarketplaceItemId, marketplaceIds);

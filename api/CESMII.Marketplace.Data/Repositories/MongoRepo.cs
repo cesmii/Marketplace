@@ -90,7 +90,7 @@
             return result.Skip(skip).Limit(take).ToList();
         }
 
-        public List<TEntity> AggregateMatch(FilterDefinition<TEntity> filter, ProjectionDefinition<TEntity> fieldList = null)
+        public List<TEntity> AggregateMatch(FilterDefinition<TEntity> filter, List<string> fieldList = null)
         {
             //calling it this way so that the repo will accept .Any syntax. The find syntax commented out operates 
             //slightly different in how it forms the query
@@ -101,7 +101,8 @@
             else
             {
                 //performance improvement - limit columns being queried
-                return _collection.Aggregate().Match(filter).Project<TEntity>(fieldList).ToList();
+                var fieldListString = "{" + string.Join(",", fieldList.Select(f => f + ":1").ToList()) + "}";
+                return _collection.Aggregate().Match(filter).Project<TEntity>(fieldListString).ToList();
             }
 
         }
