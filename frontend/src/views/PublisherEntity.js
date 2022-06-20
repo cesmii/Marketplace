@@ -234,7 +234,7 @@ function PublisherEntity() {
                     {renderHeaderRow()}
                     <div className="row" >
                     <div className="col-sm-3 order-2 order-sm-1" >
-                            <PublisherEntitySidebar item={item} />
+                        <PublisherEntitySidebar item={item} className="light" />
                         </div>
                     <div className="col-sm-9 mb-2 mb-md-4 order-1 order-sm-2" >
                             <div className="publisher-entity">

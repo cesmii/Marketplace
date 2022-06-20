@@ -57,7 +57,6 @@ function MarketplaceEntitySidebar(props) {
         if (section.items == null || section.items.length === 0) return;
 
         const choices = section.items.map((item, counter) => {
-            //console.log(`....${counter}`);
             if (counter < _viewAllMax) {  //0-based
                 return (
                     <li key={`${section.enumValue}-${item.id}`} className='my-1 tag' >
@@ -108,7 +107,6 @@ function MarketplaceEntitySidebar(props) {
             sections.push({
                 enumValue: 3, id: 3, name: 'Tags', expanded: true, items: metatags, viewAll: _viewAll.metaTags
             });
-            //tags.push({ enumValue: 4, id: 4, name: 'Publisher', expanded: true, items: props.item.industryVerticals });
         }
 
         const cards = sections.map((item) => {
