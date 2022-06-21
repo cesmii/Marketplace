@@ -101,6 +101,13 @@
         /// <returns>Task for update. Imagine this should return the number of records.</returns>
         Task UpdateAsync(TEntity entity);
 
+        /// <summary>
+        /// Insert / Update many items at once.
+        /// </summary>
+        /// <param name="entity">The Generic Entity type. Must be an abstract entity.</param>
+        /// <returns>Task for update. Imagine this should return the number of records.</returns>
+        Task BulkUpsertAsync(List<TEntity> entities);
+
         Task<int> Delete(TEntity entity);
 
         /// <summary>
