@@ -116,7 +116,7 @@ namespace CESMII.Marketplace.Api.Shared.Utils
             var client = new SendGridClient(_config.ApiKey);
             var from = new EmailAddress(_config.MailFromAddress, "SM Marketplace");
             var subject = message.Subject;
-            List<EmailAddress> mailTo = new List<EmailAddress>();
+            var mailTo = new List<EmailAddress>();
             // If Mail Relay is in debug mode set all addresses to the configuration file.
             if (_config.Debug)
             {

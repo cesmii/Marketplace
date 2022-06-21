@@ -236,7 +236,7 @@ namespace CESMII.Marketplace.Api.Controllers
             }
 
             //build list of where clauses - one for each cat passed in
-            List<Func<MarketplaceItem, bool>> predicates = new List<Func<MarketplaceItem, bool>>();
+            var predicates = new List<Func<MarketplaceItem, bool>>();
             foreach (var cat in model)
             {
                 predicates.Add(x => x.Categories.Any(c => c.ToString().Equals(cat)));

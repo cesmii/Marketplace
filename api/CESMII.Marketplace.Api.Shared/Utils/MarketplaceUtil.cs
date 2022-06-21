@@ -34,7 +34,7 @@
 
             //build list of where clauses all combined into one predicate, 
             //using expression extension to allow for .Or or .And expression
-            List<Func<MarketplaceItem, bool>> predicates = new List<Func<MarketplaceItem, bool>>();
+            var predicates = new List<Func<MarketplaceItem, bool>>();
 
             //build list of where clauses - one for each cat 
             Func<MarketplaceItem, bool> predicateCat = null;

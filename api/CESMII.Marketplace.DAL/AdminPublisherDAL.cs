@@ -53,7 +53,7 @@
 
         public async Task<string> Add(AdminPublisherModel model, string userId)
         {
-            Publisher entity = new Publisher
+            var entity = new Publisher
             {
                 ID = ""
                 //,Created = DateTime.UtcNow

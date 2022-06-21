@@ -49,7 +49,7 @@
 
         public async Task<string> Add(AdminMarketplaceItemModel model, string userId)
         {
-            MarketplaceItem entity = new MarketplaceItem
+            var entity = new MarketplaceItem
             {
                 ID = ""
             };

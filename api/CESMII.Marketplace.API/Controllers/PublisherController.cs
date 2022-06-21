@@ -21,19 +21,13 @@ namespace CESMII.Marketplace.Api.Controllers
     {
 
         private readonly IDal<Publisher, PublisherModel> _dal;
-        private readonly IDal<Publisher, AdminPublisherModel> _dalAdmin;
-        private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
 
         public PublisherController(
             IDal<Publisher, PublisherModel> dal,
-            IDal<Publisher, AdminPublisherModel> dalAdmin,
-            IDal<LookupItem, LookupItemModel> dalLookup,
             ConfigUtil config, ILogger<PublisherController> logger) 
             : base(config, logger)
         {
             _dal = dal;
-            _dalAdmin = dalAdmin;
-            _dalLookup = dalLookup;
         }
 
 

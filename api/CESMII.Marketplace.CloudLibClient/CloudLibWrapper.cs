@@ -16,20 +16,18 @@ namespace CESMII.Marketplace.CloudLibClient
     public class CloudLibWrapper :ICloudLibWrapper
     {
         private readonly UACloudLibClient _client;
-        private readonly CloudLibraryConfig _config;
         private readonly ILogger<CloudLibWrapper> _logger;
-        private readonly int _maxAuthorizationAttempts = 10;
 
         public CloudLibWrapper(UACloudLibClient client,
             IConfiguration config, ILogger<CloudLibWrapper> logger)
         {
             _client = client;
-            _config = new CloudLibraryConfig();
-            config.GetSection("CloudLibConfig").Bind(_config);
+            var configCloudLib = new CloudLibraryConfig();
+            config.GetSection("CloudLibConfig").Bind(configCloudLib);
             _logger = logger;
 
             //initialize cloud lib client
-            _client = new UACloudLibClient(_config.EndPoint, _config.UserName, _config.Password);
+            _client = new UACloudLibClient(configCloudLib.EndPoint, configCloudLib.UserName, configCloudLib.Password);
         }
 
         public async Task<IEnumerable<string>> ResolveNodeSetsAsync(List<ModelNameAndVersion> missingModels)

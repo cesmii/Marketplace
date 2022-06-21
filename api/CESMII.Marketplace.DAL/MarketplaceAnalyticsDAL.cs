@@ -27,7 +27,7 @@
 
         public async Task<string> Add(MarketplaceItemAnalyticsModel model, string userId)
         {
-            MarketplaceItemAnalytics entity = new MarketplaceItemAnalytics
+            var entity = new MarketplaceItemAnalytics
             {
                 ID = ""
                 //,Created = DateTime.UtcNow
