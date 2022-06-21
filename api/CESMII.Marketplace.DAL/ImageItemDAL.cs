@@ -22,7 +22,7 @@
 
         public async Task<string> Add(ImageItemModel model, string userId)
         {
-            ImageItem entity = new ImageItem
+            var entity = new ImageItem
             {
                 ID = ""
             };

@@ -25,7 +25,7 @@
 
         public async Task<string> Add(LookupItemModel model, string userId)
         {
-            LookupItem entity = new LookupItem
+            var entity = new LookupItem
             {
                 ID = ""
             };

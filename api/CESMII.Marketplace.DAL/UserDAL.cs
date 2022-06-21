@@ -26,7 +26,6 @@
 
         public UserDAL(IMongoRepository<User> repo,
             IMongoRepository<Permission> repoPermission,
-            IMongoRepository<Organization> repoOrganization, 
             ConfigUtil configUtil) : base(repo)
         {
             _configUtil = configUtil;
@@ -47,7 +46,7 @@
             //generate random password and then encrypt in here. 
             var password = PasswordUtils.GenerateRandomPassword(_configUtil.PasswordConfigSettings.RandomPasswordLength);
 
-            User entity = new User
+            var entity = new User
             {
                 ID = ""
                 ,Created = DateTime.UtcNow

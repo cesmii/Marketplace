@@ -61,7 +61,7 @@
             errs = errs.OrderBy(e => e.FieldName).ThenBy(e => e.Message).ToList();
 
             //optional logging
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            var sb = new System.Text.StringBuilder();
             foreach (var e in errs)
             {
                 if (sb.Length > 0) { sb.Append(delimiter); }

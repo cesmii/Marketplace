@@ -123,7 +123,7 @@ namespace CESMII.Marketplace.Api
                         Type = ReferenceType.SecurityScheme,
                         Id = "Bearer"
                     }
-                    },new string[] { }
+                    },Array.Empty<string>()
                 }
                 });
             });

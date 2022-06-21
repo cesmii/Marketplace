@@ -37,7 +37,7 @@
 
         public async Task<string> Add(RequestInfoModel model, string userId)
         {
-           RequestInfo entity = new RequestInfo
+            var entity = new RequestInfo
             {
                 ID = ""
                 //,Created = DateTime.UtcNow
