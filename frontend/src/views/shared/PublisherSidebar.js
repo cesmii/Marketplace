@@ -6,7 +6,7 @@ import { useLoadingContext } from '../../components/contexts/LoadingContext';
 import { clearSearchCriteria, toggleSearchFilterSelected } from '../../services/MarketplaceService';
 import { generateLogMessageString } from '../../utils/UtilityService';
 
-import { SVGIcon, SvgVisibilityIcon } from '../../components/SVGIcon';
+import { SvgVisibilityIcon } from '../../components/SVGIcon';
 import color from '../../components/Constants';
 import '../../components/styles/InfoPanel.scss';
 

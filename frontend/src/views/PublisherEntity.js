@@ -6,7 +6,7 @@ import axiosInstance from "../services/AxiosService";
 import { AppSettings } from '../utils/appsettings';
 import { generateLogMessageString, getMarketplaceIconName, getMarketplaceCaption } from '../utils/UtilityService'
 import { MarketplaceBreadcrumbs } from './shared/MarketplaceBreadcrumbs';
-import { useLoadingContext, UpdateRecentFileList, toggleFavoritesList } from "../components/contexts/LoadingContext";
+import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
 import { useAuthState } from "../components/authentication/AuthContext";
 
 import { SvgVisibilityIcon } from "../components/SVGIcon";
