@@ -60,7 +60,15 @@ export const AppSettings = {
         industries: '',
         membershipStatusId: null
     },
-    itemTypeCode: { smApp: 'sm-app', smProfile: 'sm-profile' }
+    itemTypeCode: { smApp: 'sm-app', smProfile: 'sm-profile' },
+    JobLogStatus: {
+        NotStarted: 0,
+        InProgress: 1,
+        Completed: 2,
+        Failed: 10,
+        Cancelled: 11
+    }
+
 
 
     
