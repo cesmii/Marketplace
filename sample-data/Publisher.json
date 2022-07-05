@@ -1,86 +1,39 @@
 [{
   "_id": {
-    "$oid": "614b269c045c0ea705844de1"
-  },
-  "Name": "palletizer-technologies",
-  "DisplayName": "Palletizer Technologies, LLC",
-  "Verified": true,
-  "Description": "Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. ",
-  "CompanyUrl": "https://www.randstadusa.com/",
-  "SocialMediaLinks": [
-    {
-      "Icon": "faFacebook",
-      "Css": "facebook",
-      "Url": "https://www.facebook.com/"
-    },
-    {
-      "Icon": "faInstagram",
-      "Css": "instagram",
-      "Url": "https://www.instagram.com/"
-    },
-    {
-      "Icon": "faTwitter",
-      "Css": "twitter",
-      "Url": "https://www.twitter.com/"
-    }
-  ],
-  "Categories": [
-    {
-      "$oid": "6123a2a96f069e7f409f62d1"
-    },
-    {
-      "$oid": "6123a2a96f069e7f409f62d2"
-    },
-    {
-      "$oid": "6123a2a96f069e7f409f62d0"
-    }
-  ],
-  "IndustryVerticals": [
-    {
-      "$oid": "6123a2a96f069e7f409f62d5"
-    },
-    {
-      "$oid": "6123a2a96f069e7f409f62d4"
-    },
-    {
-      "$oid": "6123a2a96f069e7f409f62d3"
-    }
-  ],
-  "IsActive": true
-},{
-  "_id": {
     "$oid": "614b3a74045c0ea705844e06"
+  },
+  "CreatedById": {
+    "_csharpnull": true
   },
   "Created": {
     "$date": {
       "$numberLong": "-62135596800000"
     }
   },
-  "UpdatedById": {
-    "$oid": "613770ad4849a53d993fb97d"
-  },
   "Updated": {
-    "$date": "2022-01-12T14:49:41.314Z"
+    "$date": {
+      "$numberLong": "1647882889808"
+    }
   },
   "IsActive": true,
   "Name": "micro-processor",
   "DisplayName": "Micro Processor, Inc.",
-  "Verified": true,
+  "Verified": false,
   "Description": "<p>This <strong>organization </strong>specializes in description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here.</p>",
   "CompanyUrl": "https://www.randstadusa.com/",
   "SocialMediaLinks": [
     {
-      "Icon": "faFacebook",
+      "Icon": "facebook",
       "Css": "facebook",
       "Url": "https://www.facebook.com/"
     },
     {
-      "Icon": "faInstagram",
+      "Icon": "instagram",
       "Css": "instagram",
       "Url": "https://www.instagram.com/"
     },
     {
-      "Icon": "faYoutube",
+      "Icon": "youtube",
       "Css": "youtube",
       "Url": "https://www.youtube.com/"
     }
@@ -102,98 +55,292 @@
   "_id": {
     "$oid": "618425a5ff118b749e33f5fe"
   },
+  "CreatedById": {
+    "_csharpnull": true
+  },
   "Created": {
     "$date": {
       "$numberLong": "-62135596800000"
     }
   },
-  "UpdatedById": {
-    "$oid": "613770ad4849a53d993fb97d"
-  },
   "Updated": {
-    "$date": "2022-01-25T16:33:04.481Z"
+    "$date": {
+      "$numberLong": "1648834680743"
+    }
   },
   "IsActive": true,
-  "Name": "emerson-automation-solutions",
-  "DisplayName": "Emerson Automation Solutions",
+  "Name": "emerson",
+  "DisplayName": "Emerson",
   "Verified": true,
-  "Description": "Emerson Automation solutions combines advanced technologies, industry-leading expertise and an insatiable curiosity about the world to create sustainable solutions for our customers. Many of the industry’s standard approaches were created decades ago, long before today’s innovation. Doing more of the same is yielding only incremental benefits and management expects you to deliver better results. With a partner like Emerson, you can. Our automation expertise – from projects to operations – is focused on helping you hit your targets and move your organization into Top Quartile performance.",
+  "Description": "<p>As a global leader in industrial software and automation, Emerson drives innovation that makes the world healthier, safer, smarter and more sustainable by propelling operational performance and workforce efficiency to new levels.&nbsp;</p>\n<p>By fusing more than 130 years of technology and engineering expertise, Emerson continues to solve some of the world’s most complex challenges with innovative solutions for customers in industrial markets and beyond.&nbsp;</p>",
   "CompanyUrl": "https://www.emerson.com/en-us/automation-solutions",
   "SocialMediaLinks": null,
   "Categories": [
     {
+      "$oid": "62473824a649292c49921f07"
+    },
+    {
+      "$oid": "6247382fa649292c49921f08"
+    },
+    {
+      "$oid": "6247383da649292c49921f09"
+    },
+    {
+      "$oid": "62473845a649292c49921f0a"
+    },
+    {
+      "$oid": "6247384ea649292c49921f0b"
+    },
+    {
+      "$oid": "62473856a649292c49921f0c"
+    },
+    {
+      "$oid": "618aa924557c7b88d5fb487b"
+    },
+    {
       "$oid": "6123a2a96f069e7f409f62d0"
     },
     {
-      "$oid": "6123a2a96f069e7f409f62d2"
+      "$oid": "618aa913557c7b88d5fb487a"
+    },
+    {
+      "$oid": "618aa883557c7b88d5fb4877"
     }
   ],
   "IndustryVerticals": [
+    {
+      "$oid": "62473787a649292c49921f01"
+    },
+    {
+      "$oid": "62473796a649292c49921f02"
+    },
+    {
+      "$oid": "624737a9a649292c49921f03"
+    },
+    {
+      "$oid": "624737b1a649292c49921f04"
+    },
+    {
+      "$oid": "624737b9a649292c49921f05"
+    },
+    {
+      "$oid": "624737c3a649292c49921f06"
+    },
     {
       "$oid": "6123a2a96f069e7f409f62d4"
     },
     {
       "$oid": "6123a2a96f069e7f409f62d3"
+    },
+    {
+      "$oid": "618aa8e8557c7b88d5fb4879"
+    },
+    {
+      "$oid": "618aa8c0557c7b88d5fb4878"
     }
   ]
 },{
   "_id": {
-    "$oid": "61a7fa47d33d6576d8a6a3f2"
-  },
-  "Name": "macro-analytics",
-  "DisplayName": "Macro Analytics, LLC",
-  "Verified": true,
-  "Description": "This organization specializes in description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. ",
-  "CompanyUrl": "https://www.randstadusa.com/",
-  "SocialMediaLinks": null,
-  "Categories": [
-    {
-      "$oid": "618aa924557c7b88d5fb487b"
-    },
-    {
-      "$oid": "6123a2a96f069e7f409f62d0"
-    },
-    {
-      "$oid": "618aa883557c7b88d5fb4877"
-    },
-    {
-      "$oid": "6123a2a96f069e7f409f62d2"
-    }
-  ],
-  "IndustryVerticals": [
-    {
-      "$oid": "6123a2a96f069e7f409f62d3"
-    }
-  ],
-  "IsActive": true
-},{
-  "_id": {
-    "$oid": "61a7fe8d9207dd229ff41789"
+    "$oid": "62389cb2a649292c49921eec"
   },
   "Created": {
     "$date": {
-      "$numberLong": "-62135596800000"
+      "$numberLong": "1647820800000"
+    }
+  },
+  "Updated": {
+    "$date": {
+      "$numberLong": "1649696901306"
+    }
+  },
+  "IsActive": true,
+  "Name": "5gtechnologies",
+  "DisplayName": "5G Technologies USA Ltd.",
+  "Verified": true,
+  "Description": "<p>5G is a multi-national research and innovation group that specializes in developing and marketing smart digital automation solutions for global manufacturing and financial industries. The 5G group is IP-focused and operates in 4 different countries. 5G’s suite of Industry 4.0 solutions have 20 years of successful field experience, across multiple verticals of all sized-manufacturers, in 14 countries.</p>",
+  "CompanyUrl": "https://www.5gautomatika.com/",
+  "SocialMediaLinks": null,
+  "Categories": [],
+  "IndustryVerticals": []
+},{
+  "_id": {
+    "$oid": "62545dfe2473fdfd95124116"
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1649635200000"
+    }
+  },
+  "Updated": {
+    "$date": {
+      "$numberLong": "1651172136854"
+    }
+  },
+  "IsActive": true,
+  "Name": "augury",
+  "DisplayName": "Augury",
+  "Verified": true,
+  "Description": "<p><strong>What is Augury’s Mission?</strong></p>\n<p>We’re building a world where people can always rely on the machines that matter, by providing our customers with superior insights into the health and performance of the machines they use to make products, deliver services and improve lives.</p>\n<p><strong>What is the Problem Augury Solves?&nbsp;</strong></p>\n<p>When a critical machine fails, an entire production line grinds to a halt. Augury helps manufacturers and industrial companies to reduce downtime, maximize production capacity, optimize the cost of asset care and accelerate their digital transformation.</p>\n<p><strong>What is Machine Health?&nbsp;</strong></p>\n<p>Machine Health uses the Internet of Things (IOT) and Artificial Intelligence (AI) technology to predict and prevent industrial machine failures, and improve machine performance.&nbsp;</p>\n<p><strong>How Does Machine Health Work?&nbsp;</strong></p>\n<p>Augury’s full-stack Machine Health solutions use sensors that capture vibration, temperature and magnetic data from machines, advanced AI diagnostics and human reliability experts to improve the health and performance of industrial machines. Implement Machine Health in four easy steps (See our <a href=\"https://www.youtube.com/watch?v=oEKuXED7NCY\" title=\"What is Machine Health video\">What is Machine Health video</a>) &nbsp;</p>\n<ul>\n  <li>Monitor: Sensors capture and transmit data to the Augury platform 24/7.&nbsp;</li>\n  <li>Diagnose: AI detects issues, explains what caused them and prescribes courses of action.&nbsp;</li>\n  <li>Guide: Augury’s platform, AI Insights and expert support enable users to prioritize and plan machine health activity.&nbsp;</li>\n  <li>Act: Users collaborate and act on guidance to improve the health and performance of machines and operations.</li>\n</ul>\n<p><strong>What Results Do Customers Get From Augury’s Solutions?&nbsp;</strong></p>\n<p>Machine Health has emerged as Industry 4.0’s killer app since users get value from the technology fast and at scale. On average, Augury customers make their first machine improvements within thirty days of installation. <br>\n</p>\n<p><a href=\"https://www.linkedin.com/pulse/getting-smarter-machine-health-improve-supply-chain-warren-pruitt/\" title=\"Colgate-Palmolive saved\">Colgate-Palmolive saved</a> 2.8 million tubes of t oothpaste by avoiding a single machine failure. <a href=\"https://info.augury.com/rs/644-UHX-540/images/Augury-ICL-Success-Story.pdf\" title=\"ICL saved a million dollars\">ICL saved a million dollars</a> &nbsp;in downtime and production loss costs at a single facility in less than 10 months. While <a href=\"https://www.mckinsey.com/business-functions/operations/our-insights/covid-19-an-inflection-point-for-industry-40?_lrsc=3639d301-ed38-4680-9f2e-fe06ee7d5ce0&amp;cid=other-soc-lke\" title=\"74% of manufacturers\">74% of manufacturers</a> &nbsp;still fail to scale Industry 4.0 technologies, Augury customers quickly expand to multiple sites. For example, Colgate-Palmolive had deployed Machine Health at 26 sites three years after installation at the pilot site.</p>\n<p><br></p>\n<p><strong>Learn More About Augury</strong></p>\n<p><a href=\"https://www.augury.com\" title=\"Website\">Website</a><br>\n<a href=\"https://www.facebook.com/augurysys\" title=\"Facebook\">Facebook</a><br>\n<a href=\"https://www.linkedin.com/company/augury-systems\" title=\"LinkedIn\">LinkedIn</a><br>\n<a href=\"https://twitter.com/augurysys\" title=\"Twitter\">Twitter</a></p>",
+  "CompanyUrl": "https://www.augury.com/",
+  "SocialMediaLinks": null,
+  "Categories": [],
+  "IndustryVerticals": [
+    {
+      "$oid": "626ae30c35286cb67ba0998d"
+    },
+    {
+      "$oid": "626ae2fa35286cb67ba0998c"
+    },
+    {
+      "$oid": "625db4eb2473fdfd95124120"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d3"
+    },
+    {
+      "$oid": "626ae31535286cb67ba0998e"
+    },
+    {
+      "$oid": "624c6e2ca649292c49921f15"
+    },
+    {
+      "$oid": "625db50d2473fdfd95124121"
+    }
+  ]
+},{
+  "_id": {
+    "$oid": "625db4652473fdfd9512411f"
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1650240000000"
+    }
+  },
+  "Updated": {
+    "$date": {
+      "$numberLong": "1650311289927"
+    }
+  },
+  "IsActive": true,
+  "Name": "falkonry-inc",
+  "DisplayName": "Falkonry Inc.",
+  "Verified": true,
+  "Description": "<p>Falkonry enables industrial companies to improve their output and quality through time series AI.&nbsp;</p>\n<p>By leveraging AI to review terabytes of sensor and machine data in real-time, Falkonry reveals actionable insights on excursions and faults. These insights help factory teams make smarter decisions for keeping operations on track and improving them.</p>",
+  "CompanyUrl": "https://falkonry.com/",
+  "SocialMediaLinks": null,
+  "Categories": [
+    {
+      "$oid": "625db5422473fdfd95124126"
+    },
+    {
+      "$oid": "625db54c2473fdfd95124127"
+    },
+    {
+      "$oid": "625db5392473fdfd95124125"
+    },
+    {
+      "$oid": "625db5592473fdfd95124128"
+    },
+    {
+      "$oid": "625db5632473fdfd95124129"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d2"
+    }
+  ],
+  "IndustryVerticals": [
+    {
+      "$oid": "625db5212473fdfd95124123"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d4"
+    },
+    {
+      "$oid": "625db52a2473fdfd95124124"
+    },
+    {
+      "$oid": "624c6e2ca649292c49921f15"
+    },
+    {
+      "$oid": "625db50d2473fdfd95124121"
+    },
+    {
+      "$oid": "625db5192473fdfd95124122"
+    }
+  ]
+},{
+  "_id": {
+    "$oid": "627e9fd28d634dec9b0e4b18"
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1652400000000"
     }
   },
   "UpdatedById": {
-    "$oid": "613770ad4849a53d993fb97d"
+    "_csharpnull": true
+  },
+  "Updated": null,
+  "IsActive": true,
+  "Name": "symphonyai-industrial",
+  "DisplayName": "SymphonyAI Industrial",
+  "Verified": true,
+  "Description": "<p>SymphonyAI Industrial, a SymphonyAI business, is an innovator in industrial insight, accelerating autonomous plant operations. The industry leading EurekaAI/IoT platform and industrial optimization solutions connect tens of thousands of assets and workflows in manufacturing plants globally and process billions of data points daily, pushing new plateaus in operational intelligence.</p>\n<ul>\n  <li>Digital manufacturing composable enterprise MOM/MES solutions can be operational in 90 days to connect devices, processes, people, and systems with harmonizing plant automation and control.</li>\n  <li>Plant performance applications span asset predictive maintenance and process health and optimization, maintaining high availability of equipment, extending the life of capital assets, and reducing process variability.</li>\n  <li>Connected frontline worker solutions mobilize people to handle even their most complex processes away from their desks with human-driven procedure and instruction support, using a combination of glasses, smartphones, tablets, and PCs.&nbsp;</li>\n</ul>\n<p>&nbsp;</p>\n<p>SymphonyAI Industrial solutions provide high value to users by driving variability out of processes and optimizing operations for throughput, yield, energy efficiency, and sustainability.</p>",
+  "CompanyUrl": "https://symphonyindustrial.ai/",
+  "SocialMediaLinks": null,
+  "Categories": [],
+  "IndustryVerticals": []
+},{
+  "_id": {
+    "$oid": "629645786519f64c6fab0c7c"
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1653955200000"
+    }
   },
   "Updated": {
-    "$date": "2021-12-03T00:25:36.072Z"
+    "$date": {
+      "$numberLong": "1654015619571"
+    }
   },
   "IsActive": true,
-  "Name": "starlight-analytics",
-  "DisplayName": "Starlight Analytics",
+  "Name": "corewatts",
+  "DisplayName": "CoreWatts",
   "Verified": true,
-  "Description": "This organization specializes in description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. Publisher description here. ",
-  "CompanyUrl": "https://www.randstadusa.com/",
+  "Description": "<p>CoreWatts is a ground-breaking energy tracking and insights tool that facilitates easy decision-making. CoreWatts collects and combines energy and production data from a plant to reveal trends in energy usage, discover productivity opportunities for enhancements, savings, and sustainability measures, and address machinery inefficiencies.</p>\n<p>CoreWatts. Energy Insights that give Light to Decision-Making.</p>",
+  "CompanyUrl": "https://www.corewatts.com/",
   "SocialMediaLinks": null,
   "Categories": [
+    {
+      "$oid": "62473824a649292c49921f07"
+    },
+    {
+      "$oid": "625db5392473fdfd95124125"
+    },
+    {
+      "$oid": "6247382fa649292c49921f08"
+    },
+    {
+      "$oid": "624c6fa8a649292c49921f20"
+    },
+    {
+      "$oid": "6247384ea649292c49921f0b"
+    },
+    {
+      "$oid": "624c6fc2a649292c49921f23"
+    },
+    {
+      "$oid": "624c6fdaa649292c49921f25"
+    },
     {
       "$oid": "618aa924557c7b88d5fb487b"
     },
     {
       "$oid": "6123a2a96f069e7f409f62d0"
+    },
+    {
+      "$oid": "618aa913557c7b88d5fb487a"
     },
     {
       "$oid": "618aa883557c7b88d5fb4877"
@@ -204,7 +351,184 @@
   ],
   "IndustryVerticals": [
     {
+      "$oid": "6123a2a96f069e7f409f62d5"
+    },
+    {
+      "$oid": "62473787a649292c49921f01"
+    },
+    {
+      "$oid": "626ae2fa35286cb67ba0998c"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d4"
+    },
+    {
       "$oid": "6123a2a96f069e7f409f62d3"
+    },
+    {
+      "$oid": "624c6e0ea649292c49921f12"
+    },
+    {
+      "$oid": "626ae31535286cb67ba0998e"
+    },
+    {
+      "$oid": "629646466519f64c6fab0c7d"
+    },
+    {
+      "$oid": "624737b1a649292c49921f04"
+    },
+    {
+      "$oid": "625db50d2473fdfd95124121"
+    },
+    {
+      "$oid": "624c6e67a649292c49921f18"
+    },
+    {
+      "$oid": "6296464e6519f64c6fab0c7e"
+    },
+    {
+      "$oid": "624c6e98a649292c49921f1d"
+    },
+    {
+      "$oid": "625460bf2473fdfd95124117"
+    }
+  ]
+},{
+  "_id": {
+    "$oid": "629a63a8605dda89466cf5a9"
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1654214400000"
+    }
+  },
+  "UpdatedById": {
+    "_csharpnull": true
+  },
+  "Updated": null,
+  "IsActive": true,
+  "Name": "adapdix",
+  "DisplayName": "Adapdix",
+  "Verified": true,
+  "Description": "<p>Adapdix provides an innovative software platform that enables autonomous systems for enterprises. The company’s customer centric EdgeOps platform powered by their DataMesh technology increases uptime of equipment, reduces supply chain and logistics cost, and enables autonomous operations. Founded in 2015, Adapdix is headquartered in Pleasanton, California – see <a href=\"http://www.adapdix.com\">http://www.adapdix.com</a> &nbsp;</p>",
+  "CompanyUrl": "http://www.adapdix.com",
+  "SocialMediaLinks": null,
+  "Categories": [],
+  "IndustryVerticals": []
+},{
+  "_id": {
+    "$oid": "629a6990605dda89466cf5b3"
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1654214400000"
+    }
+  },
+  "UpdatedById": {
+    "_csharpnull": true
+  },
+  "Updated": null,
+  "IsActive": true,
+  "Name": "litmus-automation",
+  "DisplayName": "Litmus Automation",
+  "Verified": true,
+  "Description": "<p>Litmus is the only flexible and scalable edge platform that provides the critical data connectivity needed to monitor, visualize, analyze, and integrate industrial data at scale. Litmus connects to every data source to provide a complete data picture for Industry 4.0 use cases ranging from Smart Manufacturing to Industrial IoT and Machine Learning. Customers include 10+ Fortune 500 manufacturing companies, while partners like Siemens, HPE, Intel, and SNC Lavalin expand the Company’s path to market. Learn more at <a href=\"https://litmus.io/\">https://litmus.io/</a>&nbsp;</p>",
+  "CompanyUrl": "https://litmus.io/",
+  "SocialMediaLinks": null,
+  "Categories": [],
+  "IndustryVerticals": []
+},{
+  "_id": {
+    "$oid": "629df33ab159f4d4ef73c5ea"
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1654473600000"
+    }
+  },
+  "Updated": {
+    "$date": {
+      "$numberLong": "1654604492198"
+    }
+  },
+  "IsActive": true,
+  "Name": "toward-zero",
+  "DisplayName": "Toward Zero",
+  "Verified": true,
+  "Description": "<p><br></p>\n<figure><img src=\"https://marketplace-back.azurewebsites.net/api/image/629f424ab159f4d4ef73c5fd\" height=\"auto\" width=\"auto\" alt=\"Toward Zero\"/></figure>\n<p>We're experts at deploying and integrating smart manufacturing systems and supply chain solutions – on time and within budget. &nbsp;Our #1 concern is making sure they work the way they're supposed to so your company gets the ROI you expect. &nbsp;Toward Zero’s global team of supply chain experts, smart manufacturing engineers, data and applications architects, and manufacturing business consultants consistently apply our proven implementation and integration methodologies and disciplined project management practices, helping you manage change in the plant and throughout the entire business. &nbsp;Every one of our team members is a deep domain expert in their chosen field, and we apply our understanding of your industry, so projects take off on the first try and keep getting results. &nbsp;Our clients consistently achieve technology investment ROI and, as a result, dramatically improve operational performance and profitability.</p>\n<p><a href=\"http://www.towardzero.com/\" title=\"Toward Zero online\">Toward Zero online</a>&nbsp;</p>\n<p><a href=\"https://www.towardzero.com/blog\" title=\"Toward Zero blog\">Toward Zero blog</a>&nbsp;</p>\n<p><a href=\"https://www.linkedin.com/company/toward-zero\" title=\"Connect with us on LinkedIn\">Connect with us on LinkedIn</a>&nbsp;</p>\n<p><br>\n</p>\n<p><strong>Collect Data from CNC Machines with Apogean™</strong></p>\n<p>It's easy to collect data from CNC machines for OEE, shop floor analytics, and other apps with Apogean™. &nbsp;Machine shops struggle to collect data from HAAS machines for OEE, shop floor analytics, and other apps. Apogean™ by Toward Zero makes it quick and easy to collect data from CNC machines, without expensive PLC’s, complex wiring, or third-party conversion software. Apogean™ is a plug-and-play smart manufacturing data collection solution with onboard software to convert data from your CNC machine to almost any protocol needed for OEE, manufacturing analytics, MES, or other smart manufacturing application. &nbsp;No more expensive hardware, software, infrastructure, or additional network drops. Apogean™ lets you use the same serial port or ethernet port for both CNC program and machine data collection. &nbsp;Check out the <a href=\"https://www.towardzero.com/apogean\" title=\"Apogean™ data sheet\">Apogean™ data sheet</a> &nbsp;or learn more about <a href=\"https://www.towardzero.com/collectmachinedata/cncmachines/haas\" title=\"collecting machine data with Apogean™\">collecting machine data with Apogean™</a> .</p>\n<p><br>\n</p>\n<p><strong>Machine Connectivity Professional Services by Toward Zero</strong></p>\n<p>“Collecting data from CNC machines is as easy as 1-2-3,” said no engineer ever. &nbsp;Does your company need to collect data from CNC machines for smart manufacturing? &nbsp;Getting access to machine data can be frustrating and confusing. &nbsp;That doesn't mean your company has to skip older equipment or machines with proprietary protocols. &nbsp;If you're unsure what approach is right for your company or specific machines, get advice and help from Toward Zero’s machine connectivity experts. &nbsp;<a href=\"https://www.towardzero.com/technology/machine-data\" title=\"Learn more about machine connectivity\">Learn more about machine connectivity</a> .</p>\n<p><br>\n</p>\n<p><strong>Advanced Planning and Scheduling with Toward Zero</strong></p>\n<p>Manufacturers that use production planning and scheduling software to conduct effective scheduling planning, so they maximize throughput with real-time visibility and collaboration. &nbsp;Toward Zero can help you select the right solution for your specific company and processes, implement the solution, integrate it with your business, operations, and supply chain systems, and help your production schedulers get the most out of your APS system. With the right production scheduling system, your company can eliminate shipping rush charges, achieve OTD with correct quantities, make more product without adding equipment, and so much more. &nbsp;<a href=\"https://www.towardzero.com/production-planning-and-scheduling\" title=\"Learn more about advanced planning and scheduling (APS)\">Learn more about advanced planning and scheduling (APS)</a> .</p>\n<p><br>\n</p>\n<p><strong>OEE, MES and other Smart Manufacturing Deployments with Toward Zero</strong></p>\n<p>An overwhelming number of manufacturing execution system (MES) deployments fall short of the finish line; in their wake, they leave partially implemented and, therefore, ineffective solutions. A typical outcome: stalled digital transformation and a budgetary freeze for additional IIoT projects. &nbsp;It’s not an uncommon scenario for MES projects, yet most manufacturing companies seem unaware that many MES deployments fail to hit expectations. &nbsp;<a href=\"https://www.towardzero.com/blog/mes-deployment-dirty-secrets\" title=\"Learn more about OEE, MES, and other smart manufacturing system deployments\">Learn more about OEE, MES, and other smart manufacturing system deployments</a> .</p>",
+  "CompanyUrl": "",
+  "SocialMediaLinks": null,
+  "Categories": [
+    {
+      "$oid": "629df484b159f4d4ef73c5ed"
+    },
+    {
+      "$oid": "625db5422473fdfd95124126"
+    },
+    {
+      "$oid": "625db54c2473fdfd95124127"
+    },
+    {
+      "$oid": "629df48eb159f4d4ef73c5ee"
+    },
+    {
+      "$oid": "625db5392473fdfd95124125"
+    },
+    {
+      "$oid": "629df498b159f4d4ef73c5ef"
+    },
+    {
+      "$oid": "629df4a2b159f4d4ef73c5f0"
+    },
+    {
+      "$oid": "629df4b4b159f4d4ef73c5f2"
+    },
+    {
+      "$oid": "629df4a9b159f4d4ef73c5f1"
+    },
+    {
+      "$oid": "629a6ad2605dda89466cf5b5"
+    },
+    {
+      "$oid": "629df4bcb159f4d4ef73c5f3"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d2"
+    },
+    {
+      "$oid": "629df4c6b159f4d4ef73c5f4"
+    }
+  ],
+  "IndustryVerticals": [
+    {
+      "$oid": "6123a2a96f069e7f409f62d5"
+    },
+    {
+      "$oid": "62473787a649292c49921f01"
+    },
+    {
+      "$oid": "629a682e605dda89466cf5b1"
+    },
+    {
+      "$oid": "625db5212473fdfd95124123"
+    },
+    {
+      "$oid": "6123a2a96f069e7f409f62d3"
+    },
+    {
+      "$oid": "629df3a2b159f4d4ef73c5ec"
+    },
+    {
+      "$oid": "624c6e2ca649292c49921f15"
+    },
+    {
+      "$oid": "625db50d2473fdfd95124121"
+    },
+    {
+      "$oid": "629df397b159f4d4ef73c5eb"
+    },
+    {
+      "$oid": "625db5192473fdfd95124122"
     }
   ]
 }]
