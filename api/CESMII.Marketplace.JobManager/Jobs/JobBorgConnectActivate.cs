@@ -52,8 +52,6 @@ namespace CESMII.Marketplace.JobManager.Jobs
 
         private async Task<string> GetBearerToken(JobBorgConnectActivateConfig configData)
         {
-            return "[auth token]";
-
             //call the 5G API to get the initial access token
             var config = new HttpApiConfig()
             {
@@ -62,6 +60,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             };
 
             string response = await _httpFactory.Run(config);
+            //var result1 = JsonConvert.DeserializeObject(response);
             var result = JsonConvert.DeserializeObject<BorgAuthorizeResponse>(response);
             if (result.LoginResult == null || string.IsNullOrEmpty(result.LoginResult.Result) ||
                 !result.LoginResult.Result.ToLower().Equals("success"))
