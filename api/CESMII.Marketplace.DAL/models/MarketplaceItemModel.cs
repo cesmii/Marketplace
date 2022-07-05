@@ -96,6 +96,8 @@
         [Obsolete("Retire ImageSquare")]
         public ImageItemSimpleModel ImageSquare { get; set; }
         public ImageItemSimpleModel ImageLandscape { get; set; }
+
+        public virtual List<JobDefinitionSimpleModel> JobDefinitions { get; set; }
     }
 
     public class MarketplaceItemModel : MarketplaceItemModelBase
@@ -113,7 +115,6 @@
 
         public List<LookupItemFilterModel> IndustryVerticals { get; set; }
 
-        //public List<ImageItemModel> Images { get; set; }
     }
 
     /// <summary>

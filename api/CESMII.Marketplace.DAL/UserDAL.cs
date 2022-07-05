@@ -297,6 +297,7 @@
                     LastLogin = entity.LastLogin,
                     IsActive = entity.IsActive,
                     RegistrationComplete = entity.RegistrationComplete,
+                    SmipSettings = entity.SmipSettings
                 };
             }
             else

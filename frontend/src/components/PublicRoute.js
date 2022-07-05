@@ -2,12 +2,14 @@ import React from "react";
 import { Route } from "react-router-dom";
 import DownloadMessage from "./DownloadMessage";
 import { InlineMessage } from "./InlineMessage";
+import { JobMessage } from "./JobMessage";
 
 const SimpleLayout = ({ children }) => (
 
     <div id="--routes-wrapper" className="container-fluid container-md" >
         <div className="main-panel mt-2 mt-md-4 w-100">
             <InlineMessage />
+            <JobMessage />
             <DownloadMessage />
             {children}
         </div>
@@ -19,6 +21,7 @@ const FilterLayout = ({ children }) => (
     <div id="--routes-wrapper" className="container-fluid container-md d-flex" >
         <div className="main-panel mt-2 mt-md-4 w-100">
             <InlineMessage />
+            <JobMessage />
             <DownloadMessage />
             {children}
         </div>

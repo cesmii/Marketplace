@@ -21,6 +21,7 @@
     <ProjectReference Include="..\CESMII.Marketplace.Common\CESMII.Marketplace.Common.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.DAL\CESMII.Marketplace.DAL.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Data\CESMII.Marketplace.Data.csproj" />
+    <ProjectReference Include="..\CESMII.Marketplace.JobManager\CESMII.Marketplace.JobManager.csproj" />
   </ItemGroup>
 
 	<ItemGroup>

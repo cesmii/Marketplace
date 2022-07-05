@@ -42,4 +42,15 @@
         CanManageRequestInfo = 5
 
     }
+
+    public enum TaskStatusEnum
+    {
+        NotStarted = 0,
+        InProgress = 1,
+        Completed = 2,
+        Failed = 10,
+        Cancelled = 11
+    }
+
+
 }

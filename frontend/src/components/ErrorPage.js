@@ -82,7 +82,7 @@ function ErrorPage({ error, resetErrorBoundary }) {
             console.error(generateLogMessageString(`onLogoutClick||logoutAction||An error occurred setting the logout state.`, CLASS_NAME));
         }
         else {
-            history.push(`/`);
+            history.push(`/admin`);
         }
     }
 

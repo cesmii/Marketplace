@@ -4,6 +4,7 @@ import DownloadNodesetModal from '../../components/DownloadNodesetModal';
 
 import { AppSettings } from '../../utils/appsettings';
 import { formatDate, generateLogMessageString, getImageUrl } from '../../utils/UtilityService';
+import { MarketplaceItemJobLauncher } from './MarketplaceItemJobLauncher';
 
 const CLASS_NAME = "MarketplaceItemEntityHeader";
 
@@ -33,7 +34,6 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
         console.log(generateLogMessageString(`onDownloadCancel`, CLASS_NAME));
         setDownloadModal(false);
     };
-
 
     //-------------------------------------------------------------------
     // Region: Render helpers
@@ -68,6 +68,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         {/*<div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderCategoryItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderMetaTagItem(props.item)}</div>*/}
+                        {renderJobDefinitions()}
                     </div>
                 </div>
             </>
@@ -111,6 +112,17 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
         );
     };
 
+
+    const renderJobDefinitions = () => {
+
+        if (props.currentUserId == null || props.item.jobDefinitions == null || props.item.jobDefinitions.length === 0) return;
+
+        return props.item.jobDefinitions.map((x) => {
+            return (
+                <MarketplaceItemJobLauncher key={x.id} className={`mr-2 mt-2`} currentUserId={props.currentUserId} jobDefinitionId={x.id} marketplaceItemId={props.item.id} jobName={x.name} payload={x.payload} />
+            );
+        });
+    };
 
     //-------------------------------------------------------------------
     // Region: Render final output
