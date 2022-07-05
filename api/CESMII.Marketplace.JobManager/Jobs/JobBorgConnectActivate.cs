@@ -22,7 +22,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
     public class JobBorgConnectActivate : JobBase
     {
         public JobBorgConnectActivate(
-            ILogger<JobBorgConnectActivate> logger,
+            ILogger<IJob> logger,
             IHttpApiFactory httpFactory, IDal<JobLog, JobLogModel> dalJobLog): 
             base(logger, httpFactory, dalJobLog)
         {
@@ -59,9 +59,24 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 Body = JsonConvert.SerializeObject(configData.AuthorizeConfig.Body)
             };
 
-            string response = await _httpFactory.Run(config);
-            //var result1 = JsonConvert.DeserializeObject(response);
-            var result = JsonConvert.DeserializeObject<BorgAuthorizeResponse>(response);
+            string responseRaw = await _httpFactory.Run(config);
+
+            #region Extra parsing
+            //because returned format is heavily escaped, we jump through some hoops to parse response.
+            var responseUnescaped = responseRaw.Replace(@"\", "");
+            //var responseUnescaped = System.Text.RegularExpressions.Regex.Unescape(responseRaw);
+            System.Diagnostics.Debug.WriteLine(responseUnescaped);
+            //remove quote around loginResult value, message value
+            responseUnescaped = responseUnescaped.Replace("\"{\"M", "{\"M"); //leading quote
+            responseUnescaped = responseUnescaped.Substring(0, responseUnescaped.Length-4) + "\"}}"; //trailing quote
+            //now work on the message value to unescape it so it can be deserialized.
+            //this is also a non-conventional structure. A message object that comes back as an array of messages.
+            responseUnescaped = responseUnescaped.Replace("\"[{", "[{"); //leading quote
+            responseUnescaped = responseUnescaped.Replace("}]\"", "}]"); //trailing quote
+            responseUnescaped = responseUnescaped.Substring(0, responseUnescaped.Length - 3) + "\"}}"; //trailing quote
+            var result = JsonConvert.DeserializeObject<BorgAuthorizeResponse>(responseUnescaped);
+            #endregion
+
             if (result.LoginResult == null || string.IsNullOrEmpty(result.LoginResult.Result) ||
                 !result.LoginResult.Result.ToLower().Equals("success"))
             {
@@ -71,7 +86,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 throw new UnauthorizedAccessException(msg);
             }
 
-            return result.LoginResult.Message.authToken;
+            return result.LoginResult.Message[0].authToken;
         }
 
         private async Task<BorgCreateResponseMessage> CreateCustomer(JobBorgConnectActivateConfig configData, 
@@ -174,7 +189,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
     internal class BorgAuthorizeResponseDetail
     {
         public string Result { get; set; }
-        public BorgAuthorizeResponseMessage Message { get; set; }
+        public List<BorgAuthorizeResponseMessage> Message { get; set; }
 
     }
 
