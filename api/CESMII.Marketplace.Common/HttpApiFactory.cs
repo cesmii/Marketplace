@@ -62,9 +62,10 @@ namespace CESMII.Marketplace.Common
 
                 if (config.IsPost)
                 {
-                    var data = new StringContent(config.Body);
+                    var data = new StringContent(config.Body, Encoding.UTF8, "application/json");
                     // Blocking call! Program will wait here until a response is received or a timeout occurs.
-                    response = await client.PostAsync(config.QueryString, data);
+                    response = await (string.IsNullOrEmpty(config.QueryString) ?
+                        client.PostAsync("", data) : client.PostAsync(config.QueryString, data)); 
                 }
                 else
                 {
@@ -81,8 +82,9 @@ namespace CESMII.Marketplace.Common
                 }
                 else
                 {
-                    _logger.LogWarning($"HttpApiFactory||Run||Unexpected Response: {response.StatusCode}::{response.ReasonPhrase}");
-                    return null;
+                    var msg = $"{(int)response.StatusCode}-{response.ReasonPhrase}";
+                    _logger.LogWarning($"HttpApiFactory||Run||Unexpected Response:{msg}");
+                    throw new HttpRequestException(msg);
                 }
 
             }
