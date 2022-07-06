@@ -1,0 +1,73 @@
+[{
+  "_id": {
+    "$oid": "62c45818fd12d9e296f1b4af"
+  },
+  "CreatedById": {
+    "$oid": "613770ad4849a53d993fb97d"
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1657034776725"
+    }
+  },
+  "UpdatedById": {
+    "$oid": "613770ad4849a53d993fb97d"
+  },
+  "Updated": {
+    "$date": {
+      "$numberLong": "1657034781128"
+    }
+  },
+  "IsActive": false,
+  "Name": null,
+  "StatusId": 2,
+  "Completed": {
+    "$date": {
+      "$numberLong": "1657034781104"
+    }
+  },
+  "Messages": [
+    {
+      "Message": "Starting job 'Activate Borg Connect' for 'Borg Connect'...",
+      "Created": {
+        "$date": {
+          "$numberLong": "1657034776725"
+        }
+      }
+    },
+    {
+      "Message": "Initializing...",
+      "Created": {
+        "$date": {
+          "$numberLong": "1657034776777"
+        }
+      }
+    },
+    {
+      "Message": "Authorizing user with Borg Connect API...",
+      "Created": {
+        "$date": {
+          "$numberLong": "1657034776902"
+        }
+      }
+    },
+    {
+      "Message": "Creating customer with Borg Connect API...",
+      "Created": {
+        "$date": {
+          "$numberLong": "1657034777007"
+        }
+      }
+    },
+    {
+      "Message": "Customer created. Retrieving connection information...",
+      "Created": {
+        "$date": {
+          "$numberLong": "1657034781104"
+        }
+      }
+    }
+  ],
+  "ResponseData": null
+}
+]

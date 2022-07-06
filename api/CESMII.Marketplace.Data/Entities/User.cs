@@ -29,7 +29,6 @@
 
         public DateTime? RegistrationComplete { get; set; }
 
-        [BsonIgnore]
         public BsonObjectId OrganizationId { get; set; }
 
         public SmipSettings SmipSettings { get; set; }

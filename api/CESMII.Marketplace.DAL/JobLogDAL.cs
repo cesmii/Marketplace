@@ -143,7 +143,14 @@
                     Created = entity.Created,
                     Updated = entity.Updated,
                     IsActive = entity.IsActive,
-                    Messages = entity.Messages.OrderByDescending(x => x.Created).ToList()
+                    //TBD - decrypt message support
+                    Messages = entity.Messages.OrderByDescending(x => x.Created).Select(x => new JobLogMessage()
+                    { 
+                        Message = x.isEncrypted ? "TBD - decrypt here" : x.Message,
+                        Created = x.Created,
+                        isEncrypted = x.isEncrypted
+                    }).ToList(), 
+                    ResponseData = entity.ResponseData
                 };
 
                 return result;
@@ -163,7 +170,13 @@
             {
                 entity.Completed = model.Completed;
             }
-            entity.Messages = model.Messages;
+            entity.Messages = model.Messages?.OrderByDescending(x => x.Created).Select(x => new JobLogMessage()
+            {
+                Message = x.isEncrypted ? "TBD - encrypt here" : x.Message,
+                Created = x.Created,
+                isEncrypted = x.isEncrypted
+            }).ToList(); 
+            entity.ResponseData = model.ResponseData;
         }
     }
 }

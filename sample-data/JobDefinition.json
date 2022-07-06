@@ -1,0 +1,55 @@
+[{
+  "_id": {
+    "$oid": "62bf3134d0a4cb3ef4c14d28"
+  },
+  "MarketplaceItemId": {
+    "$oid": "62389b98a649292c49921ee8"
+  },
+  "Name": "Activate Borg Connect",
+  "TypeName": "CESMII.Marketplace.JobManager.Jobs.JobBorgConnectActivate",
+  "Data": {
+    "AuthorizeConfig": {
+      "Url": "https://demo.ec4energy.com/BuildingManagement/Ec4Service.svc/user/session",
+      "Body": {
+        "userName": "admin@ec4energy.com",
+        "password": "eC4",
+        "admin": "yes"
+      }
+    },
+    "CreateCustomerConfig": {
+      "Url": "https://demo.ec4energy.com/BuildingManagement/Ec4Service.svc/customer",
+      "Body": {
+        "formData": [
+          {
+            "Name": "CustomerName",
+            "Value": ""
+          },
+          {
+            "Name": "ContactEmail",
+            "Value": ""
+          },
+          {
+            "Name": "CESMII_GraphQL_URL",
+            "Value": ""
+          },
+          {
+            "Name": "CESMII_UserName",
+            "Value": ""
+          },
+          {
+            "Name": "CESMII_Password",
+            "Value": ""
+          },
+          {
+            "Name": "CESMII_Authenticator",
+            "Value": ""
+          },
+          {
+            "Name": "CESMII_Authenticator_role",
+            "Value": ""
+          }
+        ]
+      }
+    }
+  }
+}]
