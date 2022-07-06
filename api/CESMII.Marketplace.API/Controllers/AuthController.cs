@@ -68,10 +68,15 @@ namespace CESMII.Marketplace.Api.Controllers
             return Ok(result);
         }
 
-        [HttpPost, Route("ValidateByToken")]
-        [ProducesResponseType(200, Type = typeof(UserModel))]
+        [HttpPost, Route("changepassword")]
+        [ProducesResponseType(200, Type = typeof(string))]
         public async Task<IActionResult> ValidateByToken([FromBody] ChangePasswordModel model)
         {
+            if (string.IsNullOrEmpty(model.OldPassword))
+            {
+                return BadRequest("Old Password is required.");
+            }
+
             if (string.IsNullOrEmpty(model.NewPassword))
             {
                 return BadRequest("Password is required.");
@@ -88,7 +93,7 @@ namespace CESMII.Marketplace.Api.Controllers
 
             // Why do we expect a new token here? The user is already authenticated and just changing their password?
             var tokenModel = _tokenUtils.BuildToken(user);
-            return Ok(tokenModel);
+            return Ok(tokenModel.Token);
         }
 
         [HttpPost, Route("ExtendToken")]
@@ -111,6 +116,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 return Ok(newToken);
             }
         }
+
 
         [AllowAnonymous]
         [HttpPost, Route("ForgotPassword")]

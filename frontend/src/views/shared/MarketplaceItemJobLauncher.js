@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 import axiosInstance from '../../services/AxiosService'
 import { useLoadingContext } from "../../components/contexts/LoadingContext";
@@ -17,7 +17,6 @@ export const MarketplaceItemJobLauncher = (props) => {
     // Region: Initialization
     //-------------------------------------------------------------------
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const [_activate, setActivate] = useState(false);
 
     //-------------------------------------------------------------------
     // Region: hooks

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useHistory } from "react-router-dom"
 import { useAuthDispatch, useAuthState } from "./authentication/AuthContext";
 import { logout } from "./authentication/AuthActions";
@@ -23,6 +23,14 @@ function Navbar() {
     const history = useHistory();
     const authTicket = useAuthState();
     const dispatch = useAuthDispatch() //get the dispatch method from the useDispatch custom hook
+    const [_user, setUser] = useState(null);
+
+    //-------------------------------------------------------------------
+    // Region: Hooks
+    //-------------------------------------------------------------------
+    useEffect(() => {
+        setUser(authTicket.user);
+    }, [authTicket.user]);
 
     //-------------------------------------------------------------------
     // Region: event handlers
@@ -77,17 +85,17 @@ function Navbar() {
     };
 
     const renderAdminMenu = () => {
-        if (authTicket == null || authTicket.user == null) return;
+        if (_user == null) return;
         return (
             <>
                 <li className="nav-item" >
                     <Dropdown>
                         <Dropdown.Toggle className="ml-0 ml-md-2 px-1 dropdown-custom-components d-flex align-items-center">
                             <SVGIcon name="account-circle" size="32" fill={Color.white} className="mr-2" />
-                            {authTicket.user.fullName}
+                            {_user.fullName}
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
-                            <Dropdown.Item eventKey="1" href="/user">Account details</Dropdown.Item>
+                            <Dropdown.Item eventKey="1" href="/account">Account Profile</Dropdown.Item>
                             <Dropdown.Divider />
                             <Dropdown.Item eventKey="2" href="/admin/library/new">Add Marketplace Item</Dropdown.Item>
                             <Dropdown.Item eventKey="3" href="/admin/publisher/new">Add Publisher</Dropdown.Item>

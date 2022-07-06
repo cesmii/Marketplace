@@ -280,6 +280,71 @@
             return 1;
         }
 
+        #region SMIP Settings Methods
+        /// <summary>
+        /// Update the user's Smip Settings pasword
+        /// </summary>
+        /// <remarks>
+        /// This assumes the controller does all the proper validation and passes a non-encrypted value
+        /// </remarks>
+        /// <returns></returns>
+        public async Task ChangeSmipPassword(string id, string oldPassword, string newPassword)
+        {
+            var existingUser = _repo.GetByID(id);
+            if (existingUser == null || !existingUser.IsActive) throw new ArgumentNullException($"User not found with id {id}");
+
+            //validate existing password
+            if (await this.ValidateSmipPassword(existingUser.ID, existingUser.SmipSettings?.UserName, oldPassword))
+            {
+                throw new ArgumentNullException($"Change SMIP Password - Old Password does not match for user {id}");
+            }
+
+            //Encrypt new password 
+            //TBD - existingUser.SmipSettings.Password = PasswordUtils.EncryptNewPassword(_configUtil.PasswordConfigSettings.EncryptionSettings, newPassword);
+            existingUser.SmipSettings.Password = newPassword;
+
+            //save changes
+            await _repo.UpdateAsync(existingUser);
+        }
+
+        private async Task<bool> ValidateSmipPassword(string id, string userName, string password)
+        {
+            //check user name and password match for this user
+            if (string.IsNullOrEmpty(password))
+            {
+                // Null value is used on initial creation, therefore null may not be passed into this method.
+                var ex = new ArgumentNullException(password, "Password required.");
+                _logger.Error(ex); // Log this within all targets as an error.
+                throw ex; // Throw an explicit exception, those using this should be aware this cannot be allowed.
+            }
+
+            //1. Validate against our encryption. Because we use the existing user's settings, we get the 
+            // existing pw, parse it into parts and encrypt the new pw with the same settings to see if it matches
+            var match = _repo.FindByCondition(u =>
+                u.ID.Equals(id) &&
+                u.SmipSettings?.UserName.ToLower() == userName.ToLower() &&
+                u.IsActive &&
+                u.RegistrationComplete.HasValue)
+                .FirstOrDefault();
+            if (match == null) return false;
+
+            //test against our encryption, means we match 
+            bool updateEncryptionLevel = false;
+            if (PasswordUtils.ValidatePassword(_configUtil.PasswordConfigSettings.EncryptionSettings, match.SmipSettings?.Password, password, out updateEncryptionLevel))
+            {
+                //if the encryption level has been upgraded since original encryption, upgrade their pw now. 
+                if (updateEncryptionLevel)
+                {
+                    match.SmipSettings.Password = PasswordUtils.EncryptNewPassword(_configUtil.PasswordConfigSettings.EncryptionSettings, password);
+                }
+                await _repo.UpdateAsync(match);
+                return true;
+            }
+
+            // No user match found, username or password incorrect. 
+            return false;
+        }
+        #endregion
 
         protected override UserModel MapToModel(User entity, bool verbose = false)
         {
@@ -343,6 +408,11 @@
 
             //handle update of user permissions
             entity.Permissions = model.PermissionIds.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x))).ToList();
+
+            //update smip settings - except SMIP password - copy it into mode first to essentially maintain existing value
+            model.SmipSettings.Password = entity.SmipSettings.Password;
+            //now all settings will be mapped to entity and password is preserved
+            entity.SmipSettings = model.SmipSettings;
         }
 
     }

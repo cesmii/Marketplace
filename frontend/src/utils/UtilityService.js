@@ -380,6 +380,18 @@ export const validate_NoSpecialCharacters = (val) => {
 };
 
 ///--------------------------------------------------------------------------
+// Validate no special characters are used - except dashes and underscores and numbers
+//--------------------------------------------------------------------------
+export const tryJsonParse = (val) => {
+    try {
+        return { json: JSON.parse(val), success: true, message: null };
+    } catch (e) {
+        return { json: null, success: false, message: e };
+    }
+};
+
+
+///--------------------------------------------------------------------------
 // Perform a numeric only check for numeric fields. Call this from onchange 
 // to prevent keying in alpha chars. 
 //--------------------------------------------------------------------------

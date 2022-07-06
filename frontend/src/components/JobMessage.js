@@ -219,7 +219,7 @@ function JobMessage() {
                 return `The job completed. ${msgAppend}`;
             case AppSettings.JobLogStatus.InProgress:
             default:
-                return `The job is processing. ${msgAppend}`;
+                return `Processing... ${msgAppend}`;
         }
     };
 
