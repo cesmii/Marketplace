@@ -5,7 +5,7 @@
   "MarketplaceItemId": {
     "$oid": "62389b98a649292c49921ee8"
   },
-  "Name": "Activate Borg Connect",
+  "Name": "Activate BorgConnect",
   "TypeName": "CESMII.Marketplace.JobManager.Jobs.JobBorgConnectActivate",
   "Data": {
     "AuthorizeConfig": {

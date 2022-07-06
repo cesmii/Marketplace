@@ -59,6 +59,31 @@ namespace CESMII.Marketplace.Api.Controllers
             {
                 return BadRequest($"No records found matching this ID: {model.ID}");
             }
+            //clear out SMIP settings so not sent to front end
+            result.SmipSettings = null;
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// This is a user getting their own profile
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost, Route("profile/mine")]
+        [Authorize()]
+        [ProducesResponseType(200, Type = typeof(UserModel))]
+        [ProducesResponseType(400)]
+        public IActionResult GetMine()
+        {
+            var userId = User.GetUserID();
+            var result = _dal.GetById(userId);
+            if (result == null)
+            {
+                _logger.LogWarning($"UserController|GetMine|No records found matching this ID: {userId}.");
+                return BadRequest($"No records found matching this ID: {userId}");
+            }
+            //clear out SMIP password so not sent to front end. Change password dialog will force user to enter existing password.
+            result.SmipSettings.Password = "";
             return Ok(result);
         }
 
@@ -113,6 +138,9 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
 
+        /// <summary>
+        /// This is an admin user updating someone else's profile.
+        /// </summary>
         [HttpPost, Route("Update")]
         [Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
         [ProducesResponseType(200, Type = typeof(List<UserModel>))]
@@ -126,13 +154,47 @@ namespace CESMII.Marketplace.Api.Controllers
             var result = await _dal.Update(model, User.GetUserID());
             if (result < 0)
             {
-                _logger.LogWarning($"Could not update user. Invalid id:{model.ID}.");
+                _logger.LogWarning($"UserController|Update|Could not update user. Invalid id:{model.ID}.");
                 return BadRequest("Could not update user. Invalid id.");
             }
-            _logger.LogInformation($"Updated user. Id:{model.ID}.");
+            _logger.LogInformation($"UserController|Update|Updated user. Id:{model.ID}.");
 
             //return success message object
             return Ok(new ResultMessageModel() { IsSuccess = true, Message = "Item was updated." });
+        }
+
+        /// <summary>
+        /// This is an individual user updating their own profile.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost, Route("profile/update")]
+        [Authorize()]
+        [ProducesResponseType(200, Type = typeof(List<UserModel>))]
+        public async Task<IActionResult> UpdateProfile([FromBody] UserModel model)
+        {
+            var userId = User.GetUserID();
+            if (!userId.Equals(model.ID))
+            {
+                _logger.LogWarning($"UserController|UpdateProfile|User attempting to update another user.");
+                return BadRequest("User can only update their own profile.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest("The profile record is invalid. Please correct the following:...join errors collection into string list.");
+            }
+
+            var result = await _dal.Update(model, User.GetUserID());
+            if (result < 0)
+            {
+                _logger.LogWarning($"UserController|UpdateProfile|Could not update user. Invalid id:{model.ID}.");
+                return BadRequest("Could not update user. Invalid id.");
+            }
+            _logger.LogInformation($"UserController|UpdateProfile|Updated user. Id:{model.ID}.");
+
+            //return success message object
+            return Ok(new ResultMessageModel() { IsSuccess = true, Message = "Account profile was updated." });
         }
 
         [HttpPost, Route("Delete")]
@@ -152,6 +214,32 @@ namespace CESMII.Marketplace.Api.Controllers
             return Ok(new ResultMessageModel() { IsSuccess = true, Message = "Item was deleted." });
         }
 
+        [HttpPost, Route("smipSettings/changepassword")]
+        [ProducesResponseType(200, Type = typeof(bool))]
+        public async Task<IActionResult> ChangeSmipPassword([FromBody] ChangePasswordModel model)
+        {
+            if (string.IsNullOrEmpty(model.OldPassword))
+            {
+                return BadRequest("Old Password is required.");
+            }
+
+            if (string.IsNullOrEmpty(model.NewPassword))
+            {
+                return BadRequest("New Password is required.");
+            }
+
+            var user = _dal.GetById(User.GetUserID());
+            if (user == null)
+            {
+                return BadRequest("User was not found. Please contact support.");
+            }
+
+            // If we get here, update the user data with new password
+            await _dal.ChangeSmipPassword(user.ID, model.OldPassword, model.NewPassword);
+
+            return Ok(true);
+        }
+
     }
-    
+
 }
