@@ -25,11 +25,13 @@
         protected readonly ConfigUtil _configUtil;
 
         public UserDAL(IMongoRepository<User> repo,
+            IMongoRepository<Organization> repoOrganization,
             IMongoRepository<Permission> repoPermission,
             ConfigUtil configUtil) : base(repo)
         {
             _configUtil = configUtil;
-            //when mapping the results, we also get related data. For efficiency, get the orgs now and then
+            //when mapping the results, we also get related data. For efficiency, get the orgs and permissions now 
+            _organizations = repoOrganization.GetAll();
             _permissions = repoPermission.GetAll();
         }
 
@@ -335,6 +337,9 @@
             entity.FirstName = model.FirstName;
             entity.LastName = model.LastName;
             entity.IsActive = model.IsActive;
+            entity.OrganizationId = model.Organization == null ?
+                MongoDB.Bson.ObjectId.Parse(Constants.BSON_OBJECTID_EMPTY) :
+                MongoDB.Bson.ObjectId.Parse(model.Organization.ID);
 
             //handle update of user permissions
             entity.Permissions = model.PermissionIds.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x))).ToList();

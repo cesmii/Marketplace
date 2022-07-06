@@ -36,21 +36,25 @@ namespace CESMII.Marketplace.JobManager.Jobs
             var configData = JsonConvert.DeserializeObject<JobBorgConnectActivateConfig>(e.Config.Data);
 
             base.CreateJobLogMessage($"Authorizing user with Borg Connect API...", TaskStatusEnum.InProgress);
-            var token = await GetBearerToken(configData);
+            var authData = await GetAuthToken(configData);
 
             //make a second call to the API to initiate the instance, pass token as auth header
             base.CreateJobLogMessage($"Creating customer with Borg Connect API...", TaskStatusEnum.InProgress);
-            var result = await CreateCustomer(configData, e.User, token);
+            var result = await CreateCustomer(configData, e.User, authData.authToken);
 
-            //serialize & encrypt result data in a response data field in the JobLog table. This will be decrypted 
-            //and displayed on the front end.
-            string response = JsonConvert.SerializeObject(result);
-            base.SetJobLogResponse(response, $"Customer created. Retrieving connection information...", TaskStatusEnum.Completed);
+            //put response into a human readable format that can be displayed as a message in the front end. 
+            //TBD - encrypt result data in the response data field in the JobLog table. This will be decrypted 
+            //by DAL and displayed on the front end.
+            string response = $"Url: <a href='{result.URL}' target='_blank' >{result.URL}</a>, User name: {result.Username}, Password: {result.Password}";
+            base.CreateJobLogMessage($"Customer created. Connection information:: {"<br />"}{response}", TaskStatusEnum.Completed, false);
+
+            //TBD - append the connection information to the user account. Add a collection of myItems with data associated with said 
+            //items. 
 
             return JsonConvert.SerializeObject(result);
         }
 
-        private async Task<string> GetBearerToken(JobBorgConnectActivateConfig configData)
+        private async Task<BorgAuthorizeResponseMessage> GetAuthToken(JobBorgConnectActivateConfig configData)
         {
             //call the 5G API to get the initial access token
             var config = new HttpApiConfig()
@@ -65,7 +69,6 @@ namespace CESMII.Marketplace.JobManager.Jobs
             //because returned format is heavily escaped, we jump through some hoops to parse response.
             var responseUnescaped = responseRaw.Replace(@"\", "");
             //var responseUnescaped = System.Text.RegularExpressions.Regex.Unescape(responseRaw);
-            System.Diagnostics.Debug.WriteLine(responseUnescaped);
             //remove quote around loginResult value, message value
             responseUnescaped = responseUnescaped.Replace("\"{\"M", "{\"M"); //leading quote
             responseUnescaped = responseUnescaped.Substring(0, responseUnescaped.Length-4) + "\"}}"; //trailing quote
@@ -73,63 +76,88 @@ namespace CESMII.Marketplace.JobManager.Jobs
             //this is also a non-conventional structure. A message object that comes back as an array of messages.
             responseUnescaped = responseUnescaped.Replace("\"[{", "[{"); //leading quote
             responseUnescaped = responseUnescaped.Replace("}]\"", "}]"); //trailing quote
-            responseUnescaped = responseUnescaped.Substring(0, responseUnescaped.Length - 3) + "\"}}"; //trailing quote
             var result = JsonConvert.DeserializeObject<BorgAuthorizeResponse>(responseUnescaped);
             #endregion
 
             if (result.LoginResult == null || string.IsNullOrEmpty(result.LoginResult.Result) ||
                 !result.LoginResult.Result.ToLower().Equals("success"))
             {
-                var msg = "Unable to authorize user against Borg Connect API.";
-                _logger.LogError($"JobBorgConnectActivate|GetBearerToken|{msg}");
+                var msg = $"Unable to authorize user against Borg Connect API. {(string)result.LoginResult.Message}.";
                 base.CreateJobLogMessage(msg, TaskStatusEnum.Failed);
+                _logger.LogError($"JobBorgConnectActivate|GetBearerToken|{msg}");
                 throw new UnauthorizedAccessException(msg);
             }
 
-            return result.LoginResult.Message[0].authToken;
+            //on success, the message value is a different structure, convert it to the expected structure.
+            List<BorgAuthorizeResponseMessage> msgResult = new List<BorgAuthorizeResponseMessage>();
+            foreach (var item in result.LoginResult.Message) //this is a JArray and cannot convert directly to list.
+            {
+                msgResult.Add(JsonConvert.DeserializeObject<BorgAuthorizeResponseMessage>(JsonConvert.SerializeObject(item)));
+            }
+
+            System.Diagnostics.Debug.WriteLine(JsonConvert.SerializeObject(msgResult[0]));
+            return msgResult[0];
         }
 
         private async Task<BorgCreateResponseMessage> CreateCustomer(JobBorgConnectActivateConfig configData, 
             UserModel user, string token)
         {
-            return new BorgCreateResponseMessage()
-            {
-                Password = "pw-TEST",
-                URL = "https://www.google.com",
-                Username = "un-TEST"
-            };
-
             //extract data from user profile and place in the formData needed by the Borg API
             MapUserToFormDataModel(ref configData, user);
+
+            /*
+            return new BorgCreateResponseMessage()
+            {
+                Password = "eC4",
+                URL = $"http://demo.ec4energy.com/{GetCustomerName(user)}",
+                Username = user.Email
+            };
+            */
 
             //call the 5G API to get the initial access token
             var config = new HttpApiConfig()
             {
                 Url = configData.CreateCustomerConfig.Url,
                 Body = JsonConvert.SerializeObject(configData.CreateCustomerConfig.Body),
-                BearerToken = token
+                //this requires an Authorization header with only the auth token as value
+                AuthToken = new KeyValuePair<string, string>("", token)
             };
 
-            string response = await _httpFactory.Run(config);
-            var result = JsonConvert.DeserializeObject<BorgCreateResponse>(response);
+            string responseRaw = await _httpFactory.Run(config);
+
+            #region Extra parsing
+            //because returned format is heavily escaped, we jump through some hoops to parse response.
+            var responseUnescaped = responseRaw.Replace(@"\", "");
+            //remove quote around loginResult value, message value
+            responseUnescaped = responseUnescaped.Replace("\"{\"M", "{\"M"); //leading quote
+            responseUnescaped = responseUnescaped.Substring(0, responseUnescaped.Length - 4) + "\"}}"; //trailing quote
+            //now work on the message value to unescape it so it can be deserialized.
+            responseUnescaped = responseUnescaped.Replace("\"Message\":\"{", "\"Message\":{"); //leading quote
+            responseUnescaped = responseUnescaped.Replace("}\",\"Result\"", "},\"Result\""); //trailing quote
+            var result = JsonConvert.DeserializeObject<BorgCreateResponse>(responseUnescaped);
+            #endregion
+
+            //var result = JsonConvert.DeserializeObject<BorgCreateResponse>(response);
             if (result.CreateCustomerResult == null || string.IsNullOrEmpty(result.CreateCustomerResult.Result) ||
                 !result.CreateCustomerResult.Result.ToLower().Equals("success"))
             {
-                var msg = "Unable to create customer against Borg Connect API.";
-                _logger.LogError($"JobBorgConnectActivate|CreateCustomer|{msg}");
+                var msg = $"Unable to create customer against Borg Connect API. {(string)result.CreateCustomerResult.Message}.";
                 base.CreateJobLogMessage(msg, TaskStatusEnum.Failed);
+                _logger.LogError($"JobBorgConnectActivate|CreateCustomer|{msg}");
                 throw new UnauthorizedAccessException(msg);
             }
 
+            //on success, the message value is a different structure, convert it to the expected structure.
+            var msgResult = JsonConvert.DeserializeObject<BorgCreateResponseMessage>(JsonConvert.SerializeObject(result.CreateCustomerResult.Message));
+
             //TBD - figure out how to pass back this sensitive info and not create a security hole. 
-            return result.CreateCustomerResult.Message;
+            return msgResult;
         }
 
         private static void MapUserToFormDataModel(ref JobBorgConnectActivateConfig configData, UserModel user)
         {
             //transfer values from user record to formData collection
-            configData.CreateCustomerConfig.Body.formData.FirstOrDefault(x => x.Name.Equals("CustomerName")).Value =
-                user.FullName;
+            configData.CreateCustomerConfig.Body.formData.FirstOrDefault(x => x.Name.Equals("CustomerName")).Value = GetCustomerName(user);
             configData.CreateCustomerConfig.Body.formData.FirstOrDefault(x => x.Name.Equals("ContactEmail")).Value =
                 user.Email;
             configData.CreateCustomerConfig.Body.formData.FirstOrDefault(x => x.Name.Equals("CESMII_GraphQL_URL")).Value =
@@ -142,6 +170,14 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 user.SmipSettings.Authenticator;
             configData.CreateCustomerConfig.Body.formData.FirstOrDefault(x => x.Name.Equals("CESMII_Authenticator_role")).Value =
                 user.SmipSettings.AuthenticatorRole;
+        }
+
+        private static string GetCustomerName(UserModel user)
+        {
+            return (user.Organization == null ?
+                new System.Text.RegularExpressions.Regex("[ ()*'\",_&#^@]").Replace(user.FullName, string.Empty) :
+                new System.Text.RegularExpressions.Regex("[ ()*'\",_&#^@]").Replace(user.Organization.Name, string.Empty)) +
+                DateTime.Now.ToString("-yyyyMMdd-HHmm");  //append datetime stamp for now so we can multiple times for demos and get unique instance.
         }
     }
 
@@ -189,7 +225,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
     internal class BorgAuthorizeResponseDetail
     {
         public string Result { get; set; }
-        public List<BorgAuthorizeResponseMessage> Message { get; set; }
+        public dynamic Message { get; set; }
 
     }
 
@@ -239,12 +275,12 @@ namespace CESMII.Marketplace.JobManager.Jobs
     internal class BorgCreateResponseDetail
     {
         public string Result { get; set; }
-        public BorgCreateResponseMessage Message { get; set; }
+        public dynamic Message { get; set; }
 
     }
 
     /// <summary>
-    /// Structure of the create customer response message details
+    /// Structure of the create customer response message details when successful call
     /// </summary>
     internal class BorgCreateResponseMessage
     {

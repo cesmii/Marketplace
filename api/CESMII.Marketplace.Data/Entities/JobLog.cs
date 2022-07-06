@@ -34,5 +34,8 @@ namespace CESMII.Marketplace.Data.Entities
         public string Message { get; set; }
 
         public DateTime Created { get; set; }
+
+        public bool isEncrypted { get; set; } = false;
+
     }
 }

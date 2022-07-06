@@ -127,7 +127,7 @@ namespace CESMII.Marketplace.JobManager
             {
                 //initialize scoped services for DI, initialize job class
                 var dalJobLog = scope.ServiceProvider.GetService<IDal<JobLog, JobLogModel>>();
-                var logger = scope.ServiceProvider.GetService<IJob>();
+                var logger = scope.ServiceProvider.GetService<ILogger<IJob>>();
                 var httpFactory = scope.ServiceProvider.GetService<IHttpApiFactory>();
 
                 try

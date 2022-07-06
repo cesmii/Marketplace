@@ -62,7 +62,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             return JobRun?.Invoke(sender, e);
         }
 
-        protected void CreateJobLogMessage(string message, TaskStatusEnum status)
+        protected void CreateJobLogMessage(string message, TaskStatusEnum status, bool isEncrypted = false)
         {
             var logItem = _dalJobLog.GetById(_jobEventArgs.JobLogId);
             logItem.Status = status;
@@ -70,11 +70,11 @@ namespace CESMII.Marketplace.JobManager.Jobs
             {
                 logItem.Completed = DateTime.UtcNow;
             }
-            logItem.Messages.Add(new JobLogMessage() { Message = message, Created = DateTime.UtcNow });
+            logItem.Messages.Add(new JobLogMessage() { Message = message, Created = DateTime.UtcNow, isEncrypted = isEncrypted });
             _dalJobLog.Update(logItem, _jobEventArgs.User.ID);
         }
 
-        protected void SetJobLogResponse(string responseData, string message, TaskStatusEnum status)
+        protected void SetJobLogResponse(string responseData, string message, TaskStatusEnum status, bool isEncrypted = false)
         {
             var logItem = _dalJobLog.GetById(_jobEventArgs.JobLogId);
             logItem.Status = status;
@@ -85,7 +85,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             //TBD - encrypt response data. 
             logItem.ResponseData = responseData;
 
-            logItem.Messages.Add(new JobLogMessage() { Message = message, Created = DateTime.UtcNow });
+            logItem.Messages.Add(new JobLogMessage() { Message = message, Created = DateTime.UtcNow, isEncrypted = isEncrypted });
             _dalJobLog.Update(logItem, _jobEventArgs.User.ID);
         }
 

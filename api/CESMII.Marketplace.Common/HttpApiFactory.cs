@@ -50,6 +50,21 @@ namespace CESMII.Marketplace.Common
                     new AuthenticationHeaderValue("Bearer", config.BearerToken);
                 }
 
+                // Add another type of auth token if necessary. 
+                if (!config.AuthToken.Equals(default(KeyValuePair<string, string>)))
+                {
+                    if (!string.IsNullOrEmpty(config.AuthToken.Key))
+                    {
+                        client.DefaultRequestHeaders.Authorization =
+                        new AuthenticationHeaderValue(config.AuthToken.Key, config.AuthToken.Value);
+                    }
+                    //if key is empty, we do a special workaround
+                    else
+                    {
+                        client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", config.AuthToken.Value);
+                    }
+                }
+
                 // Add an Accept header for JSON format. "application/json"
                 if (!string.IsNullOrEmpty(config.ContentType))
                 {
