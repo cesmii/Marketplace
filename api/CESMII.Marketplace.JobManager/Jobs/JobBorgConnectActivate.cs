@@ -64,8 +64,10 @@ namespace CESMII.Marketplace.JobManager.Jobs
             };
 
             string responseRaw = await _httpFactory.Run(config);
+            var result = JsonConvert.DeserializeObject<BorgAuthorizeResponse>(responseRaw);
 
             #region Extra parsing
+            /*
             //because returned format is heavily escaped, we jump through some hoops to parse response.
             var responseUnescaped = responseRaw.Replace(@"\", "");
             //var responseUnescaped = System.Text.RegularExpressions.Regex.Unescape(responseRaw);
@@ -77,6 +79,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             responseUnescaped = responseUnescaped.Replace("\"[{", "[{"); //leading quote
             responseUnescaped = responseUnescaped.Replace("}]\"", "}]"); //trailing quote
             var result = JsonConvert.DeserializeObject<BorgAuthorizeResponse>(responseUnescaped);
+            */
             #endregion
 
             if (result.LoginResult == null || string.IsNullOrEmpty(result.LoginResult.Result) ||
@@ -105,7 +108,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             //extract data from user profile and place in the formData needed by the Borg API
             MapUserToFormDataModel(ref configData, user);
 
-            /*
+            /* Uncomment for testing and not calling the actual create
             return new BorgCreateResponseMessage()
             {
                 Password = "eC4",
@@ -124,8 +127,10 @@ namespace CESMII.Marketplace.JobManager.Jobs
             };
 
             string responseRaw = await _httpFactory.Run(config);
+            var result = JsonConvert.DeserializeObject<BorgCreateResponse>(responseRaw);
 
             #region Extra parsing
+            /*
             //because returned format is heavily escaped, we jump through some hoops to parse response.
             var responseUnescaped = responseRaw.Replace(@"\", "");
             //remove quote around loginResult value, message value
@@ -135,9 +140,9 @@ namespace CESMII.Marketplace.JobManager.Jobs
             responseUnescaped = responseUnescaped.Replace("\"Message\":\"{", "\"Message\":{"); //leading quote
             responseUnescaped = responseUnescaped.Replace("}\",\"Result\"", "},\"Result\""); //trailing quote
             var result = JsonConvert.DeserializeObject<BorgCreateResponse>(responseUnescaped);
+            */
             #endregion
 
-            //var result = JsonConvert.DeserializeObject<BorgCreateResponse>(response);
             if (result.CreateCustomerResult == null || string.IsNullOrEmpty(result.CreateCustomerResult.Result) ||
                 !result.CreateCustomerResult.Result.ToLower().Equals("success"))
             {

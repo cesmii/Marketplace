@@ -94,14 +94,10 @@ function ChangePasswordModal(props) { //props are item, showActions
         setErrorMessage(null);
     }
 
-    const onSave = () => {
+    const onSave = (e) => {
         console.log(generateLogMessageString('onSave', CLASS_NAME));
+        e.preventDefault();
         setErrorMessage(null);
-
-        //do validation
-        if (!validateForm()) {
-            return;
-        }
 
         //do validation
         if (!validateForm()) {
@@ -124,38 +120,47 @@ function ChangePasswordModal(props) { //props are item, showActions
                             }
                         ]
                     });
+
+                    //update token in local storage - if this is the account change password flavor
+                    //if (props.updateToken) {
+                    //authTicket.token = JSON.parse(JSON.stringify(result.data.data));
+                    //let loginAction = login(dispatch, authTicket) //loginUser action makes the request and handles all the neccessary state changes
+                    //if (!loginAction) {
+                    //    console.error(generateLogMessageString(`onSave||loginAction||An error occurred setting the login state.`, CLASS_NAME));
+                    //}
+                    //}
+
+                    if (props.onSave != null) props.onSave();
+
                 }
                 else {
                     //hide a spinner, show a message
                     setLoadingProps({
                         isLoading: false, message: null, inlineMessages: [
-                            { id: new Date().getTime(), severity: "danger", body: `An error occurred changing your password.`, isTimed: true }
+                            {
+                                id: new Date().getTime(), severity: "danger", body: result.data.message, isTimed: false
+                            }
                         ]
                     });
                     console.error(generateLogMessageString(`onSave||Error||${result.data.message}.`, CLASS_NAME));
+                    //scroll back to top
+                    window.scroll({
+                        top: 0,
+                        left: 0,
+                        behavior: 'smooth',
+                    });
+
+                    if (props.onSave != null) props.onSave();
                 }
-
-                //update token in local storage - if this is the account change password flavor
-                //if (props.updateToken) {
-                //authTicket.token = JSON.parse(JSON.stringify(result.data.data));
-                //let loginAction = login(dispatch, authTicket) //loginUser action makes the request and handles all the neccessary state changes
-                //if (!loginAction) {
-                //    console.error(generateLogMessageString(`onSave||loginAction||An error occurred setting the login state.`, CLASS_NAME));
-                //}
-                //}
-
-                if (props.onSave != null) props.onSave();
 
             })
             .catch(error => {
                 //hide a spinner, show a message
                 setLoadingProps({
-                    isLoading: false, message: null, inlineMessages: [
-                        { id: new Date().getTime(), severity: "danger", body: `An error occurred saving account profile.`, isTimed: false }
-                    ]
+                    isLoading: false, message: null, inlineMessages: []
                 });
-                console.log(generateLogMessageString('handleOnSave||error||' + JSON.stringify(error), CLASS_NAME, 'error'));
-                console.log(error);
+                setErrorMessage(`An error occurred updating password.`);
+                console.log(generateLogMessageString('onSave||error||' + JSON.stringify(error), CLASS_NAME, 'error'));
                 //scroll back to top
                 window.scroll({
                     top: 0,
