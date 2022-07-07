@@ -126,5 +126,15 @@
         public string NodesetXml { get; set; }
     }
 
+    /// <summary>
+    /// A very simple marketplace item used for related data and lookup scenarios
+    /// where keeping data small is helpful
+    /// </summary>
+    public class MarketplaceItemSimpleModel: AbstractModel
+    {
+        public string Name { get; set; }
+        public string DisplayName { get; set; }
+    }
+
 
 }

@@ -13,8 +13,13 @@
     /// </summary>
     public class JobDefinitionDAL : BaseDAL<JobDefinition, JobDefinitionModel>, IDal<JobDefinition, JobDefinitionModel>
     {
-        public JobDefinitionDAL(IMongoRepository<JobDefinition> repo) : base(repo)
+        protected IMongoRepository<MarketplaceItem> _repoMarketplaceItem;
+        protected List<MarketplaceItem> _marketplaceItemAll;
+
+        public JobDefinitionDAL(IMongoRepository<JobDefinition> repo,
+            IMongoRepository<MarketplaceItem> repoMarketplaceItem) : base(repo)
         {
+            _repoMarketplaceItem = repoMarketplaceItem;
         }
 
         public async Task<string> Add(JobDefinitionModel model, string userId)
@@ -55,8 +60,12 @@
         /// <returns></returns>
         public override JobDefinitionModel GetById(string id)
         {
-            var entity = _repo.FindByCondition(x => x.ID == id)
+            var entity = _repo.FindByCondition(x => x.ID == id && x.IsActive)
                 .FirstOrDefault();
+
+            //get related data - pass list of item ids and publisher ids. 
+            GetRelatedData(new List<MongoDB.Bson.BsonObjectId>() { entity.MarketplaceItemId });
+
             return MapToModel(entity, true);
         }
 
@@ -81,6 +90,8 @@
                 skip, take,
                 x => x.Name);  
             var count = returnCount ? _repo.Count(x => x.IsActive) : 0;
+
+            GetRelatedData(data.Select(x => x.MarketplaceItemId).Distinct().ToList());
 
             //map the data to the final result
             var result = new DALResult<JobDefinitionModel>
@@ -107,6 +118,8 @@
                 x => x.Name);
             var count = returnCount ? _repo.Count(predicate) : 0;
 
+            GetRelatedData(data.Select(x => x.MarketplaceItemId).Distinct().ToList());
+
             //map the data to the final result
             var result = new DALResult<JobDefinitionModel>
             {
@@ -130,10 +143,16 @@
         {
             if (entity != null)
             {
+                var mktplItem = _marketplaceItemAll.FirstOrDefault(x => x.ID == entity.MarketplaceItemId.ToString());
                 var result = new JobDefinitionModel
                 {
                     ID = entity.ID,
-                    MarketplaceItemId = entity.MarketplaceItemId.ToString(),
+                    MarketplaceItem = new MarketplaceItemSimpleModel()
+                    {
+                        ID = entity.MarketplaceItemId.ToString(),
+                        DisplayName = mktplItem?.DisplayName,
+                        Name = mktplItem?.Name
+                    },
                     Name = entity.Name,
                     TypeName = entity.TypeName,
                     Data = MongoDB.Bson.BsonExtensionMethods.ToJson(entity.Data)
@@ -150,10 +169,26 @@
 
         protected override void MapToEntity(ref JobDefinition entity, JobDefinitionModel model)
         {
-            entity.MarketplaceItemId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.ID));
+            entity.MarketplaceItemId = MongoDB.Bson.ObjectId.Parse(model.MarketplaceItem.ID);
             entity.Name = model.Name;
             entity.TypeName = model.TypeName;
             entity.Data = Newtonsoft.Json.JsonConvert.DeserializeObject<MongoDB.Bson.BsonDocument>(model.Data);
         }
+
+        /// <summary>
+        ///When mapping the results, we also get related data. For efficiency, get the look up data now and then
+        ///mapToModel will apply to each item properly.
+        ///get list of marketplace items
+        /// </summary>
+        /// <param name="marketplaceIds"></param>
+        protected void GetRelatedData(List<MongoDB.Bson.BsonObjectId> marketplaceIds)
+        {
+            var filterMarketplaceItems = MongoDB.Driver.Builders<MarketplaceItem>.Filter.In(x => x.ID, marketplaceIds.Select(y => y.ToString()));
+            var fieldList = new List<string>()
+                { nameof(MarketplaceItemSimple.ID), nameof(MarketplaceItemSimple.DisplayName), nameof(MarketplaceItemSimple.Name)};
+            _marketplaceItemAll = _repoMarketplaceItem.AggregateMatch(filterMarketplaceItems, fieldList);
+        }
+
+
     }
 }

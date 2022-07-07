@@ -106,17 +106,6 @@ function AccountProfile() {
         setIsValid({ ..._isValid, email: isValid, emailFormat: isValidEmail });
     };
 
-    //const validate_smipSettings = (val) => {
-    //    var isValid = false;
-    //    if (val == null && val.trim().length === 0) {
-    //        isValid = true;
-    //    }
-    //    else {
-    //        isValid = tryJsonParse(val).success;
-    //    }
-    //    return isValid;
-    //};
-
     ////update state for when search click happens
     const validateForm = () => {
         console.log(generateLogMessageString(`validateForm`, CLASS_NAME));
@@ -215,15 +204,6 @@ function AccountProfile() {
                 _item[e.target.id] = e.target.value;
                 _item.fullName = `${_item.firstName} ${_item.lastName}`;
                 break;
-            //case "smipSettings":
-            //    var test = tryJsonParse(e.target.value);
-            //    if (test.success) {
-            //        _item[e.target.id] = test.json;
-            //    }
-            //    else {
-            //        console.log(generateLogMessageString('onChange||smipSettings||Could not parse JSON value:' + test.e, CLASS_NAME, 'error'));
-            //    }
-            //    break;
             default:
                 return;
         }
