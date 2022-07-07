@@ -288,15 +288,17 @@
         /// This assumes the controller does all the proper validation and passes a non-encrypted value
         /// </remarks>
         /// <returns></returns>
-        public async Task ChangeSmipPassword(string id, string oldPassword, string newPassword)
+        public async Task<bool> ChangeSmipPassword(string id, string oldPassword, string newPassword)
         {
             var existingUser = _repo.GetByID(id);
             if (existingUser == null || !existingUser.IsActive) throw new ArgumentNullException($"User not found with id {id}");
 
             //validate existing password
-            if (await this.ValidateSmipPassword(existingUser.ID, existingUser.SmipSettings?.UserName, oldPassword))
+            bool isValidExisting = await this.ValidateSmipPassword(existingUser.ID, existingUser.SmipSettings?.UserName, oldPassword);
+            if (!isValidExisting)
             {
-                throw new ArgumentNullException($"Change SMIP Password - Old Password does not match for user {id}");
+                _logger.Log(NLog.LogLevel.Warn, $"Change SMIP Password - Old Password does not match for user {id}");
+                return false;
             }
 
             //Encrypt new password 
@@ -305,6 +307,7 @@
 
             //save changes
             await _repo.UpdateAsync(existingUser);
+            return true;
         }
 
         private async Task<bool> ValidateSmipPassword(string id, string userName, string password)
@@ -330,6 +333,8 @@
 
             //test against our encryption, means we match 
             bool updateEncryptionLevel = false;
+            return match.SmipSettings.Password.Equals(password);
+            /* TBD - password not yet encrypted so do a plain text match
             if (PasswordUtils.ValidatePassword(_configUtil.PasswordConfigSettings.EncryptionSettings, match.SmipSettings?.Password, password, out updateEncryptionLevel))
             {
                 //if the encryption level has been upgraded since original encryption, upgrade their pw now. 
@@ -343,6 +348,7 @@
 
             // No user match found, username or password incorrect. 
             return false;
+            */
         }
         #endregion
 

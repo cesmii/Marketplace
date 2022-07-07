@@ -293,8 +293,8 @@ function AccountProfile() {
             case "smipSettings.password":
             case "smipSettings.graphQlUrl":
             case "smipSettings.authenticator":
-            case "smipSettings.role":
-                _item[e.target.id] = e.target.value;
+            case "smipSettings.authenticatorRole":
+                _item.smipSettings[e.target.id.replace("smipSettings.", "")] = e.target.value;
                 break;
             default:
                 return;
@@ -323,11 +323,6 @@ function AccountProfile() {
                             <Form.Control id="smipSettings.userName" className={(!_isValidSmipSettings.userName ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
                                 value={_item.smipSettings?.userName == null ? '' : _item.smipSettings.userName} onBlur={validateFormSmipSettings_userName} onChange={onChangeSmipSettings} />
                         </Form.Group>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-md-6 my-2">
-                        <Button variant="secondary" onClick={onChangePasswordOpen} data-url="user/smipSettings/changepassword" data-updatetoken={true} >Change Password</Button>
                     </div>
                 </div>
                 <div className="row">
@@ -373,6 +368,11 @@ function AccountProfile() {
                                 value={_item.smipSettings?.authenticatorRole == null ? '' : _item.smipSettings.authenticatorRole} onBlur={validateFormSmipSettings_authenticatorRole} onChange={onChangeSmipSettings}
                                 readOnly={_item.smipSettings == null || _item.smipSettings.userName == null ? 'readonly' : ''} />
                         </Form.Group>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-md-6 my-2">
+                        <Button variant="secondary" onClick={onChangePasswordOpen} data-url="user/smipSettings/changepassword" data-updatetoken={true} >Update SMIP Password</Button>
                     </div>
                 </div>
             </>

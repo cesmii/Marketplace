@@ -100,14 +100,16 @@ namespace CESMII.Marketplace.Api.Controllers
 
             if (string.IsNullOrEmpty(model.Query))
             {
-                return Ok(_dalJobLog.GetAllPaged(model.Skip, model.Take, false, true));
+                return Ok(_dalJobLog.Where(s => s.CreatedById.Equals(MongoDB.Bson.ObjectId.Parse(User.GetUserID())) &&
+                                s.IsActive
+                                , null, null, false, true));
             }
 
             model.Query = model.Query.ToLower();
-            var result = _dalJobLog.Where(s => s.CreatedById.Equals(new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(User.GetUserID()))) &&
-                            (string.IsNullOrEmpty(model.Query) || s.Name.ToLower().Contains(model.Query))
-                            ,null, null, false, true);
-            return Ok(result);
+            return Ok(_dalJobLog.Where(s => s.CreatedById.Equals(MongoDB.Bson.ObjectId.Parse(User.GetUserID())) &&
+                            (string.IsNullOrEmpty(model.Query) || s.Name.ToLower().Contains(model.Query)) &&
+                            s.IsActive
+                            , null, null, false, true));
         }
 
         /// <summary>

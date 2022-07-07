@@ -215,29 +215,46 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("smipSettings/changepassword")]
-        [ProducesResponseType(200, Type = typeof(bool))]
+        [ProducesResponseType(200, Type = typeof(ResultMessageModel))]
         public async Task<IActionResult> ChangeSmipPassword([FromBody] ChangePasswordModel model)
         {
             if (string.IsNullOrEmpty(model.OldPassword))
             {
-                return BadRequest("Old Password is required.");
+                return Ok(new ResultMessageModel()
+                {
+                    IsSuccess = false,
+                    Message = "Old Password is required."
+                });
             }
 
             if (string.IsNullOrEmpty(model.NewPassword))
             {
-                return BadRequest("New Password is required.");
+                return Ok(new ResultMessageModel()
+                {
+                    IsSuccess = false,
+                    Message = "New Password is required."
+                });
             }
 
             var user = _dal.GetById(User.GetUserID());
             if (user == null)
             {
-                return BadRequest("User was not found. Please contact support.");
+                return Ok(new ResultMessageModel()
+                {
+                    IsSuccess = false,
+                    Message = "User was not found."
+                });
             }
 
             // If we get here, update the user data with new password
-            await _dal.ChangeSmipPassword(user.ID, model.OldPassword, model.NewPassword);
+            var result = await _dal.ChangeSmipPassword(user.ID, model.OldPassword, model.NewPassword);
 
-            return Ok(true);
+            return Ok(new ResultMessageModel()
+            {
+                IsSuccess = result,
+                Message = result ? "Password updated" : "Old password does not match"
+            });
+
         }
 
     }
