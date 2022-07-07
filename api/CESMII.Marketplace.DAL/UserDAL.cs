@@ -167,21 +167,24 @@
         /// <param name="user"></param>
         /// <param name="newPassword"></param>
         /// <returns></returns>
-        public async Task ChangePassword(string id, string oldPassword, string newPassword)
+        public async Task<bool> ChangePassword(string id, string oldPassword, string newPassword)
         {
             var existingUser = _repo.GetByID(id);
             if (existingUser == null || !existingUser.IsActive) throw new ArgumentNullException($"User not found with id {id}");
 
             //validate existing password
-            if (this.Validate(existingUser.UserName, oldPassword) == null)
+            var match = await this.Validate(existingUser.UserName, oldPassword);
+            if (match == null)
             {
-                throw new ArgumentNullException($"Change Password - Old Password does not match for user {id}");
+                return false;
             }
 
             //Encrypt new password 
             existingUser.Password = PasswordUtils.EncryptNewPassword(_configUtil.PasswordConfigSettings.EncryptionSettings, newPassword);
             //save changes
             await _repo.UpdateAsync(existingUser);
+            
+            return true;
         }
 
         /// <summary>
