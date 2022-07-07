@@ -10,7 +10,7 @@ namespace CESMII.Marketplace.DAL.Models
         /// <summary>
         /// Marketplace Item Id - This will guide us as to which data we need to act on.
         /// </summary>
-        public string MarketplaceItemId { get; set; }
+        public MarketplaceItemSimpleModel MarketplaceItem { get; set; }
 
         /// <summary>
         /// Job description.

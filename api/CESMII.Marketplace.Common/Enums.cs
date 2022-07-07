@@ -39,7 +39,10 @@
         CanManagePublishers = 4,
 
         [Description("CanManageRequestInfo")]
-        CanManageRequestInfo = 5
+        CanManageRequestInfo = 5,
+
+        [Description("CanManageJobDefinitions")]
+        CanManageJobDefinitions = 6
 
     }
 

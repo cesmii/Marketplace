@@ -175,6 +175,11 @@ namespace CESMII.Marketplace.Api
                 options.AddPolicy(
                     nameof(PermissionEnum.CanManageRequestInfo),
                     policy => policy.Requirements.Add(new PermissionRequirement(PermissionEnum.CanManageRequestInfo)));
+
+                // Ability to...
+                options.AddPolicy(
+                    nameof(PermissionEnum.CanManageJobDefinitions),
+                    policy => policy.Requirements.Add(new PermissionRequirement(PermissionEnum.CanManageJobDefinitions)));
             });
 
             services.AddCors(options =>

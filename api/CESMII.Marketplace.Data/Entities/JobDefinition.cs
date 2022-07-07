@@ -25,6 +25,7 @@ namespace CESMII.Marketplace.Data.Entities
         /// </summary>
         /// <remarks>This will be encrypted to protect any sensitive data that may be returned.</remarks>
         public BsonDocument Data { get; set; }
+
     }
 
 }
