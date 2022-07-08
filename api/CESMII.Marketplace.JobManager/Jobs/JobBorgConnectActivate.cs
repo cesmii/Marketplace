@@ -182,7 +182,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             return (user.Organization == null ?
                 new System.Text.RegularExpressions.Regex("[ ()*'\",_&#^@]").Replace(user.FullName, string.Empty) :
                 new System.Text.RegularExpressions.Regex("[ ()*'\",_&#^@]").Replace(user.Organization.Name, string.Empty)) +
-                DateTime.Now.ToString("-yyyyMMdd-HHmm");  //append datetime stamp for now so we can multiple times for demos and get unique instance.
+                DateTime.Now.ToString("yyMMddHHmm");  //append datetime stamp for now so we can multiple times for demos and get unique instance.
         }
     }
 
