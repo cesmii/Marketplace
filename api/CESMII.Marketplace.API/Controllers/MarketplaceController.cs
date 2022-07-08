@@ -18,7 +18,7 @@ using CESMII.Marketplace.Api.Shared.Utils;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
-    [AllowAnonymous, Route("api/[controller]")]
+    [Route("api/[controller]")]
     public class MarketplaceController : BaseController<MarketplaceController>
     {
         private readonly IDal<MarketplaceItem, MarketplaceItemModel> _dal;

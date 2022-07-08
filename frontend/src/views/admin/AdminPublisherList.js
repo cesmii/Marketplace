@@ -69,7 +69,7 @@ function AdminPublisherList() {
             //show a spinner
             setLoadingProps({ isLoading: true, message: null });
 
-            var url = `publisher/search`;
+            var url = `publisher/admin/search`;
             console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
 
             var data = { Query: _pager.searchVal, Skip: (_pager.currentPage - 1) * _pager.pageSize, Take: _pager.pageSize };

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-
+using Microsoft.AspNetCore.Authorization;
 
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Enums;
@@ -64,6 +64,15 @@ namespace CESMII.Marketplace.Api.Controllers
             var result = _dal.Where(predicate, model.Skip, model.Take, true, false);
 
             return Ok(result);
+        }
+
+        [HttpPost, Route("admin/search")]
+        [Authorize(Policy = nameof(PermissionEnum.CanManagePublishers))]
+        [ProducesResponseType(200, Type = typeof(DALResult<PublisherModel>))]
+        [ProducesResponseType(400)]
+        public IActionResult AdminSearch([FromBody] PagerFilterSimpleModel model)
+        {
+            return this.Search(model);
         }
 
         [HttpPost, Route("GetByID")]
