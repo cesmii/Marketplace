@@ -173,7 +173,8 @@ export function getUserPreferences() {
         marketplacePreferences: { pageSize: AppSettings.PageSize },
         requestInfoPreferences: { pageSize: AppSettings.PageSize },
         lookupPreferences: { pageSize: AppSettings.PageSize },
-        publisherPreferences: { pageSize: AppSettings.PageSize }
+        publisherPreferences: { pageSize: AppSettings.PageSize },
+        jobDefinitionPreferences: { pageSize: AppSettings.PageSize }
     };
 
     var item = JSON.parse(result);
@@ -184,6 +185,7 @@ export function getUserPreferences() {
     if (item.requestInfoPreferences == null || item.requestInfoPreferences.pageSize == null) item.requestInfoPreferences = { pageSize: AppSettings.PageSize };
     if (item.lookupPreferences == null || item.lookupPreferences.pageSize == null) item.lookupPreferences = { pageSize: AppSettings.PageSize };
     if (item.publisherPreferences == null || item.publisherPreferences.pageSize == null) item.publisherPreferences = { pageSize: AppSettings.PageSize };
+    if (item.jobDefinitionPreferences == null || item.jobDefinitionPreferences.pageSize == null) item.jobDefinitionPreferences = { pageSize: AppSettings.PageSize };
     if (needsUpdate) localStorage.setItem('userPreferences', JSON.stringify(item));
 
     return item;
@@ -378,6 +380,18 @@ export const validate_NoSpecialCharacters = (val) => {
     var format = /[ `!@#$%^&*()+=[\]{};':"\\|,.<>/?~]/;  //includes a space
     return !format.test(val);
 };
+
+///--------------------------------------------------------------------------
+// Validate no special characters are used - except dashes and underscores and numbers
+//--------------------------------------------------------------------------
+export const tryJsonParse = (val) => {
+    try {
+        return { json: JSON.parse(val), success: true, message: null };
+    } catch (e) {
+        return { json: null, success: false, message: e };
+    }
+};
+
 
 ///--------------------------------------------------------------------------
 // Perform a numeric only check for numeric fields. Call this from onchange 

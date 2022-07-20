@@ -261,14 +261,6 @@ function Home() {
         );
     };
 
-    const renderNoDataRow = () => {
-        return (
-            <div className="m-auto my-4">
-                <div className="text-center" >loading...</div>
-            </div>
-        );
-    }
-
     //render popular
     const renderSectionHeading = (caption, showLink) => {
         return (

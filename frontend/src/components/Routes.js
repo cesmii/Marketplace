@@ -16,7 +16,7 @@ import AdminMarketplaceEntity from '../views/admin/AdminMarketplaceEntity'
 import AdminPubisherEntity from '../views/admin/AdminPubisherEntity'
 import RequestInfo from '../views/RequestInfo'
 import Home from '../views/Home'
-//import About from '../views/About'
+
 import AdminRequestInfoEntity from '../views/admin/AdminRequestInfoEntity'
 import AdminRequestInfoList from '../views/admin/AdminRequestInfoList'
 import AdminStockImageList from '../views/admin/AdminStockImageList'
@@ -24,6 +24,9 @@ import AdminLookupList from '../views/admin/AdminLookupList'
 import AdminLookupEntity from '../views/admin/AdminLookupEntity'
 import AdminMarketplaceList from '../views/admin/AdminMarketplaceList'
 import AdminPublisherList from '../views/admin/AdminPublisherList'
+import AdminJobDefinitionList from '../views/admin/AdminJobDefinitionList'
+import AdminJobDefinitionEntity from '../views/admin/AdminJobDefinitionEntity'
+import AccountProfile from '../views/AccountProfile'
 
 //const CLASS_NAME = "Routes";
 
@@ -62,6 +65,10 @@ function Routes() {
             <AdminRoute path="/admin/images/list" component={AdminStockImageList} />
             <AdminRoute path="/admin/lookup/list" component={AdminLookupList} />
             <AdminRoute path="/admin/lookup/:id" component={AdminLookupEntity} />
+            <AdminRoute path="/admin/jobDefinition/list" component={AdminJobDefinitionList} />
+            <AdminRoute path="/admin/jobDefinition/:id" component={AdminJobDefinitionEntity} />
+
+            <AdminRoute path="/account" component={AccountProfile} />
 
             <PublicRoute component={PageNotFound} />
         </Switch>

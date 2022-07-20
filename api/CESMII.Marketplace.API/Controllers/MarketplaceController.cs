@@ -18,7 +18,7 @@ using CESMII.Marketplace.Api.Shared.Utils;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
-    [AllowAnonymous, Route("api/[controller]")]
+    [Route("api/[controller]")]
     public class MarketplaceController : BaseController<MarketplaceController>
     {
         private readonly IDal<MarketplaceItem, MarketplaceItemModel> _dal;
@@ -61,11 +61,13 @@ namespace CESMII.Marketplace.Api.Controllers
         [ProducesResponseType(400)]
         public IActionResult Home()
         {
-            MarketplaceHomeModel result = new MarketplaceHomeModel();
-            result.FeaturedItems = _dal.Where(x => x.IsFeatured && x.IsActive, null, null, false, false).Data;
-            //trim down to 4 most recent 
-            result.NewItems = _dal.Where(x => x.IsActive , null, 3, false, false,
-                new OrderByExpression<MarketplaceItem>() { Expression = x => x.PublishDate, IsDescending = true }).Data;
+            var result = new MarketplaceHomeModel
+            {
+                FeaturedItems = _dal.Where(x => x.IsFeatured && x.IsActive, null, null, false, false).Data,
+                //trim down to 4 most recent 
+                NewItems = _dal.Where(x => x.IsActive, null, 3, false, false,
+                new OrderByExpression<MarketplaceItem>() { Expression = x => x.PublishDate, IsDescending = true }).Data
+            };
             //calculate most popular based on analytics counts
             var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
             result.PopularItems = util.PopularItems();
@@ -78,9 +80,11 @@ namespace CESMII.Marketplace.Api.Controllers
         [ProducesResponseType(400)]
         public IActionResult GetFeatured()
         {
-            List<Func<MarketplaceItem, bool>> predicates = new List<Func<MarketplaceItem, bool>>();
-            //limit to featured and isActive
-            predicates.Add(x => x.IsFeatured && x.IsActive);
+            var predicates = new List<Func<MarketplaceItem, bool>>
+            {
+                //limit to featured and isActive
+                x => x.IsFeatured && x.IsActive
+            };
             //limit to publish status of live
             var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
             predicates.Add(util.BuildStatusFilterPredicate());
@@ -95,9 +99,11 @@ namespace CESMII.Marketplace.Api.Controllers
         [ProducesResponseType(400)]
         public IActionResult GetRecentItems()
         {
-            List<Func<MarketplaceItem, bool>> predicates = new List<Func<MarketplaceItem, bool>>();
-            //limit to isActive
-            predicates.Add(x => x.IsActive);
+            var predicates = new List<Func<MarketplaceItem, bool>>
+            {
+                //limit to isActive
+                x => x.IsActive
+            };
             //limit to publish status of live
             var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
             predicates.Add(util.BuildStatusFilterPredicate());
@@ -154,9 +160,6 @@ namespace CESMII.Marketplace.Api.Controllers
                 {
                     analytic.PageVisitCount += 1;
                     _dalAnalytics.Update(analytic, model.ID);
-
-                    // _dalAnalytics.Update(analytic, model.ID);
-                    // _dalAnalytics.Update(analytic, analytic.ID.ToString());
                 }
                 result.Analytics = analytic;
             }
@@ -182,12 +185,12 @@ namespace CESMII.Marketplace.Api.Controllers
             //if we get more than one match, throw exception
             var matches = _dal.Where(x => x.Name.ToLower().Equals(model.ID.ToLower()), null, null, false, true).Data;
 
-            if (matches == null || matches.Count() == 0)
+            if (!matches.Any())
             {
                 _logger.LogWarning($"MarketplaceController|GetByName|No records found matching this name: {model.ID}");
                 return BadRequest($"No records found matching this name: {model.ID}");
             }
-            if (matches.Count() > 1)
+            if (matches.Count > 1)
             {
                 _logger.LogWarning($"MarketplaceController|GetByName|Multiple records found matching this name: {model.ID}");
                 return BadRequest($"Multiple records found matching this name: {model.ID}");
@@ -232,23 +235,8 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest($"Invalid model (null)");
             }
 
-            //  var allData = _dal.Where(s => model.Select(x => x.ID).ToList().Contains(s.Categories));
-            // var result = _dal.Where(s => 
-            //                         s.Categories.Any(t => model.ListItems.Select(x => x.ID).ToList().Contains(s.ID)),
-            //                         model.Skip, model.Take, true);
-            // test2.Where(t2 => test1.Any(t1 => t2.Contains(t1)));
-            // model.Categories.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList()
-            //var result = _dal.Where(s =>
-            //                        model.ListItems.ToList().Any(s2 => s.Categories.Select(x => x.Value.ToString()).ToList().Contains(s2.ID)),
-            //                        model.Skip, model.Take, true);
-            //return _dal.Where(p => model.SiteIds.Contains(p.Site.ID), model.StartIndex, model.Length, true);
-
-            //var catsFilter = model.Select(x => new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(x))).ToList();
-            //Any is not supported by Mongo DB driver
-            //var result = _dal.Where(s => s.Categories.Except(catsFilter).Any();
-
             //build list of where clauses - one for each cat passed in
-            List<Func<MarketplaceItem, bool>> predicates = new List<Func<MarketplaceItem, bool>>();
+            var predicates = new List<Func<MarketplaceItem, bool>>();
             foreach (var cat in model)
             {
                 predicates.Add(x => x.Categories.Any(c => c.ToString().Equals(cat)));
@@ -256,15 +244,6 @@ namespace CESMII.Marketplace.Api.Controllers
 
             var result = _dal.Where(predicates, null, null, true, false,
                 new OrderByExpression<MarketplaceItem>() { Expression = x => x.Name });
-
-            //var result = _dal.Where(s => s.Categories.Any(x => x.Equals(model)),
-            //model.Contains(s.Categories.Any(c => c.ToString())).ListItems.ToList().Any(s2 => s.Categories.Select(x => x.Value.ToString()).ToList().Contains(s2.ID)),
-            //null ,null, true);
-
-            //var result = _dal.Where(s =>
-            //                        model.Contains(s.Categories.Any(c => c.ToString())) .ListItems.ToList().Any(s2 => s.Categories.Select(x => x.Value.ToString()).ToList().Contains(s2.ID)),
-            //                        model.Skip, model.Take, true);
-            // var result = allData.Where(s => s.Categories.Contains(model));
 
             if (result == null)
             {
@@ -327,22 +306,21 @@ namespace CESMII.Marketplace.Api.Controllers
         {
 
             //init and then flags set by user or system will determine which of the following get applied
-            var result = new DALResult<MarketplaceItemModel>() { Data = new List<MarketplaceItemModel>() };
 
             //extract selected items within a list of items
-            var cats = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.Where(x => x.EnumValue == LookupTypeEnum.Process).FirstOrDefault().Items.Where(x => x.Selected).ToList();
-            var verts = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.Where(x => x.EnumValue == LookupTypeEnum.IndustryVertical).FirstOrDefault().Items.Where(x => x.Selected).ToList();
-            var pubs = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.Where(x => x.EnumValue == LookupTypeEnum.Publisher).FirstOrDefault().Items.Where(x => x.Selected).ToList();
+            var cats = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.FirstOrDefault(x => x.EnumValue == LookupTypeEnum.Process).Items.Where(x => x.Selected).ToList();
+            var verts = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.FirstOrDefault(x => x.EnumValue == LookupTypeEnum.IndustryVertical).Items.Where(x => x.Selected).ToList();
+            var pubs = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.FirstOrDefault(x => x.EnumValue == LookupTypeEnum.Publisher).Items.Where(x => x.Selected).ToList();
             var types = model.ItemTypes.Count == 0 ? new List<LookupItemFilterModel>() : model.ItemTypes.Where(x => x.Selected).ToList();
 
             //SM Apps, Hardware, etc. - anything other than sm profile types
             //User driven flag to select only a certain type. Determine if none are selected or if item type of sm app is selected.
-            result = AdvancedSearchMarketplace(model, types, cats, verts, pubs, liveOnly);
+            var result = AdvancedSearchMarketplace(model, types, cats, verts, pubs, liveOnly);
 
             //SM Profiles
             //User driven flag to select only a certain type. Determine if none are selected or if item type of sm profile is selected.
-            var includeSmProfileTypes = model.ItemTypes == null || model.ItemTypes.Where(x => x.Selected).Count() == 0 ||
-                model.ItemTypes.Where(x => x.Selected && x.ID.Equals(_configUtil.MarketplaceSettings.SmProfile.TypeId)).Count() > 0;
+            var includeSmProfileTypes = model.ItemTypes == null || !model.ItemTypes.Any(x => x.Selected) ||
+                model.ItemTypes.Any(x => x.Selected && x.ID.Equals(_configUtil.MarketplaceSettings.SmProfile.TypeId));
             //Skip over this in certain scenarios. ie. admin section
             if (_configUtil.MarketplaceSettings.EnableCloudLibSearch && includeCloudLib && includeSmProfileTypes)
             {
@@ -380,16 +358,17 @@ namespace CESMII.Marketplace.Api.Controllers
             model.Query = string.IsNullOrEmpty(model.Query) ? model.Query : model.Query.ToLower();
 
             //union passed in list w/ lookup list.
-            var combinedCats = cats == null ? null : cats.Select(x => x.ID).ToArray();
-            var combinedVerts = verts == null ? null : verts.Select(x => x.ID).ToArray();
-            var combinedPubs = pubs == null ? null : pubs.Select(x => x.ID).ToArray();
+            var combinedCats = cats?.Select(x => x.ID).ToArray();
+            var combinedVerts = verts?.Select(x => x.ID).ToArray();
+            var combinedPubs = pubs?.Select(x => x.ID).ToArray();
 
             //build list of where clauses all combined into one predicate, 
             //using expression extension to allow for .Or or .And expression
-            List<Func<MarketplaceItem, bool>> predicates = new List<Func<MarketplaceItem, bool>>();
-
-            //limit to isActive
-            predicates.Add(x => x.IsActive);
+            var predicates = new List<Func<MarketplaceItem, bool>>
+            {
+                //limit to isActive
+                x => x.IsActive
+            };
 
             //limit to publish status of live
             if (liveOnly)
@@ -398,7 +377,7 @@ namespace CESMII.Marketplace.Api.Controllers
             }
 
             //build where clause - one for each type passed in
-            if (types != null && types.Count() > 0)//model.Categories != null)
+            if (types != null && types.Any())//model.Categories != null)
             {
                 predicates.Add(x => x.ItemTypeId != null && types.Any(y => y.ID.Equals(x.ItemTypeId.ToString())));
             }
@@ -483,8 +462,6 @@ namespace CESMII.Marketplace.Api.Controllers
             , List<LookupItemFilterModel> pubs
             )
         {
-            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
-
             //lowercase model.query
             model.Query = string.IsNullOrEmpty(model.Query) ? model.Query : model.Query.ToLower();
 
@@ -521,7 +498,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="set2"></param>
         /// <param name="model"></param>
         /// <returns></returns>
-        private DALResult<MarketplaceItemModel> MergeSortPageSearchedItems(List<MarketplaceItemModel> set1, List<MarketplaceItemModel> set2,
+        private static DALResult<MarketplaceItemModel> MergeSortPageSearchedItems(List<MarketplaceItemModel> set1, List<MarketplaceItemModel> set2,
             MarketplaceSearchModel model)
         {
             //get count before paging
@@ -538,7 +515,7 @@ namespace CESMII.Marketplace.Api.Controllers
             //    .ThenBy(x => x.DisplayName); //.ToList();
             combined = combined
                 .OrderByDescending(x => x.IsFeatured)
-                .ThenBy(x => x.DisplayName); //.ToList();
+                .ThenBy(x => x.DisplayName); 
 
             //now page the data. 
             combined = combined.Skip(model.Skip).Take(model.Take);
@@ -573,20 +550,24 @@ namespace CESMII.Marketplace.Api.Controllers
             if (analytic == null)
             {
                 await _dalAnalytics.Add(new MarketplaceItemAnalyticsModel() { MarketplaceItemId = model.ID, LikeCount = 1 }, null);
-
+                return Ok(new ResultMessageWithDataModel()
+                {
+                    IsSuccess = true,
+                    Message = "Item was added.",
+                    Data = 1
+                });
             }
             else
             {
-                // analytic.PageVisitCount += 1;
                 analytic.LikeCount += 1;
                 await _dalAnalytics.Update(analytic, null);
+                return Ok(new ResultMessageWithDataModel()
+                {
+                    IsSuccess = true,
+                    Message = "Item was updated.",
+                    Data = analytic.LikeCount // return analytic.likecount
+                });
             }
-            return Ok(new ResultMessageWithDataModel()
-            {
-                IsSuccess = true,
-                Message = "Item was updated.",
-                Data = analytic.LikeCount // return analytic.likecount
-            });
         }
 
         /// <summary>
@@ -613,19 +594,24 @@ namespace CESMII.Marketplace.Api.Controllers
             if (analytic == null)
             {
                 await _dalAnalytics.Add(new MarketplaceItemAnalyticsModel() { MarketplaceItemId = model.ID, DislikeCount = 1 }, null);
-
+                return Ok(new ResultMessageWithDataModel()
+                {
+                    IsSuccess = true,
+                    Message = "Item was added.",
+                    Data = 1
+                });
             }
             else
             {
                 analytic.DislikeCount += 1;
                 await _dalAnalytics.Update(analytic, null);
+                return Ok(new ResultMessageWithDataModel()
+                {
+                    IsSuccess = true,
+                    Message = "Item was updated.",
+                    Data = analytic.DislikeCount
+                });
             }
-            return Ok(new ResultMessageWithDataModel()
-            {
-                IsSuccess = true,
-                Message = "Item was updated.",
-                Data = analytic.DislikeCount
-            });
         }
         #endregion
     }

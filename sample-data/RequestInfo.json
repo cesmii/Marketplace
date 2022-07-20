@@ -1,402 +1,21 @@
 [{
   "_id": {
-    "$oid": "61ae9b15132c502561b2da38"
-  },
-  "Created": {
-    "$date": "2021-12-06T23:21:57.384Z"
-  },
-  "UpdatedById": {
-    "_csharpnull": true
-  },
-  "Updated": null,
-  "IsActive": true,
-  "MarketplaceItemId": {
-    "$oid": "000000000000000000000000"
-  },
-  "PublisherId": {
-    "$oid": "000000000000000000000000"
-  },
-  "RequestTypeId": {
-    "$oid": "61928d19557c7b88d5fb4880"
-  },
-  "FirstName": "",
-  "LastName": "",
-  "CompanyName": "",
-  "CompanyUrl": "",
-  "Description": "",
-  "Email": "zzzzzzzzz@gmail.com",
-  "Phone": "",
-  "Notes": null,
-  "StatusId": {
-    "$oid": "61ae5bcf1c65b79debe7a015"
-  }
-},{
-  "_id": {
-    "$oid": "61af7e24cc544d299389db55"
-  },
-  "Created": {
-    "$date": "2021-12-07T15:30:43.934Z"
-  },
-  "UpdatedById": {
-    "_csharpnull": true
-  },
-  "Updated": null,
-  "IsActive": true,
-  "MarketplaceItemId": {
-    "$oid": "000000000000000000000000"
-  },
-  "PublisherId": {
-    "$oid": "000000000000000000000000"
-  },
-  "RequestTypeId": {
-    "$oid": "61ae4e3e1c65b79debe7a009"
-  },
-  "FirstName": "Test",
-  "LastName": "User",
-  "CompanyName": "TEST",
-  "CompanyUrl": "zzzzzz",
-  "Description": "publisher",
-  "Email": "testuser@gmail.com",
-  "Phone": "7705551212",
-  "Industries": "energy, oil & gas",
-  "MembershipStatusId": {
-    "$oid": "61af70c7e6d640316cfa108d"
-  },
-  "Notes": null,
-  "StatusId": {
-    "$oid": "61ae5bcf1c65b79debe7a015"
-  }
-},{
-  "_id": {
-    "$oid": "61af7eaccc544d299389db56"
-  },
-  "Created": {
-    "$date": "2021-12-07T15:33:00.499Z"
-  },
-  "UpdatedById": {
-    "_csharpnull": true
-  },
-  "Updated": null,
-  "IsActive": true,
-  "MarketplaceItemId": {
-    "$oid": "000000000000000000000000"
-  },
-  "PublisherId": {
-    "$oid": "000000000000000000000000"
-  },
-  "RequestTypeId": {
-    "$oid": "61ae54cd1c65b79debe7a00e"
-  },
-  "FirstName": "Test",
-  "LastName": "User",
-  "CompanyName": "TEST",
-  "CompanyUrl": "",
-  "Description": "request-demo - 10.32",
-  "Email": "testuser@gmail.com",
-  "Phone": "7705551212",
-  "Industries": "",
-  "MembershipStatusId": {
-    "$oid": "61af70e4e6d640316cfa108e"
-  },
-  "Notes": null,
-  "StatusId": {
-    "$oid": "61ae5bcf1c65b79debe7a015"
-  }
-},{
-  "_id": {
-    "$oid": "61af7edacc544d299389db57"
-  },
-  "Created": {
-    "$date": "2021-12-07T15:33:46.661Z"
-  },
-  "UpdatedById": {
-    "_csharpnull": true
-  },
-  "Updated": null,
-  "IsActive": true,
-  "MarketplaceItemId": {
-    "$oid": "000000000000000000000000"
-  },
-  "PublisherId": {
-    "$oid": "61a7fa47d33d6576d8a6a3f2"
-  },
-  "RequestTypeId": {
-    "$oid": "61928d2d557c7b88d5fb4881"
-  },
-  "FirstName": "Test",
-  "LastName": "User",
-  "CompanyName": "TEST",
-  "CompanyUrl": "",
-  "Description": "request info - publisher 10.33",
-  "Email": "testuser@gmail.com",
-  "Phone": "7705551212",
-  "Industries": "",
-  "MembershipStatusId": {
-    "$oid": "61af70c7e6d640316cfa108d"
-  },
-  "Notes": null,
-  "StatusId": {
-    "$oid": "61ae5bcf1c65b79debe7a015"
-  }
-},{
-  "_id": {
-    "$oid": "61af7f10cc544d299389db58"
-  },
-  "Created": {
-    "$date": "2021-12-07T15:34:40.129Z"
-  },
-  "Updated": {
-    "$date": "2021-12-07T22:07:18.030Z"
-  },
-  "IsActive": true,
-  "MarketplaceItemId": {
-    "$oid": "61843d361046a1acc0f11b4d"
-  },
-  "PublisherId": {
-    "$oid": "000000000000000000000000"
-  },
-  "RequestTypeId": {
-    "$oid": "61928d19557c7b88d5fb4880"
-  },
-  "FirstName": "Test",
-  "LastName": "User",
-  "CompanyName": "TEST",
-  "CompanyUrl": "",
-  "Description": "add to platform - 10.34",
-  "Email": "testuser@gmail.com",
-  "Phone": "7705551212",
-  "Industries": "oil & gas, food & beverage",
-  "MembershipStatusId": {
-    "$oid": "61af70c7e6d640316cfa108d"
-  },
-  "Notes": null,
-  "StatusId": {
-    "$oid": "61ae5bcf1c65b79debe7a015"
-  }
-},{
-  "_id": {
-    "$oid": "61af81c3cc544d299389db59"
-  },
-  "Created": {
-    "$date": "2021-12-07T15:46:11.763Z"
-  },
-  "Updated": {
-    "$date": "2021-12-07T17:45:17.488Z"
-  },
-  "IsActive": true,
-  "MarketplaceItemId": {
-    "$oid": "000000000000000000000000"
-  },
-  "PublisherId": {
-    "$oid": "000000000000000000000000"
-  },
-  "RequestTypeId": {
-    "$oid": "61ae934e1c65b79debe7a037"
-  },
-  "FirstName": "",
-  "LastName": "",
-  "CompanyName": "",
-  "CompanyUrl": "",
-  "Description": "",
-  "Email": "testuser@gmail.com",
-  "Phone": "",
-  "Industries": "",
-  "MembershipStatusId": {
-    "$oid": "000000000000000000000000"
-  },
-  "Notes": "test notes - added to subscription email",
-  "StatusId": {
-    "$oid": "61ae5c081c65b79debe7a017"
-  }
-},{
-  "_id": {
-    "$oid": "61af829ecc544d299389db5a"
-  },
-  "Created": {
-    "$date": "2021-12-07T15:49:50.605Z"
-  },
-  "Updated": {
-    "$date": "2021-12-07T15:51:24.080Z"
-  },
-  "IsActive": true,
-  "MarketplaceItemId": {
-    "$oid": "000000000000000000000000"
-  },
-  "PublisherId": {
-    "$oid": "000000000000000000000000"
-  },
-  "RequestTypeId": {
-    "$oid": "61ae54f21c65b79debe7a00f"
-  },
-  "FirstName": "Test",
-  "LastName": "User",
-  "CompanyName": "",
-  "CompanyUrl": "",
-  "Description": "support - 10.49",
-  "Email": "testuser@gmail.com",
-  "Phone": "7705551212",
-  "Industries": "",
-  "MembershipStatusId": {
-    "$oid": "000000000000000000000000"
-  },
-  "Notes": null,
-  "StatusId": {
-    "$oid": "61ae5bcf1c65b79debe7a015"
-  }
-},{
-  "_id": {
-    "$oid": "61af9d254d5c621d3d333182"
-  },
-  "Created": {
-    "$date": "2021-12-07T17:43:01.698Z"
-  },
-  "Updated": {
-    "$date": "2021-12-07T21:26:07.389Z"
-  },
-  "IsActive": true,
-  "MarketplaceItemId": {
-    "$oid": "000000000000000000000000"
-  },
-  "PublisherId": {
-    "$oid": "000000000000000000000000"
-  },
-  "RequestTypeId": {
-    "$oid": "61ae4e3e1c65b79debe7a009"
-  },
-  "FirstName": "Test",
-  "LastName": "User",
-  "CompanyName": "TEST",
-  "CompanyUrl": "",
-  "Description": "contribute - 12.42",
-  "Email": "testuser@gmail.com",
-  "Phone": "7705551212",
-  "Industries": "",
-  "MembershipStatusId": {
-    "$oid": "61af70aae6d640316cfa108c"
-  },
-  "Notes": null,
-  "StatusId": {
-    "$oid": "61ae5be81c65b79debe7a016"
-  }
-},{
-  "_id": {
-    "$oid": "61af9d504d5c621d3d333183"
-  },
-  "Created": {
-    "$date": "2021-12-07T17:43:44.418Z"
-  },
-  "UpdatedById": {
-    "_csharpnull": true
-  },
-  "Updated": null,
-  "IsActive": true,
-  "MarketplaceItemId": {
-    "$oid": "61843d361046a1acc0f11b4d"
-  },
-  "PublisherId": {
-    "$oid": "000000000000000000000000"
-  },
-  "RequestTypeId": {
-    "$oid": "61928d19557c7b88d5fb4880"
-  },
-  "FirstName": "Test",
-  "LastName": "User",
-  "CompanyName": "TEST",
-  "CompanyUrl": "",
-  "Description": "add to platform - 12.43",
-  "Email": "testuser@gmail.com",
-  "Phone": "7705551212",
-  "Industries": "",
-  "MembershipStatusId": {
-    "$oid": "61af70c7e6d640316cfa108d"
-  },
-  "Notes": null,
-  "StatusId": {
-    "$oid": "61ae5bcf1c65b79debe7a015"
-  }
-},{
-  "_id": {
-    "$oid": "61af9d664d5c621d3d333184"
-  },
-  "Created": {
-    "$date": "2021-12-07T17:44:06.766Z"
-  },
-  "Updated": {
-    "$date": "2022-01-10T15:13:13.628Z"
-  },
-  "IsActive": true,
-  "MarketplaceItemId": {
-    "$oid": "000000000000000000000000"
-  },
-  "PublisherId": {
-    "$oid": "000000000000000000000000"
-  },
-  "RequestTypeId": {
-    "$oid": "61ae934e1c65b79debe7a037"
-  },
-  "FirstName": "",
-  "LastName": "",
-  "CompanyName": "",
-  "CompanyUrl": "",
-  "Description": "",
-  "Email": "testuser@gmail.com",
-  "Phone": "",
-  "Industries": "",
-  "MembershipStatusId": {
-    "$oid": "000000000000000000000000"
-  },
-  "Notes": null,
-  "StatusId": {
-    "$oid": "61ae5be81c65b79debe7a016"
-  }
-},{
-  "_id": {
-    "$oid": "61df07c0db7ec22901f11fff"
-  },
-  "Created": {
-    "$date": "2022-01-12T16:54:24.007Z"
-  },
-  "UpdatedById": {
-    "_csharpnull": true
-  },
-  "Updated": null,
-  "IsActive": true,
-  "MarketplaceItemId": {
-    "$oid": "61379b2f7fa0aa686242dc30"
-  },
-  "PublisherId": {
-    "$oid": "000000000000000000000000"
-  },
-  "RequestTypeId": {
-    "$oid": "61928d19557c7b88d5fb4880"
-  },
-  "FirstName": "Test",
-  "LastName": "User",
-  "CompanyName": "TEST",
-  "CompanyUrl": "",
-  "Description": "n/a",
-  "Email": "testuser@gmail.com",
-  "Phone": "7705551212",
-  "Industries": "",
-  "MembershipStatusId": {
-    "$oid": "61af70c7e6d640316cfa108d"
-  },
-  "Notes": null,
-  "StatusId": {
-    "$oid": "61ae5bcf1c65b79debe7a015"
-  }
-},{
-  "_id": {
     "$oid": "61df0dd30969640b36723496"
   },
-  "Created": {
-    "$date": "2022-01-12T17:20:19.408Z"
-  },
-  "UpdatedById": {
+  "CreatedById": {
     "_csharpnull": true
   },
-  "Updated": null,
-  "IsActive": true,
+  "Created": {
+    "$date": {
+      "$numberLong": "1642008019408"
+    }
+  },
+  "Updated": {
+    "$date": {
+      "$numberLong": "1651071390899"
+    }
+  },
+  "IsActive": false,
   "MarketplaceItemId": {
     "$oid": "6184183c800636bc43c76e57"
   },
@@ -416,6 +35,606 @@
   "Industries": "",
   "MembershipStatusId": {
     "$oid": "61af70c7e6d640316cfa108d"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "62309071a649292c49921ee5"
+  },
+  "CreatedById": {
+    "_csharpnull": true
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1647349873003"
+    }
+  },
+  "UpdatedById": {
+    "_csharpnull": true
+  },
+  "Updated": null,
+  "IsActive": true,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61ae4e3e1c65b79debe7a009"
+  },
+  "FirstName": "Jay",
+  "LastName": "Schwarz",
+  "CompanyName": "Emerson",
+  "CompanyUrl": "https://www.emerson.com/en-us/automation-solutions",
+  "Description": "Marketing Specialist (contributor) for Plantweb Optics, Analytics, Data Lake",
+  "Email": "jay.schwarz@emerson.com",
+  "Phone": "5077660715",
+  "Industries": "Industrial Automation & Software",
+  "MembershipStatusId": {
+    "$oid": "61af70aae6d640316cfa108c"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "623b2735a649292c49921ef5"
+  },
+  "CreatedById": {
+    "_csharpnull": true
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1648043829550"
+    }
+  },
+  "Updated": {
+    "$date": {
+      "$numberLong": "1651069995185"
+    }
+  },
+  "IsActive": true,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61ae54f21c65b79debe7a00f"
+  },
+  "FirstName": "Jay",
+  "LastName": "Schwarz",
+  "CompanyName": "",
+  "CompanyUrl": "",
+  "Description": "Hi There. \n\nI am part of Emerson's marketing team and would like to gain access to be a contributor - I work with Pete Sharpe, and want to add our offerings. \n\nI did submit the request to be added as a contributor but have not seen anything back yet. \n\nLet me know what I need to do to contribute! ",
+  "Email": "jay.schwarz@emerson.com",
+  "Phone": "5077660715",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "000000000000000000000000"
+  },
+  "Notes": "Dave is in contact with him...",
+  "StatusId": {
+    "$oid": "61ae5be81c65b79debe7a016"
+  }
+},{
+  "_id": {
+    "$oid": "62604500b52b1599231f7338"
+  },
+  "CreatedById": {
+    "_csharpnull": true
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1650476288233"
+    }
+  },
+  "Updated": {
+    "$date": {
+      "$numberLong": "1651068960267"
+    }
+  },
+  "IsActive": false,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61ae4e3e1c65b79debe7a009"
+  },
+  "FirstName": "Sean",
+  "LastName": "TEST",
+  "CompanyName": "TEST",
+  "CompanyUrl": "",
+  "Description": "testing change related to app settings....",
+  "Email": "sean.coxen@gmail.com",
+  "Phone": "6787770830",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "61af70c7e6d640316cfa108d"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "62682bf195391a493dfb8563"
+  },
+  "CreatedById": {
+    "_csharpnull": true
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1650994161089"
+    }
+  },
+  "Updated": {
+    "$date": {
+      "$numberLong": "1651068969505"
+    }
+  },
+  "IsActive": false,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61ae54f21c65b79debe7a00f"
+  },
+  "FirstName": "Sean",
+  "LastName": "Coxen",
+  "CompanyName": "",
+  "CompanyUrl": "",
+  "Description": "test",
+  "Email": "sean.coxen@gmail.com",
+  "Phone": "6787770830",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "000000000000000000000000"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "626830de95391a493dfb8564"
+  },
+  "CreatedById": {
+    "_csharpnull": true
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1650995422281"
+    }
+  },
+  "Updated": {
+    "$date": {
+      "$numberLong": "1651068977484"
+    }
+  },
+  "IsActive": false,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61ae54f21c65b79debe7a00f"
+  },
+  "FirstName": "Sean",
+  "LastName": "Coxen",
+  "CompanyName": "",
+  "CompanyUrl": "",
+  "Description": "test - email me if you received.",
+  "Email": "sean.coxen@gmail.com",
+  "Phone": "6787770830",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "000000000000000000000000"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "62695a0235286cb67ba09989"
+  },
+  "CreatedById": {
+    "_csharpnull": true
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1651071490485"
+    }
+  },
+  "Updated": {
+    "$date": {
+      "$numberLong": "1651076093655"
+    }
+  },
+  "IsActive": false,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61ae54f21c65b79debe7a00f"
+  },
+  "FirstName": "Sean",
+  "LastName": "Coxen",
+  "CompanyName": "",
+  "CompanyUrl": "",
+  "Description": "Dev Ops - Testing out email sending from marketplace. There will be a couple of emails arriving. Please disregard.  \nDave - can you confirm receipt? ",
+  "Email": "sean.coxen@gmail.com",
+  "Phone": "6787770830",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "000000000000000000000000"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "62695a2435286cb67ba0998a"
+  },
+  "CreatedById": {
+    "_csharpnull": true
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1651071524669"
+    }
+  },
+  "Updated": {
+    "$date": {
+      "$numberLong": "1651076087120"
+    }
+  },
+  "IsActive": false,
+  "MarketplaceItemId": {
+    "$oid": "62389b98a649292c49921ee8"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61928d19557c7b88d5fb4880"
+  },
+  "FirstName": "Sean",
+  "LastName": "Coxen",
+  "CompanyName": "Randstad",
+  "CompanyUrl": "www.randstadusa.com",
+  "Description": "Dev Ops - Testing out email sending from marketplace. There will be a couple of emails arriving. Please disregard.  \nDave - can you confirm receipt? ",
+  "Email": "sean.coxen@gmail.com",
+  "Phone": "6787770830",
+  "Industries": "aquatics",
+  "MembershipStatusId": {
+    "$oid": "61af70e4e6d640316cfa108e"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "62695a4b35286cb67ba0998b"
+  },
+  "CreatedById": {
+    "_csharpnull": true
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1651071563747"
+    }
+  },
+  "Updated": {
+    "$date": {
+      "$numberLong": "1651076079985"
+    }
+  },
+  "IsActive": false,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "RequestTypeId": {
+    "$oid": "61ae4e3e1c65b79debe7a009"
+  },
+  "FirstName": "Sean",
+  "LastName": "Coxen",
+  "CompanyName": "Randstad",
+  "CompanyUrl": "www.randstadusa.com",
+  "Description": "Dev Ops - Testing out email sending from marketplace. There will be a couple of emails arriving. Please disregard.  \nDave - can you confirm receipt? ",
+  "Email": "sean.coxen@gmail.com",
+  "Phone": "6787770830",
+  "Industries": "lawn care",
+  "MembershipStatusId": {
+    "$oid": "61af70aae6d640316cfa108c"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "62978555ce12769a2d99ee28"
+  },
+  "CreatedById": {
+    "_csharpnull": true
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1654097237920"
+    }
+  },
+  "Updated": {
+    "$date": {
+      "$numberLong": "1654108581129"
+    }
+  },
+  "IsActive": false,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "SmProfileId": {
+    "$numberLong": "3477163290"
+  },
+  "RequestTypeId": {
+    "$oid": "629020c143d218966422d871"
+  },
+  "FirstName": "Sean",
+  "LastName": "Coxen",
+  "CompanyName": "TEST",
+  "CompanyUrl": "",
+  "Description": "Disregard. Testing out request more info on live site of an SM profile. ",
+  "Email": "sean.coxen@gmail.com",
+  "Phone": "6787770830",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "61af70aae6d640316cfa108c"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "62978596ce12769a2d99ee29"
+  },
+  "CreatedById": {
+    "_csharpnull": true
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1654097302886"
+    }
+  },
+  "Updated": {
+    "$date": {
+      "$numberLong": "1654108597627"
+    }
+  },
+  "IsActive": false,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "SmProfileId": {
+    "$numberLong": "3477163290"
+  },
+  "RequestTypeId": {
+    "$oid": "6291396543d218966422d876"
+  },
+  "FirstName": "Sean",
+  "LastName": "Coxen",
+  "CompanyName": "Disregard. Testing out download on live site of an SM profile. ",
+  "CompanyUrl": "",
+  "Description": "",
+  "Email": "sean.coxen@gmail.com",
+  "Phone": "",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "000000000000000000000000"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "6297865dce12769a2d99ee2a"
+  },
+  "CreatedById": {
+    "_csharpnull": true
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1654097501576"
+    }
+  },
+  "Updated": {
+    "$date": {
+      "$numberLong": "1654108590585"
+    }
+  },
+  "IsActive": false,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "SmProfileId": null,
+  "RequestTypeId": {
+    "$oid": "61ae55061c65b79debe7a010"
+  },
+  "FirstName": "Sean",
+  "LastName": "Coxen",
+  "CompanyName": "",
+  "CompanyUrl": "",
+  "Description": "Disregard. Testing out request more info on live site of an SM app. ",
+  "Email": "sean.coxen@gmail.com",
+  "Phone": "6787770830",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "61af70aae6d640316cfa108c"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "6297a338ce12769a2d99ee30"
+  },
+  "CreatedById": {
+    "_csharpnull": true
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1654104888334"
+    }
+  },
+  "Updated": {
+    "$date": {
+      "$numberLong": "1654108571231"
+    }
+  },
+  "IsActive": false,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "SmProfileId": {
+    "$numberLong": "2957581357"
+  },
+  "RequestTypeId": {
+    "$oid": "6291396543d218966422d876"
+  },
+  "FirstName": "Sean",
+  "LastName": "Coxen",
+  "CompanyName": "testing",
+  "CompanyUrl": "",
+  "Description": "",
+  "Email": "sean.coxen@gmail.com",
+  "Phone": "",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "000000000000000000000000"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "6297b13d605dda89466cf59e"
+  },
+  "CreatedById": {
+    "_csharpnull": true
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1654108477126"
+    }
+  },
+  "Updated": {
+    "$date": {
+      "$numberLong": "1654108509465"
+    }
+  },
+  "IsActive": false,
+  "MarketplaceItemId": {
+    "$oid": "62389b98a649292c49921ee8"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "SmProfileId": null,
+  "RequestTypeId": {
+    "$oid": "61928d19557c7b88d5fb4880"
+  },
+  "FirstName": "Sean",
+  "LastName": "Coxen",
+  "CompanyName": "Randstad",
+  "CompanyUrl": "",
+  "Description": "Testing. Disregard this submission.",
+  "Email": "sean.coxen@gmail.com",
+  "Phone": "6787770830",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "61af70aae6d640316cfa108c"
+  },
+  "Notes": null,
+  "StatusId": {
+    "$oid": "61ae5bcf1c65b79debe7a015"
+  }
+},{
+  "_id": {
+    "$oid": "62b0a9431c47cad7b51bba0c"
+  },
+  "CreatedById": {
+    "_csharpnull": true
+  },
+  "Created": {
+    "$date": {
+      "$numberLong": "1655744835357"
+    }
+  },
+  "UpdatedById": {
+    "_csharpnull": true
+  },
+  "Updated": null,
+  "IsActive": true,
+  "MarketplaceItemId": {
+    "$oid": "000000000000000000000000"
+  },
+  "PublisherId": {
+    "$oid": "000000000000000000000000"
+  },
+  "SmProfileId": {
+    "$numberLong": "3897744060"
+  },
+  "RequestTypeId": {
+    "$oid": "6291396543d218966422d876"
+  },
+  "FirstName": "Sean",
+  "LastName": "Coxen",
+  "CompanyName": "TEST",
+  "CompanyUrl": "",
+  "Description": "",
+  "Email": "sean.coxen@gmail.com",
+  "Phone": "",
+  "Industries": "",
+  "MembershipStatusId": {
+    "$oid": "000000000000000000000000"
   },
   "Notes": null,
   "StatusId": {

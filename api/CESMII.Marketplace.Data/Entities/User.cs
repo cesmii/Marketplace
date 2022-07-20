@@ -29,9 +29,26 @@
 
         public DateTime? RegistrationComplete { get; set; }
 
-        [BsonIgnore]
         public BsonObjectId OrganizationId { get; set; }
 
+        public SmipSettings SmipSettings { get; set; }
+    }
+
+    /// <summary>
+    /// Temporary class to store and use SMIP settings
+    /// </summary>
+    /// <remarks>Eventually, this will go away in favor of a SSO unified user record</remarks>
+    public class SmipSettings
+    {
+        public string UserName { get; set; }
+
+        public string Password { get; set; }
+
+        public string GraphQlUrl { get; set; }
+
+        public string Authenticator { get; set; }
+
+        public string AuthenticatorRole { get; set; }
     }
 
 }

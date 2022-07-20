@@ -42,11 +42,6 @@ function MarketplaceList() {
     
     const caption = 'Library';
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    //get look up types for sm-type
-    var [_itemTypeProfile] = useState(loadingProps == null || loadingProps.lookupDataStatic == null ? null :
-        loadingProps.lookupDataStatic.find((g) => {
-        return g.lookupType.enumValue === AppSettings.LookupTypeEnum.SmItemType && g.code === 'sm-profile'
-    }));
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events

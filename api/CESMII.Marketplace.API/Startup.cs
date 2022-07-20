@@ -32,6 +32,7 @@ using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Marketplace.Common.Models;
+using CESMII.Marketplace.JobManager;
 
 namespace CESMII.Marketplace.Api
 {
@@ -72,6 +73,8 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IMongoRepository<Organization>, MongoRepository<Organization>>();
             services.AddScoped<IMongoRepository<User>, MongoRepository<User>>();
             services.AddScoped<IMongoRepository<Permission>, MongoRepository<Permission>>();
+            services.AddScoped<IMongoRepository<JobLog>, MongoRepository<JobLog>>();
+            services.AddScoped<IMongoRepository<JobDefinition>, MongoRepository<JobDefinition>>();
 
             //DAL objects
             services.AddScoped<UserDAL>();  //this one has extra methods outside of the IDal interface
@@ -83,13 +86,16 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel>, MarkeplaceAnalyticsDAL>();
             services.AddScoped<IDal<RequestInfo, RequestInfoModel>, RequestInfoDAL>();
             services.AddScoped<IDal<ImageItem, ImageItemModel>, ImageItemDAL>();
-
+            services.AddScoped<IDal<JobLog, JobLogModel>, JobLogDAL>();
+            services.AddScoped<IDal<JobDefinition, JobDefinitionModel>, JobDefinitionDAL>();
 
             // Configuration, utils, one off objects
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddSingleton<ConfigUtil>();  //helper to allow us to bind to app settings data 
             services.AddSingleton<MailRelayService>();  //helper for emailing
-            services.AddSingleton<MongoClientGlobal>();  //helper for emailing
+            services.AddSingleton<MongoClientGlobal>();  
+            services.AddScoped<IJobFactory, JobFactory>();  
+            services.AddScoped<IHttpApiFactory, HttpApiFactory>();  
 
             //Cloud Lib
             services.AddSingleton<Opc.Ua.CloudLib.Client.UACloudLibClient>();
@@ -123,7 +129,7 @@ namespace CESMII.Marketplace.Api
                         Type = ReferenceType.SecurityScheme,
                         Id = "Bearer"
                     }
-                    },new string[] { }
+                    },Array.Empty<string>()
                 }
                 });
             });
@@ -169,6 +175,11 @@ namespace CESMII.Marketplace.Api
                 options.AddPolicy(
                     nameof(PermissionEnum.CanManageRequestInfo),
                     policy => policy.Requirements.Add(new PermissionRequirement(PermissionEnum.CanManageRequestInfo)));
+
+                // Ability to...
+                options.AddPolicy(
+                    nameof(PermissionEnum.CanManageJobDefinitions),
+                    policy => policy.Requirements.Add(new PermissionRequirement(PermissionEnum.CanManageJobDefinitions)));
             });
 
             services.AddCors(options =>
@@ -196,6 +207,9 @@ namespace CESMII.Marketplace.Api
             // Add response caching.
             services.AddResponseCaching();
 
+            //add httpclient service for dependency injection
+            //https://docs.microsoft.com/en-us/aspnet/core/fundamentals/http-requests?view=aspnetcore-6.0
+            services.AddHttpClient();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

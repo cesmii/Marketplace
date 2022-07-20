@@ -112,11 +112,6 @@ function RequestInfo() {
         if (loadingProps.lookupDataStatic == null) {
             setLoadingProps({ refreshLookupData: true });
         }
-
-        //this will execute on unmount
-        return () => {
-            //console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
-        };
     }, [loadingProps.lookupDataStatic]);
 
     //-------------------------------------------------------------------
@@ -422,7 +417,7 @@ function RequestInfo() {
                         <p className="mb-0">Published: {formatDate(_referrerItem.publishDate)}</p>
                     </div>
                 </div>
-                {itemType != "profile" && 
+                {itemType !== "profile" && 
                     <PublisherSidebar item={_referrerItem.publisher} />
                 }
             </div>

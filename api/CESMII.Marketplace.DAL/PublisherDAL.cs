@@ -54,45 +54,16 @@
         public async Task<string> Add(PublisherModel model, string userId)
         {
             throw new NotSupportedException("For adding publisher items, use AdminPublisherDAL");
-            //Publisher entity = new Publisher
-            //{
-            //    ID = ""
-            //    //,Created = DateTime.UtcNow
-            //    //,CreatedBy = userId
-            //};
-
-            //this.MapToEntity(ref entity, model);
-            ////do this after mapping to enforce isactive is true on add
-            //entity.Verified = true;
-
-            ////this will add and call saveChanges
-            //await _repo.AddAsync(entity);
-
-            //// Return id for newly added user
-            //return entity.ID;
         }
 
         public async Task<int> Update(PublisherModel model, string userId)
         {
             throw new NotSupportedException("For saving publisher items, use AdminPublisherDAL");
-            //Publisher entity = _repo.FindByCondition(x => x.ID == model.ID).FirstOrDefault();
-            ////model.Updated = DateTime.UtcNow;
-            //this.MapToEntity(ref entity, model);
-
-            //await _repo.UpdateAsync(entity);
-            //return 1;
         }
 
         public override async Task<int> Delete(string id, string userId)
         {
             throw new NotSupportedException("For deleting publisher items, use AdminPublisherDAL");
-            //Publisher entity = _repo.FindByCondition(x => x.ID == id).FirstOrDefault();
-            ////entity.Updated = DateTime.UtcNow;
-            ////entity.UpdatedBy = userId;
-            //entity.Verified = false;
-
-            //await _repo.UpdateAsync(entity);
-            //return 1;
         }
         /// <summary>
         /// Get all lookup items (no paging)
@@ -114,15 +85,17 @@
             var count = returnCount ? _repo.Count(x => x.Verified) : 0;
 
             //map the data to the final result
-            DALResult<PublisherModel> result = new DALResult<PublisherModel>();
-            result.Count = count;
-            result.Data = MapToModels(data.ToList(), verbose);
-            result.SummaryData = null;
+            var result = new DALResult<PublisherModel>
+            {
+                Count = count,
+                Data = MapToModels(data.ToList(), verbose),
+                SummaryData = null
+            };
             return result;
         }
 
         public override DALResult<PublisherModel> Where(Func<Publisher, bool> predicate, int? skip, int? take,
-            bool returnCount = true, bool verbose = false)
+            bool returnCount = false, bool verbose = false)
         {
             //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
             var data = _repo.FindByCondition(
@@ -134,10 +107,12 @@
             _lookupItemsAll = _repoLookup.GetAll();
 
             //map the data to the final result
-            DALResult<PublisherModel> result = new DALResult<PublisherModel>();
-            result.Count = count;
-            result.Data = MapToModels(data.ToList(), verbose);
-            result.SummaryData = null;
+            var result = new DALResult<PublisherModel>
+            {
+                Count = count,
+                Data = MapToModels(data.ToList(), verbose),
+                SummaryData = null
+            };
             return result;
 
         }
@@ -155,8 +130,7 @@
                     Verified = entity.Verified,
                     Description = entity.Description,
                     CompanyUrl = entity.CompanyUrl,
-                    SocialMediaLinks = entity.SocialMediaLinks == null ? null :
-                        entity.SocialMediaLinks.Select(x => new SocialMediaLinkModel() { Css = x.Css, Icon = x.Icon, Url = x.Url }).ToList(),
+                    SocialMediaLinks = entity.SocialMediaLinks?.Select(x => new SocialMediaLinkModel() { Css = x.Css, Icon = x.Icon, Url = x.Url }).ToList(),
                     IsActive = entity.IsActive
                 };
                 if (verbose)

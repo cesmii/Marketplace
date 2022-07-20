@@ -2,27 +2,25 @@
   "_id": {
     "$oid": "6123a2a96f069e7f409f62d0"
   },
-  "Id": 101,
   "Name": "Asset Monitoring",
   "Code": "AM",
-  "DisplayOrder": 99,
   "LookupType": {
     "EnumValue": 1,
     "Name": "Processes"
   },
+  "DisplayOrder": 0,
   "IsActive": true
 },{
   "_id": {
     "$oid": "6123a2a96f069e7f409f62d1"
   },
-  "Id": 102,
   "Name": "Palletizing",
   "Code": "PAL",
-  "DisplayOrder": 99,
   "LookupType": {
     "EnumValue": 1,
     "Name": "Processes"
   },
+  "DisplayOrder": 0,
   "IsActive": true
 },{
   "_id": {
@@ -30,13 +28,11 @@
   },
   "Name": "Predictive Maintenance",
   "Code": "PM",
-  "TypeId": 0,
   "LookupType": {
     "EnumValue": 1,
-    "Name": "Processes",
-    "Code": null
+    "Name": "Processes"
   },
-  "DisplayOrder": 99,
+  "DisplayOrder": 0,
   "IsActive": true
 },{
   "_id": {
@@ -48,20 +44,19 @@
     "EnumValue": 2,
     "Name": "Industry Vertical"
   },
-  "DisplayOrder": 99,
+  "DisplayOrder": 0,
   "IsActive": true
 },{
   "_id": {
     "$oid": "6123a2a96f069e7f409f62d4"
   },
-  "Id": 202,
   "Name": "Energy (Oil & Gas)",
   "Code": "EOG",
-  "DisplayOrder": 99,
   "LookupType": {
     "EnumValue": 2,
     "Name": "Industry Vertical"
   },
+  "DisplayOrder": 0,
   "IsActive": true
 },{
   "_id": {
@@ -73,7 +68,7 @@
     "EnumValue": 2,
     "Name": "Industry Vertical"
   },
-  "DisplayOrder": 99,
+  "DisplayOrder": 0,
   "IsActive": true
 },{
   "_id": {
@@ -81,7 +76,7 @@
   },
   "Id": 301,
   "Name": "Draft",
-  "Code": "D",
+  "Code": "draft",
   "DisplayOrder": 99,
   "LookupType": {
     "EnumValue": 5,
@@ -94,7 +89,7 @@
   },
   "Id": 302,
   "Name": "Retire",
-  "Code": "R",
+  "Code": "retire",
   "DisplayOrder": 99,
   "LookupType": {
     "EnumValue": 5,
@@ -107,7 +102,7 @@
   },
   "Id": 303,
   "Name": "Live",
-  "Code": "MS3",
+  "Code": "live",
   "DisplayOrder": 99,
   "LookupType": {
     "EnumValue": 5,
@@ -118,66 +113,61 @@
   "_id": {
     "$oid": "618aa883557c7b88d5fb4877"
   },
-  "Id": 200,
   "Name": "Machine Learning",
   "Code": "AM",
-  "DisplayOrder": 99,
   "LookupType": {
     "EnumValue": 1,
     "Name": "Processes"
   },
+  "DisplayOrder": 0,
   "IsActive": true
 },{
   "_id": {
     "$oid": "618aa8c0557c7b88d5fb4878"
   },
-  "Id": 300,
   "Name": "Petrochemical",
   "Code": "PC",
-  "DisplayOrder": 99,
   "LookupType": {
     "EnumValue": 2,
     "Name": "Industry Vertical"
   },
+  "DisplayOrder": 0,
   "IsActive": true
 },{
   "_id": {
     "$oid": "618aa8e8557c7b88d5fb4879"
   },
-  "Id": 301,
   "Name": "Industrial Gas",
   "Code": "IG",
-  "DisplayOrder": 99,
   "LookupType": {
     "EnumValue": 2,
     "Name": "Industry Vertical"
   },
+  "DisplayOrder": 0,
   "IsActive": true
 },{
   "_id": {
     "$oid": "618aa913557c7b88d5fb487a"
   },
-  "Id": 201,
   "Name": "IIoT",
   "Code": "IIoT",
-  "DisplayOrder": 99,
   "LookupType": {
     "EnumValue": 1,
     "Name": "Processes"
   },
+  "DisplayOrder": 0,
   "IsActive": true
 },{
   "_id": {
     "$oid": "618aa924557c7b88d5fb487b"
   },
-  "Id": 202,
   "Name": "Analytics",
   "Code": "AM",
-  "DisplayOrder": 99,
   "LookupType": {
     "EnumValue": 1,
     "Name": "Processes"
   },
+  "DisplayOrder": 0,
   "IsActive": true
 },{
   "_id": {
@@ -377,14 +367,13 @@
   "_id": {
     "$oid": "61af70e4e6d640316cfa108e"
   },
-  "Id": 902,
   "Name": "Previous Member",
   "Code": "member-previous",
-  "DisplayOrder": 1,
   "LookupType": {
     "EnumValue": 9,
-    "Name": "MembershipStatus"
+    "Name": "Membership Status"
   },
+  "DisplayOrder": 1,
   "IsActive": true
 },{
   "_id": {
@@ -412,6 +401,666 @@
   "IsActive": false
 },{
   "_id": {
+    "$oid": "62473787a649292c49921f01"
+  },
+  "Name": "Automotive",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "62473796a649292c49921f02"
+  },
+  "Name": "Chemical",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624737a9a649292c49921f03"
+  },
+  "Name": "Life Sciences",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624737b1a649292c49921f04"
+  },
+  "Name": "Packaging",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624737b9a649292c49921f05"
+  },
+  "Name": "Power",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624737c3a649292c49921f06"
+  },
+  "Name": "Refining",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "62473824a649292c49921f07"
+  },
+  "Name": "Asset Performance Management",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6247382fa649292c49921f08"
+  },
+  "Name": "Data Analytics",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6247383da649292c49921f09"
+  },
+  "Name": "Enterprise Data Management",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "62473845a649292c49921f0a"
+  },
+  "Name": "Historian",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6247384ea649292c49921f0b"
+  },
+  "Name": "Industrial Software",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "62473856a649292c49921f0c"
+  },
+  "Name": "OT Data Lake",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6de6a649292c49921f0d"
+  },
+  "Name": "Academia",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6defa649292c49921f0e"
+  },
+  "Name": "Cement",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6df8a649292c49921f0f"
+  },
+  "Name": "Electronics",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6dffa649292c49921f10"
+  },
+  "Name": "Forestry",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6e07a649292c49921f11"
+  },
+  "Name": "Foundry",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6e0ea649292c49921f12"
+  },
+  "Name": "Government",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6e15a649292c49921f13"
+  },
+  "Name": "Lumber",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6e25a649292c49921f14"
+  },
+  "Name": "Machine Shops",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6e2ca649292c49921f15"
+  },
+  "Name": "Metals",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6e34a649292c49921f16"
+  },
+  "Name": "Mining",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6e5fa649292c49921f17"
+  },
+  "Name": "Personal Care",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6e67a649292c49921f18"
+  },
+  "Name": "Plastics",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6e70a649292c49921f19"
+  },
+  "Name": "Pulp & Paper",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6e80a649292c49921f1a"
+  },
+  "Name": "Small-Medium Enterprises",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6e88a649292c49921f1b"
+  },
+  "Name": "Steel",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6e90a649292c49921f1c"
+  },
+  "Name": "Telecom",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6e98a649292c49921f1d"
+  },
+  "Name": "Textile",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6f92a649292c49921f1e"
+  },
+  "Name": "Augmented Reality",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6f9ea649292c49921f1f"
+  },
+  "Name": "Edge Computing",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6fa8a649292c49921f20"
+  },
+  "Name": "Energy Efficiency",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6fb1a649292c49921f21"
+  },
+  "Name": "Enterprise Integration",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6fb8a649292c49921f22"
+  },
+  "Name": "Machine Vision",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6fc2a649292c49921f23"
+  },
+  "Name": "Maintenance",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6fcda649292c49921f24"
+  },
+  "Name": "Plant Reliability",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6fdaa649292c49921f25"
+  },
+  "Name": "Power Factor",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6fe3a649292c49921f26"
+  },
+  "Name": "Power Quality",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6feda649292c49921f27"
+  },
+  "Name": "Quality Assurance",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6ff4a649292c49921f28"
+  },
+  "Name": "Short Interval Control",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "624c6ffca649292c49921f29"
+  },
+  "Name": "Workflow Mapping",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "625460bf2473fdfd95124117"
+  },
+  "Name": "Utilities",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "625db4eb2473fdfd95124120"
+  },
+  "Name": "Energy",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "625db50d2473fdfd95124121"
+  },
+  "Name": "Pharmaceuticals",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "625db5192473fdfd95124122"
+  },
+  "Name": "Semiconductor",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "625db5212473fdfd95124123"
+  },
+  "Name": "Defense",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "625db52a2473fdfd95124124"
+  },
+  "Name": "Intelligence",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "625db5392473fdfd95124125"
+  },
+  "Name": "Continuous improvement",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "625db5422473fdfd95124126"
+  },
+  "Name": "Asset health",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "625db54c2473fdfd95124127"
+  },
+  "Name": "Asset optimization",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "625db5592473fdfd95124128"
+  },
+  "Name": "Process optimization",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "625db5632473fdfd95124129"
+  },
+  "Name": "Quality assessment",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "626ae2fa35286cb67ba0998c"
+  },
+  "Name": "Consumer and Paper Goods",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "626ae30c35286cb67ba0998d"
+  },
+  "Name": "Building Materials and Supplies",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "626ae31535286cb67ba0998e"
+  },
+  "Name": "Heavy Industry",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
     "$oid": "6275769bb7e0831201e5c3e2"
   },
   "Name": "SM App",
@@ -428,10 +1077,288 @@
   },
   "Name": "SM Profile",
   "Code": "sm-profile",
+  "DisplayOrder": 4,
+  "LookupType": {
+    "EnumValue": 10,
+    "Name": "SmItemType"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629020c143d218966422d871"
+  },
+  "Id": 607,
+  "Name": "SM Profile",
+  "Code": "smprofile",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 7,
+    "Name": "RequestInfo"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6291396543d218966422d876"
+  },
+  "Id": 608,
+  "Name": "SM Profile Download",
+  "Code": "smprofile-download",
+  "DisplayOrder": 99,
+  "LookupType": {
+    "EnumValue": 7,
+    "Name": "RequestInfo"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629646466519f64c6fab0c7d"
+  },
+  "Name": "Hospitality",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "6296464e6519f64c6fab0c7e"
+  },
+  "Name": "Retailers",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629763866827ef2028a17d61"
+  },
+  "Name": "SM Hardware",
+  "Code": "sm-hardware",
+  "DisplayOrder": 3,
+  "LookupType": {
+    "EnumValue": 10,
+    "Name": "SmItemType"
+  },
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629763866827ef2028a17d62"
+  },
+  "Name": "SM Datasource",
+  "Code": "sm-datasource",
   "DisplayOrder": 2,
   "LookupType": {
     "EnumValue": 10,
     "Name": "SmItemType"
   },
+  "IsActive": false
+},{
+  "_id": {
+    "$oid": "629a682e605dda89466cf5b1"
+  },
+  "Name": "Consumer Products",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629a683b605dda89466cf5b2"
+  },
+  "Name": "Data Management",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629a6ad2605dda89466cf5b5"
+  },
+  "Name": "OEE",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629a6b1b605dda89466cf5b6"
+  },
+  "Name": "Discreet Manufacturing",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629a6b27605dda89466cf5b7"
+  },
+  "Name": "Process Manufacturing",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629a6b34605dda89466cf5b8"
+  },
+  "Name": "Agriculture",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629df397b159f4d4ef73c5eb"
+  },
+  "Name": "Plastics and Rubber",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629df3a2b159f4d4ef73c5ec"
+  },
+  "Name": "Medical Devices",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629df484b159f4d4ef73c5ed"
+  },
+  "Name": "APS",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629df48eb159f4d4ef73c5ee"
+  },
+  "Name": "CNC Monitoring",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629df498b159f4d4ef73c5ef"
+  },
+  "Name": "Data Collection",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629df4a2b159f4d4ef73c5f0"
+  },
+  "Name": "Energy Monitoring",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629df4a9b159f4d4ef73c5f1"
+  },
+  "Name": "MES",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629df4b4b159f4d4ef73c5f2"
+  },
+  "Name": "Machine Connectivity",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629df4bcb159f4d4ef73c5f3"
+  },
+  "Name": "Planning and Scheduling",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629df4c6b159f4d4ef73c5f4"
+  },
+  "Name": "Supply Chain",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 1,
+    "Name": "Processes"
+  },
+  "DisplayOrder": 0,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "629df6a7b159f4d4ef73c5f6"
+  },
+  "Name": "CNC",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 2,
+    "Name": "Industry Vertical"
+  },
+  "DisplayOrder": 0,
   "IsActive": true
 }]

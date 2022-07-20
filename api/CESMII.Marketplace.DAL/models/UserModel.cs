@@ -52,6 +52,7 @@
 
         public OrganizationModel Organization { get; set; }
 
+        public Data.Entities.SmipSettings SmipSettings { get; set; }
     }
 
     public class UserSimpleModel : AbstractModel
