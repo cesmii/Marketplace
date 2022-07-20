@@ -21,6 +21,8 @@
         protected List<MarketplaceItemAnalytics> _marketplaceItemAnalyticsAll;
         protected IMongoRepository<ImageItemSimple> _repoImages;  //get image info except the actual source data. 
         protected List<ImageItemSimple> _imagesAll;
+        protected IMongoRepository<JobDefinition> _repoJobDefinition; 
+        protected List<JobDefinition> _jobDefinitionAll;
         //default type - use if none assigned yet.
         private readonly MongoDB.Bson.BsonObjectId _smItemTypeIdDefault;
 
@@ -28,6 +30,7 @@
             IMongoRepository<Publisher> repoPublisher, 
             IMongoRepository<MarketplaceItemAnalytics> repoAnalytics,
             IMongoRepository<ImageItemSimple> repoImages,
+            IMongoRepository<JobDefinition> repoJobDefinition,
             ConfigUtil configUtil
             ) : base(repo)
         {
@@ -35,6 +38,7 @@
             _repoPublisher = repoPublisher;
             _repoAnalytics = repoAnalytics;
             _repoImages = repoImages;
+            _repoJobDefinition = repoJobDefinition;
 
             //init some stuff we will use during the mapping methods
             _smItemTypeIdDefault = new MongoDB.Bson.BsonObjectId(
@@ -241,7 +245,13 @@
                 };
                 //get additional data under certain scenarios
                 if (verbose)
-                { 
+                {
+                    if (_jobDefinitionAll.Any())
+                    {
+                        result.JobDefinitions = _jobDefinitionAll
+                            .Where(x => x.MarketplaceItemId.ToString().Equals(entity.ID))
+                            .Select(x => new JobDefinitionSimpleModel { ID = x.ID, Name = x.Name }).ToList();
+                    }
                 }
                 return result;
             }
@@ -251,6 +261,7 @@
             }
 
         }
+
         // Add Maptomodelanalytics create new model
         protected static MarketplaceItemAnalyticsModel MapToModelMarketplaceItemAnalyticsData(string marketplaceItemId, List<MarketplaceItemAnalytics> allItems)
         {
@@ -300,21 +311,6 @@
         /// </summary>
         /// <param name="marketplaceIds"></param>
         /// <param name="publisherIds"></param>
-        protected void GetMarketplaceRelatedData(string[] marketplaceIds, string[] publisherIds)
-        {
-            _lookupItemsAll = _repoLookup.GetAll();
-            _publishersAll = _repoPublisher.FindByCondition(x => publisherIds.Any(y => y.Equals(x.ID)));
-            _marketplaceItemAnalyticsAll = _repoAnalytics.FindByCondition(x => marketplaceIds.Any(y => y.Equals(x.MarketplaceItemId.ToString())));
-            _imagesAll = _repoImages.FindByCondition(x => marketplaceIds.Any(y => y.Equals(x.MarketplaceItemId.ToString())));
-        }
-
-        /// <summary>
-        ///When mapping the results, we also get related data. For efficiency, get the look up data now and then
-        ///mapToModel will apply cats and industry verts to each item properly.
-        ///get list of all categories, industry verticals
-        /// </summary>
-        /// <param name="marketplaceIds"></param>
-        /// <param name="publisherIds"></param>
         protected void GetMarketplaceRelatedData(List<MongoDB.Bson.BsonObjectId> marketplaceIds, List<MongoDB.Bson.BsonObjectId> publisherIds)
         {
             _lookupItemsAll = _repoLookup.GetAll();
@@ -330,6 +326,9 @@
 
             var filterAnalytics = MongoDB.Driver.Builders<MarketplaceItemAnalytics>.Filter.In(x => x.MarketplaceItemId, marketplaceIds);
             _marketplaceItemAnalyticsAll = _repoAnalytics.AggregateMatch(filterAnalytics);
+
+            var filterJobDef = MongoDB.Driver.Builders<JobDefinition>.Filter.In(x => x.MarketplaceItemId, marketplaceIds);
+            _jobDefinitionAll = _repoJobDefinition.AggregateMatch(filterJobDef);
         }
 
     }

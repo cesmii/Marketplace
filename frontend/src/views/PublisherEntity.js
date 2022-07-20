@@ -6,7 +6,7 @@ import axiosInstance from "../services/AxiosService";
 import { AppSettings } from '../utils/appsettings';
 import { generateLogMessageString, getMarketplaceIconName, getMarketplaceCaption } from '../utils/UtilityService'
 import { MarketplaceBreadcrumbs } from './shared/MarketplaceBreadcrumbs';
-import { useLoadingContext, UpdateRecentFileList, toggleFavoritesList } from "../components/contexts/LoadingContext";
+import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
 import { useAuthState } from "../components/authentication/AuthContext";
 
 import { SvgVisibilityIcon } from "../components/SVGIcon";
@@ -234,7 +234,7 @@ function PublisherEntity() {
                     {renderHeaderRow()}
                     <div className="row" >
                     <div className="col-sm-3 order-2 order-sm-1" >
-                            <PublisherEntitySidebar item={item} />
+                        <PublisherEntitySidebar item={item} className="light" />
                         </div>
                     <div className="col-sm-9 mb-2 mb-md-4 order-1 order-sm-2" >
                             <div className="publisher-entity">

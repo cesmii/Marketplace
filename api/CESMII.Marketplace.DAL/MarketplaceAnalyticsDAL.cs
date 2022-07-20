@@ -27,7 +27,7 @@
 
         public async Task<string> Add(MarketplaceItemAnalyticsModel model, string userId)
         {
-            MarketplaceItemAnalytics entity = new MarketplaceItemAnalytics
+            var entity = new MarketplaceItemAnalytics
             {
                 ID = ""
                 //,Created = DateTime.UtcNow
@@ -36,7 +36,6 @@
 
             this.MapToEntity(ref entity, model);
             //do this after mapping to enforce isactive is true on add
-           // entity.IsActive = true;
 
             //this will add and call saveChanges
             await _repo.AddAsync(entity);
@@ -48,7 +47,6 @@
         public async Task<int> Update(MarketplaceItemAnalyticsModel model, string userId)
         {
             MarketplaceItemAnalytics entity = _repo.FindByCondition(x => x.ID == model.ID ).FirstOrDefault();
-            //model.Updated = DateTime.UtcNow;
             this.MapToEntity(ref entity, model);
 
             await _repo.UpdateAsync(entity);
@@ -76,7 +74,7 @@
         /// <returns></returns>
         public override List<MarketplaceItemAnalyticsModel> GetAll(bool verbose = false)
         {
-            DALResult<MarketplaceItemAnalyticsModel> result = GetAllPaged(verbose: verbose);
+            var result = GetAllPaged(null, null, verbose: verbose);
             return result.Data;
         }
 
@@ -88,11 +86,35 @@
             var count = returnCount ? _repo.Count() : 0;
 
             //map the data to the final result
-            DALResult<MarketplaceItemAnalyticsModel> result = new DALResult<MarketplaceItemAnalyticsModel>();
-            result.Count = count;
-            result.Data = MapToModels(data.ToList(), verbose);
-            result.SummaryData = null;
+            var result = new DALResult<MarketplaceItemAnalyticsModel>
+            {
+                Count = count,
+                Data = MapToModels(data.ToList(), verbose),
+                SummaryData = null
+            };
             return result;
+        }
+
+        public override DALResult<MarketplaceItemAnalyticsModel> GetAllPaged(int? skip = null, int? take = null, bool returnCount = false, bool verbose = false,
+            params OrderByExpression<MarketplaceItemAnalytics>[] orderByExpressions)
+        {
+            //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
+            var predicates = new List<Func<MarketplaceItemAnalytics, bool>>();
+            var data = _repo.FindByCondition(
+                predicates,
+                skip, take,
+                orderByExpressions);
+            var count = returnCount ? _repo.Count() : 0;
+
+            //map the data to the final result
+            var result = new DALResult<MarketplaceItemAnalyticsModel>
+            {
+                Count = count,
+                Data = MapToModels(data.ToList(), verbose),
+                SummaryData = null
+            };
+            return result;
+
         }
 
         /// <summary>
@@ -101,7 +123,7 @@
         /// <param name="predicate"></param>
         /// <returns></returns>
         public override DALResult<MarketplaceItemAnalyticsModel> Where(Func<MarketplaceItemAnalytics, bool> predicate, int? skip, int? take,
-            bool returnCount = true, bool verbose = false)
+            bool returnCount = false, bool verbose = false)
         {
             //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
             var data = _repo.FindByCondition(
@@ -111,30 +133,12 @@
             var count = returnCount ? _repo.Count(predicate) : 0;
 
             //map the data to the final result
-            DALResult<MarketplaceItemAnalyticsModel> result = new DALResult<MarketplaceItemAnalyticsModel>();
-            result.Count = count;
-            result.Data = MapToModels(data.ToList(), verbose);
-            result.SummaryData = null;
-            return result;
-
-        }
-
-        public override DALResult<MarketplaceItemAnalyticsModel> GetAllPaged(int? skip, int? take, bool returnCount = false, bool verbose = false,
-            params OrderByExpression<MarketplaceItemAnalytics>[] orderByExpressions)
-        {
-            //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
-            var predicates = new List<Func<MarketplaceItemAnalytics, bool>>();
-            var data = _repo.FindByCondition(
-                predicates, 
-                skip, take,
-                orderByExpressions);
-            var count = returnCount ? _repo.Count() : 0;
-
-            //map the data to the final result
-            DALResult<MarketplaceItemAnalyticsModel> result = new DALResult<MarketplaceItemAnalyticsModel>();
-            result.Count = count;
-            result.Data = MapToModels(data.ToList(), verbose);
-            result.SummaryData = null;
+            var result = new DALResult<MarketplaceItemAnalyticsModel>
+            {
+                Count = count,
+                Data = MapToModels(data.ToList(), verbose),
+                SummaryData = null
+            };
             return result;
 
         }
@@ -153,8 +157,7 @@
                     DislikeCount = entity.DislikeCount,
                     MoreInfoCount = entity.MoreInfoCount,
                     SearchResultCount = entity.ShareCount,
-                    ShareCount = entity.ShareCount,
-                  //  DownloadCount = entity.DownloadHistory == null ? 0 : entity.DownloadHistory.Count
+                    ShareCount = entity.ShareCount
                 };
             }
             else
@@ -176,7 +179,6 @@
             entity.MoreInfoCount = model.MoreInfoCount;
             entity.SearchResultCount = model.SearchResultCount;
             entity.ShareCount = model.ShareCount;
-          //  entity.DownloadHistory = model.DownloadHistory.Where(x => x.UserId == new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.MarketplaceItemId))).ToList();
 
         }
     }

@@ -20,15 +20,13 @@ namespace CESMII.Marketplace.Api.Controllers
     public class AuthController : BaseController<AuthController>
     {
         private readonly UserDAL _dal;
-        private readonly MailRelayService _mailRelay;
         private readonly TokenUtils _tokenUtils;
 
-        public AuthController(UserDAL dal, TokenUtils tokenUtils, MailRelayService mailRelay, ConfigUtil config, ILogger<AuthController> logger) 
+        public AuthController(UserDAL dal, TokenUtils tokenUtils, ConfigUtil config, ILogger<AuthController> logger) 
             : base(config, logger)
         {
             _dal = dal;
             _tokenUtils = tokenUtils;
-            _mailRelay = mailRelay;
         }
 
         [AllowAnonymous, HttpPost, Route("Login")]
@@ -70,27 +68,49 @@ namespace CESMII.Marketplace.Api.Controllers
             return Ok(result);
         }
 
-        [HttpPost, Route("ValidateByToken")]
-        [ProducesResponseType(200, Type = typeof(UserModel))]
-        public async Task<IActionResult> ValidateByToken([FromBody] ChangePasswordModel model)
+        [HttpPost, Route("changepassword")]
+        [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordModel model)
         {
+            if (string.IsNullOrEmpty(model.OldPassword))
+            {
+                return Ok(new ResultMessageWithDataModel()
+                {
+                    IsSuccess = false,
+                    Message = "Old Password is required."
+                });
+            }
+
             if (string.IsNullOrEmpty(model.NewPassword))
             {
-                return BadRequest("Password is required.");
+                return Ok(new ResultMessageWithDataModel()
+                {
+                    IsSuccess = false,
+                    Message = "New Password is required."
+                });
             }
 
             var user = _dal.GetById(User.GetUserID());
             if (user == null)
             {
-                return BadRequest("User was not found. Please contact support.");
+                return Ok(new ResultMessageWithDataModel()
+                {
+                    IsSuccess = false,
+                    Message = "User was not found."
+                });
             }
 
             // If we get here, update the user data with new password
-            await _dal.ChangePassword(user.ID, model.OldPassword, model.NewPassword);
-
-            // Why do we expect a new token here? The user is already authenticated and just changing their password?
+            var result = await _dal.ChangePassword(user.ID, model.OldPassword, model.NewPassword);
+            //update token given new password
             var tokenModel = _tokenUtils.BuildToken(user);
-            return Ok(tokenModel);
+
+            return Ok(new ResultMessageWithDataModel()
+            {
+                IsSuccess = result,
+                Message = result ? "Password updated" : "Old password does not match",
+                Data = tokenModel.Token
+            });
         }
 
         [HttpPost, Route("ExtendToken")]
@@ -113,6 +133,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 return Ok(newToken);
             }
         }
+
 
         [AllowAnonymous]
         [HttpPost, Route("ForgotPassword")]

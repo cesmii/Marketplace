@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-
+using Microsoft.AspNetCore.Authorization;
 
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Enums;
@@ -21,19 +21,13 @@ namespace CESMII.Marketplace.Api.Controllers
     {
 
         private readonly IDal<Publisher, PublisherModel> _dal;
-        private readonly IDal<Publisher, AdminPublisherModel> _dalAdmin;
-        private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
 
         public PublisherController(
             IDal<Publisher, PublisherModel> dal,
-            IDal<Publisher, AdminPublisherModel> dalAdmin,
-            IDal<LookupItem, LookupItemModel> dalLookup,
             ConfigUtil config, ILogger<PublisherController> logger) 
             : base(config, logger)
         {
             _dal = dal;
-            _dalAdmin = dalAdmin;
-            _dalLookup = dalLookup;
         }
 
 
@@ -72,6 +66,15 @@ namespace CESMII.Marketplace.Api.Controllers
             return Ok(result);
         }
 
+        [HttpPost, Route("admin/search")]
+        [Authorize(Policy = nameof(PermissionEnum.CanManagePublishers))]
+        [ProducesResponseType(200, Type = typeof(DALResult<PublisherModel>))]
+        [ProducesResponseType(400)]
+        public IActionResult AdminSearch([FromBody] PagerFilterSimpleModel model)
+        {
+            return this.Search(model);
+        }
+
         [HttpPost, Route("GetByID")]
         [ProducesResponseType(200, Type = typeof(PublisherModel))]
         [ProducesResponseType(400)]
@@ -107,12 +110,12 @@ namespace CESMII.Marketplace.Api.Controllers
             //if we get more than one match, throw exception
             var matches = _dal.Where(x => x.Name.ToLower().Equals(model.ID.ToLower()), null, null, false, true).Data;
 
-            if (matches == null || matches.Count() == 0)
+            if (matches == null || !matches.Any())
             {
                 _logger.LogWarning($"PublisherController|GetByName|No records found matching this name: {model.ID}");
                 return BadRequest($"No records found matching this name: {model.ID}");
             }
-            if (matches.Count() > 1)
+            if (matches.Count > 1)
             {
                 _logger.LogWarning($"PublisherController|GetByName|Multiple records found matching this name: {model.ID}");
                 return BadRequest($"Multiple records found matching this name: {model.ID}");

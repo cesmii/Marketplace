@@ -21,7 +21,6 @@ function Login() {
     //-------------------------------------------------------------------
     const caption = 'Login';
     const [_loginData, setLoginData] = useState({ userName: '', password: '' });
-    //const [_isLoggedIn, setLoggedIn] = useState(false);
     const [_error, setIsError] = useState({ success: true, message: 'An error occurred. Please try again.' } );
     const [_isValid, setIsValid] = useState({ userName: true, password: true });
     const authTicket = useAuthState();
@@ -33,7 +32,6 @@ function Login() {
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
     const onChange = (e) => {
-        //console.log(generateLogMessageString(`onAttributeChange||e:${e.target}`, CLASS_NAME));
 
         switch (e.target.id.toLowerCase()) {
             case "username":
@@ -50,7 +48,6 @@ function Login() {
 
     //update state for when search click happens
     const onBlur = (e) => {
-        //console.log(generateLogMessageString(`onBlur`, CLASS_NAME));
 
         switch (e.target.id.toLowerCase()) {
             case "username":
@@ -142,7 +139,7 @@ function Login() {
     //if already logged in, go to admin home page
     if (authTicket != null && authTicket.token != null) {
         //    if (_isLoggedIn) {
-        return <Redirect to="/admin/library/list" />;
+        return <Redirect to="/" />;
     }
 
     return (

@@ -37,7 +37,7 @@
 
         public async Task<string> Add(RequestInfoModel model, string userId)
         {
-           RequestInfo entity = new RequestInfo
+            var entity = new RequestInfo
             {
                 ID = ""
                 //,Created = DateTime.UtcNow
@@ -126,7 +126,7 @@
         /// <returns></returns>
         public override List<RequestInfoModel> GetAll(bool verbose = false)
         {
-            DALResult<RequestInfoModel> result = GetAllPaged(verbose: verbose);
+            var result = GetAllPaged(verbose: verbose);
             return result.Data;
         }
 
@@ -146,10 +146,12 @@
                 x.LookupType.EnumValue == LookupTypeEnum.TaskStatus || x.LookupType.EnumValue == LookupTypeEnum.MembershipStatus);
 
             //map the data to the final result
-            DALResult<RequestInfoModel> result = new DALResult<RequestInfoModel>();
-            result.Count = count;
-            result.Data = MapToModels(data.ToList(), verbose);
-            result.SummaryData = null;
+            var result = new DALResult<RequestInfoModel>
+            {
+                Count = count,
+                Data = MapToModels(data.ToList(), verbose),
+                SummaryData = null
+            };
             return result;
         }
 
@@ -159,7 +161,7 @@
         /// <param name="predicate"></param>
         /// <returns></returns>
         public override DALResult<RequestInfoModel> Where(Func<RequestInfo, bool> predicate, int? skip, int? take,
-            bool returnCount = true, bool verbose = false)
+            bool returnCount = false, bool verbose = false)
         {
             //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
             var data = _repo.FindByCondition(
@@ -175,10 +177,12 @@
                 x.LookupType.EnumValue == LookupTypeEnum.TaskStatus || x.LookupType.EnumValue == LookupTypeEnum.MembershipStatus);
 
             //map the data to the final result
-            DALResult<RequestInfoModel> result = new DALResult<RequestInfoModel>();
-            result.Count = count;
-            result.Data = MapToModels(data.ToList(), verbose);
-            result.SummaryData = null;
+            var result = new DALResult<RequestInfoModel>
+            {
+                Count = count,
+                Data = MapToModels(data.ToList(), verbose),
+                SummaryData = null
+            };
             return result;
 
         }
@@ -197,7 +201,6 @@
                     Publisher = entity.PublisherId.ToString().Equals(Common.Constants.BSON_OBJECTID_EMPTY) ? null :
                         MapToModelPublisher(entity.PublisherId),
                     SmProfileId = entity.SmProfileId,
-                    //RequestTypeCode = entity.RequestTypeId.ToString() == null ? null : entity.RequestTypeId.ToString(),
                     RequestType = MapToModelLookupItem(entity.RequestTypeId, _lookupItemsAll),
                     MembershipStatus = MapToModelLookupItem(entity.MembershipStatusId, _lookupItemsAll),
                     FirstName = entity.FirstName,
@@ -233,7 +236,7 @@
         {
 
             var matches = _repoPublisher.FindByCondition(x => x.ID == id.ToString());
-            if (matches == null || matches.Count() == 0) return null;
+            if (!matches.Any()) return null;
             return base.MapToModelPublisher(id, matches);
         }
 

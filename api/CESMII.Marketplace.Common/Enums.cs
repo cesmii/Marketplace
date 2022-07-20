@@ -39,7 +39,21 @@
         CanManagePublishers = 4,
 
         [Description("CanManageRequestInfo")]
-        CanManageRequestInfo = 5
+        CanManageRequestInfo = 5,
+
+        [Description("CanManageJobDefinitions")]
+        CanManageJobDefinitions = 6
 
     }
+
+    public enum TaskStatusEnum
+    {
+        NotStarted = 0,
+        InProgress = 1,
+        Completed = 2,
+        Failed = 10,
+        Cancelled = 11
+    }
+
+
 }

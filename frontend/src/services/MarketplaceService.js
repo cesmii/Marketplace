@@ -58,3 +58,4 @@ export function toggleSearchFilterSelected(criteria, id) {
     //toggle the selection or set for initial scenario
     item.selected = !item.selected;
 }
+

@@ -34,7 +34,7 @@
 
             //build list of where clauses all combined into one predicate, 
             //using expression extension to allow for .Or or .And expression
-            List<Func<MarketplaceItem, bool>> predicates = new List<Func<MarketplaceItem, bool>>();
+            var predicates = new List<Func<MarketplaceItem, bool>>();
 
             //build list of where clauses - one for each cat 
             Func<MarketplaceItem, bool> predicateCat = null;
@@ -89,26 +89,29 @@
         {
             //get list of popular items in analytics collection
             //build list of order bys to sort result by most important factors first - this is essentially giving us most popular 
-            var orderBys = new List<OrderByExpression<MarketplaceItemAnalytics>>();
-            orderBys.Add(new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.DownloadCount, IsDescending = true });
-            orderBys.Add(new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.LikeCount, IsDescending = true });
-            orderBys.Add(new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.ShareCount, IsDescending = true });
-            orderBys.Add(new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.MoreInfoCount, IsDescending = true });
-            orderBys.Add(new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.PageVisitCount, IsDescending = true });
-            orderBys.Add(new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.DislikeCount, IsDescending = false });
+            var orderBys = new List<OrderByExpression<MarketplaceItemAnalytics>>
+            {
+                new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.DownloadCount, IsDescending = true },
+                new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.LikeCount, IsDescending = true },
+                new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.ShareCount, IsDescending = true },
+                new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.MoreInfoCount, IsDescending = true },
+                new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.PageVisitCount, IsDescending = true },
+                new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.DislikeCount, IsDescending = false }
+            };
 
-            //throw new NotImplementedException("Under Construction");
             var popular = _dalAnalytics.GetAllPaged(null, 4, false, false, orderBys.ToArray()).Data.Select(x => x.MarketplaceItemId).ToArray();
 
             //now get the marketplace items with popular rankings
             //filter our inactive and non-live items
-            List<Func<MarketplaceItem, bool>> predicates = new List<Func<MarketplaceItem, bool>>();
-            //limit to isActive
-            predicates.Add(x => x.IsActive);
-            //limit to publish status of live
-            predicates.Add(this.BuildStatusFilterPredicate());
-            //only get items which are most popular based on previous query of analytics
-            predicates.Add(x => popular.Any(m => m == x.ID.ToString()));
+            var predicates = new List<Func<MarketplaceItem, bool>>
+            {
+                //limit to isActive
+                x => x.IsActive,
+                //limit to publish status of live
+                this.BuildStatusFilterPredicate(),
+                //only get items which are most popular based on previous query of analytics
+                x => popular.Any(m => m == x.ID.ToString())
+            };
 
             return _dalMarketplace.Where(predicates, null, 4, false, false).Data;
         }

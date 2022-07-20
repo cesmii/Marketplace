@@ -1,6 +1,5 @@
 ﻿namespace CESMII.Marketplace.DAL.Models
 {
-    // using CESMII.Marketplace.DAL.models;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -59,7 +58,7 @@
         /// TBD - May need to convert this to list.
         /// </summary>
         public virtual UserModel Author { get; set; }
-        //public virtual List<Author> Author { get; set; }
+        
         /// <summary>
         /// The author may not be someone within the system. In this case, show as a simple string field.
         /// TBD - May need to convert this to list.
@@ -97,6 +96,8 @@
         [Obsolete("Retire ImageSquare")]
         public ImageItemSimpleModel ImageSquare { get; set; }
         public ImageItemSimpleModel ImageLandscape { get; set; }
+
+        public virtual List<JobDefinitionSimpleModel> JobDefinitions { get; set; }
     }
 
     public class MarketplaceItemModel : MarketplaceItemModelBase
@@ -114,7 +115,6 @@
 
         public List<LookupItemFilterModel> IndustryVerticals { get; set; }
 
-        //public List<ImageItemModel> Images { get; set; }
     }
 
     /// <summary>
@@ -124,6 +124,16 @@
     {
         public MarketplaceItemModel Item { get; set; }
         public string NodesetXml { get; set; }
+    }
+
+    /// <summary>
+    /// A very simple marketplace item used for related data and lookup scenarios
+    /// where keeping data small is helpful
+    /// </summary>
+    public class MarketplaceItemSimpleModel: AbstractModel
+    {
+        public string Name { get; set; }
+        public string DisplayName { get; set; }
     }
 
 

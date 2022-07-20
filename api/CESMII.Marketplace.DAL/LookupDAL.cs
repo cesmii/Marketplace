@@ -25,11 +25,9 @@
 
         public async Task<string> Add(LookupItemModel model, string userId)
         {
-            LookupItem entity = new LookupItem
+            var entity = new LookupItem
             {
                 ID = ""
-                //,Created = DateTime.UtcNow
-                //,CreatedBy = userId
             };
 
             this.MapToEntity(ref entity, model);
@@ -46,7 +44,6 @@
         public async Task<int> Update(LookupItemModel model, string userId)
         {
             LookupItem entity = _repo.FindByCondition(x => x.ID == model.ID).FirstOrDefault();
-            //model.Updated = DateTime.UtcNow;
             this.MapToEntity(ref entity, model);
 
             await _repo.UpdateAsync(entity);
@@ -74,7 +71,7 @@
         /// <returns></returns>
         public override List<LookupItemModel> GetAll(bool verbose = false)
         {
-            DALResult<LookupItemModel> result = GetAllPaged(verbose: verbose);
+            var result = GetAllPaged(verbose: verbose);
             return result.Data;
         }
 
@@ -93,10 +90,12 @@
             var count = returnCount ? _repo.Count(x => x.IsActive) : 0;
 
             //map the data to the final result
-            DALResult<LookupItemModel> result = new DALResult<LookupItemModel>();
-            result.Count = count;
-            result.Data = MapToModels(data.ToList(), verbose);
-            result.SummaryData = null;
+            var result = new DALResult<LookupItemModel>
+            {
+                Count = count,
+                Data = MapToModels(data.ToList(), verbose),
+                SummaryData = null
+            };
             return result;
         }
 
@@ -106,7 +105,7 @@
         /// <param name="predicate"></param>
         /// <returns></returns>
         public override DALResult<LookupItemModel> Where(Func<LookupItem, bool> predicate, int? skip, int? take, 
-            bool returnCount = true, bool verbose = false)
+            bool returnCount = false, bool verbose = false)
         {
             //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
             var data = _repo.FindByCondition(
@@ -116,10 +115,12 @@
             var count = returnCount ? _repo.Count(predicate) : 0;
 
             //map the data to the final result
-            DALResult<LookupItemModel> result = new DALResult<LookupItemModel>();
-            result.Count = count;
-            result.Data = MapToModels(data.ToList(), verbose);
-            result.SummaryData = null;
+            var result = new DALResult<LookupItemModel>
+            {
+                Count = count,
+                Data = MapToModels(data.ToList(), verbose),
+                SummaryData = null
+            };
             return result;
 
         }
@@ -127,8 +128,6 @@
         public override async Task<int> Delete(string id, string userId)
         {
             LookupItem entity = _repo.FindByCondition(x => x.ID == id).FirstOrDefault();
-            //entity.Updated = DateTime.UtcNow;
-            //entity.UpdatedBy = userId;
             entity.IsActive = false;
 
             await _repo.UpdateAsync(entity);

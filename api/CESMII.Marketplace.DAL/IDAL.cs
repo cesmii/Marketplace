@@ -40,23 +40,6 @@
         /// <returns></returns>
         Task<int> Update(TModel model, string userId);
 
-        /// <summary>
-        /// Add an entity synchronously
-        /// </summary>
-        /// <param name="model"></param>
-        /// <param name="userId"></param>
-        /// <returns></returns>
-        //int AddSync(TModel model, int userId);
-
-        /// <summary>
-        /// Update an entity synchronously
-        /// </summary>
-        /// <param name="model"></param>
-        /// <param name="userId"></param>
-        /// <returns></returns>
-        //int UpdateSync(TModel model, int userId);
-
-        //Task<long> Upsert(TModel model, int userId);
         Task<int> Delete(string id, string userId);
 
         /// <summary>

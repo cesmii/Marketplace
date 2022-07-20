@@ -100,5 +100,15 @@
 
     }
 
+    /// <summary>
+    /// A very simple marketplace item used for related data and lookup scenarios
+    /// where keeping data small is helpful
+    /// </summary>
+    public class MarketplaceItemSimple : AbstractEntity
+    {
+        public string Name { get; set; }
+        public string DisplayName { get; set; }
+    }
+
 
 }

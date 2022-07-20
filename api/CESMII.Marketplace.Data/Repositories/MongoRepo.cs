@@ -5,7 +5,7 @@
     using System.Linq;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
-    using System.ComponentModel.DataAnnotations.Schema; 
+    using System.ComponentModel.DataAnnotations.Schema;
     using Microsoft.Extensions.Logging;
 
     using MongoDB.Driver;
@@ -17,10 +17,10 @@
     /// <summary>
     /// Global class to maintain the Mongo DB client during the app lifetime
     /// </summary>
-    public class MongoClientGlobal 
+    public class MongoClientGlobal
     {
         public readonly MongoClient Client;
-        public readonly IMongoDatabase Database; 
+        public readonly IMongoDatabase Database;
         public MongoClientGlobal(ConfigUtil configUtil, ILogger<MongoClient> logger)
         {
             //https://stackoverflow.com/questions/30333925/how-do-i-log-my-queries-in-mongodb-c-sharp-driver-2-0
@@ -43,14 +43,14 @@
         }
     }
 
-    public class MongoRepository<TEntity>: IMongoRepository<TEntity> where TEntity : AbstractEntity
+    public class MongoRepository<TEntity> : IMongoRepository<TEntity> where TEntity : AbstractEntity
     {
-        protected readonly ILogger<MongoRepository<TEntity>> _logger; 
+        protected readonly ILogger<MongoRepository<TEntity>> _logger;
         private readonly IMongoCollection<TEntity> _collection;
         private readonly string _collectionName;
         protected bool _disposed = false;
 
-        public MongoRepository(MongoClientGlobal gClient, ILogger<MongoRepository<TEntity>> logger) 
+        public MongoRepository(MongoClientGlobal gClient, ILogger<MongoRepository<TEntity>> logger)
         //public MongoRepository(MongoClientGlobal gClient, ConfigUtil configUtil, ILogger<MongoRepository<TEntity>> logger) 
         {
             _logger = logger;
@@ -101,7 +101,7 @@
             else
             {
                 //performance improvement - limit columns being queried
-                var fieldListString = "{" + string.Join(",", fieldList.Select(f => f + ":1").ToList()) + "}";
+                string fieldListString = BuildProjectionFieldList(fieldList);
                 return _collection.Aggregate().Match(filter).Project<TEntity>(fieldListString).ToList();
             }
 
@@ -136,7 +136,7 @@
         }
 
 
-        public List<TEntity> FindByCondition(List<Func<TEntity, bool>> predicates, int? skip, int? take, 
+        public List<TEntity> FindByCondition(List<Func<TEntity, bool>> predicates, int? skip, int? take,
             params Expression<Func<TEntity, object>>[] orderByExpressions)
         {
             var exprs = new List<OrderByExpression<TEntity>>();
@@ -144,7 +144,7 @@
             {
                 foreach (var expr in orderByExpressions)
                 {
-                    exprs.Add( new OrderByExpression<TEntity>() { Expression = expr, IsDescending = false }  );
+                    exprs.Add(new OrderByExpression<TEntity>() { Expression = expr, IsDescending = false });
                 }
             }
             return FindByCondition(predicates, skip, take, exprs.ToArray());
@@ -207,6 +207,29 @@
         public void Update(TEntity entity)
         {
             _collection.ReplaceOne(TEntity => TEntity.ID.Equals(entity.ID), entity);
+        }
+
+        public async Task BulkUpsertAsync(List<TEntity> entities)
+        {
+            var listWrites = new List<WriteModel<TEntity>>();
+
+            //cue up list of items
+            foreach (var entity in entities)
+            {
+                if (string.IsNullOrEmpty(entity.ID))
+                {
+                    //insert statements
+                    listWrites.Add(new InsertOneModel<TEntity>(entity));
+                }
+                else
+                {
+                    //update statements
+                    var filterDefinition = Builders<TEntity>.Filter.Eq(x => x.ID, entity.ID.ToString());
+                    listWrites.Add(new ReplaceOneModel<TEntity>(filterDefinition, entity));
+                }
+            }
+
+            await _collection.BulkWriteAsync(listWrites);
         }
 
         //TBD - return value?
@@ -274,12 +297,17 @@
             query = queryOrdered == null ? query : queryOrdered.AsQueryable<TEntity>();
         }
 
+        private static string BuildProjectionFieldList(List<string> fieldList)
+        {
+            return "{" + string.Join(",", fieldList.Select(f => f + ":1").ToList()) + "}";
+        }
+
         #endregion
-        
+
         public virtual void Dispose()
         {
             if (_disposed) return;
-            
+
             //clean up resources
 
             //set flag so we only run dispose once.

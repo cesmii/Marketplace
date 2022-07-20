@@ -40,18 +40,9 @@
             return MapToModels(result, verbose);
         }
 
-        public virtual DALResult<TModel> GetAllPaged(int? skip, int? take, bool returnCount = true, bool verbose = false)
+        public virtual DALResult<TModel> GetAllPaged(int? skip = null, int? take = null, bool returnCount = false, bool verbose = false)
         {
             throw new NotImplementedException("TBD - Under Construction. Make this work for Mongo DB. Perhaps pass in the paging to the repo.");
-            //var query = _repo.GetAll();
-            //var count = returnCount ? query.Count() : 0;
-            //if (skip.HasValue) query = query.Skip(skip.Value);
-            //if (take.HasValue) query = query.Take(take.Value);
-            //DALResult<TModel> result = new DALResult<TModel>();
-            //result.Count = count;
-            //result.Data = MapToModels(query.ToList(), verbose);
-            //result.SummaryData = null;
-            //return result;
         }
 
         public virtual DALResult<TModel> GetAllPaged(int? skip = null, int? take = null, bool returnCount = false, bool verbose = false,
@@ -112,7 +103,7 @@
         /// </summary>
         /// <remarks>Verbose is intended to map more of the related data. Each DAL 
         /// can determine how much is enough</remarks>
-        protected virtual TModel MapToModel(TEntity entity, bool verbose = true)
+        protected virtual TModel MapToModel(TEntity entity, bool verbose = false)
         {
             throw new NotImplementedException();
         }
@@ -189,7 +180,7 @@
         {
             if (lookupId == null) return null;
             
-            var match = allItems.Where(x => x.ID == lookupId.ToString()).FirstOrDefault();
+            var match = allItems.FirstOrDefault(x => x.ID == lookupId.ToString());
             if (match == null) return null;
             return new LookupItemModel()
             {
@@ -204,7 +195,7 @@
         protected PublisherModel MapToModelPublisher(MongoDB.Bson.BsonObjectId publisherId, List<Publisher> allItems)
         {
 
-            var pubItem = allItems.Where(x => x.ID == publisherId.ToString()).FirstOrDefault();
+            var pubItem = allItems.FirstOrDefault(x => x.ID == publisherId.ToString());
             return new PublisherModel()
             {
                 ID = pubItem.ID,
@@ -213,8 +204,7 @@
                 CompanyUrl = pubItem.CompanyUrl,
                 Name = pubItem.Name,
                 DisplayName = pubItem.DisplayName,
-                SocialMediaLinks = pubItem.SocialMediaLinks == null ? null :
-                        pubItem.SocialMediaLinks.Select(x => new SocialMediaLinkModel() { Css = x.Css, Icon = x.Icon, Url = x.Url }).ToList()
+                SocialMediaLinks = pubItem.SocialMediaLinks?.Select(x => new SocialMediaLinkModel() { Css = x.Css, Icon = x.Icon, Url = x.Url }).ToList()
             };
 
         }
@@ -232,7 +222,7 @@
 
         protected ImageItemModel MapToModelImage(Func<ImageItem, bool> predicate, List<ImageItem> allItems)
         {
-            var match = allItems.Where(predicate).FirstOrDefault();
+            var match = allItems.FirstOrDefault(predicate);
             if (match == null) return null;
             return MapToModelImage(match);
         }
@@ -252,7 +242,7 @@
 
         protected ImageItemSimpleModel MapToModelImageSimple(Func<ImageItemSimple, bool> predicate, List<ImageItemSimple> allItems)
         {
-            var match = allItems.Where(predicate).FirstOrDefault();
+            var match = allItems.FirstOrDefault(predicate);
             if (match == null) return null;
             return MapToModelImageSimple(match);
         }
