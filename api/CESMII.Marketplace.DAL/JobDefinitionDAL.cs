@@ -155,7 +155,8 @@
                     },
                     Name = entity.Name,
                     TypeName = entity.TypeName,
-                    Data = MongoDB.Bson.BsonExtensionMethods.ToJson(entity.Data)
+                    Data = MongoDB.Bson.BsonExtensionMethods.ToJson(entity.Data),
+                    IsActive = entity.IsActive
                 };
 
                 return result;
@@ -172,7 +173,7 @@
             entity.MarketplaceItemId = MongoDB.Bson.ObjectId.Parse(model.MarketplaceItem.ID);
             entity.Name = model.Name;
             entity.TypeName = model.TypeName;
-            entity.Data = Newtonsoft.Json.JsonConvert.DeserializeObject<MongoDB.Bson.BsonDocument>(model.Data);
+            entity.Data = MongoDB.Bson.BsonDocument.Parse(model.Data);
         }
 
         /// <summary>

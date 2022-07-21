@@ -85,7 +85,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             if (result.LoginResult == null || string.IsNullOrEmpty(result.LoginResult.Result) ||
                 !result.LoginResult.Result.ToLower().Equals("success"))
             {
-                var msg = $"Unable to authorize user against Borg Connect API. {(string)result.LoginResult.Message}.";
+                var msg = $"Unable to authorize user against Borg Connect API.";
                 base.CreateJobLogMessage(msg, TaskStatusEnum.Failed);
                 _logger.LogError($"JobBorgConnectActivate|GetBearerToken|{msg}");
                 throw new UnauthorizedAccessException(msg);
