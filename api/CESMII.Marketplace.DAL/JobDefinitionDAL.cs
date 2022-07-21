@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Threading.Tasks;
 
+    using CESMII.Marketplace.Common;
     using CESMII.Marketplace.DAL.Models;
     using CESMII.Marketplace.Data.Entities;
     using CESMII.Marketplace.Data.Repositories;
@@ -15,11 +16,14 @@
     {
         protected IMongoRepository<MarketplaceItem> _repoMarketplaceItem;
         protected List<MarketplaceItem> _marketplaceItemAll;
+        protected string _encryptDecryptKey;
 
         public JobDefinitionDAL(IMongoRepository<JobDefinition> repo,
-            IMongoRepository<MarketplaceItem> repoMarketplaceItem) : base(repo)
+            IMongoRepository<MarketplaceItem> repoMarketplaceItem,
+            ConfigUtil configUtil) : base(repo)
         {
             _repoMarketplaceItem = repoMarketplaceItem;
+            _encryptDecryptKey = configUtil.PasswordConfigSettings.EncryptionSettings.EncryptDecryptKey;
         }
 
         public async Task<string> Add(JobDefinitionModel model, string userId)
@@ -155,7 +159,8 @@
                     },
                     Name = entity.Name,
                     TypeName = entity.TypeName,
-                    Data = MongoDB.Bson.BsonExtensionMethods.ToJson(entity.Data),
+                    Data = !string.IsNullOrEmpty(entity.Data) ? 
+                            PasswordUtils.DecryptString(entity.Data, _encryptDecryptKey) : null, 
                     IsActive = entity.IsActive
                 };
 
@@ -173,7 +178,7 @@
             entity.MarketplaceItemId = MongoDB.Bson.ObjectId.Parse(model.MarketplaceItem.ID);
             entity.Name = model.Name;
             entity.TypeName = model.TypeName;
-            entity.Data = MongoDB.Bson.BsonDocument.Parse(model.Data);
+            entity.Data = PasswordUtils.EncryptString(model.Data, _encryptDecryptKey);
         }
 
         /// <summary>
