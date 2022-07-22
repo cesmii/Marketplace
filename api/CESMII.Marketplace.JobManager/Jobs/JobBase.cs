@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 using CESMII.Marketplace.DAL;
@@ -25,13 +27,13 @@ namespace CESMII.Marketplace.JobManager.Jobs
         public JobBase(
             ILogger<IJob> logger,
             IHttpApiFactory httpFactory,
-            IDal<JobLog, JobLogModel> dalJobLog, 
-            ConfigUtil configUtil)
+            IDal<JobLog, JobLogModel> dalJobLog,
+            IConfiguration configuration)
         {
             _logger = logger;
             _httpFactory = httpFactory;
             _dalJobLog = dalJobLog;
-            _configUtil = configUtil;
+            _configUtil = new ConfigUtil(configuration);
         }
 
         public virtual void Initialize(JobDefinitionModel jobDefinition, string payload, string logId, UserModel user)
