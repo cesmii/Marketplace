@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -24,8 +25,8 @@ namespace CESMII.Marketplace.JobManager.Jobs
         public JobBorgConnectActivate(
             ILogger<IJob> logger,
             IHttpApiFactory httpFactory, IDal<JobLog, JobLogModel> dalJobLog,
-            ConfigUtil configUtil) : 
-            base(logger, httpFactory, dalJobLog, configUtil)
+            IConfiguration configuration) : 
+            base(logger, httpFactory, dalJobLog, configuration)
         {
             //wire up run async event
             base.JobRun += JobRunBorg;
