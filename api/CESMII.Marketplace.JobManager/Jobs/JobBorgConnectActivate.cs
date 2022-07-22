@@ -23,8 +23,9 @@ namespace CESMII.Marketplace.JobManager.Jobs
     {
         public JobBorgConnectActivate(
             ILogger<IJob> logger,
-            IHttpApiFactory httpFactory, IDal<JobLog, JobLogModel> dalJobLog): 
-            base(logger, httpFactory, dalJobLog)
+            IHttpApiFactory httpFactory, IDal<JobLog, JobLogModel> dalJobLog,
+            ConfigUtil configUtil) : 
+            base(logger, httpFactory, dalJobLog, configUtil)
         {
             //wire up run async event
             base.JobRun += JobRunBorg;
@@ -85,7 +86,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             if (result.LoginResult == null || string.IsNullOrEmpty(result.LoginResult.Result) ||
                 !result.LoginResult.Result.ToLower().Equals("success"))
             {
-                var msg = $"Unable to authorize user against Borg Connect API. {(string)result.LoginResult.Message}.";
+                var msg = $"Unable to authorize user against Borg Connect API.";
                 base.CreateJobLogMessage(msg, TaskStatusEnum.Failed);
                 _logger.LogError($"JobBorgConnectActivate|GetBearerToken|{msg}");
                 throw new UnauthorizedAccessException(msg);
@@ -159,7 +160,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             return msgResult;
         }
 
-        private static void MapUserToFormDataModel(ref JobBorgConnectActivateConfig configData, UserModel user)
+        private void MapUserToFormDataModel(ref JobBorgConnectActivateConfig configData, UserModel user)
         {
             //transfer values from user record to formData collection
             configData.CreateCustomerConfig.Body.formData.FirstOrDefault(x => x.Name.Equals("CustomerName")).Value = GetCustomerName(user);
@@ -169,8 +170,10 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 user.SmipSettings.GraphQlUrl;
             configData.CreateCustomerConfig.Body.formData.FirstOrDefault(x => x.Name.Equals("CESMII_UserName")).Value =
                 user.SmipSettings.UserName;
+            //decrypt password so it can be used downstream
             configData.CreateCustomerConfig.Body.formData.FirstOrDefault(x => x.Name.Equals("CESMII_Password")).Value =
-                user.SmipSettings.Password;
+                PasswordUtils.DecryptString(user.SmipSettings.Password,
+                    _configUtil.PasswordConfigSettings.EncryptionSettings.EncryptDecryptKey);
             configData.CreateCustomerConfig.Body.formData.FirstOrDefault(x => x.Name.Equals("CESMII_Authenticator")).Value =
                 user.SmipSettings.Authenticator;
             configData.CreateCustomerConfig.Body.formData.FirstOrDefault(x => x.Name.Equals("CESMII_Authenticator_role")).Value =

@@ -17,6 +17,8 @@
         public int CurrentLevel { get; set; }
 
         public List<EncryptionLevelConfig> Levels { get; set; }
+        
+        public string EncryptDecryptKey { get; set; }
     }
 
     public class EncryptionLevelConfig

@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.Data.Entities;
-using CESMII.Marketplace.Data.Repositories;
-using CESMII.Marketplace.JobManager.Models;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Enums;
@@ -20,6 +16,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
         protected bool _disposed = false;
         protected readonly IHttpApiFactory _httpFactory;
         protected readonly IDal<JobLog, JobLogModel> _dalJobLog;
+        protected readonly ConfigUtil _configUtil;
 
         protected JobEventArgs _jobEventArgs { get; set; }
 
@@ -28,11 +25,13 @@ namespace CESMII.Marketplace.JobManager.Jobs
         public JobBase(
             ILogger<IJob> logger,
             IHttpApiFactory httpFactory,
-            IDal<JobLog, JobLogModel> dalJobLog)
+            IDal<JobLog, JobLogModel> dalJobLog, 
+            ConfigUtil configUtil)
         {
             _logger = logger;
             _httpFactory = httpFactory;
             _dalJobLog = dalJobLog;
+            _configUtil = configUtil;
         }
 
         public virtual void Initialize(JobDefinitionModel jobDefinition, string payload, string logId, UserModel user)

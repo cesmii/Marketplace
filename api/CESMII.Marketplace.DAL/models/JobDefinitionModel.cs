@@ -24,6 +24,7 @@ namespace CESMII.Marketplace.DAL.Models
         /// executing this job.
         /// </summary>
         public string Data { get; set; }
+        public virtual bool IsActive { get; set; }
     }
 
     public class JobDefinitionSimpleModel : AbstractModel

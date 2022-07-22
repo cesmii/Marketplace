@@ -215,7 +215,7 @@ function AccountProfile() {
         console.log(generateLogMessageString(`onChangePasswordOpen`, CLASS_NAME));
         var url = e.currentTarget.getAttribute("data-url");
         var updateToken = e.currentTarget.getAttribute("data-updatetoken");
-        setChangePasswordModal({ show: true, url: url, updateToken: updateToken  });
+        setChangePasswordModal({ show: true, url: url, updateToken: updateToken === "true" });
     };
 
     const onChangePasswordClose = () => {
@@ -352,7 +352,7 @@ function AccountProfile() {
                 </div>
                 <div className="row">
                     <div className="col-md-6 my-2">
-                        <Button variant="secondary" onClick={onChangePasswordOpen} data-url="user/smipSettings/changepassword" data-updatetoken={true} >Update SMIP Password</Button>
+                        <Button variant="secondary" onClick={onChangePasswordOpen} data-url="user/smipSettings/changepassword" data-updatetoken={false} >Update SMIP Password</Button>
                     </div>
                 </div>
             </>

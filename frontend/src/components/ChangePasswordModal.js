@@ -147,15 +147,16 @@ function ChangePasswordModal(props) { //props are item, showActions
                         ]
                     });
                     console.error(generateLogMessageString(`onSave||Error||${result.data.message}.`, CLASS_NAME));
-                    //scroll back to top
-                    window.scroll({
-                        top: 0,
-                        left: 0,
-                        behavior: 'smooth',
-                    });
 
                     if (props.onSave != null) props.onSave();
                 }
+
+                //scroll back to top
+                window.scroll({
+                    top: 0,
+                    left: 0,
+                    behavior: 'smooth',
+                });
 
             })
             .catch(error => {
