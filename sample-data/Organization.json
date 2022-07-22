@@ -7,10 +7,15 @@
   "_id": {
     "$oid": "62c5c4d2d0a4cb3ef4c14de7"
   },
-  "Name": "Randstad Technologies"
+  "Name": "Randstad"
 },{
   "_id": {
     "$oid": "62c5c4e3d0a4cb3ef4c14de8"
   },
   "Name": "C-Labs"
+},{
+  "_id": {
+    "$oid": "62c84124b5def08ca58e7c45"
+  },
+  "Name": "FifthGenTech"
 }]

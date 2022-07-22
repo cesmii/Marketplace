@@ -305,8 +305,8 @@
             }
 
             //Encrypt new password 
-            //TBD - existingUser.SmipSettings.Password = PasswordUtils.EncryptNewPassword(_configUtil.PasswordConfigSettings.EncryptionSettings, newPassword);
-            existingUser.SmipSettings.Password = newPassword;
+            existingUser.SmipSettings.Password = PasswordUtils.EncryptString(newPassword, 
+                _configUtil.PasswordConfigSettings.EncryptionSettings.EncryptDecryptKey); 
 
             //save changes
             await _repo.UpdateAsync(existingUser);
@@ -334,24 +334,10 @@
                 .FirstOrDefault();
             if (match == null) return false;
 
+            //SMIP password needs encrypt/decrypt ability so we use different technique than the account passwords
             //test against our encryption, means we match 
-            bool updateEncryptionLevel = false;
-            return match.SmipSettings.Password.Equals(password);
-            /* TBD - password not yet encrypted so do a plain text match
-            if (PasswordUtils.ValidatePassword(_configUtil.PasswordConfigSettings.EncryptionSettings, match.SmipSettings?.Password, password, out updateEncryptionLevel))
-            {
-                //if the encryption level has been upgraded since original encryption, upgrade their pw now. 
-                if (updateEncryptionLevel)
-                {
-                    match.SmipSettings.Password = PasswordUtils.EncryptNewPassword(_configUtil.PasswordConfigSettings.EncryptionSettings, password);
-                }
-                await _repo.UpdateAsync(match);
-                return true;
-            }
-
-            // No user match found, username or password incorrect. 
-            return false;
-            */
+            var passwordDecrypted = PasswordUtils.DecryptString(match.SmipSettings.Password, _configUtil.PasswordConfigSettings.EncryptionSettings.EncryptDecryptKey);
+            return password.Equals(passwordDecrypted);
         }
         #endregion
 

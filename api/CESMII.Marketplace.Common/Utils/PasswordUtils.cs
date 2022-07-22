@@ -1,6 +1,7 @@
 ﻿namespace CESMII.Marketplace.Common
 {
     using System;
+    using System.Text;
     using System.Security.Cryptography;
     using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
@@ -104,5 +105,64 @@
             return hashed == passwordParts[2];
         }
 
+        #region Encrypting / Decrypting Paired Methods
+        /// <summary>
+        /// This will generate a random key, encrypt the value and return 
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static string EncryptString(string text, string key)
+        {
+            //split key into 2 parts using a pre-defined delimeter
+            string[] keyParts = key.Split(_delimiter);
+            if (keyParts.Length != 2) throw new ArgumentException("Invalid key value");
+
+            Aes cipher = CreateCipher(keyParts[0]);
+            cipher.IV = Convert.FromBase64String(keyParts[1]);
+
+            ICryptoTransform cryptTransform = cipher.CreateEncryptor();
+            byte[] plaintext = Encoding.UTF8.GetBytes(text);
+            byte[] cipherText = cryptTransform.TransformFinalBlock(plaintext, 0, plaintext.Length);
+
+            return Convert.ToBase64String(cipherText);
+        }
+
+        public static string DecryptString(string encryptedText, string key)
+        {
+            string[] keyParts = key.Split(_delimiter);
+            if (keyParts.Length != 2) throw new ArgumentException("Invalid key value");
+
+            Aes cipher = CreateCipher(keyParts[0]);
+            cipher.IV = Convert.FromBase64String(keyParts[1]);
+
+            ICryptoTransform cryptTransform = cipher.CreateDecryptor();
+            byte[] encryptedBytes = Convert.FromBase64String(encryptedText);
+            byte[] plainBytes = cryptTransform.TransformFinalBlock(encryptedBytes, 0, encryptedBytes.Length);
+
+            return Encoding.UTF8.GetString(plainBytes);
+        }
+
+        //public static (string key, string ivBase64) InitSymmetricEncryptionKeyIV()
+        //{
+        //    var byteArray = new byte[32]; //256
+        //    RandomNumberGenerator.Fill(byteArray);
+        //    var key = Convert.ToBase64String(byteArray); 
+        //    Aes cipher = CreateCipher(key);
+        //    var ivBase64 = Convert.ToBase64String(cipher.IV);
+        //    return (key, ivBase64);
+        //}
+
+        private static Aes CreateCipher(string keyBase64)
+        {
+            // Default values: Keysize 256, Padding PKC27
+            Aes cipher = Aes.Create();
+            cipher.Mode = CipherMode.CBC;  // Ensure the integrity of the ciphertext if using CBC
+
+            cipher.Padding = PaddingMode.ISO10126;
+            cipher.Key = Convert.FromBase64String(keyBase64);
+
+            return cipher;
+        }
+        #endregion
     }
 }

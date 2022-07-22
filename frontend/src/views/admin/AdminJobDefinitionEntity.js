@@ -7,6 +7,9 @@ import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import Dropdown from 'react-bootstrap/Dropdown'
 
+import JSONInput from 'react-json-editor-ajrm';
+import locale from 'react-json-editor-ajrm/locale/en';
+
 import { AppSettings } from '../../utils/appsettings';
 import { generateLogMessageString, tryJsonParse, validate_NoSpecialCharacters } from '../../utils/UtilityService'
 import { useLoadingContext } from "../../components/contexts/LoadingContext";
@@ -94,7 +97,7 @@ function AdminJobDefinitionEntity() {
 
         }
 
-        //get a blank publisher item object from server
+        //get a blank job definition item object from server
         async function fetchDataAdd() {
             console.log(generateLogMessageString('useEffect||fetchDataAdd||async', CLASS_NAME));
             //initialize spinner during loading
@@ -106,10 +109,10 @@ function AdminJobDefinitionEntity() {
                 result = await axiosInstance.post(url);
             }
             catch (err) {
-                var msg = 'An error occurred retrieving the blank publisher item.';
+                var msg = 'An error occurred retrieving the blank job definition item.';
                 console.log(generateLogMessageString('useEffect||fetchDataAdd||error', CLASS_NAME, 'error'));
                 if (err != null && err.response != null && err.response.status === 404) {
-                    msg += ' A problem occurred with the add publisher item screen.';
+                    msg += ' A problem occurred with the add job definition item screen.';
                     history.push('/404');
                 }
                 setLoadingProps({
@@ -170,7 +173,7 @@ function AdminJobDefinitionEntity() {
                     setRefreshMarketplaceData(false);
                 }
             });
-        };
+        }
 
         if (_refreshMarketplaceData) {
             fetchMarketplaceData();
@@ -203,10 +206,16 @@ function AdminJobDefinitionEntity() {
         setIsValid({ ..._isValid, name: isValid });
     };
 
+    const validate_TypeName = (val) => {
+        if (val == null || val.length === 0) return true;
+        //no spaces, starts with char, no numbers, allows periods, underscores
+        var format = /^[a-zA-Z\._]+$/;
+        return format.test(val);
+    }
+
     const validateForm_typeName = (e) => {
         var isValid = e.target.value != null && e.target.value.trim().length > 0;
-        var format = /^[a-zA-Z\._]+$/; //no spaces, starts with char, no numbers, allows periods, underscores
-        var isValidFormat = format.test(e.target.value);
+        var isValidFormat = validate_TypeName(e.target.value);
         setIsValid({ ..._isValid, typeName: isValid, typeNameFormat: isValidFormat });
     };
 
@@ -232,9 +241,9 @@ function AdminJobDefinitionEntity() {
 
         _isValid.name = _item.name != null && _item.name.trim().length > 0;
         _isValid.typeName = _item.name != null && _item.typeName.trim().length > 0;
-        _isValid.typeNameFormat = validate_NoSpecialCharacters(_item.typeName);
+        _isValid.typeNameFormat = validate_TypeName(_item.typeName);
         _isValid.marketplaceItem = _item.marketplaceItem != null && _item.marketplaceItem.id.toString() !== "-1";
-        _isValid.dataFormat = validate_data_json(_item.data);
+        //use the value checked when we onBlur from the json editor. This will be the most up to date indicator: _isValid.dataFormat =
 
         setIsValid(JSON.parse(JSON.stringify(_isValid)));
         return (_isValid.name && _isValid.typeName && _isValid.typeNameFormat && _isValid.dataFormat && _isValid.marketplaceItem);
@@ -322,7 +331,7 @@ function AdminJobDefinitionEntity() {
                 //hide a spinner, show a message
                 setLoadingProps({
                     isLoading: false, message: null, inlineMessages: [
-                        { id: new Date().getTime(), severity: "success", body: `Publisher item was saved.`, isTimed: true }
+                        { id: new Date().getTime(), severity: "success", body: `Job definition item was saved.`, isTimed: true }
                     ],
                     refreshSearchCriteria: true
                 });
@@ -333,7 +342,7 @@ function AdminJobDefinitionEntity() {
                 //hide a spinner, show a message
                 setLoadingProps({
                     isLoading: false, message: null, inlineMessages: [
-                        { id: new Date().getTime(), severity: "danger", body: `An error occurred ${mode.toLowerCase() === "copy" ? "copying" : "saving"} this publisher item.`, isTimed: false }
+                        { id: new Date().getTime(), severity: "danger", body: `An error occurred ${mode.toLowerCase() === "copy" ? "copying" : "saving"} this job definition item.`, isTimed: false }
                     ]
                 });
                 console.log(generateLogMessageString('handleOnSave||error||' + JSON.stringify(error), CLASS_NAME, 'error'));
@@ -385,6 +394,19 @@ function AdminJobDefinitionEntity() {
         setItem(JSON.parse(JSON.stringify(_item)));
     }
 
+    //on change handler to update state
+    const onBlurData = (e) => {
+        console.log(generateLogMessageString('onBlurData||data', CLASS_NAME));
+        //console.log(e);
+        if (e.error) {
+            setIsValid({ ..._isValid, dataFormat: false });
+        }
+        else {
+            setIsValid({ ..._isValid, dataFormat: true });
+            setItem({ ..._item, data: JSON.stringify(e.jsObject) });
+        }
+    }
+
     //-------------------------------------------------------------------
     // Region: Render Helpers
     //-------------------------------------------------------------------
@@ -398,7 +420,7 @@ function AdminJobDefinitionEntity() {
                     <SVGIcon name="more-vert" size="24" fill={color.shark} />
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                    <Dropdown.Item href={`/admin/jobDefinition/new`}>Add Publisher</Dropdown.Item>
+                    <Dropdown.Item href={`/admin/jobDefinition/new`}>Add Job Definition</Dropdown.Item>
                     <Dropdown.Item href={`/admin/jobDefinition/copy/${_item.id}`}>Copy '{_item.name}'</Dropdown.Item>
                     <Dropdown.Item onClick={onDeleteItem} >Delete '{_item.name}'</Dropdown.Item>
                 </Dropdown.Menu>
@@ -474,10 +496,13 @@ function AdminJobDefinitionEntity() {
                 </Form.Group>
             )
         }
-        if (_marketplaceRows == null) return;
-
         //show drop down list for edit, copy mode
-        const options = _marketplaceRows.map((item) => {
+        //during load put a placeholder item there. 
+        var options = null;
+        if (_marketplaceRows == null) {
+            options = (<option key={_item.marketplaceItem == null ? "none" : _item.marketplaceItem.id} value={_item.marketplaceItem == null ? "none" : _item.marketplaceItem.id} >{_item.marketplaceItem == null ? "None" : _item.marketplaceItem.displayName}</option>);
+        }
+            options = _marketplaceRows.map((item) => {
             return (<option key={item.id} value={item.id} >{item.displayName}</option>)
         });
 
@@ -524,7 +549,7 @@ function AdminJobDefinitionEntity() {
                     </div>
                 </div>
                 <div className="row">
-                    <div className="col-md-8">
+                    <div className="col-md-12">
                         <Form.Group>
                             <Form.Label>Type Name</Form.Label>
                             {!_isValid.typeName &&
@@ -532,9 +557,9 @@ function AdminJobDefinitionEntity() {
                                     Required
                                 </span>
                             }
-                            {!_isValid.nameFormat &&
+                            {!_isValid.typeNameFormat &&
                                 <span className="invalid-field-message inline">
-                                    No spaces or special characters (except periods ".")
+                                    No spaces, numbers or special characters (except periods ".")
                                 </span>
                             }
                             <Form.Control id="typeName" className={(!_isValid.typeName || !_isValid.typeNameFormat ? 'invalid-field minimal pr-5' : 'minimal pr-5')} type="" placeholder={`Enter unique name`}
@@ -554,8 +579,25 @@ function AdminJobDefinitionEntity() {
                                     Invalid JSON structure
                                 </span>
                             }
-                            <Form.Control id="data" as="textarea" style={{ height: '300px' }} className={(!_isValid.dataFormat ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
-                                value={_item.data == null ? '' : JSON.stringify(JSON.parse(_item.data), undefined, 2)} onBlur={onChange} readOnly={isReadOnly} />
+                            <JSONInput
+                                id='data'
+                                placeholder={_item.data == null ? {} : JSON.parse(_item.data)}
+                                locale={locale}
+                                colors={{
+                                    // overrides theme colors with whatever color value you want
+                                    default: color.textPrimary,
+                                    keys: color.cardinal,
+                                    colon: color.cardinal,
+                                    background: "#ffffff",
+                                    background_warning: color.transparent,
+                                    error: color.textSecondary
+                                }}
+                                height='550px'
+                                width="100%"
+                                waitAfterKeyPress={2000}
+                                onBlur={onBlurData}
+                                viewOnly={isReadOnly}
+                            />
                             <span className="small text-muted" >Optional. This is JSON data that will be used in execution of this job.</span>
                         </Form.Group>
                     </div>

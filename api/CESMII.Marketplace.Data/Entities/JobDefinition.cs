@@ -24,7 +24,7 @@ namespace CESMII.Marketplace.Data.Entities
         /// Field to store settings and structure unique to this job
         /// </summary>
         /// <remarks>This will be encrypted to protect any sensitive data that may be returned.</remarks>
-        public BsonDocument Data { get; set; }
+        public string Data { get; set; }
 
     }
 

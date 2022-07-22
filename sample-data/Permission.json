@@ -38,4 +38,12 @@
   "Name": "Can Manage Request Info",
   "Description": null,
   "CodeName": "CanManageRequestInfo"
+},{
+  "_id": {
+    "$oid": "62c767e2b5def08ca58e7c3e"
+  },
+  "PermissionEnum": 6,
+  "Name": "Can Manage Job Definitions",
+  "Description": null,
+  "CodeName": "CanManageJobDefinitions"
 }]
