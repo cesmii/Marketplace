@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react'
+
+import { InteractionStatus } from "@azure/msal-browser";
+import { useIsAuthenticated, useMsal } from "@azure/msal-react";
+
 import { useHistory } from "react-router-dom"
 import { useAuthDispatch, useAuthState } from "./authentication/AuthContext";
 import { logout } from "./authentication/AuthActions";
@@ -22,6 +26,9 @@ function Navbar() {
     // Region: Initialization
     //-------------------------------------------------------------------
     const history = useHistory();
+    const { instance, inProgress } = useMsal();
+    const isAuthenticated = useIsAuthenticated();
+
     const authTicket = useAuthState();
     const dispatch = useAuthDispatch() //get the dispatch method from the useDispatch custom hook
     const [_user, setUser] = useState(null);
@@ -37,6 +44,10 @@ function Navbar() {
     // Region: event handlers
     //-------------------------------------------------------------------
     const onLogoutClick = () => {
+        //MSAL logout
+        instance.logoutPopup();
+
+        //Old way - keep for now
         //updates state and removes user auth ticket from local storage
         let logoutAction = logout(dispatch);
         if (!logoutAction) {
@@ -109,7 +120,9 @@ function Navbar() {
                             <Dropdown.Item eventKey="8" href="/admin/jobdefinition/list">Manage Job Definitions</Dropdown.Item>
                             <Dropdown.Item eventKey="9" href="/admin/requestinfo/list">Manage Request Info Inquiries</Dropdown.Item>
                             <Dropdown.Divider />
-                            <Dropdown.Item eventKey="9" onClick={onLogoutClick} >Logout</Dropdown.Item>
+                            {(inProgress !== InteractionStatus.Startup && inProgress !== InteractionStatus.HandleRedirect) &&
+                                <Dropdown.Item eventKey="9" onClick={onLogoutClick} >Logout</Dropdown.Item>
+                            }
                         </Dropdown.Menu>
                     </Dropdown>
                 </li>
@@ -118,7 +131,7 @@ function Navbar() {
     };
 
     const renderLoginButton = () => {
-        if (_user != null) return;
+        if (isAuthenticated) return;
         return (
             <LoginButton />
         );
