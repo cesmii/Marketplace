@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Button from 'react-bootstrap/Button'
 
 import {InteractionRequiredAuthError,InteractionStatus} from "@azure/msal-browser";
-import { AuthenticatedTemplate, useMsal } from "@azure/msal-react";
+import { useMsal } from "@azure/msal-react";
 
 import { generateLogMessageString } from '../utils/UtilityService'
 import { useLoadingContext } from "../components/contexts/LoadingContext";
