@@ -2,6 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactGA from 'react-ga4';
 
+import { PublicClientApplication } from "@azure/msal-browser";
+import { MsalProvider } from "@azure/msal-react";
+
 import './index.css';
 import App from './App';
 import { AuthContextProvider } from "./components/authentication/AuthContext";
@@ -30,6 +33,10 @@ if (AppSettings.TrackAnalytics === "true") {
 }
 //#endregion
 
+// create PublicClientApplication instance
+const _publicClientApplication = new PublicClientApplication(AppSettings.MsalConfig);
+//#endregion
+
 //var express = require('express');
 //var server = express();
 //var options = {
@@ -40,11 +47,13 @@ if (AppSettings.TrackAnalytics === "true") {
 
 ReactDOM.render(
   <React.StrictMode>
+    <MsalProvider instance={_publicClientApplication}>
     <AuthContextProvider>  {/*When the context within this is null or false, user can't get to private routes. When true, they can*/}
         <LoadingContextProvider>
             <App />
         </LoadingContextProvider>
     </AuthContextProvider>
+    </MsalProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );

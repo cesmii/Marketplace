@@ -12,6 +12,7 @@ import Color from './Constants'
 
 import './styles/Navbar.scss'
 import { AppSettings } from '../utils/appsettings';
+import LoginButton from './LoginButton';
 
 const CLASS_NAME = "Navbar";
 
@@ -76,6 +77,7 @@ function Navbar() {
                                 <a className={`nav-link py-1 px-2 ${history.location.pathname.indexOf("/contact-us/") > -1 ? "active" : ""}`}
                                     href="/contact-us/contribute">Contribute</a>
                             </li>
+                            {renderLoginButton()}
                             {renderAdminMenu()}
                         </ul>
                     </div>
@@ -112,6 +114,13 @@ function Navbar() {
                     </Dropdown>
                 </li>
             </>
+        );
+    };
+
+    const renderLoginButton = () => {
+        if (_user != null) return;
+        return (
+            <LoginButton />
         );
     };
 
