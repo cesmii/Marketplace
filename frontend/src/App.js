@@ -4,7 +4,6 @@ import { ErrorBoundary } from 'react-error-boundary'
 import axios from "axios"
 import { axiosInstance } from "./services/AxiosService";
 
-import { useAuthDispatch } from "./components/authentication/AuthContext";
 import { useLoadingContext } from "./components/contexts/LoadingContext";
 import Navbar from './components/Navbar'
 import { LoadingOverlay } from "./components/LoadingOverlay"
@@ -12,7 +11,6 @@ import MainContent from './components/MainContent'
 import Footer from './components/Footer'
 import { AppSettings } from './utils/appsettings'
 import { generateLogMessageString } from './utils/UtilityService'
-import { logout } from './components/authentication/AuthActions'
 import ErrorPage from './components/ErrorPage'
 import { OnLookupLoad } from './components/OnLookupLoad'
 
@@ -27,7 +25,6 @@ function App() {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const dispatch = useAuthDispatch() //get the dispatch method from the useDispatch custom hook
     const { setLoadingProps } = useLoadingContext();
 
     //-------------------------------------------------------------------
@@ -35,15 +32,10 @@ function App() {
     //  If a network error occurs (ie API not there), catch it here and handle gracefully.  
     //-------------------------------------------------------------------
     const OnApiResponseError = (err) => {
-        //session expired - go to login
+        //401 - unauthorized - session expired - due to token expiration or unauthorized attempt
         if (err.response && err.response.status === 401) {
             console.log(generateLogMessageString(`axiosInstance.interceptors.response||error||${err.response.status}||${err.config.baseURL}${err.config.url}`, CLASS_NAME));
             setLoadingProps({ isLoading: false, message: null });
-            //updates state and removes user auth ticket from local storage
-            let logoutAction = logout(dispatch);
-            if (!logoutAction) {
-                console.error(generateLogMessageString(`axiosInstance.interceptors.response||An error occurred setting the logout state.`, CLASS_NAME));
-            }
         }
         //403 error - user may be allowed to log in but not permitted to perform the API call they are attempting
         else if (err.response && err.response.status === 403) {
@@ -65,13 +57,6 @@ function App() {
                     isLoading: false, message: null, isImporting: false, inlineMessages: [
                         { id: new Date().getTime(), severity: "danger", body: 'A system error has occurred. Please contact your system administrator.', isTimed: true }]
                 });
-                //for now, don't log user out because it creates more confusion
-                //updates state and removes user auth ticket from local storage
-                //let logoutAction = logout(dispatch);
-                //if (!logoutAction) {
-                //    console.error(generateLogMessageString(`axiosInstance.interceptors.response||An error occurred setting the logout state.`, CLASS_NAME));
-                //}
-
             }
         }
 
