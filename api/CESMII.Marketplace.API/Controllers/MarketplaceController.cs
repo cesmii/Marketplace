@@ -78,6 +78,8 @@ namespace CESMII.Marketplace.Api.Controllers
         [HttpPost, Route("featured")]
         [ProducesResponseType(200, Type = typeof(List<MarketplaceItemModel>))]
         [ProducesResponseType(400)]
+        [Authorize(Roles = "cesmii.marketplace.user")]
+        //[Authorize()]
         public IActionResult GetFeatured()
         {
             var predicates = new List<Func<MarketplaceItem, bool>>

@@ -2,7 +2,7 @@ import { BrowserRouter as Router } from "react-router-dom"
 import { Helmet } from "react-helmet"
 import { ErrorBoundary } from 'react-error-boundary'
 import axios from "axios"
-import axiosInstance from './services/AxiosService'
+import { axiosInstance, axiosInstanceAuthorized } from "./services/AxiosService";
 
 import { useAuthDispatch } from "./components/authentication/AuthContext";
 import { useLoadingContext } from "./components/contexts/LoadingContext";
@@ -79,6 +79,17 @@ function App() {
 
     //Catch exceptions in the flow when we use our axiosInstance
     axiosInstance.interceptors.response.use(
+        response => {
+            return response
+        },
+        err => {
+            OnApiResponseError(err);
+            return Promise.reject(err)
+        }
+    )
+
+    //Catch exceptions in the flow when we use our axiosInstanceAuthorized
+    axiosInstanceAuthorized.interceptors.response.use(
         response => {
             return response
         },

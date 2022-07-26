@@ -18,6 +18,7 @@ using Microsoft.Extensions.Hosting;
 
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.Identity.Web;
 
 using NLog;
 using NLog.Extensions.Logging;
@@ -135,19 +136,21 @@ namespace CESMII.Marketplace.Api
             });
 
             // https://stackoverflow.com/questions/46112258/how-do-i-get-current-user-in-net-core-web-api-from-jwt-token
+            //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            //    .AddJwtBearer(options =>
+            //    {
+            //        options.TokenValidationParameters = new TokenValidationParameters
+            //        {
+            //            ValidateIssuer = true,
+            //            ValidateLifetime = true,
+            //            ValidateAudience = false,
+            //            ValidateIssuerSigningKey = true,
+            //            ValidIssuer = configUtil.JWTSettings.Issuer,
+            //            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configUtil.JWTSettings.Key))
+            //        };
+            //    });
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateLifetime = true,
-                        ValidateAudience = false,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = configUtil.JWTSettings.Issuer,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configUtil.JWTSettings.Key))
-                    };
-                });
+                .AddMicrosoftIdentityWebApi(Configuration, "AzureAdSettings");
 
             // Add permission authorization requirements.
             services.AddAuthorization(options =>

@@ -27,11 +27,12 @@ function Navbar() {
     //-------------------------------------------------------------------
     const history = useHistory();
     const { instance, inProgress } = useMsal();
-    const isAuthenticated = useIsAuthenticated();
+    const _isAuthenticated = useIsAuthenticated();
 
     const authTicket = useAuthState();
     const dispatch = useAuthDispatch() //get the dispatch method from the useDispatch custom hook
     const [_user, setUser] = useState(null);
+    const _activeAccount = instance.getActiveAccount();
 
     //-------------------------------------------------------------------
     // Region: Hooks
@@ -88,7 +89,7 @@ function Navbar() {
                                 <a className={`nav-link py-1 px-2 ${history.location.pathname.indexOf("/contact-us/") > -1 ? "active" : ""}`}
                                     href="/contact-us/contribute">Contribute</a>
                             </li>
-                            {renderLoginButton()}
+                            <LoginButton />
                             {renderAdminMenu()}
                         </ul>
                     </div>
@@ -98,14 +99,14 @@ function Navbar() {
     };
 
     const renderAdminMenu = () => {
-        if (_user == null) return;
+        if (!_isAuthenticated || _activeAccount == null) return;
         return (
             <>
                 <li className="nav-item" >
                     <Dropdown>
                         <Dropdown.Toggle className="ml-0 ml-md-2 px-1 dropdown-custom-components d-flex align-items-center">
                             <SVGIcon name="account-circle" size="32" fill={Color.white} className="mr-2" />
-                            {_user.fullName}
+                            {_activeAccount?.name}
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
                             <Dropdown.Item eventKey="1" href="/account">Account Profile</Dropdown.Item>
@@ -127,13 +128,6 @@ function Navbar() {
                     </Dropdown>
                 </li>
             </>
-        );
-    };
-
-    const renderLoginButton = () => {
-        if (isAuthenticated) return;
-        return (
-            <LoginButton />
         );
     };
 
