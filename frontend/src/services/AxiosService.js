@@ -12,15 +12,15 @@ export const axiosInstance = axios.create({
 	baseURL: `${AppSettings.BASE_API_URL}/`
 });
 
-export const axiosInstanceAuthorized = axios.create({
-	baseURL: `${AppSettings.BASE_API_URL}/`
-});
+//export const axiosInstanceAuthorized = axios.create({
+//	baseURL: `${AppSettings.BASE_API_URL}/`
+//});
 
 //-------------------------------------------------------------------
 //  Add Auth token on every http call to our API, set the authorization token in the header.
 //  if not present, set to null
-//  TBD - only set the header when API call is to our base url...
 //-------------------------------------------------------------------
+/*
 axiosInstanceAuthorized.interceptors.request.use(
 	async config => {
 
@@ -36,16 +36,17 @@ axiosInstanceAuthorized.interceptors.request.use(
 		return Promise.reject(error);
 	}
 );
+*/
 
 axiosInstance.interceptors.request.use(
-	config => {
+	async config => {
 		//moved to the other axiosInstance so that public endpoints do not have to wait for 
 		//token to be retrieved on their calls.
-		//var token = getBearerToken();
+		var token = await getBearerToken();
 
-		//if (token == null) return config;
+		if (token == null) return config;
 		//append token to header if present. Some requests like public facing pages do not require token.
-		//config.headers.authorization = `Bearer ${token}`;
+		config.headers.authorization = `Bearer ${token}`;
 		return config;
 	},
 	error => {

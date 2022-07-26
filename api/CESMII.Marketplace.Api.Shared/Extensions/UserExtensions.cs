@@ -46,6 +46,12 @@
             return null;
         }
 
+        public static string GetUserNameMsal(this ClaimsPrincipal user)
+        {
+            return user.FindFirst(ClaimTypes.Name).Value;
+        }
+
+
         public static string GetUserID(this ClaimsPrincipal user)
         {
             if (user.IsImpersonating())

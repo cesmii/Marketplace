@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
 import { Helmet } from "react-helmet"
-import { axiosInstance, axiosInstanceAuthorized } from "../services/AxiosService";
+import { axiosInstance } from "../services/AxiosService";
 
 import { AppSettings } from '../utils/appsettings'
 import { generateLogMessageString } from '../utils/UtilityService'
@@ -152,9 +152,7 @@ function Home() {
             var url = `marketplace/featured`;
             console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
 
-            //var myInstance = await axiosInstanceAuthorized();
-            //myInstance.post(url, loadingProps).then(result => {
-            axiosInstanceAuthorized.post(url, loadingProps).then(result => {
+            axiosInstance.post(url, loadingProps).then(result => {
                 if (result.status === 200) {
 
                     //set state on fetch of data
