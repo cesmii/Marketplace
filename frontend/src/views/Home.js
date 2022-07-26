@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
 import { Helmet } from "react-helmet"
+import { useMsal } from "@azure/msal-react";
 import { axiosInstance } from "../services/AxiosService";
 
 import { AppSettings } from '../utils/appsettings'
 import { generateLogMessageString } from '../utils/UtilityService'
 import MarketplaceItemRow from './shared/MarketplaceItemRow';
-import { useAuthState } from "../components/authentication/AuthContext";
 import { useLoadingContext } from "../components/contexts/LoadingContext";
 
 import MarketplaceFilter from './shared/MarketplaceFilter';
@@ -30,7 +30,8 @@ function Home() {
     // Region: Initialization
     //-------------------------------------------------------------------
     const history = useHistory();
-    const authTicket = useAuthState();
+    const { instance } = useMsal();
+    const _activeAccount = instance.getActiveAccount();
     const [_refreshData, setRefreshData] = useState(true);
     //const [_dataRows, setDataRows] = useState({
     //    featured: [], new: [], popular: []
@@ -255,7 +256,7 @@ function Home() {
                 {/*    {renderTitleBlock("Library", null, null)}*/}
                 {/*</div>*/}
                 <div className="col-sm-12">
-                    <HeaderSearch filterVal={_searchCriteriaLocal == null ? null : _searchCriteriaLocal.query} onSearch={handleOnSearchChange} searchMode="standard" currentUserId={authTicket.user == null ? null : authTicket.user.id} />
+                    <HeaderSearch filterVal={_searchCriteriaLocal == null ? null : _searchCriteriaLocal.query} onSearch={handleOnSearchChange} searchMode="standard" currentUserId={_activeAccount?.username} />
                 </div>
             </div>
         );
@@ -293,7 +294,7 @@ function Home() {
         }
 
         const mainBody = _dataRowsFeatured.map((item) => {
-            return (<MarketplaceItemRow key={item.id} item={item} currentUserId={authTicket.user == null ? null : authTicket.user.id} showActions={true} cssClass="marketplace-list-item carousel mb-0" />)
+            return (<MarketplaceItemRow key={item.id} item={item} currentUserId={_activeAccount?.username} showActions={true} cssClass="marketplace-list-item carousel mb-0" />)
         });
 
         return (

@@ -5,8 +5,6 @@ import Modal from 'react-bootstrap/Modal'
 
 import axiosInstance from "../services/AxiosService";
 import { useLoadingContext } from "../components/contexts/LoadingContext";
-import { login } from './authentication/AuthActions';
-import { useAuthDispatch, useAuthState } from './authentication/AuthContext';
 import { generateLogMessageString } from '../utils/UtilityService';
 
 const CLASS_NAME = "ChangePasswordModal";
@@ -16,8 +14,6 @@ function ChangePasswordModal(props) { //props are item, showActions
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const authTicket = useAuthState();
-    const dispatch = useAuthDispatch() //get the dispatch method from the useDispatch custom hook
     const [_show, setShow] = useState(false);
     const [_errorMsg, setErrorMessage] = useState(null);
     const { setLoadingProps } = useLoadingContext();
@@ -124,15 +120,6 @@ function ChangePasswordModal(props) { //props are item, showActions
                             }
                         ]
                     });
-
-                    //update token in local storage - if this is the account change password flavor
-                    if (props.updateToken) {
-                        authTicket.token = JSON.parse(JSON.stringify(result.data.data));
-                        let loginAction = login(dispatch, authTicket) //loginUser action makes the request and handles all the neccessary state changes
-                        if (!loginAction) {
-                            console.error(generateLogMessageString(`onSave||loginAction||An error occurred setting the login state.`, CLASS_NAME));
-                        }
-                    }
 
                     if (props.onSave != null) props.onSave();
 

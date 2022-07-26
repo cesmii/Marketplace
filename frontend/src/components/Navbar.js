@@ -1,15 +1,11 @@
-import React, { useState, useEffect } from 'react'
-
+import React from 'react'
+import { useHistory } from "react-router-dom"
 import { InteractionStatus } from "@azure/msal-browser";
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 
-import { useHistory } from "react-router-dom"
-import { useAuthDispatch, useAuthState } from "./authentication/AuthContext";
-import { logout } from "./authentication/AuthActions";
-
 import Dropdown from 'react-bootstrap/Dropdown'
 
-import { generateLogMessageString, isInRole } from '../utils/UtilityService';
+import { isInRole } from '../utils/UtilityService';
 import logo from './img/Logo-CESMII.svg'
 import { SVGIcon } from './SVGIcon'
 import Color from './Constants'
@@ -18,7 +14,7 @@ import './styles/Navbar.scss'
 import { AppSettings } from '../utils/appsettings';
 import LoginButton from './LoginButton';
 
-const CLASS_NAME = "Navbar";
+//const CLASS_NAME = "Navbar";
 
 function Navbar() {
 
@@ -28,18 +24,11 @@ function Navbar() {
     const history = useHistory();
     const { instance, inProgress } = useMsal();
     const _isAuthenticated = useIsAuthenticated();
-
-    const authTicket = useAuthState();
-    const dispatch = useAuthDispatch() //get the dispatch method from the useDispatch custom hook
-    const [_user, setUser] = useState(null);
     const _activeAccount = instance.getActiveAccount();
 
     //-------------------------------------------------------------------
     // Region: Hooks
     //-------------------------------------------------------------------
-    useEffect(() => {
-        setUser(authTicket.user);
-    }, [authTicket.user]);
 
     //-------------------------------------------------------------------
     // Region: event handlers
@@ -47,17 +36,7 @@ function Navbar() {
     const onLogoutClick = () => {
         //MSAL logout
         instance.logoutPopup();
-
-        //Old way - keep for now
-        //updates state and removes user auth ticket from local storage
-        let logoutAction = logout(dispatch);
-        if (!logoutAction) {
-            console.error(generateLogMessageString(`onLogoutClick||logoutAction||An error occurred setting the logout state.`, CLASS_NAME));
-        }
-        else {
-            history.push(`/`);
-        }
-        //setAuthTicket(null);
+        history.push(`/`);
     }
 
     const renderNav = () => {
