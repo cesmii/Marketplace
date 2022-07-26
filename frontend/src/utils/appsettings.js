@@ -97,6 +97,8 @@ export const AppSettings = {
             storeAuthStateInCookie: _isIE || _isEdge || _isFirefox
         }
     }
+    , MsalScopes: ["api://1b34784c-0861-404f-875b-4195e47db212/cesmii.marketplace"]  //tied to scope defined in app registration / scope, set in Azure AAD
+    //, MsalScopes: [process.env.REACT_APP_MSAL_SCOPE]  //tied to scope defined in app registration / scope, set in Azure AAD
     
 }
 

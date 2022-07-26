@@ -33,8 +33,9 @@ if (AppSettings.TrackAnalytics === "true") {
 }
 //#endregion
 
-// create PublicClientApplication instance
-const _publicClientApplication = new PublicClientApplication(AppSettings.MsalConfig);
+//create PublicClientApplication instance
+//export it so that our non-component code can access this instance.
+export const Msal_Instance = new PublicClientApplication(AppSettings.MsalConfig);
 //#endregion
 
 //var express = require('express');
@@ -47,7 +48,7 @@ const _publicClientApplication = new PublicClientApplication(AppSettings.MsalCon
 
 ReactDOM.render(
   <React.StrictMode>
-    <MsalProvider instance={_publicClientApplication}>
+    <MsalProvider instance={Msal_Instance}>
     <AuthContextProvider>  {/*When the context within this is null or false, user can't get to private routes. When true, they can*/}
         <LoadingContextProvider>
             <App />
