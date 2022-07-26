@@ -40,7 +40,8 @@ namespace CESMII.Marketplace.Api.Controllers
 
 
         [HttpPost, Route("Search")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(DALResult<RequestInfoModel>))]
         [ProducesResponseType(400)]
         public IActionResult Search([FromBody] PagerFilterSimpleModel model)
@@ -69,7 +70,8 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("GetByID")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(RequestInfoModel))]
         [ProducesResponseType(400)]
         public async Task<IActionResult> GetByID([FromBody] IdStringModel model)
@@ -104,7 +106,6 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <returns></returns>
         [HttpPost, Route("Add")]
         [AllowAnonymous()]
-        // [Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         public async Task<IActionResult> Add([FromBody] RequestInfoModel model)
         {
@@ -165,8 +166,8 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpGet, Route("EmailTest")]
-        [AllowAnonymous()]
-        // [Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        //[AllowAnonymous()]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         public async Task<IActionResult> EmailTest()
         {
@@ -219,7 +220,8 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost, Route("Update")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         public async Task<IActionResult> Update([FromBody] RequestInfoModel model)
         {
@@ -260,7 +262,8 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost, Route("Delete")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(ResultMessageModel))]
         public async Task<IActionResult> Delete([FromBody] IdStringModel model)
         {

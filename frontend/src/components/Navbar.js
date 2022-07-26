@@ -9,7 +9,7 @@ import { logout } from "./authentication/AuthActions";
 
 import Dropdown from 'react-bootstrap/Dropdown'
 
-import { generateLogMessageString } from '../utils/UtilityService';
+import { generateLogMessageString, isInRole } from '../utils/UtilityService';
 import logo from './img/Logo-CESMII.svg'
 import { SVGIcon } from './SVGIcon'
 import Color from './Constants'
@@ -111,18 +111,27 @@ function Navbar() {
                         <Dropdown.Menu>
                             <Dropdown.Item eventKey="1" href="/account">Account Profile</Dropdown.Item>
                             <Dropdown.Divider />
-                            <Dropdown.Item eventKey="2" href="/admin/library/new">Add Marketplace Item</Dropdown.Item>
-                            <Dropdown.Item eventKey="3" href="/admin/publisher/new">Add Publisher</Dropdown.Item>
-                            <Dropdown.Divider />
-                            <Dropdown.Item eventKey="4" href="/admin/library/list">Manage Marketplace Items</Dropdown.Item>
-                            <Dropdown.Item eventKey="5" href="/admin/publisher/list">Manage Publishers</Dropdown.Item>
-                            <Dropdown.Item eventKey="6" href="/admin/lookup/list">Manage Lookup Items</Dropdown.Item>
-                            <Dropdown.Item eventKey="7" href="/admin/images/list">Manage Stock Images</Dropdown.Item>
-                            <Dropdown.Item eventKey="8" href="/admin/jobdefinition/list">Manage Job Definitions</Dropdown.Item>
-                            <Dropdown.Item eventKey="9" href="/admin/requestinfo/list">Manage Request Info Inquiries</Dropdown.Item>
-                            <Dropdown.Divider />
+                            {(isInRole(_activeAccount, 'cesmii.marketplace.marketplaceadmin')) &&
+                                <>
+                                    <Dropdown.Item eventKey="2" href="/admin/library/new">Add Marketplace Item</Dropdown.Item>
+                                    <Dropdown.Item eventKey="3" href="/admin/publisher/new">Add Publisher</Dropdown.Item>
+                                    <Dropdown.Divider />
+                                    <Dropdown.Item eventKey="4" href="/admin/library/list">Manage Marketplace Items</Dropdown.Item>
+                                    <Dropdown.Item eventKey="5" href="/admin/publisher/list">Manage Publishers</Dropdown.Item>
+                                    <Dropdown.Item eventKey="6" href="/admin/lookup/list">Manage Lookup Items</Dropdown.Item>
+                                    <Dropdown.Item eventKey="7" href="/admin/images/list">Manage Stock Images</Dropdown.Item>
+                                    <Dropdown.Item eventKey="9" href="/admin/requestinfo/list">Manage Request Info Inquiries</Dropdown.Item>
+                                    <Dropdown.Divider />
+                                </>
+                            }
+                            {(isInRole(_activeAccount, 'cesmii.marketplace.jobadmin')) &&
+                                <>
+                                    <Dropdown.Item eventKey="8" href="/admin/jobdefinition/list">Manage Job Definitions</Dropdown.Item>
+                                    <Dropdown.Divider />
+                                </>
+                            }
                             {(inProgress !== InteractionStatus.Startup && inProgress !== InteractionStatus.HandleRedirect) &&
-                                <Dropdown.Item eventKey="9" onClick={onLogoutClick} >Logout</Dropdown.Item>
+                                <Dropdown.Item eventKey="10" onClick={onLogoutClick} >Logout</Dropdown.Item>
                             }
                         </Dropdown.Menu>
                     </Dropdown>

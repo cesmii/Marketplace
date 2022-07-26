@@ -1,20 +1,13 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
+import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 
-import { useAuthState } from "../../../components/authentication/AuthContext";
 import DownloadMessage from "../../../components/DownloadMessage";
-//import AdminSideMenu from "./AdminSideMenu";
 import { InlineMessage } from "../../../components/InlineMessage";
+import { isInRoles } from "../../../utils/UtilityService";
 
 const AdminLayout = ({ children }) => (
 
-//    <div id="--routes-wrapper" className="container-fluid sidebar p-0 d-flex" >
-//        <AdminSideMenu />
-//        <div className="main-panel m-4 w-100">
-//            <InlineMessage />
-//            {children}
-//        </div>
-//    </div>
     <div className="container-fluid container-md" >
         <div className="main-panel m-4">
             <InlineMessage />
@@ -26,10 +19,12 @@ const AdminLayout = ({ children }) => (
 
 function AdminRoute({ component: Component, ...rest }) {
 
-    const authTicket = useAuthState();
-    //TBD - this would become more elaborate. Do more than just check for the existence of this value. Check for a token expiry, etc.
-    var isAuthorized = (authTicket != null && authTicket.token != null);
-    //TBD - check individual permissions - ie can manage marketplace items.
+    const { instance } = useMsal();
+    const _isAuthenticated = useIsAuthenticated();
+    const _activeAccount = instance.getActiveAccount();
+    //Check for is authenticated. Check individual permissions - ie can manage marketplace items.
+    var isAuthorized = _isAuthenticated && _activeAccount != null && (rest.roles == null || isInRoles(_activeAccount, rest.roles));
+
     return (
         <Route
             {...rest}
