@@ -87,6 +87,35 @@ namespace CESMII.Marketplace.Api.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// This is a user getting their own profile - MSAL flow
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost, Route("profile/mine/msal")]
+        [Authorize()]
+        [ProducesResponseType(200, Type = typeof(UserModel))]
+        [ProducesResponseType(400)]
+        public IActionResult GetMineMsal()
+        {
+            var userName = User.GetUserNameMsal();
+            var matches = _dal.Where(x => x.UserName.ToLower().Equals(userName), null, null, true);
+            if (matches.Count == 0)
+            {
+                _logger.LogWarning($"UserController|GetMine|MSAL|No records found matching this email: {userName}.");
+                return BadRequest($"No records found matching this email: {userName}");
+            }
+            else if (matches.Count > 1)
+            {
+                _logger.LogWarning($"UserController|GetMine|MSAL|Multiple records found matching this email: {userName}.");
+                return BadRequest($"Multiple records found matching this email: {userName}");
+            }
+            //clear out SMIP password so not sent to front end. Change password dialog will force user to enter existing password.
+            var result = matches.Data.FirstOrDefault();
+            result.SmipSettings.Password = "";
+            return Ok(result);
+        }
+
         [HttpPost, Route("Search")]
         [Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
         [ProducesResponseType(200, Type = typeof(DALResult<UserModel>))]

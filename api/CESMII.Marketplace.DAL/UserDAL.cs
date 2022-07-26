@@ -246,7 +246,7 @@
                 predicate,
                 skip, take,
                 x => x.LastName, x => x.FirstName);
-            var count = returnCount ? _repo.Count(x => x.IsActive) : 0;
+            var count = returnCount ? _repo.Count(predicate) : 0;
 
             //map the data to the final result
             var result = new DALResult<UserModel>

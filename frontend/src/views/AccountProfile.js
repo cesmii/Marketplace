@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
 import { Helmet } from "react-helmet"
-import { axiosInstance, axiosInstanceAuthorized } from "../services/AxiosService";
+import { axiosInstance } from "../services/AxiosService";
 
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
@@ -48,8 +48,8 @@ function AccountProfile() {
             //get my latest profile info
             var result = null;
             try {
-                var url = `user/profile/mine`
-                result = await axiosInstanceAuthorized.post(url);
+                var url = `user/profile/mine/msal`
+                result = await axiosInstance.post(url);
             }
             catch (err) {
                 var msg = 'An error occurred retrieving this user.';
