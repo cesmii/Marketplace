@@ -35,7 +35,8 @@ namespace CESMII.Marketplace.Api.Controllers
 
 
         [HttpGet, Route("All")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        [Authorize(Roles = "cesmii.marketplace.useradmin")]
         [ProducesResponseType(200, Type = typeof(List<UserModel>))]
         [ProducesResponseType(400)]
         public IActionResult GetAll()
@@ -49,7 +50,8 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("GetByID")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        [Authorize(Roles = "cesmii.marketplace.useradmin")]
         [ProducesResponseType(200, Type = typeof(UserModel))]
         [ProducesResponseType(400)]
         public IActionResult GetByID([FromBody] IdStringModel model)
@@ -117,7 +119,8 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("Search")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        [Authorize(Roles = "cesmii.marketplace.useradmin")]
         [ProducesResponseType(200, Type = typeof(DALResult<UserModel>))]
         public IActionResult Search([FromBody] PagerFilterSimpleModel model)
         {
@@ -143,7 +146,8 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("Add")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        [Authorize(Roles = "cesmii.marketplace.useradmin")]
         [ProducesResponseType(200, Type = typeof(List<UserModel>))]
         public async Task<IActionResult> Add([FromBody] UserModel model)
         {
@@ -171,7 +175,8 @@ namespace CESMII.Marketplace.Api.Controllers
         /// This is an admin user updating someone else's profile.
         /// </summary>
         [HttpPost, Route("Update")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        [Authorize(Roles = "cesmii.marketplace.useradmin")]
         [ProducesResponseType(200, Type = typeof(List<UserModel>))]
         public async Task<IActionResult> Update([FromBody] UserModel model)
         {
@@ -227,7 +232,8 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("Delete")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        [Authorize(Roles = "cesmii.marketplace.useradmin")]
         [ProducesResponseType(200, Type = typeof(List<UserModel>))]
         public async Task<IActionResult> Delete([FromBody] IdStringModel model)
         {

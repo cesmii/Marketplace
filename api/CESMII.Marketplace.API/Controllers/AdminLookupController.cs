@@ -35,7 +35,8 @@ namespace CESMII.Marketplace.Api.Controllers
 
 
         [HttpPost, Route("init")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(LookupItemModel))]
         [ProducesResponseType(400)]
         public IActionResult Init()
@@ -45,7 +46,8 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("Search")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(DALResult<LookupItemModel>))]
         [ProducesResponseType(400)]
         public IActionResult Search([FromBody] PagerFilterSimpleModel model)
@@ -79,7 +81,8 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("types/all")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(List<LookupTypeModel>))]
         [ProducesResponseType(400)]
         public IActionResult GetLookupTypes()
@@ -98,7 +101,8 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("GetByID")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(LookupItemModel))]
         [ProducesResponseType(400)]
         public IActionResult GetByID([FromBody] IdStringModel model)
@@ -127,7 +131,8 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("copy")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(LookupItemModel))]
         [ProducesResponseType(400)]
         public IActionResult CopyItem([FromBody] IdStringModel model)
@@ -158,7 +163,8 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost, Route("Update")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         public async Task<IActionResult> Update([FromBody] LookupItemModel model)
         {
@@ -208,7 +214,8 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost, Route("Delete")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(ResultMessageModel))]
         public async Task<IActionResult> Delete([FromBody] IdStringModel model)
         {
@@ -241,7 +248,8 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost, Route("Add")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         public async Task<IActionResult> Add([FromBody] LookupItemModel model)
         {

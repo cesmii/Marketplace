@@ -89,7 +89,8 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost, Route("Search/Admin")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(DALResult<MarketplaceItemModel>))]
         public async Task<IActionResult> AdminSearch([FromBody] MarketplaceSearchModel model)
         {

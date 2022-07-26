@@ -54,19 +54,19 @@ function Routes() {
             {/* Admin UI order matters in the profile/ routes* - TBD - update to admin versions of the forms...*/}
             <PublicRoute exact path="/login" component={Login} />
             <PublicRoute exact path="/admin" component={Login} />
-            <AdminRoute path="/admin/library/list" component={AdminMarketplaceList} />
-            <AdminRoute path="/admin/library/copy/:parentId" component={AdminMarketplaceEntity} />
-            <AdminRoute path="/admin/library/:id" component={AdminMarketplaceEntity} />
-            <AdminRoute path="/admin/publisher/list" component={AdminPublisherList} />
-            <AdminRoute path="/admin/publisher/copy/:parentId" component={AdminPubisherEntity} />
-            <AdminRoute path="/admin/publisher/:id" component={AdminPubisherEntity} />
-            <AdminRoute path="/admin/requestinfo/list" component={AdminRequestInfoList} />
-            <AdminRoute path="/admin/requestinfo/:id" component={AdminRequestInfoEntity} />
-            <AdminRoute path="/admin/images/list" component={AdminStockImageList} />
-            <AdminRoute path="/admin/lookup/list" component={AdminLookupList} />
-            <AdminRoute path="/admin/lookup/:id" component={AdminLookupEntity} />
-            <AdminRoute path="/admin/jobDefinition/list" component={AdminJobDefinitionList} />
-            <AdminRoute path="/admin/jobDefinition/:id" component={AdminJobDefinitionEntity} />
+            <AdminRoute path="/admin/library/list" component={AdminMarketplaceList} roles={['cesmii.marketplace.marketplaceadmin']} />
+            <AdminRoute path="/admin/library/copy/:parentId" component={AdminMarketplaceEntity} roles={['cesmii.marketplace.marketplaceadmin']} />
+            <AdminRoute path="/admin/library/:id" component={AdminMarketplaceEntity} roles={['cesmii.marketplace.marketplaceadmin']} />
+            <AdminRoute path="/admin/publisher/list" component={AdminPublisherList} roles={['cesmii.marketplace.marketplaceadmin']} />
+            <AdminRoute path="/admin/publisher/copy/:parentId" component={AdminPubisherEntity} roles={['cesmii.marketplace.marketplaceadmin']} />
+            <AdminRoute path="/admin/publisher/:id" component={AdminPubisherEntity} roles={['cesmii.marketplace.marketplaceadmin']} />
+            <AdminRoute path="/admin/requestinfo/list" component={AdminRequestInfoList} roles={['cesmii.marketplace.marketplaceadmin']} />
+            <AdminRoute path="/admin/requestinfo/:id" component={AdminRequestInfoEntity} roles={['cesmii.marketplace.marketplaceadmin']} />
+            <AdminRoute path="/admin/images/list" component={AdminStockImageList} roles={['cesmii.marketplace.marketplaceadmin']} />
+            <AdminRoute path="/admin/lookup/list" component={AdminLookupList} roles={['cesmii.marketplace.marketplaceadmin']} />
+            <AdminRoute path="/admin/lookup/:id" component={AdminLookupEntity} roles={['cesmii.marketplace.marketplaceadmin']} />
+            <AdminRoute path="/admin/jobDefinition/list" component={AdminJobDefinitionList} roles={['cesmii.marketplace.jobadmin']} />
+            <AdminRoute path="/admin/jobDefinition/:id" component={AdminJobDefinitionEntity} roles={['cesmii.marketplace.jobadmin']} />
 
             <AdminRoute path="/account" component={AccountProfile} />
 
