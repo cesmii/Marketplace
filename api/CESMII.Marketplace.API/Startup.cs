@@ -34,6 +34,7 @@ using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.JobManager;
+using Microsoft.IdentityModel.Logging;
 
 namespace CESMII.Marketplace.Api
 {
@@ -232,7 +233,7 @@ namespace CESMII.Marketplace.Api
                     context.Response.Headers.Add("Access-Control-Allow-Headers", "authorization,content-type");
                     context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT");
                     context.Response.StatusCode = (int)System.Net.HttpStatusCode.NoContent;
-                    await context.Response.WriteAsync("Pre-flight check complete.");
+                    System.Diagnostics.Debug.WriteLine("Pre-flight check complete - {context.Request.Path}");
                 }
                 else
                 {
@@ -257,6 +258,7 @@ namespace CESMII.Marketplace.Api
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CESMII.Marketplace.Api v1"));
+                IdentityModelEventSource.ShowPII = true;
             }
             else
             {
