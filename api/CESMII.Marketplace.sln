@@ -17,6 +17,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.CloudLib
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.JobManager", "CESMII.Marketplace.JobManager\CESMII.Marketplace.JobManager.csproj", "{F334A962-F4FA-4B3F-B7D1-B5F51D47BD23}"
 EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "frontend", "..\frontend\frontend.esproj", "{227450B5-5A5B-40B8-9246-5114B1B2C8F6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readme", "Readme", "{9B364B4C-96E5-4822-A16A-9C2BAAC22E1F}"
+	ProjectSection(SolutionItems) = preProject
+		..\.gitignore = ..\.gitignore
+		..\.github\workflows\backend-publish-azure.yml = ..\.github\workflows\backend-publish-azure.yml
+		..\.github\workflows\backend-publish-stage-azure.yml = ..\.github\workflows\backend-publish-stage-azure.yml
+		..\.github\workflows\frontend--publish-azure.yml = ..\.github\workflows\frontend--publish-azure.yml
+		..\.github\workflows\frontend--publish-stage-azure.yml = ..\.github\workflows\frontend--publish-stage-azure.yml
+		..\README.md = ..\README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,6 +78,15 @@ Global
 		{F334A962-F4FA-4B3F-B7D1-B5F51D47BD23}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F334A962-F4FA-4B3F-B7D1-B5F51D47BD23}.Staging|Any CPU.ActiveCfg = Staging|Any CPU
 		{F334A962-F4FA-4B3F-B7D1-B5F51D47BD23}.Staging|Any CPU.Build.0 = Staging|Any CPU
+		{227450B5-5A5B-40B8-9246-5114B1B2C8F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{227450B5-5A5B-40B8-9246-5114B1B2C8F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{227450B5-5A5B-40B8-9246-5114B1B2C8F6}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{227450B5-5A5B-40B8-9246-5114B1B2C8F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{227450B5-5A5B-40B8-9246-5114B1B2C8F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{227450B5-5A5B-40B8-9246-5114B1B2C8F6}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{227450B5-5A5B-40B8-9246-5114B1B2C8F6}.Staging|Any CPU.ActiveCfg = Release|Any CPU
+		{227450B5-5A5B-40B8-9246-5114B1B2C8F6}.Staging|Any CPU.Build.0 = Release|Any CPU
+		{227450B5-5A5B-40B8-9246-5114B1B2C8F6}.Staging|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
