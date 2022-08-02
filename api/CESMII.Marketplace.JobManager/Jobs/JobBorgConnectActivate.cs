@@ -47,9 +47,12 @@ namespace CESMII.Marketplace.JobManager.Jobs
             //put response into a human readable format that can be displayed as a message in the front end. 
             //TBD - encrypt result data in the response data field in the JobLog table. This will be decrypted 
             //by DAL and displayed on the front end.
-            string response = $"Url: <a href='{result.URL}' target='_blank' >{result.URL}</a>, User name: {result.Username}, Password: {result.Password}";
+            string response = $"Url: <a href='{result.URL}' target='_blank' >{result.URL}</a>, User name: {result.Username}. An email has been sent with your temporary password.";
+            //string response = $"Url: <a href='{result.URL}' target='_blank' >{result.URL}</a>, User name: {result.Username}, Password: {result.Password}";
             base.CreateJobLogMessage($"Customer created. Connection information:: {"<br />"}{response}", TaskStatusEnum.Completed, false);
 
+            //TBD - send a password to the owner of this job. May need to re-factor to know who the owner is.
+            
             //TBD - append the connection information to the user account. Add a collection of myItems with data associated with said 
             //items. 
 
