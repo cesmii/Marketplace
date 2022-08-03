@@ -204,7 +204,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 //we are adding a request info with an smprofile, get the associated sm profile.
                 modelNew.SmProfile = smProfile;
 
-                var subject = REQUESTINFO_SUBJECT.Replace("{{RequestType}}", modelNew.RequestType.Name);
+                var subject = REQUESTINFO_SUBJECT.Replace("{{RequestType}}", "Download Nodeset Notification");
                 var body = await this.RenderViewAsync("~/Views/Template/RequestInfo.cshtml", modelNew);
                 var emailResult = await EmailRequestInfo(subject, body, _mailRelayService);
 
