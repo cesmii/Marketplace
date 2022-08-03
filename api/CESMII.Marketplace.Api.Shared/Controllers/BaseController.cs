@@ -1,5 +1,6 @@
 ﻿namespace CESMII.Marketplace.Api.Shared.Controllers
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -8,13 +9,11 @@
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Logging;
 
-    using NLog;
-
     using CESMII.Marketplace.Api.Shared.Extensions;
     using CESMII.Marketplace.Common.Models;
     using CESMII.Marketplace.Common;
     using CESMII.Marketplace.Api.Shared.Models;
-    using System;
+    using CESMII.Marketplace.Common.Utils;
 
     public class BaseController<TController> : Controller where TController : Controller
     {
@@ -74,7 +73,7 @@
             return sb;
         }
 
-        protected async Task<bool> EmailRequestInfo(string subject, string body, Utils.MailRelayService _mailRelayService)
+        protected async Task<bool> EmailRequestInfo(string subject, string body, MailRelayService _mailRelayService)
         {
             var message = new MailMessage
             {
@@ -84,26 +83,7 @@
                 IsBodyHtml = true
             };
 
-            switch (_mailConfig.Provider)
-            {
-                case "SMTP":
-                    if (!_mailRelayService.SendEmail(message))
-                    {
-                        return false;
-                    }
-
-                    break;
-                case "SendGrid":
-                    if (!_mailRelayService.SendEmailSendGrid(message).Result)
-                    {
-                        return false;
-                    }
-                    break;
-                default:
-                    throw new InvalidOperationException("The configured email provider is invalid.");
-            }
-
-            return true;
+            return await _mailRelayService.SendEmail(message);
         }
 
         /// <summary>

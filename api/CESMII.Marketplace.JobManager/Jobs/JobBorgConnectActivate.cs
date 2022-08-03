@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -11,8 +12,8 @@ using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.Common;
-using System.Threading.Tasks;
 using CESMII.Marketplace.Common.Enums;
+using CESMII.Marketplace.Common.Utils;
 
 namespace CESMII.Marketplace.JobManager.Jobs
 {
@@ -25,8 +26,9 @@ namespace CESMII.Marketplace.JobManager.Jobs
         public JobBorgConnectActivate(
             ILogger<IJob> logger,
             IHttpApiFactory httpFactory, IDal<JobLog, JobLogModel> dalJobLog,
-            IConfiguration configuration) : 
-            base(logger, httpFactory, dalJobLog, configuration)
+            IConfiguration configuration,
+            MailRelayService mailRelayService) : 
+            base(logger, httpFactory, dalJobLog, configuration, mailRelayService)
         {
             //wire up run async event
             base.JobRun += JobRunBorg;
@@ -48,15 +50,45 @@ namespace CESMII.Marketplace.JobManager.Jobs
             //TBD - encrypt result data in the response data field in the JobLog table. This will be decrypted 
             //by DAL and displayed on the front end.
             string response = $"Url: <a href='{result.URL}' target='_blank' >{result.URL}</a>, User name: {result.Username}. An email has been sent with your temporary password.";
-            //string response = $"Url: <a href='{result.URL}' target='_blank' >{result.URL}</a>, User name: {result.Username}, Password: {result.Password}";
             base.CreateJobLogMessage($"Customer created. Connection information:: {"<br />"}{response}", TaskStatusEnum.Completed, false);
 
-            //TBD - send a password to the owner of this job. May need to re-factor to know who the owner is.
-            
+            //Send two emails with account info. a password to the owner of this job. 
+            await EmailConnectionInformation(result);
+
             //TBD - append the connection information to the user account. Add a collection of myItems with data associated with said 
             //items. 
 
             return JsonConvert.SerializeObject(result);
+        }
+
+        /// <summary>
+        /// Send two emails with account info. a password to the owner of this job. 
+        /// </summary>
+        /// <remarks>do not fail the process if email sending fails. </remarks>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        private async Task EmailConnectionInformation(BorgCreateResponseMessage result)
+        {
+            try
+            {
+                string body = $"<p>Thank you for your interest in BorgConnect and the Smart Manufacturing Innovation Platform. Your BorgConnect activation has completed and your instance information is included below. " +
+                    "For security reasons, your password will be delivered in a separate email. </p>" +
+                    $"<p><b>Connection Details:</b><br />" +
+                    $"<b>Url</b>: <a href='{result.URL}' target='_blank' >{result.URL}</a><br />" +
+                    $"<b>Username</b>: {result.Username}<br />" +
+                    "</p>";
+                await base.SendEmail("CESMII | BorgConnect | Activation - Instance Details", body);
+
+                string bodyPw = $"<p>Thank you for your interest in BorgConnect and the Smart Manufacturing Innovation Platform. Your BorgConnect activation has completed and your password information is included below. " +
+                    "For security reasons, your instance details will be delivered in a separate email. </p>" +
+                    $"<p></p>" +
+                    $"<b>Password</b>: {result.Password}</p>";
+                await base.SendEmail("CESMII | BorgConnect | Activation - Connection Information", bodyPw);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"JobBorgConnectActivate|Email Error");
+            }
         }
 
         private async Task<BorgAuthorizeResponseMessage> GetAuthToken(JobBorgConnectActivateConfig configData)
