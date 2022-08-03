@@ -1,39 +1,64 @@
 ﻿
-namespace CESMII.Marketplace.Api.Shared.Utils
+namespace CESMII.Marketplace.Common.Utils
 {
     using System;
     using System.Net;
     using System.Net.Mail;
 
     using System.Collections.Generic;
-    using System.IO;
     using System.Threading.Tasks;
 
     using SendGrid;
     using SendGrid.Helpers.Mail;
 
-    using CESMII.Marketplace.Api.Shared.Extensions;
-    using CESMII.Marketplace.DAL.Models;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Configuration;
+
     using CESMII.Marketplace.Common;
     using CESMII.Marketplace.Common.Models;
 
     public class MailRelayService
     {
-        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
-
+        protected readonly ILogger<MailRelayService> _logger;
         private readonly MailConfig _config;
 
-        public MailRelayService(ConfigUtil configUtil)
+        public MailRelayService(
+            ILogger<MailRelayService> logger,
+            IConfiguration configuration)
         {
-            _config = configUtil.MailSettings;
+            _config = (new ConfigUtil(configuration)).MailSettings;
+            _logger = logger;
         }
 
-        public bool SendEmail(MailMessage message)
+        public async Task<bool> SendEmail(MailMessage message)
+        {
+            switch (_config.Provider)
+            {
+                case "SMTP":
+                    if (!(await SendSmtpEmail(message)))
+                    {
+                        return false;
+                    }
+
+                    break;
+                case "SendGrid":
+                    if (!(await SendEmailSendGrid(message)))
+                    {
+                        return false;
+                    }
+                    break;
+                default:
+                    throw new InvalidOperationException("The configured email provider is invalid.");
+            }
+            return true;
+        }
+
+        private async Task<bool> SendSmtpEmail(MailMessage message)
         {
             // Do not proceed further if mail relay is disabled.
             if (!_config.Enabled)
             {
-                Logger.Warn("Mail Relay is disabled.");
+                _logger.LogWarning("Mail Relay is disabled.");
                 return true;
             }
 
@@ -53,14 +78,14 @@ namespace CESMII.Marketplace.Api.Shared.Utils
                 ServicePointManager.ServerCertificateValidationCallback = (s, certificate, chain, sslPolicyErrors) => true;
             }
 
-            Logger.Debug($"Email configuration | Server: {_config.Address} Port: {_config.Port} SSL: {_config.EnableSsl}");
+            _logger.LogDebug($"Email configuration | Server: {_config.Address} Port: {_config.Port} SSL: {_config.EnableSsl}");
 
             message.From = new MailAddress(_config.MailFromAddress, "SM Marketplace");
 
             // If Mail Relay is in debug mode set all addresses to the configuration file.
             if (_config.Debug)
             {
-                Logger.Debug($"Mail relay is in debug mode. Redirecting target email to: {string.Join("|", _config.DebugToAddresses)}");
+                _logger.LogDebug($"Mail relay is in debug mode. Redirecting target email to: {string.Join("|", _config.DebugToAddresses)}");
                 message.To.Clear();
                 foreach (var address in _config.DebugToAddresses)
                 {
@@ -81,25 +106,25 @@ namespace CESMII.Marketplace.Api.Shared.Utils
             if (!string.IsNullOrEmpty(_config.Username) && !string.IsNullOrEmpty(_config.Password))
             {
                 client.Credentials = new NetworkCredential(_config.Username, _config.Password);
-                Logger.Debug("Credentials are set in app settings, will leverage for SMTP connection.");
+                _logger.LogDebug("Credentials are set in app settings, will leverage for SMTP connection.");
             }
 
             try
             {
-                client.Send(message);
+                await client.SendMailAsync(message);
             }
             catch (Exception ex)
             {
                 if (ex is SmtpException)
                 {
-                    Logger.Error("An SMTP exception occurred while attempting to relay mail.");
+                    _logger.LogError("An SMTP exception occurred while attempting to relay mail.");
                 }
                 else
                 {
-                    Logger.Error("A general exception occured while attempting to relay mail.");
+                    _logger.LogError("A general exception occured while attempting to relay mail.");
                 }
 
-                Logger.Error(ex.Message);
+                _logger.LogError(ex.Message);
                 return false;
             }
             finally
@@ -107,11 +132,11 @@ namespace CESMII.Marketplace.Api.Shared.Utils
                 message.Dispose();
             }
 
-            Logger.Info("Message relay complete.");
+            _logger.LogInformation("Message relay complete.");
             return true;
         }
 
-        public async Task<bool> SendEmailSendGrid(MailMessage message)
+        private async Task<bool> SendEmailSendGrid(MailMessage message)
         {
             var client = new SendGridClient(_config.ApiKey);
             var from = new EmailAddress(_config.MailFromAddress, "SM Marketplace");
@@ -120,7 +145,7 @@ namespace CESMII.Marketplace.Api.Shared.Utils
             // If Mail Relay is in debug mode set all addresses to the configuration file.
             if (_config.Debug)
             {
-                Logger.Debug($"Mail relay is in debug mode. Redirecting target email to: {string.Join("|", _config.DebugToAddresses)}");
+                _logger.LogDebug($"Mail relay is in debug mode. Redirecting target email to: {string.Join("|", _config.DebugToAddresses)}");
                 foreach (var address in _config.DebugToAddresses)
                 {
                     mailTo.Add(new EmailAddress(address));
