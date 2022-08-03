@@ -138,8 +138,8 @@ namespace CESMII.Marketplace.Api.Controllers
                         modelNew.SmProfile = await _dalCloudLib.GetById(modelNew.SmProfileId.Value.ToString());
                     }
 
-                    var subject = REQUESTINFO_SUBJECT.Replace("{{RequestType}}", modelNew.RequestType.Name);
-                    var body = await this.RenderViewAsync("~/Views/Template/RequestInfo.cshtml", modelNew);
+                    var subject = GetEmailSubject(modelNew);
+                    var body = await this.RenderViewAsync(GetRenderViewUrl(modelNew), modelNew);
                     var emailResult = await EmailRequestInfo(subject, body, _mailRelayService);
 
                     if (!emailResult)
@@ -158,6 +158,38 @@ namespace CESMII.Marketplace.Api.Controllers
                     Message = "Item was added.",
                     Data = model.ID
                 });
+            }
+        }
+
+        private static string GetEmailSubject(RequestInfoModel item)
+        {
+            switch (item.RequestType.Code.ToLower())
+            {
+                case "publisher":
+                case "sm-profile":
+                case "marketplaceitem":
+                    return REQUESTINFO_SUBJECT.Replace("{{RequestType}}", $"Request More Info | {item.RequestType.Name}");
+                case "membership":
+                case "contribute":
+                case "request-demo":
+                    return REQUESTINFO_SUBJECT.Replace("{{RequestType}}", $"{item.RequestType.Name} Inquiry");
+                case "subscribe":
+                    return REQUESTINFO_SUBJECT.Replace("{{RequestType}}", $"{item.RequestType.Name} to Newsletter Inquiry");
+                default:
+                    return REQUESTINFO_SUBJECT.Replace("{{RequestType}}", item.RequestType.Name);
+            }
+        }
+
+        private static string GetRenderViewUrl(RequestInfoModel item)
+        {
+            switch (item.RequestType.Code.ToLower())
+            {
+                case "publisher":
+                case "sm-profile":
+                case "marketplaceitem":
+                    return "~/Views/Template/RequestInfo.cshtml";
+                default:
+                    return "~/Views/Template/ContactUs.cshtml";
             }
         }
 
