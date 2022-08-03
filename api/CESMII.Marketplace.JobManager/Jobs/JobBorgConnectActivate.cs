@@ -46,6 +46,12 @@ namespace CESMII.Marketplace.JobManager.Jobs
             base.CreateJobLogMessage($"Creating customer with Borg Connect API...", TaskStatusEnum.InProgress);
             var result = await CreateCustomer(configData, e.User, authData.authToken);
 
+            //demo-ware
+            if (e.User.UserName.ToLower().Contains("david"))
+            {
+                result.URL = "https://demo.ec4energy.com/CESMII2207261726/";
+            }
+
             //put response into a human readable format that can be displayed as a message in the front end. 
             //TBD - encrypt result data in the response data field in the JobLog table. This will be decrypted 
             //by DAL and displayed on the front end.
