@@ -13,7 +13,7 @@ using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.Api.Shared.Extensions;
 using CESMII.Marketplace.Api.Shared.Controllers;
 using CESMII.Marketplace.Api.Shared.Models;
-using CESMII.Marketplace.Api.Shared.Utils;
+using CESMII.Marketplace.Common.Utils;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
