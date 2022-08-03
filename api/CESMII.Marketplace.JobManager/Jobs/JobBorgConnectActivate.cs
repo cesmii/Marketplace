@@ -47,10 +47,10 @@ namespace CESMII.Marketplace.JobManager.Jobs
             var result = await CreateCustomer(configData, e.User, authData.authToken);
 
             //demo-ware
-            if (e.User.UserName.ToLower().Contains("david"))
-            {
-                result.URL = "https://demo.ec4energy.com/CESMII2207261726/";
-            }
+            //if (e.User.UserName.ToLower().Contains("david"))
+            //{
+            //    result.URL = "https://demo.ec4energy.com/CESMII2207261726/";
+            //}
 
             //put response into a human readable format that can be displayed as a message in the front end. 
             //TBD - encrypt result data in the response data field in the JobLog table. This will be decrypted 
@@ -83,13 +83,13 @@ namespace CESMII.Marketplace.JobManager.Jobs
                     $"<b>Url</b>: <a href='{result.URL}' target='_blank' >{result.URL}</a><br />" +
                     $"<b>Username</b>: {result.Username}<br />" +
                     "</p>";
-                await base.SendEmail("CESMII | BorgConnect | Activation - Instance Details", body);
+                await base.SendEmail("CESMII | SM Marketplace | BorgConnect | Activation - Instance Details", body);
 
                 string bodyPw = $"<p>Thank you for your interest in BorgConnect and the Smart Manufacturing Innovation Platform. Your BorgConnect activation has completed and your password information is included below. " +
                     "For security reasons, your instance details will be delivered in a separate email. </p>" +
                     $"<p></p>" +
                     $"<b>Password</b>: {result.Password}</p>";
-                await base.SendEmail("CESMII | BorgConnect | Activation - Connection Information", bodyPw);
+                await base.SendEmail("CESMII | SM Marketplace | BorgConnect | Activation - Connection Information", bodyPw);
             }
             catch (Exception ex)
             {

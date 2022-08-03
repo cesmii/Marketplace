@@ -18,7 +18,7 @@
     public class BaseController<TController> : Controller where TController : Controller
     {
         protected bool _disposed = false;
-        protected const string REQUESTINFO_SUBJECT = "SM Marketplace - {{RequestType}} - Request Info Item Submitted";
+        protected const string REQUESTINFO_SUBJECT = "CESMII | SM Marketplace | {{RequestType}}";
 
         /// <summary>
         /// Logger available to all controllers, simplifies referencing but will show origin as BaseController.
@@ -78,7 +78,7 @@
             var message = new MailMessage
             {
                 From = new MailAddress(_mailConfig.MailFromAddress),
-                Subject = $"CESMII - SM Marketplace - Request Info Item Submitted",
+                Subject = subject,
                 Body = body,
                 IsBodyHtml = true
             };
