@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.Mail;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Configuration;
@@ -9,6 +10,7 @@ using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Enums;
+using CESMII.Marketplace.Common.Utils;
 
 namespace CESMII.Marketplace.JobManager.Jobs
 {
@@ -19,6 +21,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
         protected readonly IHttpApiFactory _httpFactory;
         protected readonly IDal<JobLog, JobLogModel> _dalJobLog;
         protected readonly ConfigUtil _configUtil;
+        protected readonly MailRelayService _mailRelayService;
 
         protected JobEventArgs _jobEventArgs { get; set; }
 
@@ -28,12 +31,14 @@ namespace CESMII.Marketplace.JobManager.Jobs
             ILogger<IJob> logger,
             IHttpApiFactory httpFactory,
             IDal<JobLog, JobLogModel> dalJobLog,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            MailRelayService mailRelayService)
         {
             _logger = logger;
             _httpFactory = httpFactory;
             _dalJobLog = dalJobLog;
             _configUtil = new ConfigUtil(configuration);
+            _mailRelayService = mailRelayService;
         }
 
         public virtual void Initialize(JobDefinitionModel jobDefinition, string payload, string logId, UserModel user)
@@ -89,6 +94,20 @@ namespace CESMII.Marketplace.JobManager.Jobs
             logItem.Messages.Add(new JobLogMessage() { Message = message, Created = DateTime.UtcNow, isEncrypted = isEncrypted });
             _dalJobLog.Update(logItem, _jobEventArgs.User.ID);
         }
+
+        protected async Task<bool> SendEmail(string subject, string body)
+        {
+            var message = new MailMessage
+            {
+                From = new MailAddress(_configUtil.MailSettings.MailFromAddress),
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = true
+            };
+
+            return await _mailRelayService.SendEmail(message);
+        }
+
 
         /// <summary>
         /// Override this in the descendant classes to handle disposal of unmanaged resources.
