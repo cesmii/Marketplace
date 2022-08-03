@@ -17,6 +17,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Data.Repositories;
+using CESMII.Marketplace.Common.Utils;
 
 namespace CESMII.Marketplace.JobManager
 {
@@ -130,11 +131,12 @@ namespace CESMII.Marketplace.JobManager
                 var logger = scope.ServiceProvider.GetService<ILogger<IJob>>();
                 var httpFactory = scope.ServiceProvider.GetService<IHttpApiFactory>();
                 var configuration = scope.ServiceProvider.GetService<IConfiguration>();
+                var mailRelay = scope.ServiceProvider.GetService<MailRelayService>();
 
                 try
                 {
                     //instantiate job class
-                    var job = InstantiateJob(jobDef.TypeName, logger, httpFactory, dalJobLog, configuration);
+                    var job = InstantiateJob(jobDef.TypeName, logger, httpFactory, dalJobLog, configuration, mailRelay);
 
                     //initialize job
                     job.Initialize(jobDef, payload, logId, user);
