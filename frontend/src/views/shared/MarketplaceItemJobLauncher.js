@@ -72,7 +72,7 @@ export const MarketplaceItemJobLauncher = (props) => {
     // Region: Render
     //-------------------------------------------------------------------
     // renders nothing if not logged in
-    if (props.currentUserId == null) return null;
+    if (!props.isAuthenticated) return null;
 
     return (
         <button className={`btn btn-primary d-flex align-items-center ${props.className}`} onClick={onExecuteJob}><i className="material-icons mr-1">system_update</i>{props.jobName}</button>
