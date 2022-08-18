@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import Button from 'react-bootstrap/Button'
 
-import {InteractionRequiredAuthError,InteractionStatus} from "@azure/msal-browser";
+import {BrowserAuthError, InteractionRequiredAuthError,InteractionStatus} from "@azure/msal-browser";
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 
+import axiosInstance from "../services/AxiosService";
 import { generateLogMessageString } from '../utils/UtilityService'
 import { useLoadingContext } from "../components/contexts/LoadingContext";
 import { AppSettings } from "../utils/appsettings";
@@ -18,7 +19,29 @@ function LoginButton() {
     const { instance, inProgress, accounts } = useMsal();
     const _isAuthenticated = useIsAuthenticated();
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const [_error, setIsError] = useState({ success: true, message: 'An error occurred. Please try again.' });
+
+    //-------------------------------------------------------------------
+    // Region: API call
+    //-------------------------------------------------------------------
+    const onAfterAADLogin = () => {
+        console.log(generateLogMessageString('onAfterAADLogin', CLASS_NAME));
+
+        //perform insert call
+        var url = `auth/onAADLogin`;
+        axiosInstance.post(url)
+            .then(result => {
+                if (result.data.isSuccess) {
+                    console.log(generateLogMessageString(`onAfterAADLogin||${result.data.message}`, CLASS_NAME));
+                }
+                else {
+                    console.warn(generateLogMessageString(`onAfterAADLogin||Initialize Failed||${result.data.message}`, CLASS_NAME));
+                }
+            })
+            .catch(error => {
+                console.log(generateLogMessageString('handleOnSave||error||' + JSON.stringify(error), CLASS_NAME, 'error'));
+                console.log(error);
+            });
+    };
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
@@ -29,37 +52,55 @@ function LoginButton() {
         e.preventDefault(); //prevent form.submit action
 
         //show a spinner
-        setIsError({ ..._error, success: true });
         setLoadingProps({ isLoading: true, message: null });
 
         if (inProgress === InteractionStatus.None) {
 
             var loginRequest = {
-                scopes: AppSettings.MsalScopes, 
+                scopes: AppSettings.MsalScopes,
                 account: accounts[0],
             };
 
+            // redirect anonymous user to login popup
             instance.loginPopup(loginRequest)
                 //.acquireTokenSilent(loginRequest)
                 .then((response) => {
-                    //show a spinner
-                    setIsError({ ..._error, success: true });
-                    setLoadingProps({ isLoading: true, message: null });
-
                     //set the active account
                     instance.setActiveAccount(response.account);
 
-                    //console.info(generateLogMessageString(`onLoginClick||loginPopup||token||${accessToken}`, CLASS_NAME));
+                    //call API to inform user login successful. 
+                    onAfterAADLogin();
 
                     //trigger additional actions to pull back data from mktplace once logged in
-                    setLoadingProps({ refreshMarketplaceCount: true, hasSidebar: true, refreshLookupData: true, refreshFavorites: true, refreshSearchCriteria: true });
                     setLoadingProps({ isLoading: false, message: null });
+                    setLoadingProps({ refreshMarketplaceCount: true, hasSidebar: true, refreshLookupData: true, refreshFavorites: true, refreshSearchCriteria: true });
                 })
                 .catch((error) => {
+                    var msg = 'An error occurred attempting to launch the login window. Please contact the system administrator.';
                     if (error instanceof InteractionRequiredAuthError) {
                         instance.acquireTokenRedirect(loginRequest);
+                        console.error(generateLogMessageString(`onLoginClick||loginPopup||${error}`, CLASS_NAME));
                     }
-                    console.error(generateLogMessageString(`onLoginClick||loginPopup||${error}`, CLASS_NAME));
+                    else if (error instanceof BrowserAuthError) {
+                        switch (error.errorCode) {
+                            case 'user_cancelled':
+                                console.warn(generateLogMessageString(`onLoginClick||loginPopup||${error}`, CLASS_NAME));
+                                //no need to inform user they cancelled
+                                msg = null;
+                                break;
+                            case 'popup_blocker':
+                                console.warn(generateLogMessageString(`onLoginClick||loginPopup||${error}`, CLASS_NAME));
+                                msg = "The Login UI uses a popup window. Please disable Popup blocker for this site.";
+                                break;
+                            default:
+                                console.error(generateLogMessageString(`onLoginClick||loginPopup||${error}`, CLASS_NAME));
+                                msg = error.message;
+                        }
+                    }
+                    setLoadingProps({
+                        isLoading: false, message: null, inlineMessages: msg == null ? [] :
+                            [{ id: new Date().getTime(), severity: "danger", body: msg, isTimed: false }]
+                    });
                 });
         }
     }

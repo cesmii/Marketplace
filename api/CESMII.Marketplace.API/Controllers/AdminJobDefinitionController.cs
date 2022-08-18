@@ -30,8 +30,9 @@ namespace CESMII.Marketplace.Api.Controllers
             IDal<JobDefinition, JobDefinitionModel> dal,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IDal<MarketplaceItem, MarketplaceItemModel> dalMarketplaceItem,
+            UserDAL dalUser,
             ConfigUtil config, ILogger<AdminJobDefinitionController> logger) 
-            : base(config, logger)
+            : base(config, logger, dalUser)
         {
             _dal = dal;
             _dalLookup = dalLookup;

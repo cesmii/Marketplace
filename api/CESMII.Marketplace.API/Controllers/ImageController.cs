@@ -21,8 +21,9 @@ namespace CESMII.Marketplace.Api.Controllers
         private readonly IDal<ImageItem, ImageItemModel> _dal;
 
         public ImageController(IDal<ImageItem, ImageItemModel> dal,
+            UserDAL dalUser,
             ConfigUtil config, ILogger<ImageController> logger)
-            : base(config, logger)
+            : base(config, logger, dalUser)
         {
             _dal = dal;
         }

@@ -7,6 +7,7 @@ using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Api.Shared.Models;
 using CESMII.Marketplace.Api.Shared.Controllers;
 using CESMII.Marketplace.Api.Shared.Extensions;
+using CESMII.Marketplace.DAL;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
@@ -14,8 +15,8 @@ namespace CESMII.Marketplace.Api.Controllers
     [Authorize]
     public class SystemController : BaseController<SystemController>
     {
-        public SystemController(ConfigUtil config, ILogger<SystemController> logger)
-            : base(config, logger)
+        public SystemController(ConfigUtil config, ILogger<SystemController> logger, UserDAL dalUser)
+            : base(config, logger, dalUser)
         {
         }
 
@@ -38,7 +39,7 @@ namespace CESMII.Marketplace.Api.Controllers
         {
             var result = new ResultMessageWithDataModel() { IsSuccess = true, Message = "", Data = null };
 
-            _logger.LogCritical($"REACT|LogMessage|User:{User.GetUserID()}|Error:{model.Message}|Url:{model.Url}");
+            _logger.LogCritical($"REACT|LogMessage|User:{LocalUser.UserName}|Error:{model.Message}|Url:{model.Url}");
 
             return Ok(result);
         }

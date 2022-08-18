@@ -74,7 +74,7 @@ namespace CESMII.Marketplace.Api
             //stock tables
             services.AddScoped<IMongoRepository<Organization>, MongoRepository<Organization>>();
             services.AddScoped<IMongoRepository<User>, MongoRepository<User>>();
-            services.AddScoped<IMongoRepository<Permission>, MongoRepository<Permission>>();
+            //services.AddScoped<IMongoRepository<Permission>, MongoRepository<Permission>>();
             services.AddScoped<IMongoRepository<JobLog>, MongoRepository<JobLog>>();
             services.AddScoped<IMongoRepository<JobDefinition>, MongoRepository<JobDefinition>>();
 
@@ -104,9 +104,10 @@ namespace CESMII.Marketplace.Api
             services.AddSingleton<CloudLibClient.ICloudLibWrapper,CloudLibClient.CloudLibWrapper>();
             services.AddScoped<ICloudLibDAL<MarketplaceItemModel>, CloudLibDAL>();
 
+            //AAD - no longer need this
             // Add token builder.
-            var configUtil = new ConfigUtil(Configuration);
-            services.AddTransient(provider => new TokenUtils(configUtil));
+            //var configUtil = new ConfigUtil(Configuration);
+            //services.AddTransient(provider => new TokenUtils(configUtil));
 
             services.AddControllers();
 
@@ -150,6 +151,7 @@ namespace CESMII.Marketplace.Api
             //            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configUtil.JWTSettings.Key))
             //        };
             //    });
+            //New - Azure AD approach replaces previous code above
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApi(Configuration, "AzureAdSettings");
 

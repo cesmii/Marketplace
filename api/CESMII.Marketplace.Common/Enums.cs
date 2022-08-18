@@ -24,6 +24,7 @@
 
     //TBD - update these...adjust to align with this data. 
     //TBD - consider approach where we don't hardcode these.
+    //TODO: Update enum permissions to match what is coming from AAD
     public enum PermissionEnum
     {
         [Description("CanManageMarketplace")]
