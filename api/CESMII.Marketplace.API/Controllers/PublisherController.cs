@@ -24,8 +24,9 @@ namespace CESMII.Marketplace.Api.Controllers
 
         public PublisherController(
             IDal<Publisher, PublisherModel> dal,
+            UserDAL dalUser,
             ConfigUtil config, ILogger<PublisherController> logger) 
-            : base(config, logger)
+            : base(config, logger, dalUser)
         {
             _dal = dal;
         }

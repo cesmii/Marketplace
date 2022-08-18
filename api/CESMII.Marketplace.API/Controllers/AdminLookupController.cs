@@ -27,8 +27,9 @@ namespace CESMII.Marketplace.Api.Controllers
 
         public AdminLookupController(
             IDal<LookupItem, LookupItemModel> dal,
+            UserDAL dalUser,
             ConfigUtil config, ILogger<AdminLookupController> logger) 
-            : base(config, logger)
+            : base(config, logger, dalUser)
         {
             _dal = dal;
         }

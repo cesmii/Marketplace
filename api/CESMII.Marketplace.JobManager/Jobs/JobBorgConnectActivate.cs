@@ -224,10 +224,16 @@ namespace CESMII.Marketplace.JobManager.Jobs
 
         private static string GetCustomerName(UserModel user)
         {
-            return (user.Organization == null ?
-                new System.Text.RegularExpressions.Regex("[ ()*'\",_&#^@]").Replace(user.FullName, string.Empty) :
-                new System.Text.RegularExpressions.Regex("[ ()*'\",_&#^@]").Replace(user.Organization.Name, string.Empty)) +
-                DateTime.Now.ToString("yyMMddHHmm");  //append datetime stamp for now so we can multiple times for demos and get unique instance.
+            string name = "";
+            if (user.Organization != null)
+                name = new System.Text.RegularExpressions.Regex("[ ()*'\",_&#^@]").Replace(user.Organization.Name, string.Empty);
+            else if (user.DisplayName != null)
+                name = new System.Text.RegularExpressions.Regex("[ ()*'\",_&#^@]").Replace(user.DisplayName, string.Empty);
+            else if (user.UserName != null)
+                name = new System.Text.RegularExpressions.Regex("[ ()*'\",_&#^@]").Replace(user.UserName, string.Empty);
+            else  //assume we won't get here and email will be present. 
+                name = new System.Text.RegularExpressions.Regex("[ ()*'\",_&#^@]").Replace(user.Email, string.Empty);
+            return name + DateTime.Now.ToString("yyMMddHHmm");  //append datetime stamp for now so we can multiple times for demos and get unique instance.
         }
     }
 

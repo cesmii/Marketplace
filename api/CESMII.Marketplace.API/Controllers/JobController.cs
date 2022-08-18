@@ -21,17 +21,15 @@ namespace CESMII.Marketplace.Api.Controllers
     {
         private readonly IJobFactory _jobFactory;
         private readonly IDal<JobLog, JobLogModel> _dalJobLog;
-        private readonly UserDAL _dalUser;
 
         public JobController(IJobFactory jobFactory, 
             IDal<JobLog, JobLogModel> dalJobLog,
             UserDAL dalUser,
             ConfigUtil config, ILogger<JobController> logger) 
-            : base(config, logger)
+            : base(config, logger, dalUser)
         {
             _jobFactory = jobFactory;
             _dalJobLog = dalJobLog;
-            _dalUser = dalUser;
         }
 
         #region Job Factory
@@ -48,8 +46,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest($"Invalid model (null)");
             }
 
-            var user = _dalUser.GetById(User.GetUserID());
-            var result = await _jobFactory.ExecuteJob(model, user);
+            var result = await _jobFactory.ExecuteJob(model, base.LocalUser);
 
             return Ok(new ResultMessageWithDataModel() {
                 Data = result,
@@ -100,13 +97,13 @@ namespace CESMII.Marketplace.Api.Controllers
 
             if (string.IsNullOrEmpty(model.Query))
             {
-                return Ok(_dalJobLog.Where(s => s.CreatedById.Equals(MongoDB.Bson.ObjectId.Parse(User.GetUserID())) &&
+                return Ok(_dalJobLog.Where(s => s.CreatedById.Equals(MongoDB.Bson.ObjectId.Parse(LocalUser.ID)) &&
                                 s.IsActive
                                 , null, null, false, true));
             }
 
             model.Query = model.Query.ToLower();
-            return Ok(_dalJobLog.Where(s => s.CreatedById.Equals(MongoDB.Bson.ObjectId.Parse(User.GetUserID())) &&
+            return Ok(_dalJobLog.Where(s => s.CreatedById.Equals(MongoDB.Bson.ObjectId.Parse(LocalUser.ID)) &&
                             (string.IsNullOrEmpty(model.Query) || s.Name.ToLower().Contains(model.Query)) &&
                             s.IsActive
                             , null, null, false, true));
@@ -123,7 +120,7 @@ namespace CESMII.Marketplace.Api.Controllers
         public async Task<IActionResult> Delete([FromBody] IdStringModel model)
         {
             //This is a soft delete
-            var result = await _dalJobLog.Delete(model.ID, User.GetUserID());
+            var result = await _dalJobLog.Delete(model.ID, LocalUser.ID);
             if (result < 0)
             {
                 _logger.LogWarning($"JobController|Log|Delete|Could not delete item. Invalid id:{model.ID}.");

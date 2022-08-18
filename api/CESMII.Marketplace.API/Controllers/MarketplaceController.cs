@@ -30,8 +30,9 @@ namespace CESMII.Marketplace.Api.Controllers
             IDal<LookupItem, LookupItemModel> dalLookup,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
             ICloudLibDAL<MarketplaceItemModel> dalCloudLib,
+            UserDAL dalUser,
             ConfigUtil config, ILogger<MarketplaceController> logger)
-            : base(config, logger)
+            : base(config, logger, dalUser)
         {
             _dal = dal;
             _dalLookup = dalLookup;
@@ -78,8 +79,6 @@ namespace CESMII.Marketplace.Api.Controllers
         [HttpPost, Route("featured")]
         [ProducesResponseType(200, Type = typeof(List<MarketplaceItemModel>))]
         [ProducesResponseType(400)]
-        [Authorize(Roles = "cesmii.marketplace.user")]
-        //[Authorize()]
         public IActionResult GetFeatured()
         {
             var predicates = new List<Func<MarketplaceItem, bool>>
@@ -425,7 +424,8 @@ namespace CESMII.Marketplace.Api.Controllers
                     || x.Description.ToLower().Contains(model.Query)
                     || x.Abstract.ToLower().Contains(model.Query)
                     || (x.MetaTags != null && x.MetaTags.Contains(model.Query))
-                    || (x.Author != null && (x.Author.FirstName.Contains(model.Query) || x.Author.LastName.Contains(model.Query)));
+                    //|| (x.Author != null && (x.Author.FirstName.Contains(model.Query) || x.Author.LastName.Contains(model.Query)));
+                    ;
 
                 predicates.Add(predicateQuery);
             }

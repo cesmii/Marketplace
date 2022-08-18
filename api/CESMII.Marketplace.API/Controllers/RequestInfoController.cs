@@ -29,9 +29,10 @@ namespace CESMII.Marketplace.Api.Controllers
         public RequestInfoController(
             IDal<RequestInfo, RequestInfoModel> dal,
             ICloudLibDAL<MarketplaceItemModel> dalCloudLib,
+            UserDAL dalUser,
             ConfigUtil config, ILogger<RequestInfoController> logger,
             MailRelayService mailRelayService)
-            : base(config, logger)
+            : base(config, logger, dalUser)
         {
             _dal = dal;
             _dalCloudLib = dalCloudLib;
