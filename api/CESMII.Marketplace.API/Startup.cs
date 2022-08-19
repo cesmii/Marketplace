@@ -155,6 +155,7 @@ namespace CESMII.Marketplace.Api
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddMicrosoftIdentityWebApi(Configuration, "AzureAdSettings");
 
+            //TBD - may not need these at all anymore since AAD implementation
             // Add permission authorization requirements.
             services.AddAuthorization(options =>
             {
@@ -164,23 +165,8 @@ namespace CESMII.Marketplace.Api
                     policy => policy.Requirements.Add(new PermissionRequirement(PermissionEnum.CanManageMarketplace)));
 
                 options.AddPolicy(
-                    nameof(PermissionEnum.CanManagePublishers),
-                    policy => policy.Requirements.Add(new PermissionRequirement(PermissionEnum.CanManagePublishers)));
-
-                // Ability to...
-                options.AddPolicy(
-                    nameof(PermissionEnum.CanManageSystemSettings),
-                    policy => policy.Requirements.Add(new PermissionRequirement(PermissionEnum.CanManageSystemSettings)));
-
-                // Ability to...
-                options.AddPolicy(
-                    nameof(PermissionEnum.CanManageUsers),
-                    policy => policy.Requirements.Add(new PermissionRequirement(PermissionEnum.CanManageUsers)));
-
-                // Ability to...
-                options.AddPolicy(
-                    nameof(PermissionEnum.CanManageRequestInfo),
-                    policy => policy.Requirements.Add(new PermissionRequirement(PermissionEnum.CanManageRequestInfo)));
+                    nameof(PermissionEnum.GeneralUser),
+                    policy => policy.Requirements.Add(new PermissionRequirement(PermissionEnum.GeneralUser)));
 
                 // Ability to...
                 options.AddPolicy(
