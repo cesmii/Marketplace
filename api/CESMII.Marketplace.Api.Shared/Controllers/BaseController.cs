@@ -118,12 +118,14 @@
                         throw new ArgumentNullException($"On AAD Login, could not update existing user: {userAAD.ObjectIdAAD}.");
                     }
                     result.LastLogin = DateTime.UtcNow;
+                    result.DisplayName  = userAAD.DisplayName;
                     _dalUser.Update(result, userAAD.ObjectIdAAD).Wait();
                     break;
                 case 0:
                     result = new UserModel()
                     {
                         ObjectIdAAD = userAAD.ObjectIdAAD,
+                        DisplayName = userAAD.DisplayName,
                         LastLogin = DateTime.UtcNow
                     };
                     result.ID = _dalUser.Add(result, userAAD.ObjectIdAAD).Result;
@@ -134,7 +136,7 @@
             }
 
             //apply add'l claims not stored in db
-            result.DisplayName = userAAD.DisplayName;
+            //result.DisplayName = userAAD.DisplayName;
             result.UserName = userAAD.UserName;
             result.FirstName = userAAD.FirstName;
             result.LastName = userAAD.LastName;

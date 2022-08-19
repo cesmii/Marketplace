@@ -15,6 +15,7 @@
             return user.HasClaim(ClaimTypes.Role, EnumUtils.GetEnumDescription(permission));
         }
 
+        /*
         /// <summary>
         /// If the user has any permission considered an admin permission, then return true.
         /// </summary>
@@ -29,7 +30,6 @@
             return false;
         }
 
-        /*
         // Boolean to determine if a user is currently impersonating another user. False if cannot parse/find.
         public static bool IsImpersonating(this ClaimsPrincipal user)
         {
@@ -63,7 +63,7 @@
                          user.FindFirst(ClaimTypes.Upn).Value : //user principle name
                          user.FindFirst(ClaimTypes.Email).Value,
                 TenantId = user.FindFirst(x => x.Type.Contains("tenantid")).Value,
-                Roles = user.FindFirst(x => x.Type.Contains("role")).Value,
+                Roles = string.Join(", ", user.FindAll(x => x.Type.Contains("role")).Select(x => x.Value).ToArray()),
                 Scope = user.FindFirst(x => x.Type.Contains("scope")).Value
             };
             return result;

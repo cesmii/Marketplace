@@ -27,24 +27,14 @@
     //TODO: Update enum permissions to match what is coming from AAD
     public enum PermissionEnum
     {
-        [Description("CanManageMarketplace")]
+        [Description("cesmii.marketplace.marketplaceadmin")]
         CanManageMarketplace = 1,
 
-        [Description("CanManageUsers")]
-        CanManageUsers = 2,
+        [Description("cesmii.marketplace.user")]
+        GeneralUser = 2,
 
-        [Description("CanManageSystemSettings")]
-        CanManageSystemSettings = 3,
-
-        [Description("CanManagePublishers")]
-        CanManagePublishers = 4,
-
-        [Description("CanManageRequestInfo")]
-        CanManageRequestInfo = 5,
-
-        [Description("CanManageJobDefinitions")]
-        CanManageJobDefinitions = 6
-
+        [Description("cesmii.marketplace.jobadmin")]
+        CanManageJobDefinitions = 3
     }
 
     public enum TaskStatusEnum
