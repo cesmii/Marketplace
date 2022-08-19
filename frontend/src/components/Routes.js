@@ -6,7 +6,6 @@ import AdminRoute from '../views/admin/shared/AdminRoute'
 import { PublicRoute, PublicRouteWFilter } from './PublicRoute'
 
 //page level imports
-import Login from "../views/Login"
 import PageNotFound from "../views/PageNotFound"
 import MarketplaceList from '../views/MarketplaceList';
 import MarketplaceEntity from '../views/MarketplaceEntity'
@@ -52,8 +51,6 @@ function Routes() {
             <PublicRoute exact path="/contact-us/:type" component={RequestInfo} />
 
             {/* Admin UI order matters in the profile/ routes* - TBD - update to admin versions of the forms...*/}
-            <PublicRoute exact path="/login" component={Login} />
-            <PublicRoute exact path="/admin" component={Login} />
             <AdminRoute path="/admin/library/list" component={AdminMarketplaceList} roles={['cesmii.marketplace.marketplaceadmin']} />
             <AdminRoute path="/admin/library/copy/:parentId" component={AdminMarketplaceEntity} roles={['cesmii.marketplace.marketplaceadmin']} />
             <AdminRoute path="/admin/library/:id" component={AdminMarketplaceEntity} roles={['cesmii.marketplace.marketplaceadmin']} />

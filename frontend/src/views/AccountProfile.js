@@ -412,7 +412,7 @@ function AccountProfile() {
     return (
         <>
             <Helmet>
-                <title>{AppSettings.Titles.Main + caption}</title>
+                <title>{AppSettings.Titles.Main + ' | ' + caption}</title>
             </Helmet>
             <Form noValidate>
                 {renderHeaderRow()}
