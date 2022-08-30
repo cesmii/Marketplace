@@ -55,18 +55,23 @@
             var result = new UserModel()
             {
                 ObjectIdAAD = user.FindFirst(x => x.Type.Contains("objectidentifier")).Value,
-                UserName = user.FindFirst(ClaimTypes.Name).Value,
-                LastName = user.FindFirst(ClaimTypes.Surname).Value,
-                FirstName = user.FindFirst(ClaimTypes.GivenName).Value,
-                DisplayName = user.FindFirst(x => x.Type.Equals("name")).Value,
-                Email = user.FindFirst(ClaimTypes.Email) == null ?
-                         user.FindFirst(ClaimTypes.Upn).Value : //user principle name
-                         user.FindFirst(ClaimTypes.Email).Value,
-                TenantId = user.FindFirst(x => x.Type.Contains("tenantid")).Value,
+                UserName = user.FindFirst(x => x.Type.Equals("preferred_username"))?.Value,
+                LastName = user.FindFirst(ClaimTypes.Surname)?.Value,
+                FirstName = user.FindFirst(ClaimTypes.GivenName)?.Value,
+                DisplayName = user.FindFirst(x => x.Type.Equals("name"))?.Value,
+                Email = GetUserAADEmail(user),
+                TenantId = user.FindFirst(x => x.Type.Contains("tenantid"))?.Value,
                 Roles = string.Join(", ", user.FindAll(x => x.Type.Contains("role")).Select(x => x.Value).ToArray()),
-                Scope = user.FindFirst(x => x.Type.Contains("scope")).Value
+                Scope = user.FindFirst(x => x.Type.Contains("scope"))?.Value
             };
             return result;
+        }
+
+        private static string GetUserAADEmail(ClaimsPrincipal user)
+        {
+            if (user.FindFirst(ClaimTypes.Email) != null) return user.FindFirst(ClaimTypes.Email).Value;
+            if (user.FindFirst(ClaimTypes.Upn) != null) return user.FindFirst(ClaimTypes.Upn).Value;
+            return user.FindFirst(x => x.Type.Equals("preferred_username"))?.Value;
         }
 
         public static string GetUserIdAAD(this ClaimsPrincipal user)

@@ -87,8 +87,6 @@ export const AppSettings = {
         auth: {
             clientId: process.env.REACT_APP_MSAL_CLIENT_ID, //Application (client) id in Azure of the registered application
             authority: process.env.REACT_APP_MSAL_AUTHORITY, //MSAL code will append client id, oauth path
-            //clientId: '1b34784c-0861-404f-875b-4195e47db212', //Application (client) id in Azure of the registered application
-            //authority: 'https://login.microsoftonline.com/a1590c8d-0700-4132-8b49-37fbddb2c1c2', //MSAL code will append client id, oauth path
             redirectUri: "/library", //must match with the redirect url specified in the Azure App Application. Note Azure will also need https://domainname.com/library
             postLogoutRedirectUri: "/"
         },
@@ -97,7 +95,6 @@ export const AppSettings = {
             storeAuthStateInCookie: _isIE || _isEdge || _isFirefox
         }
     }
-    //, MsalScopes: ["api://1b34784c-0861-404f-875b-4195e47db212/cesmii.marketplace"]  //tied to scope defined in app registration / scope, set in Azure AAD
     , MsalScopes: [process.env.REACT_APP_MSAL_SCOPE]  //tied to scope defined in app registration / scope, set in Azure AAD
     
 }
