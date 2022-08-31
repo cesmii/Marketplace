@@ -122,7 +122,8 @@ namespace CESMII.Marketplace.Api.Controllers
                     ID = itm.ID,
                     Name = itm.Name,
                     IsActive = itm.IsActive,
-                    DisplayOrder = itm.DisplayOrder
+                    DisplayOrder = itm.DisplayOrder,
+                    Code = itm.Code
                     //tbd any other lookup fields
                 }).OrderBy(x => x.DisplayOrder).ThenBy(x => x.Name).ToList()
             };
