@@ -1,9 +1,8 @@
 import React, { useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useMsal } from "@azure/msal-react";
 import axiosInstance from "../services/AxiosService";
 
 import SideMenuItem from './SideMenuItem'
-import { useAuthState } from "./authentication/AuthContext";
 import { useLoadingContext } from './contexts/LoadingContext'
 import color from './Constants'
 import { generateLogMessageString } from '../utils/UtilityService'
@@ -17,9 +16,9 @@ function SideMenu() {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const history = useHistory();
-    const authTicket = useAuthState();
     const { loadingProps, setLoadingProps } = useLoadingContext();
+    const { instance } = useMsal();
+    const _activeAccount = instance.getActiveAccount();
 
     //-------------------------------------------------------------------
     // Load Profile Counts if some part of the app indicates the need to do so.
@@ -70,7 +69,7 @@ function SideMenu() {
                 <SideMenuItem caption="Marketplace library" bgColor={color.shark} iconName="folder-profile" navUrl="/admin/library/all" subText={marketplaceCountAllCaption()} subMenuItems={marketplaceSubMenu} />
             </ul>
             {(loadingProps.recentFileList != null && loadingProps.recentFileList.length > 0) &&
-                <SideMenuLinkList caption='Recent / Open Items' iconName='access-time' items={loadingProps.recentFileList} currentUserId={authTicket.user.id} ></SideMenuLinkList>
+                <SideMenuLinkList caption='Recent / Open Items' iconName='access-time' items={loadingProps.recentFileList} currentUserId={_activeAccount?.username} ></SideMenuLinkList>
             }
         </div>
     )

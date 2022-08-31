@@ -10,7 +10,6 @@ import Dropdown from 'react-bootstrap/Dropdown'
 import { AppSettings } from '../../utils/appsettings';
 import { formatDate, generateLogMessageString } from '../../utils/UtilityService'
 import { useLoadingContext } from "../../components/contexts/LoadingContext";
-import { useAuthState } from "../../components/authentication/AuthContext";
 
 import { SVGIcon } from "../../components/SVGIcon";
 import color from "../../components/Constants";
@@ -33,7 +32,6 @@ function AdminRequestInfoEntity() {
     const [isLoading, setIsLoading] = useState(true);
     const [isReadOnly, setIsReadOnly] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const authTicket = useAuthState();
     const [_isValid, setIsValid] = useState({ status: true });
     const [_deleteModal, setDeleteModal] = useState({ show: false, items: null });
     const [_error, setError] = useState({ show: false, message: null, caption: null });
@@ -99,7 +97,7 @@ function AdminRequestInfoEntity() {
         return () => {
             console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
         };
-    }, [id, authTicket.user]);
+    }, [id]);
 
 
     //-------------------------------------------------------------------

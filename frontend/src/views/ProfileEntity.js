@@ -5,7 +5,6 @@ import axiosInstance from "../services/AxiosService";
 
 import { AppSettings } from '../utils/appsettings';
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
-import { useAuthState } from "../components/authentication/AuthContext";
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
 import { cleanFileName, generateLogMessageString, getMarketplaceIconName } from '../utils/UtilityService'
 import MarketplaceTileList from './shared/MarketplaceTileList';
@@ -24,7 +23,6 @@ function ProfileEntity() {
     const [item, setItem] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const authTicket = useAuthState();
     ////is favorite calc
     //const [isFavorite, setIsFavorite] = useState((loadingProps.favoritesList != null && loadingProps.favoritesList.findIndex(x => x.url === history.location.pathname) > -1));
 
@@ -80,7 +78,7 @@ function ProfileEntity() {
         return () => {
             console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
         };
-    }, [id, authTicket.user]);
+    }, [id]);
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events

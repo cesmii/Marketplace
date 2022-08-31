@@ -14,6 +14,7 @@
 
     public class TokenUtils
     {
+        /*
         // TODO Add "One Time Token" 24 hours for both "first login" and reset password.
         private readonly JWTConfig _config;
 
@@ -153,8 +154,9 @@
                 claims.Add(new Claim(ClaimTypes.Role, name));
             }
             result.Subject.AddClaims(claims);
-
-            return result;
+            
+        return result;
         }
+        */
     }
 }

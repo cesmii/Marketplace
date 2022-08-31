@@ -26,8 +26,9 @@ namespace CESMII.Marketplace.Api.Controllers
         private readonly IDal<Publisher, PublisherModel> _dalPublisher;
         public LookupController(IDal<LookupItem, LookupItemModel> dal,
             IDal<Publisher, PublisherModel> dalPublisher,
+            UserDAL dalUser,
             ConfigUtil config, ILogger<LookupController> logger) 
-            : base(config, logger)
+            : base(config, logger, dalUser)
         {
             _dal = dal;
             _dalPublisher = dalPublisher;

@@ -5,7 +5,6 @@ import axiosInstance from "../../services/AxiosService";
 import { AppSettings } from '../../utils/appsettings'
 import { generateLogMessageString } from '../../utils/UtilityService'
 import GridPager from '../../components/GridPager'
-import { useAuthState } from "../../components/authentication/AuthContext";
 import { useLoadingContext } from "../../components/contexts/LoadingContext";
 
 import HeaderSearch from '../../components/HeaderSearch';
@@ -21,7 +20,6 @@ function AdminPublisherList() {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const authTicket = useAuthState();
     const _scrollToRef = useRef(null);
     const [_dataRows, setDataRows] = useState({
         all: [], itemCount: 0, listView: true
@@ -311,7 +309,7 @@ function AdminPublisherList() {
                     <h1>Admin | Publishers</h1>
                 </div>
                 <div className="col-sm-3 d-flex align-items-center" >
-                    <HeaderSearch filterVal={_pager.searchVal == null ? null : _pager.searchVal} onSearch={handleOnSearchChange} searchMode="standard" currentUserId={authTicket.user == null ? null : authTicket.user.id} />
+                    <HeaderSearch filterVal={_pager.searchVal == null ? null : _pager.searchVal} onSearch={handleOnSearchChange} searchMode="standard" />
                 </div>
             </div>
 
