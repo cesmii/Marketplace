@@ -477,16 +477,30 @@ namespace CESMII.Marketplace.Api.Controllers
             if (!string.IsNullOrEmpty(model.Query))
             {
                 //add series of where conditions
-                predicateQuery = x => x.Name.ToLower().Contains(model.Query)
-                    //or search on additional fields
-                    || x.DisplayName.ToLower().Contains(model.Query)
-                    || x.Description.ToLower().Contains(model.Query)
-                    || x.Abstract.ToLower().Contains(model.Query)
-                    || (x.MetaTags != null && x.MetaTags.Contains(model.Query))
-                    //if we are using special type, it means user entered special word for query like "profile". In this case,
-                    //we want to get all types of sm-profile >>OR<< any item containing the word profile
-                    || (!useSpecialTypeSelection || x.ItemTypeId != null && types.Any(y => y.ID.Equals(x.ItemTypeId.ToString())))
-                    ;
+                if (useSpecialTypeSelection)
+                {
+                    predicateQuery = x => x.Name.ToLower().Contains(model.Query)
+                        //or search on additional fields
+                        || x.DisplayName.ToLower().Contains(model.Query)
+                        || x.Description.ToLower().Contains(model.Query)
+                        || x.Abstract.ToLower().Contains(model.Query)
+                        || (x.MetaTags != null && x.MetaTags.Contains(model.Query))
+                        //if we are using special type, it means user entered special word for query like "profile". In this case,
+                        //we want to get all types of sm-profile >>OR<< any item containing the word profile
+                        || (x.ItemTypeId != null && types.Any(y => y.ID.Equals(x.ItemTypeId.ToString())))
+                        ;
+                }
+                else
+                {
+                    predicateQuery = x => x.Name.ToLower().Contains(model.Query)
+                        //or search on additional fields
+                        || x.DisplayName.ToLower().Contains(model.Query)
+                        || x.Description.ToLower().Contains(model.Query)
+                        || x.Abstract.ToLower().Contains(model.Query)
+                        || (x.MetaTags != null && x.MetaTags.Contains(model.Query))
+                        ;
+                }
+
                 /*
                 predicateQuery = x => x.Name.ToLower().Contains(model.Query);
                 //or search on additional fields
@@ -501,7 +515,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 {
                     predicateQuery.Or(x => x.ItemTypeId != null && types.Any(y => y.ID.Equals(x.ItemTypeId.ToString())));
                 }
-                 */
+                */
 
                 predicates.Add(predicateQuery);
             }
