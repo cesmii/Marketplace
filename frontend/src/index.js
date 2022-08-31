@@ -2,13 +2,16 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactGA from 'react-ga4';
 
-import './index.css';
+import { PublicClientApplication } from "@azure/msal-browser";
+import { MsalProvider } from "@azure/msal-react";
+
 import App from './App';
-import { AuthContextProvider } from "./components/authentication/AuthContext";
 import { LoadingContextProvider } from "./components/contexts/LoadingContext";
 import reportWebVitals from './reportWebVitals';
 import { generateLogMessageString } from './utils/UtilityService';
 import { AppSettings } from './utils/appsettings';
+
+import './index.css';
 
 require('dotenv').config()
 
@@ -30,6 +33,11 @@ if (AppSettings.TrackAnalytics === "true") {
 }
 //#endregion
 
+//create PublicClientApplication instance
+//export it so that our non-component code can access this instance.
+export const Msal_Instance = new PublicClientApplication(AppSettings.MsalConfig);
+//#endregion
+
 //var express = require('express');
 //var server = express();
 //var options = {
@@ -40,11 +48,11 @@ if (AppSettings.TrackAnalytics === "true") {
 
 ReactDOM.render(
   <React.StrictMode>
-    <AuthContextProvider>  {/*When the context within this is null or false, user can't get to private routes. When true, they can*/}
+    <MsalProvider instance={Msal_Instance}>
         <LoadingContextProvider>
             <App />
         </LoadingContextProvider>
-    </AuthContextProvider>
+    </MsalProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );

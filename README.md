@@ -1,79 +1,72 @@
-<h1>CESMII - Marketplace</h1>
-<h2>Prerequisites</h2>
-<ul>
-<li>
-	Install node.js (version > 10.16) - https://nodejs.org/en/
-</li>
-<li>
-	Install npm (version > 5.6) - https://www.npmjs.com/ (note I just upgraded to 7.17 =>  npm install -g npm)
-</li>
-<li>
-	React - https://reactjs.org/
-</li>
-<li>
-	.NET Core 5, Visual Studio 2019 or equivalent
-</li>
-<li>
-	DB - Mongo DB - details to follow...
-</li>
-</ul>
+# CESMII - Marketplace
 
-<h2>Directories</h2>
-<ul>
-<li>
-	\api - This contains a .NET web API back end for marketplace. Within this solution, the DB database connections to Mongo DB will occur. 
-</li>
-<li>
-	\frontend - This contains the REACT front end for the marketplace app.
-</li>
-<li>
-	\images - These are starter images loaded into the system to be used in content areas.
-</li>
-<li>
-	\sample-data - This contains JSON data that mimics the data in the stage Azure Cosmos Mongo DB.
-</li>
-</ul>
+## Prerequisites
 
-<h2>How to Build</h2>
-<ol>
-<li>
-	Clone the repo from GIT.
-</li>
-<li>
-	<b>Build/Run the front end (Using a node.js prompt): </b>
-	<ul>
-		<li>
-			cd \front-end
-		</li>
-		<li>
-			npm install
-		</li>
-		<li>
-			npm run start 
-		</li>
-		<li>
-			Verify the site is running in a browser: http://localhost:3000
-		</li>
-	</ul>
-</li>
-<li>
-	<b>Build/Run the back end API - CESMII.Marketplace.sln (.NET Solution): </b>
-	<p>
-		This contains the .NET web API project and supporting projects to interact with marketplace data storage. 
-	</p>
-</li>
-<li>
-	<b>Database - Mongo DB: </b>	
-	<ul>
-		<li>
-			We use Mongo DB Compasss to directly inspect, view or edit data as needed.
-		</li>
-		<li>
-			The DB is deployed to an Azure location but could be installed locally or to another hosting provider. 
-		</li>
-		<li>
-			Sample collections of data are stored in the sample-data folder.
-		</li>
-	</ul>
-</li>
-</ol>
+- Install node.js (version > 10.16) - https://nodejs.org/en/
+- Install npm (version > 5.6) - https://www.npmjs.com/ (note I just upgraded to 7.17 =>  npm install -g npm)
+- React - https://reactjs.org/
+- .NET Core 5, Visual Studio 2019 or equivalent
+- DB - Mongo DB - details to follow...
+
+## Directories
+
+- \api - This contains a .NET web API back end for marketplace. Within this solution, the DB database connections to Mongo DB will occur. 
+- \frontend - This contains the REACT front end for the marketplace app.
+- \images - These are starter images loaded into the system to be used in content areas.
+- \sample-data - This contains JSON data that mimics the data in the stage Azure Cosmos Mongo DB.
+
+## How to Build
+
+1. Clone the repo from GIT.
+
+2. **Build/Run the front end (Using a node.js prompt):**
+
+    ```ps
+    cd \front-end
+    npm install
+    npm run start
+    ```
+
+    Verify the site is running in a browser: http://localhost:3000
+
+3. **Build/Run the back end API - CESMII.Marketplace.sln (.NET Solution):**
+
+    This contains the .NET web API project and supporting projects to interact with marketplace data storage.
+
+4. **Database - Mongo DB:**
+    - We use Mongo DB Compasss to directly inspect, view or edit data as needed.
+    - The DB is deployed to an Azure location but could be installed locally or to another hosting provider. 
+    - Sample collections of data are stored in the sample-data folder.
+
+## Provision Azure AD tenant
+
+1. In the Azure Portal for AAD, create a new Application Registration "CESMII MarketPlace", configure it for SPA using MSAL 2.0 as per https://docs.microsoft.com/en-us/azure/active-directory/develop/scenario-spa-app-registration:
+   - Choose all account types: any organization and personal Microsoft accounts, don't specify a redirect URI at this point
+2. Under Authentication, add platform choose Single-Page Application.
+
+   - Enter a redirect URL pointing to the marketplace instance:
+
+     Local development: http://localhost:3000/library.
+
+     Staging: https://marketplace-front-stage.azurewebsites.net/library.
+
+     Production: https://marketplace.cesmii.net/library.
+
+   - Enter a Front-channel logout URL. Local development: https://localhost:3000/logout. Similar for stage / production.
+   - Under Implicit/Hybrid Grant Flows, leave Access and ID token unchecked.
+
+3. Under Expose an API, create
+
+    - Add a scope "cesmii.marketplace", consent admin and users.
+    - Add an Authorized client application using the appid of the SPA registration from step 1 and grant it access to the cesmii.marketplace scope.
+
+4. Under App roles, create the following roles (all for users/groups):
+
+```
+cesmii.marketplace.user
+cesmii.marketplace.marketplaceadmin
+cesmii.marketplace.useradmin
+cesmii.marketplace.jobadmin
+```
+
+5. Configure the application itself (local config files or in the Azure Portal Settings/Configuration) with the AAD tenant information.

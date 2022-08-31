@@ -1,37 +1,33 @@
 import React, { useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
 import { Helmet } from "react-helmet"
-import axiosInstance from "../services/AxiosService";
+import { useMsal } from "@azure/msal-react";
+import { axiosInstance } from "../services/AxiosService";
 
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
-import Dropdown from 'react-bootstrap/Dropdown'
 
 import { useLoadingContext } from "../components/contexts/LoadingContext";
-import { useAuthDispatch, useAuthState } from "../components/authentication/AuthContext";
-import { login } from "../components/authentication/AuthActions";
 import { AppSettings } from '../utils/appsettings';
-import { generateLogMessageString, validate_Email } from '../utils/UtilityService'
+import { generateLogMessageString } from '../utils/UtilityService'
 
-import { SVGIcon } from "../components/SVGIcon";
-import color from "../components/Constants";
 import ChangePasswordModal from '../components/ChangePasswordModal';
 
 const CLASS_NAME = "AccountProfile";
 
 function AccountProfile() {
 
+    //TBD - Remove the remaining fields
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
     const history = useHistory();
-    const authTicket = useAuthState();
-    const dispatch = useAuthDispatch() //get the dispatch method from the useDispatch custom hook
+    const { instance } = useMsal();
+    const _activeAccount = instance.getActiveAccount();
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_item, setItem] = useState({});
     const [_isValid, setIsValid] = useState({
-        userName: true, firstName: true, lastName: true, email: true, emailFormat: true
-        , smipSettings: true
+        userName: true, smipSettings: true
     });
     const [_changePasswordModal, setChangePasswordModal] = useState({ show: false, url: null, updateToken: false});
     var caption = 'My Profile';
@@ -48,7 +44,7 @@ function AccountProfile() {
             //get my latest profile info
             var result = null;
             try {
-                var url = `user/profile/mine`
+                var url = `user/profile/mine/msal`
                 result = await axiosInstance.post(url);
             }
             catch (err) {
@@ -79,47 +75,20 @@ function AccountProfile() {
 
         fetchData();
 
-    }, [authTicket.user]);
+    }, []);
 
 
     //-------------------------------------------------------------------
     // Region: Validation
     //-------------------------------------------------------------------
-    const validateForm_userName = (e) => {
-        var isValid = e.target.value != null && e.target.value.trim().length > 0;
-        setIsValid({ ..._isValid, userName: isValid });
-    };
-
-    const validateForm_firstName = (e) => {
-        var isValid = e.target.value != null && e.target.value.trim().length > 0;
-        setIsValid({ ..._isValid, firstName: isValid });
-    };
-
-    const validateForm_lastName = (e) => {
-        var isValid = e.target.value != null && e.target.value.trim().length > 0;
-        setIsValid({ ..._isValid, lastName: isValid });
-    };
-
-    const validateForm_email = (e) => {
-        var isValid = (e.target.value != null && e.target.value.trim().length > 0);
-        var isValidEmail = validate_Email(e.target.value);
-        setIsValid({ ..._isValid, email: isValid, emailFormat: isValidEmail });
-    };
-
     ////update state for when search click happens
     const validateForm = () => {
         console.log(generateLogMessageString(`validateForm`, CLASS_NAME));
 
-        _isValid.userName = _item.userName != null && _item.userName.trim().length > 0;
-        _isValid.firstName = _item.firstName != null && _item.firstName.trim().length > 0;
-        _isValid.lastName = _item.lastName != null && _item.lastName.trim().length > 0;
-        _isValid.email = _item.email != null && _item.email.trim().length > 0;
-        _isValid.emailFormat = validate_Email(_item.email);
         _isValid.smipSettings = validateFormSmipSettings();
 
         setIsValid(JSON.parse(JSON.stringify(_isValid)));
-        return (_isValid.userName && _isValid.firstName && _isValid.lastName
-            && _isValid.email && _isValid.emailFormat);
+        return (true);
     }
 
     //-------------------------------------------------------------------
@@ -165,14 +134,6 @@ function AccountProfile() {
                     });
                     console.error(generateLogMessageString(`onSave||Error||${result.data.message}.`, CLASS_NAME));
                 }
-
-                //update account profile in local storage.
-                authTicket.user = JSON.parse(JSON.stringify(_item));
-                let loginAction = login(dispatch, authTicket) //loginUser action makes the request and handles all the neccessary state changes
-                if (!loginAction) {
-                    console.error(generateLogMessageString(`onSave||loginAction||An error occurred setting the login state.`, CLASS_NAME));
-                }
-
             })
             .catch(error => {
                 //hide a spinner, show a message
@@ -196,17 +157,17 @@ function AccountProfile() {
     const onChange = (e) => {
 
         //note you must update the state value for the input to be read only. It is not enough to simply have the onChange handler.
-        switch (e.target.id) {
-            case "userName":
-            case "firstName":
-            case "lastName":
-            case "email":
-                _item[e.target.id] = e.target.value;
-                _item.fullName = `${_item.firstName} ${_item.lastName}`;
-                break;
-            default:
-                return;
-        }
+        //switch (e.target.id) {
+            //case "userName":
+            //case "firstName":
+            //case "lastName":
+            //case "email":
+            //    _item[e.target.id] = e.target.value;
+            //    _item.fullName = `${_item.firstName} ${_item.lastName}`;
+            //    break;
+        //    default:
+        //        return;
+        //}
         //update the state
         setItem(JSON.parse(JSON.stringify(_item)));
     }
@@ -366,22 +327,6 @@ function AccountProfile() {
     //-------------------------------------------------------------------
     // Region: Render Helpers
     //-------------------------------------------------------------------
-    const renderMoreDropDown = () => {
-        if (_item == null) return;
-
-        //React-bootstrap bug if you launch modal, then the dropdowns don't work. Add onclick code to the drop down as a workaround - https://github.com/react-bootstrap/react-bootstrap/issues/5561
-        return (
-            <Dropdown className="action-menu icon-dropdown ml-2" onClick={(e) => e.stopPropagation()} >
-                <Dropdown.Toggle drop="left">
-                    <SVGIcon name="more-vert" size="24" fill={color.shark} />
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                    <Dropdown.Item onClick={onChangePasswordOpen} data-url="auth/changepassword" data-updatetoken={true} >Change Password</Dropdown.Item>
-                </Dropdown.Menu>
-            </Dropdown>
-        );
-    }
-
     const renderButtons = () => {
         return (
             <>
@@ -396,63 +341,25 @@ function AccountProfile() {
         return (
             <>
                 <div className="row">
+                    <div className="col-md-12">
+                        <h2>Azure Account Info</h2>
+                    </div>
+                </div>
+                <div className="row">
                     <div className="col-md-6">
                         <Form.Group>
                             <Form.Label htmlFor="userName" >User Name</Form.Label>
-                            {!_isValid.userName &&
-                                <span className="invalid-field-message inline">
-                                    Required
-                                </span>
-                            }
-                            <Form.Control id="userName" className={(!_isValid.userName ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
-                                value={_item.userName == null ? '' : _item.userName} onBlur={validateForm_userName} onChange={onChange} readOnly='readonly' />
+                            <Form.Control id="userName" className={'minimal pr-5'}
+                                value={_activeAccount?.username == null ? '' : _activeAccount?.username} readOnly='readonly' />
                         </Form.Group>
                     </div>
                 </div>
                 <div className="row">
                     <div className="col-md-6">
                         <Form.Group>
-                            <Form.Label htmlFor="firstName" >First Name</Form.Label>
-                            {!_isValid.firstName &&
-                                <span className="invalid-field-message inline">
-                                    Required
-                                </span>
-                            }
-                            <Form.Control id="firstName" className={(!_isValid.firstName ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
-                                value={_item.firstName == null ? '' : _item.firstName} onBlur={validateForm_firstName} onChange={onChange} />
-                        </Form.Group>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-md-6">
-                        <Form.Group>
-                            <Form.Label htmlFor="lastName" >Last Name</Form.Label>
-                            {!_isValid.lastName &&
-                                <span className="invalid-field-message inline">
-                                    Required
-                                </span>
-                            }
-                            <Form.Control id="lastName" className={(!_isValid.lastName ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
-                                value={_item.lastName == null ? '' : _item.lastName} onBlur={validateForm_lastName} onChange={onChange} />
-                        </Form.Group>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-md-6">
-                        <Form.Group>
-                            <Form.Label htmlFor="email" >Email</Form.Label>
-                            {!_isValid.email &&
-                                <span className="invalid-field-message inline">
-                                    Required
-                                </span>
-                            }
-                            {!_isValid.emailFormat &&
-                                <span className="invalid-field-message inline">
-                                    Invalid Format (ie. jdoe@abc.com)
-                                </span>
-                            }
-                            <Form.Control id="email" type="email" className={(!_isValid.email || !_isValid.emailFormat ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
-                                value={_item.email == null ? '' : _item.email} onBlur={validateForm_email} onChange={onChange} />
+                            <Form.Label htmlFor="userName" >Display Name</Form.Label>
+                            <Form.Control id="userName" className={'minimal pr-5'}
+                                value={_activeAccount?.name == null ? '' : _activeAccount?.name} readOnly='readonly' />
                         </Form.Group>
                     </div>
                 </div>
@@ -490,7 +397,6 @@ function AccountProfile() {
                 </h1>
                 <div className="ml-auto d-flex align-items-center" >
                     {renderButtons()}
-                    {renderMoreDropDown()}
                 </div>
             </>
         )
@@ -506,7 +412,7 @@ function AccountProfile() {
     return (
         <>
             <Helmet>
-                <title>{AppSettings.Titles.Main + caption}</title>
+                <title>{AppSettings.Titles.Main + ' | ' + caption}</title>
             </Helmet>
             <Form noValidate>
                 {renderHeaderRow()}

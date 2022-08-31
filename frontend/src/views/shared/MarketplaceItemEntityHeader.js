@@ -115,11 +115,11 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
 
     const renderJobDefinitions = () => {
 
-        if (props.currentUserId == null || props.item.jobDefinitions == null || props.item.jobDefinitions.length === 0) return;
+        if (!props.isAuthenticated || props.item.jobDefinitions == null || props.item.jobDefinitions.length === 0) return;
 
         return props.item.jobDefinitions.map((x) => {
             return (
-                <MarketplaceItemJobLauncher key={x.id} className={`mr-2 mt-2`} currentUserId={props.currentUserId} jobDefinitionId={x.id} marketplaceItemId={props.item.id} jobName={x.name} payload={x.payload} />
+                <MarketplaceItemJobLauncher key={x.id} className={`mr-2 mt-2`} isAuthenticated={props.isAuthenticated} jobDefinitionId={x.id} marketplaceItemId={props.item.id} jobName={x.name} payload={x.payload} />
             );
         });
     };

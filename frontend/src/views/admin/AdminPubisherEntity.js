@@ -10,7 +10,6 @@ import Dropdown from 'react-bootstrap/Dropdown'
 import { AppSettings } from '../../utils/appsettings';
 import { generateLogMessageString, validate_NoSpecialCharacters } from '../../utils/UtilityService'
 import { useLoadingContext } from "../../components/contexts/LoadingContext";
-import { useAuthState } from "../../components/authentication/AuthContext";
 
 import { SVGIcon } from "../../components/SVGIcon";
 import color from "../../components/Constants";
@@ -35,7 +34,6 @@ function AdminPubisherEntity() {
     const [isLoading, setIsLoading] = useState(true);
     const [isReadOnly, setIsReadOnly] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const authTicket = useAuthState();
     const [_isValid, setIsValid] = useState({ name: true, nameFormat: true, displayName: true, description: true});
     const [_deleteModal, setDeleteModal] = useState({ show: false, items: null });
     const [_error, setError] = useState({ show: false, message: null, caption: null });
@@ -143,7 +141,7 @@ function AdminPubisherEntity() {
         return () => {
             console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
         };
-    }, [id, parentId, authTicket.user]);
+    }, [id, parentId]);
 
 
     //-------------------------------------------------------------------

@@ -9,7 +9,6 @@ import { AppSettings } from '../utils/appsettings'
 import { generateLogMessageString, renderTitleBlock } from '../utils/UtilityService'
 import GridPager from '../components/GridPager'
 import MarketplaceItemRow from './shared/MarketplaceItemRow';
-import { useAuthState } from "../components/authentication/AuthContext";
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
 
 import MarketplaceFilter from './shared/MarketplaceFilter';
@@ -32,7 +31,6 @@ function MarketplaceList() {
     // Region: Initialization
     //-------------------------------------------------------------------
     const history = useHistory();
-    const authTicket = useAuthState();
     const _scrollToRef = useRef(null);
     const [_dataRows, setDataRows] = useState({
         all: [], itemCount: 0, listView: true
@@ -198,7 +196,7 @@ function MarketplaceList() {
                     {renderTitleBlock("Library", null, null)}
                 </div>
                 <div className="col-lg-4">
-                    <HeaderSearch filterVal={loadingProps.searchCriteria == null ? null : loadingProps.searchCriteria.query} onSearch={handleOnSearchChange} searchMode="standard" currentUserId={authTicket.user == null ? null : authTicket.user.id} />
+                    <HeaderSearch filterVal={loadingProps.searchCriteria == null ? null : loadingProps.searchCriteria.query} onSearch={handleOnSearchChange} searchMode="standard" />
                 </div>
                 <div className="col-lg-5 pl-0">
                     <MarketplaceItemTypeFilter onSearchCriteriaChanged={onTypeSelectionChange} searchCriteria={loadingProps.searchCriteria} />
@@ -232,10 +230,10 @@ function MarketplaceList() {
         }
         const mainBody = _dataRows.all.map((item) => {
             if (item.type != null && item.type.code === AppSettings.itemTypeCode.smProfile) {
-                return (<ProfileItemRow key={item.id} item={item} currentUserId={authTicket.user == null ? null : authTicket.user.id} showActions={true} cssClass="marketplace-list-item" />)
+                return (<ProfileItemRow key={item.id} item={item} showActions={true} cssClass="marketplace-list-item" />)
             }
             else {
-                return (<MarketplaceItemRow key={item.id} item={item} currentUserId={authTicket.user == null ? null : authTicket.user.id} showActions={true} cssClass="marketplace-list-item" />)
+                return (<MarketplaceItemRow key={item.id} item={item} showActions={true} cssClass="marketplace-list-item" />)
             }
         });
 

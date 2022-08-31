@@ -13,7 +13,6 @@ import locale from 'react-json-editor-ajrm/locale/en';
 import { AppSettings } from '../../utils/appsettings';
 import { generateLogMessageString, tryJsonParse, validate_NoSpecialCharacters } from '../../utils/UtilityService'
 import { useLoadingContext } from "../../components/contexts/LoadingContext";
-import { useAuthState } from "../../components/authentication/AuthContext";
 
 import { SVGIcon } from "../../components/SVGIcon";
 import color from "../../components/Constants";
@@ -36,7 +35,6 @@ function AdminJobDefinitionEntity() {
     const [isLoading, setIsLoading] = useState(true);
     const [isReadOnly, setIsReadOnly] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const authTicket = useAuthState();
     const [_isValid, setIsValid] = useState({ name: true, typeName: true, typeNameFormat: true, dataFormat: true, marketplaceItem: true });
     const [_deleteModal, setDeleteModal] = useState({ show: false, items: null });
     const [_error, setError] = useState({ show: false, message: null, caption: null });
@@ -143,7 +141,7 @@ function AdminJobDefinitionEntity() {
         return () => {
             console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
         };
-    }, [id, parentId, authTicket.user]);
+    }, [id, parentId]);
 
 
     //-------------------------------------------------------------------

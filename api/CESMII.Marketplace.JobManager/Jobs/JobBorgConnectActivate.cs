@@ -39,6 +39,15 @@ namespace CESMII.Marketplace.JobManager.Jobs
             //extract out job config params from payload and convert from JSON to an object we can use within this job
             var configData = JsonConvert.DeserializeObject<JobBorgConnectActivateConfig>(e.Config.Data);
 
+            //validate all settings before we proceed
+            var isValid = this.ValidateData(e.User, out string errorMessage);
+            if (!isValid)
+            {
+                base.CreateJobLogMessage($"Validating data...failed. {errorMessage}", TaskStatusEnum.Failed);
+                _logger.LogError($"JobBorgConnectActivate|ValidateData|Failed|{errorMessage}");
+                return null;
+            }
+
             base.CreateJobLogMessage($"Authorizing user with Borg Connect API...", TaskStatusEnum.InProgress);
             var authData = await GetAuthToken(configData);
 
@@ -202,6 +211,30 @@ namespace CESMII.Marketplace.JobManager.Jobs
             return msgResult;
         }
 
+        private bool ValidateData(UserModel user, out string message)
+        {
+            var sbResult = new System.Text.StringBuilder();
+            if (string.IsNullOrEmpty(GetCustomerName(user))) sbResult.AppendLine("A valid user name is required. ");
+            if (string.IsNullOrEmpty(user.Email)) sbResult.AppendLine("Email is required. ");
+            if (user.SmipSettings == null) sbResult.AppendLine("Smip Settings are required. ");
+            else
+            {
+                if (string.IsNullOrEmpty(user.SmipSettings.UserName)) sbResult.AppendLine("Smip User Name is required. ");
+                if (string.IsNullOrEmpty(user.SmipSettings.Password)) sbResult.AppendLine("Smip Password is required. ");
+                if (string.IsNullOrEmpty(user.SmipSettings.Authenticator)) sbResult.AppendLine("Smip Authenticator is required. ");
+                if (string.IsNullOrEmpty(user.SmipSettings.AuthenticatorRole)) sbResult.AppendLine("Smip Authenticator Role is required. ");
+                if (string.IsNullOrEmpty(user.SmipSettings.GraphQlUrl)) sbResult.AppendLine("Smip GraphQL Url is required. ");
+            }
+
+            if (sbResult.Length > 0)
+            {
+                sbResult.AppendLine("Check your account profile and your marketplace profile to ensure all required data is set.");
+            }
+
+            message = sbResult.ToString();
+            return sbResult.Length == 0;
+        }
+
         private void MapUserToFormDataModel(ref JobBorgConnectActivateConfig configData, UserModel user)
         {
             //transfer values from user record to formData collection
@@ -224,10 +257,16 @@ namespace CESMII.Marketplace.JobManager.Jobs
 
         private static string GetCustomerName(UserModel user)
         {
-            return (user.Organization == null ?
-                new System.Text.RegularExpressions.Regex("[ ()*'\",_&#^@]").Replace(user.FullName, string.Empty) :
-                new System.Text.RegularExpressions.Regex("[ ()*'\",_&#^@]").Replace(user.Organization.Name, string.Empty)) +
-                DateTime.Now.ToString("yyMMddHHmm");  //append datetime stamp for now so we can multiple times for demos and get unique instance.
+            string name = "";
+            if (user.Organization != null)
+                name = new System.Text.RegularExpressions.Regex("[ ()*'\",_&#^@]").Replace(user.Organization.Name, string.Empty);
+            else if (user.DisplayName != null)
+                name = new System.Text.RegularExpressions.Regex("[ ()*'\",_&#^@]").Replace(user.DisplayName, string.Empty);
+            else if (user.UserName != null)
+                name = new System.Text.RegularExpressions.Regex("[ ()*'\",_&#^@]").Replace(user.UserName, string.Empty);
+            else  //assume we won't get here and email will be present. 
+                name = new System.Text.RegularExpressions.Regex("[ ()*'\",_&#^@]").Replace(user.Email, string.Empty);
+            return name + DateTime.Now.ToString("yyMMddHHmm");  //append datetime stamp for now so we can multiple times for demos and get unique instance.
         }
     }
 
