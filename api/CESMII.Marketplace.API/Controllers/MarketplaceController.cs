@@ -351,37 +351,21 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <remarks>model.ItemTypes selected items could be altered in this method</remarks>
         /// <param name="model"></param>
         /// <returns>True if a reserved word altered the type selection. This will be used downstream in the search predicate.</returns>
-        private static bool PrepareAdvancedSearchTypeSelections(MarketplaceSearchModel model)
+        private bool PrepareAdvancedSearchTypeSelections(MarketplaceSearchModel model)
         {
             bool result = false;
             if (!string.IsNullOrEmpty(model.Query))
             {
-                var terms = new List<KeyValuePair<string, string>>() {
-                    new KeyValuePair<string, string>("app","sm-app"),
-                    new KeyValuePair<string, string>("apps","sm-app"),
-                    new KeyValuePair<string, string>("sm app","sm-app"),
-                    new KeyValuePair<string, string>("sm apps","sm-app"),
-                    new KeyValuePair<string, string>("profile","sm-profile"),
-                    new KeyValuePair<string, string>("profiles","sm-profile"),
-                    new KeyValuePair<string, string>("sm profile","sm-profile"),
-                    new KeyValuePair<string, string>("sm profiles","sm-profile")
-                }.Where(x => x.Key.ToLower().Equals(model.Query.ToLower())).ToList();
+                var terms = _configUtil.MarketplaceSettings.SearchReservedKeywords
+                    .Where(x => x.Key.ToLower().Equals(model.Query.ToLower())).ToList();
 
                 //if there are matching reserved terms and that term has an item type in the collection.
                 result = terms.Any() && model.ItemTypes.Any(x => terms.Any(y => y.Value.ToLower().Equals(x.Code.ToLower())));
 
-                //types = model.ItemTypes.Where(
-                //    x => x.Selected || 
-                //    terms.Any(y => y.Value.ToLower().Equals(x.Code.ToLower()))).ToList();
-                //var initTypeCount = model.ItemTypes.Count(x => x.Selected);
                 foreach (var t in model.ItemTypes)
                 {
                     t.Selected = t.Selected || terms.Any(y => y.Value.ToLower().Equals(t.Code.ToLower()));
                 }
-
-                //because it was a reserved word, remove it from the filter so we don't further filter downstream.
-                //result = model.ItemTypes.Count(x => x.Selected) > initTypeCount;
-                //model.Query = "";
             }
 
             return result;
@@ -493,17 +477,28 @@ namespace CESMII.Marketplace.Api.Controllers
             if (!string.IsNullOrEmpty(model.Query))
             {
                 //add series of where conditions
+                /*
                 predicateQuery = x => x.Name.ToLower().Contains(model.Query)
                     //or search on additional fields
                     || x.DisplayName.ToLower().Contains(model.Query)
                     || x.Description.ToLower().Contains(model.Query)
                     || x.Abstract.ToLower().Contains(model.Query)
                     || (x.MetaTags != null && x.MetaTags.Contains(model.Query))
-                    //if we are using special type, it means user entered special word for query like "profile". In this case,
-                    //we want to get all types of sm-profile >>OR<< any item containing the word profile
-                    || (!useSpecialTypeSelection || x.ItemTypeId != null && types.Any(y => y.ID.Equals(x.ItemTypeId.ToString())))
-                    //|| (x.Author != null && (x.Author.FirstName.Contains(model.Query) || x.Author.LastName.Contains(model.Query)));
                     ;
+                */
+                predicateQuery = x => x.Name.ToLower().Contains(model.Query);
+                //or search on additional fields
+                predicateQuery.Or(x => x.DisplayName.ToLower().Contains(model.Query));
+                predicateQuery.Or(x => x.Description.ToLower().Contains(model.Query));
+                predicateQuery.Or(x => x.Abstract.ToLower().Contains(model.Query));
+                predicateQuery.Or(x => (x.MetaTags != null && x.MetaTags.Contains(model.Query)));
+
+                //if we are using special type, it means user entered special word for query like "profile". In this case,
+                //we want to get all types of sm-profile >>OR<< any item containing the word profile
+                if (useSpecialTypeSelection)
+                {
+                    predicateQuery.Or(x => x.ItemTypeId != null && types.Any(y => y.ID.Equals(x.ItemTypeId.ToString())));
+                }
 
                 predicates.Add(predicateQuery);
             }
