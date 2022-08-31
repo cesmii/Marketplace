@@ -43,6 +43,12 @@ function HeaderSearch(props) { //(caption, iconName, showSearch, searchValue, on
         setFilterVal(e.target.value);
     }
 
+    //update search state so that form submit has value
+    const onSearchBlur = (e) => {
+        // call change page function in parent component
+        if (props.onSearchBlur) props.onSearchBlur(e.target.value);
+    }
+
     //trigger search after x chars entered or search button click
     const onSearchClick = (e) => {
         console.log(generateLogMessageString(`onSearchClick||Search value: ${_filterVal}`, CLASS_NAME));
@@ -71,6 +77,7 @@ function HeaderSearch(props) { //(caption, iconName, showSearch, searchValue, on
                                 aria-label="Search here"
                                 value={_filterVal == null ? '' : _filterVal}
                                 onChange={onSearchChange}
+                                onBlur={onSearchBlur}
                                 className="with-append"
                             />
                             <InputGroup.Append>
