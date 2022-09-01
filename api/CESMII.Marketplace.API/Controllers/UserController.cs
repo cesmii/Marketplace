@@ -28,14 +28,15 @@ namespace CESMII.Marketplace.Api.Controllers
 
         public UserController(UserDAL dal,
             ConfigUtil config, ILogger<UserController> logger)
-            : base(config, logger)
+            : base(config, logger, dal)
         {
             _dal = dal;
         }
 
 
         [HttpGet, Route("All")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        [Authorize(Roles = "cesmii.marketplace.useradmin")]
         [ProducesResponseType(200, Type = typeof(List<UserModel>))]
         [ProducesResponseType(400)]
         public IActionResult GetAll()
@@ -49,7 +50,8 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("GetByID")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        [Authorize(Roles = "cesmii.marketplace.useradmin")]
         [ProducesResponseType(200, Type = typeof(UserModel))]
         [ProducesResponseType(400)]
         public IActionResult GetByID([FromBody] IdStringModel model)
@@ -75,20 +77,37 @@ namespace CESMII.Marketplace.Api.Controllers
         [ProducesResponseType(400)]
         public IActionResult GetMine()
         {
-            var userId = User.GetUserID();
-            var result = _dal.GetById(userId);
+            var result = LocalUser;
             if (result == null)
             {
-                _logger.LogWarning($"UserController|GetMine|No records found matching this ID: {userId}.");
-                return BadRequest($"No records found matching this ID: {userId}");
+                _logger.LogWarning($"UserController|GetMine|No records found matching this ID: {User.GetUserIdAAD()}.");
+                return BadRequest($"No records found matching this ID: {User.GetUserIdAAD()}");
             }
             //clear out SMIP password so not sent to front end. Change password dialog will force user to enter existing password.
             result.SmipSettings.Password = "";
             return Ok(result);
         }
 
+        /// <summary>
+        /// This is a user getting their own profile - MSAL flow
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost, Route("profile/mine/msal")]
+        [Authorize()]
+        [ProducesResponseType(200, Type = typeof(UserModel))]
+        [ProducesResponseType(400)]
+        public IActionResult GetMineMsal()
+        {
+            //clear out SMIP password so not sent to front end. Change password dialog will force user to enter existing password.
+            var result = LocalUser;
+            result.SmipSettings.Password = "";
+            return Ok(result);
+        }
+
         [HttpPost, Route("Search")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        [Authorize(Roles = "cesmii.marketplace.useradmin")]
         [ProducesResponseType(200, Type = typeof(DALResult<UserModel>))]
         public IActionResult Search([FromBody] PagerFilterSimpleModel model)
         {
@@ -105,16 +124,19 @@ namespace CESMII.Marketplace.Api.Controllers
             model.Query = model.Query.ToLower();
             var result = _dal.Where(s =>
                             //string query section
-                            s.IsActive && 
-                            (s.UserName.ToLower().Contains(model.Query) ||
-                            (s.FirstName.ToLower() + s.LastName.ToLower()).Contains(
-                                model.Query.Replace(" ", "").Replace("-", ""))),  //in case they search for code and name in one string.
+                            //s.IsActive && 
+                            (s.ObjectIdAAD.ToLower().Contains(model.Query) 
+                            //|| (s.FirstName.ToLower() + s.LastName.ToLower()).Contains(
+                            //    model.Query.Replace(" ", "").Replace("-", ""))),  //in case they search for code and name in one string.
+                            ),
                             model.Skip, model.Take, true);
             return Ok(result);
         }
 
+        /*
         [HttpPost, Route("Add")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        [Authorize(Roles = "cesmii.marketplace.useradmin")]
         [ProducesResponseType(200, Type = typeof(List<UserModel>))]
         public async Task<IActionResult> Add([FromBody] UserModel model)
         {
@@ -136,13 +158,14 @@ namespace CESMII.Marketplace.Api.Controllers
             //return success message object
             return Ok(new ResultMessageModel() { IsSuccess = true, Message = "Item was added." });
         }
-
+        */
 
         /// <summary>
         /// This is an admin user updating someone else's profile.
         /// </summary>
         [HttpPost, Route("Update")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        [Authorize(Roles = "cesmii.marketplace.useradmin")]
         [ProducesResponseType(200, Type = typeof(List<UserModel>))]
         public async Task<IActionResult> Update([FromBody] UserModel model)
         {
@@ -151,7 +174,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest("The profile record is invalid. Please correct the following:...join errors collection into string list.");
             }
 
-            var result = await _dal.Update(model, User.GetUserID());
+            var result = await _dal.Update(model, LocalUser.ID);
             if (result < 0)
             {
                 _logger.LogWarning($"UserController|Update|Could not update user. Invalid id:{model.ID}.");
@@ -173,7 +196,7 @@ namespace CESMII.Marketplace.Api.Controllers
         [ProducesResponseType(200, Type = typeof(List<UserModel>))]
         public async Task<IActionResult> UpdateProfile([FromBody] UserModel model)
         {
-            var userId = User.GetUserID();
+            var userId = LocalUser.ID;
             if (!userId.Equals(model.ID))
             {
                 _logger.LogWarning($"UserController|UpdateProfile|User attempting to update another user.");
@@ -185,7 +208,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest("The profile record is invalid. Please correct the following:...join errors collection into string list.");
             }
 
-            var result = await _dal.Update(model, User.GetUserID());
+            var result = await _dal.Update(model, userId);
             if (result < 0)
             {
                 _logger.LogWarning($"UserController|UpdateProfile|Could not update user. Invalid id:{model.ID}.");
@@ -198,11 +221,12 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("Delete")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
+        [Authorize(Roles = "cesmii.marketplace.useradmin")]
         [ProducesResponseType(200, Type = typeof(List<UserModel>))]
         public async Task<IActionResult> Delete([FromBody] IdStringModel model)
         {
-            var result = await _dal.Delete(model.ID, User.GetUserID());
+            var result = await _dal.Delete(model.ID, LocalUser.ID);
             if (result < 0)
             {
                 _logger.LogWarning($"Could not delete user. Invalid id:{model.ID}.");
@@ -218,15 +242,6 @@ namespace CESMII.Marketplace.Api.Controllers
         [ProducesResponseType(200, Type = typeof(ResultMessageModel))]
         public async Task<IActionResult> ChangeSmipPassword([FromBody] ChangePasswordModel model)
         {
-            if (string.IsNullOrEmpty(model.OldPassword))
-            {
-                return Ok(new ResultMessageModel()
-                {
-                    IsSuccess = false,
-                    Message = "Old Password is required."
-                });
-            }
-
             if (string.IsNullOrEmpty(model.NewPassword))
             {
                 return Ok(new ResultMessageModel()
@@ -236,7 +251,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 });
             }
 
-            var user = _dal.GetById(User.GetUserID());
+            var user = _dal.GetByIdAAD(User.GetUserIdAAD());
             if (user == null)
             {
                 return Ok(new ResultMessageModel()

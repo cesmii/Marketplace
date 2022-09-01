@@ -9,7 +9,6 @@ import { AppSettings } from '../utils/appsettings'
 import { generateLogMessageString, renderTitleBlock } from '../utils/UtilityService'
 import GridPager from '../components/GridPager'
 import MarketplaceItemRow from './shared/MarketplaceItemRow';
-import { useAuthState } from "../components/authentication/AuthContext";
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
 
 import MarketplaceFilter from './shared/MarketplaceFilter';
@@ -32,7 +31,6 @@ function MarketplaceList() {
     // Region: Initialization
     //-------------------------------------------------------------------
     const history = useHistory();
-    const authTicket = useAuthState();
     const _scrollToRef = useRef(null);
     const [_dataRows, setDataRows] = useState({
         all: [], itemCount: 0, listView: true
@@ -42,6 +40,7 @@ function MarketplaceList() {
     
     const caption = 'Library';
     const { loadingProps, setLoadingProps } = useLoadingContext();
+    const [_queryLocal, setQueryLocal] = useState(loadingProps.query);
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
@@ -57,18 +56,24 @@ function MarketplaceList() {
         setLoadingProps({ searchCriteria: JSON.parse(JSON.stringify(loadingProps.searchCriteria)) });
     };
 
+    const handleOnSearchBlur = (val) => {
+        setQueryLocal(val);
+    };
+
     ///called when a marketplace item type is selected
     const onTypeSelectionChange = (criteria) => {
         //console.log(generateLogMessageString('onTypeSelectionChange||Search criteria: ' + criteria, CLASS_NAME));
 
         //this will trigger a fetch from the API to pull the data for the filtered criteria
         setCurrentPage(1);
+        criteria.query = _queryLocal;
         setLoadingProps({ searchCriteria: JSON.parse(JSON.stringify(criteria)) });
     };
 
     //called when an item is selected in the filter panel
     const filterOnItemClick = (criteria) => {
         //filter event handler - set global state and navigate to search page
+        criteria.query = _queryLocal;
         setLoadingProps({ searchCriteria: criteria });
     }
 
@@ -77,7 +82,7 @@ function MarketplaceList() {
 
         //this will trigger a fetch from the API to pull the data for the filtered criteria
         setCurrentPage(currentPage);
-
+        loadingProps.searchCriteria.query = _queryLocal;
         loadingProps.searchCriteria.skip = (currentPage - 1) * pageSize; //0-based
         loadingProps.searchCriteria.take = pageSize;
         setLoadingProps({ searchCriteria: JSON.parse(JSON.stringify(loadingProps.searchCriteria)) });
@@ -100,7 +105,7 @@ function MarketplaceList() {
         //this will trigger the API call
         //update state for other components to see
         setLoadingProps({ searchCriteria: criteria });
-
+        setQueryLocal(criteria.query);
         setCurrentPage(1);
     }
 
@@ -198,7 +203,7 @@ function MarketplaceList() {
                     {renderTitleBlock("Library", null, null)}
                 </div>
                 <div className="col-lg-4">
-                    <HeaderSearch filterVal={loadingProps.searchCriteria == null ? null : loadingProps.searchCriteria.query} onSearch={handleOnSearchChange} searchMode="standard" currentUserId={authTicket.user == null ? null : authTicket.user.id} />
+                    <HeaderSearch filterVal={loadingProps.searchCriteria == null ? null : loadingProps.searchCriteria.query} onSearch={handleOnSearchChange} onSearchBlur={handleOnSearchBlur} searchMode="standard" />
                 </div>
                 <div className="col-lg-5 pl-0">
                     <MarketplaceItemTypeFilter onSearchCriteriaChanged={onTypeSelectionChange} searchCriteria={loadingProps.searchCriteria} />
@@ -232,10 +237,10 @@ function MarketplaceList() {
         }
         const mainBody = _dataRows.all.map((item) => {
             if (item.type != null && item.type.code === AppSettings.itemTypeCode.smProfile) {
-                return (<ProfileItemRow key={item.id} item={item} currentUserId={authTicket.user == null ? null : authTicket.user.id} showActions={true} cssClass="marketplace-list-item" />)
+                return (<ProfileItemRow key={item.id} item={item} showActions={true} cssClass="marketplace-list-item" />)
             }
             else {
-                return (<MarketplaceItemRow key={item.id} item={item} currentUserId={authTicket.user == null ? null : authTicket.user.id} showActions={true} cssClass="marketplace-list-item" />)
+                return (<MarketplaceItemRow key={item.id} item={item} showActions={true} cssClass="marketplace-list-item" />)
             }
         });
 

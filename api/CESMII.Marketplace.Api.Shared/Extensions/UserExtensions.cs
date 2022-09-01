@@ -6,6 +6,7 @@
 
     using CESMII.Marketplace.Common.Enums;
     using CESMII.Marketplace.Common.Utils;
+    using CESMII.Marketplace.DAL.Models;
 
     public static class UserExtension
     {
@@ -14,6 +15,7 @@
             return user.HasClaim(ClaimTypes.Role, EnumUtils.GetEnumDescription(permission));
         }
 
+        /*
         /// <summary>
         /// If the user has any permission considered an admin permission, then return true.
         /// </summary>
@@ -21,6 +23,7 @@
         /// <returns></returns>
         public static bool HasAdminPermission(this ClaimsPrincipal user)
         {
+            //TODO: Update enum permissions to match what is coming from AAD
             if (user.HasClaim(ClaimTypes.Role, PermissionEnum.CanManageMarketplace.ToString())) return true;
             if (user.HasClaim(ClaimTypes.Role, PermissionEnum.CanManageSystemSettings.ToString())) return true;
             if (user.HasClaim(ClaimTypes.Role, PermissionEnum.CanManageUsers.ToString())) return true;
@@ -45,7 +48,39 @@
             // Otherwise return null.
             return null;
         }
+        */
 
+        public static UserModel GetUserAAD(this ClaimsPrincipal user)
+        {
+            var result = new UserModel()
+            {
+                ObjectIdAAD = user.FindFirst(x => x.Type.Contains("objectidentifier")).Value,
+                UserName = user.FindFirst(x => x.Type.Equals("preferred_username"))?.Value,
+                LastName = user.FindFirst(ClaimTypes.Surname)?.Value,
+                FirstName = user.FindFirst(ClaimTypes.GivenName)?.Value,
+                DisplayName = user.FindFirst(x => x.Type.Equals("name"))?.Value,
+                Email = GetUserAADEmail(user),
+                TenantId = user.FindFirst(x => x.Type.Contains("tenantid"))?.Value,
+                Roles = string.Join(", ", user.FindAll(x => x.Type.Contains("role")).Select(x => x.Value).ToArray()),
+                Scope = user.FindFirst(x => x.Type.Contains("scope"))?.Value
+            };
+            return result;
+        }
+
+        private static string GetUserAADEmail(ClaimsPrincipal user)
+        {
+            if (user.FindFirst(ClaimTypes.Email) != null) return user.FindFirst(ClaimTypes.Email).Value;
+            if (user.FindFirst(ClaimTypes.Upn) != null) return user.FindFirst(ClaimTypes.Upn).Value;
+            return user.FindFirst(x => x.Type.Equals("preferred_username"))?.Value;
+        }
+
+        public static string GetUserIdAAD(this ClaimsPrincipal user)
+        {
+            return user.FindFirst(x => x.Type.Contains("objectidentifier")).Value;
+        }
+
+        /*
+        [System.Obsolete("GetUserID is obsolete", true)]
         public static string GetUserID(this ClaimsPrincipal user)
         {
             if (user.IsImpersonating())
@@ -57,7 +92,9 @@
             //TBD - why is user.Identity.Name == null, There are claims but this is not transferring over to the expected identity.name as the user's id 
             return user.FindFirst(ClaimTypes.Sid).Value;
         }
+        */
 
+        /*
         /// <summary>
         /// This method allows for a simple access to the real user's ID regardless of impersonation.
         /// </summary>
@@ -69,6 +106,6 @@
             //return int.Parse(user.Identity.Name);
             return user.FindFirst(ClaimTypes.Sid).Value;
         }
-
+        */
     }
 }

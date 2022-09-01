@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 import axiosInstance from "../services/AxiosService";
+import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 
 import { AppSettings } from '../utils/appsettings';
-import { generateLogMessageString, getMarketplaceIconName, getMarketplaceCaption } from '../utils/UtilityService'
+import { generateLogMessageString, getMarketplaceIconName, getMarketplaceCaption, isInRole } from '../utils/UtilityService'
 import { MarketplaceBreadcrumbs } from './shared/MarketplaceBreadcrumbs';
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
-import { useAuthState } from "../components/authentication/AuthContext";
 
 import { SvgVisibilityIcon } from "../components/SVGIcon";
 import color from "../components/Constants";
@@ -29,7 +29,11 @@ function PublisherEntity() {
     const [item, setItem] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const authTicket = useAuthState();
+    const { instance } = useMsal();
+    const _isAuthenticated = useIsAuthenticated();
+    const _activeAccount = instance.getActiveAccount();
+    //Check for is authenticated. Check individual permissions - ie can manage marketplace items.
+    const _isAuthorized = _isAuthenticated && _activeAccount != null && (isInRole(_activeAccount, "cesmii.marketplace.marketplaceadmin"));
 
     useEffect(() => {
         async function fetchData() {
@@ -83,7 +87,7 @@ function PublisherEntity() {
         return () => {
             console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
         };
-    }, [id, authTicket.user]);
+    }, [id]);
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
@@ -121,7 +125,7 @@ function PublisherEntity() {
 
         return (
             <>
-                <MarketplaceBreadcrumbs item={item} currentUserId={authTicket.currentUserId} />
+                <MarketplaceBreadcrumbs item={item} isAuthenticated={_isAuthenticated && _activeAccount != null} />
             </>
         );
     };
@@ -150,7 +154,7 @@ function PublisherEntity() {
                     {item.displayName}
                 </h1>
                 <a className="btn btn-secondary ml-2 px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/request-info/publisher/${item.id}`} >Request Info</a>
-                {authTicket.user != null &&
+                {_isAuthorized &&
                     <a className="btn btn-icon-outline circle ml-2" href={`/admin/publisher/${item.id}`} ><i className="material-icons">edit</i></a>
                 }
             </>

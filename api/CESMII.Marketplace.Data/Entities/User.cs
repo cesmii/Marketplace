@@ -1,33 +1,27 @@
 ﻿namespace CESMII.Marketplace.Data.Entities
 {
     using System;
-    using System.Collections.Generic;
 
     using MongoDB.Bson;
     using MongoDB.Bson.Serialization.Attributes;
 
+    [BsonIgnoreExtraElements]
     public class User : AbstractEntity 
     {
-        public string UserName { get; set; }
+        /// <summary>
+        /// Object Id value stored in Azure. This should not change during lifetime of Azure AD user account.
+        /// </summary>
+        public string ObjectIdAAD { get; set; }
+        /// <summary>
+        /// Display Name from Azure AD. This is a convenience helper to make it eaiser to display friendly
+        /// name within our eco system. This will be updated on each login. 
+        /// This is not expected to be unique AND is expected it can change. 
+        /// </summary>
+        public string DisplayName { get; set; }
 
-        public string Password { get; set; }
-
-        public string FirstName { get; set; }
-
-        public string LastName { get; set; }
-
-        public string Email { get; set; }
-
-        // User can belong to many permissions
-        public virtual List<BsonObjectId> Permissions { get; set; }
-
-        public bool IsActive { get; set; }
-
-        public DateTime Created { get; set; }
+        public DateTime? Created { get; set; }
 
         public DateTime? LastLogin { get; set; }
-
-        public DateTime? RegistrationComplete { get; set; }
 
         public BsonObjectId OrganizationId { get; set; }
 

@@ -26,8 +26,9 @@ namespace CESMII.Marketplace.Api.Controllers
         private readonly IDal<Publisher, PublisherModel> _dalPublisher;
         public LookupController(IDal<LookupItem, LookupItemModel> dal,
             IDal<Publisher, PublisherModel> dalPublisher,
+            UserDAL dalUser,
             ConfigUtil config, ILogger<LookupController> logger) 
-            : base(config, logger)
+            : base(config, logger, dalUser)
         {
             _dal = dal;
             _dalPublisher = dalPublisher;
@@ -121,7 +122,8 @@ namespace CESMII.Marketplace.Api.Controllers
                     ID = itm.ID,
                     Name = itm.Name,
                     IsActive = itm.IsActive,
-                    DisplayOrder = itm.DisplayOrder
+                    DisplayOrder = itm.DisplayOrder,
+                    Code = itm.Code
                     //tbd any other lookup fields
                 }).OrderBy(x => x.DisplayOrder).ThenBy(x => x.Name).ToList()
             };
