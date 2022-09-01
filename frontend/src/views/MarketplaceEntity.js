@@ -139,7 +139,7 @@ function MarketplaceEntity() {
 
         return (
             <>
-                <MarketplaceBreadcrumbs item={item} isAuthenticated={_isAuthenticated} />
+                <MarketplaceBreadcrumbs item={item} isAuthenticated={_isAuthenticated && _activeAccount != null} />
             </>
         );
     };
@@ -223,7 +223,7 @@ function MarketplaceEntity() {
         if (!loadingProps.isLoading && (item == null)) {
             return;
         }
-        return (<MarketplaceItemEntityHeader key={item.id} item={item} isAuthenticated={_isAuthenticated} isAuthorized={_isAuthorized} showActions={true} cssClass="marketplace-list-item" />)
+        return (<MarketplaceItemEntityHeader key={item.id} item={item} isAuthenticated={_isAuthenticated && _activeAccount != null} isAuthorized={_isAuthorized} showActions={true} cssClass="marketplace-list-item" />)
     }
 
     //

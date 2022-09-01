@@ -242,15 +242,6 @@ namespace CESMII.Marketplace.Api.Controllers
         [ProducesResponseType(200, Type = typeof(ResultMessageModel))]
         public async Task<IActionResult> ChangeSmipPassword([FromBody] ChangePasswordModel model)
         {
-            if (string.IsNullOrEmpty(model.OldPassword))
-            {
-                return Ok(new ResultMessageModel()
-                {
-                    IsSuccess = false,
-                    Message = "Old Password is required."
-                });
-            }
-
             if (string.IsNullOrEmpty(model.NewPassword))
             {
                 return Ok(new ResultMessageModel()

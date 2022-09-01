@@ -125,7 +125,7 @@ function PublisherEntity() {
 
         return (
             <>
-                <MarketplaceBreadcrumbs item={item} isAuthenticated={_isAuthenticated} />
+                <MarketplaceBreadcrumbs item={item} isAuthenticated={_isAuthenticated && _activeAccount != null} />
             </>
         );
     };
