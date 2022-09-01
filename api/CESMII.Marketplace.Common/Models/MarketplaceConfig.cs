@@ -9,7 +9,6 @@ namespace CESMII.Marketplace.Common.Models
         public MarketplaceItemConfig SmHardware { get; set; }
         public MarketplaceItemConfig SmDatasource { get; set; }
         public bool EnableCloudLibSearch { get; set; }
-        public List<ReservedWords> SearchReservedKeywords { get; set; }
     }
 
     public class MarketplaceItemConfig
@@ -19,11 +18,5 @@ namespace CESMII.Marketplace.Common.Models
         //public string DefaultImageIdSquare { get; set; }
         public string DefaultImageIdPortrait { get; set; }
         public string DefaultImageIdLandscape { get; set; }
-    }
-
-    public class ReservedWords
-    {
-        public string Key { get; set; }
-        public string Value { get; set; }
     }
 }

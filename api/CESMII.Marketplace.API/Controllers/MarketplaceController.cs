@@ -25,11 +25,13 @@ namespace CESMII.Marketplace.Api.Controllers
         private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
         private readonly ICloudLibDAL<MarketplaceItemModel> _dalCloudLib;
+        private readonly IDal<SearchKeyword, SearchKeywordModel> _dalSearchKeyword;
 
         public MarketplaceController(IDal<MarketplaceItem, MarketplaceItemModel> dal,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
             ICloudLibDAL<MarketplaceItemModel> dalCloudLib,
+            IDal<SearchKeyword, SearchKeywordModel> dalSearchKeyword,
             UserDAL dalUser,
             ConfigUtil config, ILogger<MarketplaceController> logger)
             : base(config, logger, dalUser)
@@ -38,6 +40,7 @@ namespace CESMII.Marketplace.Api.Controllers
             _dalLookup = dalLookup;
             _dalAnalytics = dalAnalytics;
             _dalCloudLib = dalCloudLib;
+            _dalSearchKeyword = dalSearchKeyword;
         }
 
         [HttpGet, Route("All")]
@@ -354,15 +357,15 @@ namespace CESMII.Marketplace.Api.Controllers
             bool result = false;
             if (!string.IsNullOrEmpty(model.Query))
             {
-                var terms = _configUtil.MarketplaceSettings.SearchReservedKeywords
-                    .Where(x => x.Key.ToLower().Equals(model.Query.ToLower())).ToList();
+                var terms = _dalSearchKeyword
+                    .Where(x => x.Term.ToLower().Equals(model.Query.ToLower()), null, null, false, false).Data.ToList();
 
                 //if there are matching reserved terms and that term has an item type in the collection.
-                result = terms.Any() && model.ItemTypes.Any(x => terms.Any(y => y.Value.ToLower().Equals(x.Code.ToLower())));
+                result = terms.Any() && model.ItemTypes.Any(x => terms.Any(y => y.Code.ToLower().Equals(x.Code.ToLower())));
 
                 foreach (var t in model.ItemTypes)
                 {
-                    t.Selected = t.Selected || terms.Any(y => y.Value.ToLower().Equals(t.Code.ToLower()));
+                    t.Selected = t.Selected || terms.Any(y => y.Code.ToLower().Equals(t.Code.ToLower()));
                 }
             }
 
@@ -387,13 +390,13 @@ namespace CESMII.Marketplace.Api.Controllers
             //find the matching items and then use this when assembling the where clause around the model.query
             if (enumVal == LookupTypeEnum.IndustryVertical)
             {
-                return _dal.Where(x => matches.Any(y => x.IndustryVerticals.Contains(new MongoDB.Bson.BsonObjectId(y.ID) ))
+                return _dal.Where(x => matches.Any(y => x.IndustryVerticals.Contains(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y.ID))))
                                 && x.IsActive
                                 , null, null, false, false).Data.ToList();
             }
             else if (enumVal == LookupTypeEnum.Process)
             {
-                return _dal.Where(x => matches.Any(y => x.Categories.Contains(new MongoDB.Bson.BsonObjectId(y.ID)))
+                return _dal.Where(x => matches.Any(y => x.Categories.Contains(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y.ID))))
                                 && x.IsActive
                                 , null, null, false, false).Data.ToList();
             }
