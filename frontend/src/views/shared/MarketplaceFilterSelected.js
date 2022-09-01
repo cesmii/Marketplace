@@ -1,6 +1,5 @@
 import React from 'react'
 
-//import { useAuthState } from "./authentication/AuthContext";
 import { useLoadingContext } from '../../components/contexts/LoadingContext'
 import { clearSearchCriteria, toggleSearchFilterSelected } from '../../services/MarketplaceService';
 import { generateLogMessageString } from '../../utils/UtilityService';

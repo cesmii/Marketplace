@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import { useHistory } from "react-router-dom"
-import { useAuthDispatch, useAuthState } from "./authentication/AuthContext";
-import { logout } from "./authentication/AuthActions";
+import { InteractionStatus } from "@azure/msal-browser";
+import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 
 import Dropdown from 'react-bootstrap/Dropdown'
 
-import { generateLogMessageString } from '../utils/UtilityService';
+import { isInRole } from '../utils/UtilityService';
 import logo from './img/Logo-CESMII.svg'
 import { SVGIcon } from './SVGIcon'
 import Color from './Constants'
 
 import './styles/Navbar.scss'
 import { AppSettings } from '../utils/appsettings';
+import LoginButton from './LoginButton';
 
-const CLASS_NAME = "Navbar";
+//const CLASS_NAME = "Navbar";
 
 function Navbar() {
 
@@ -21,30 +22,21 @@ function Navbar() {
     // Region: Initialization
     //-------------------------------------------------------------------
     const history = useHistory();
-    const authTicket = useAuthState();
-    const dispatch = useAuthDispatch() //get the dispatch method from the useDispatch custom hook
-    const [_user, setUser] = useState(null);
+    const { instance, inProgress } = useMsal();
+    const _isAuthenticated = useIsAuthenticated();
+    const _activeAccount = instance.getActiveAccount();
 
     //-------------------------------------------------------------------
     // Region: Hooks
     //-------------------------------------------------------------------
-    useEffect(() => {
-        setUser(authTicket.user);
-    }, [authTicket.user]);
 
     //-------------------------------------------------------------------
     // Region: event handlers
     //-------------------------------------------------------------------
     const onLogoutClick = () => {
-        //updates state and removes user auth ticket from local storage
-        let logoutAction = logout(dispatch);
-        if (!logoutAction) {
-            console.error(generateLogMessageString(`onLogoutClick||logoutAction||An error occurred setting the logout state.`, CLASS_NAME));
-        }
-        else {
-            history.push(`/`);
-        }
-        //setAuthTicket(null);
+        //MSAL logout
+        instance.logoutPopup();
+        history.push(`/`);
     }
 
     const renderNav = () => {
@@ -76,6 +68,10 @@ function Navbar() {
                                 <a className={`nav-link py-1 px-2 ${history.location.pathname.indexOf("/contact-us/") > -1 ? "active" : ""}`}
                                     href="/contact-us/contribute">Contribute</a>
                             </li>
+                            {/*Per DW, only show login button when on /admin page for now. */}
+                            {history.location.pathname === "/admin" &&
+                                <LoginButton />
+                            }
                             {renderAdminMenu()}
                         </ul>
                     </div>
@@ -85,29 +81,40 @@ function Navbar() {
     };
 
     const renderAdminMenu = () => {
-        if (_user == null) return;
+        if (!_isAuthenticated || _activeAccount == null) return;
         return (
             <>
                 <li className="nav-item" >
                     <Dropdown>
                         <Dropdown.Toggle className="ml-0 ml-md-2 px-1 dropdown-custom-components d-flex align-items-center">
                             <SVGIcon name="account-circle" size="32" fill={Color.white} className="mr-2" />
-                            {_user.fullName}
+                            {_activeAccount?.name}
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
                             <Dropdown.Item eventKey="1" href="/account">Account Profile</Dropdown.Item>
                             <Dropdown.Divider />
-                            <Dropdown.Item eventKey="2" href="/admin/library/new">Add Marketplace Item</Dropdown.Item>
-                            <Dropdown.Item eventKey="3" href="/admin/publisher/new">Add Publisher</Dropdown.Item>
-                            <Dropdown.Divider />
-                            <Dropdown.Item eventKey="4" href="/admin/library/list">Manage Marketplace Items</Dropdown.Item>
-                            <Dropdown.Item eventKey="5" href="/admin/publisher/list">Manage Publishers</Dropdown.Item>
-                            <Dropdown.Item eventKey="6" href="/admin/lookup/list">Manage Lookup Items</Dropdown.Item>
-                            <Dropdown.Item eventKey="7" href="/admin/images/list">Manage Stock Images</Dropdown.Item>
-                            <Dropdown.Item eventKey="8" href="/admin/jobdefinition/list">Manage Job Definitions</Dropdown.Item>
-                            <Dropdown.Item eventKey="9" href="/admin/requestinfo/list">Manage Request Info Inquiries</Dropdown.Item>
-                            <Dropdown.Divider />
-                            <Dropdown.Item eventKey="9" onClick={onLogoutClick} >Logout</Dropdown.Item>
+                            {(isInRole(_activeAccount, 'cesmii.marketplace.marketplaceadmin')) &&
+                                <>
+                                    <Dropdown.Item eventKey="2" href="/admin/library/new">Add Marketplace Item</Dropdown.Item>
+                                    <Dropdown.Item eventKey="3" href="/admin/publisher/new">Add Publisher</Dropdown.Item>
+                                    <Dropdown.Divider />
+                                    <Dropdown.Item eventKey="4" href="/admin/library/list">Manage Marketplace Items</Dropdown.Item>
+                                    <Dropdown.Item eventKey="5" href="/admin/publisher/list">Manage Publishers</Dropdown.Item>
+                                    <Dropdown.Item eventKey="6" href="/admin/lookup/list">Manage Lookup Items</Dropdown.Item>
+                                    <Dropdown.Item eventKey="7" href="/admin/images/list">Manage Stock Images</Dropdown.Item>
+                                    <Dropdown.Item eventKey="9" href="/admin/requestinfo/list">Manage Request Info Inquiries</Dropdown.Item>
+                                    <Dropdown.Divider />
+                                </>
+                            }
+                            {(isInRole(_activeAccount, 'cesmii.marketplace.jobadmin')) &&
+                                <>
+                                    <Dropdown.Item eventKey="8" href="/admin/jobdefinition/list">Manage Job Definitions</Dropdown.Item>
+                                    <Dropdown.Divider />
+                                </>
+                            }
+                            {(inProgress !== InteractionStatus.Startup && inProgress !== InteractionStatus.HandleRedirect) &&
+                                <Dropdown.Item eventKey="10" onClick={onLogoutClick} >Logout</Dropdown.Item>
+                            }
                         </Dropdown.Menu>
                     </Dropdown>
                 </li>

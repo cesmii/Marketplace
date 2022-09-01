@@ -1,0 +1,58 @@
+﻿@using CESMII.Marketplace.DAL.Models
+@model RequestInfoModel
+@{
+    Layout = "_EmailLayout";
+}
+
+<div>
+    <h1>@Model.RequestType.Name</h1>
+    <p>Submitted: @Model.Created.ToString("MM-dd-yyyy hh:mm")</p>
+</div>
+
+<div>
+    @if (!string.IsNullOrEmpty(Model.LastName))
+    {
+        <h2>Contact Info</h2>
+    }
+    @if (!string.IsNullOrEmpty(Model.FirstName))
+    {
+        <p>First Name: @Model.FirstName</p>
+    }
+    @if (!string.IsNullOrEmpty(Model.LastName))
+    {
+        <p>Last Name: @Model.LastName</p>
+    }
+    @if (!string.IsNullOrEmpty(Model.Email))
+    {
+        <p>Email: @Model.Email</p>
+    }
+    @if (!string.IsNullOrEmpty(Model.Phone))
+    {
+        <p>Phone: @Model.Phone</p>
+    }
+    @if (Model.MembershipStatus != null)
+    {
+    <p>Membership Status: @Model.MembershipStatus.Name</p>
+    }
+</div>
+@if (!string.IsNullOrEmpty(Model.CompanyName))
+{
+    <div>
+        <h2>Company Info</h2>
+        <p>Name: @Model.CompanyName</p>
+        @if (!string.IsNullOrEmpty(Model.Industries))
+        {
+            <p>Industry(s): @Model.Industries</p>
+        }
+        @if (!string.IsNullOrEmpty(Model.CompanyUrl))
+        {
+            <p>Website: @Model.CompanyUrl</p>
+        }
+    </div>
+}
+@if (!string.IsNullOrEmpty(Model.Description))
+{    <div>
+        <h2>Message</h2>
+        <p>@Model.Description</p>
+    </div>
+}

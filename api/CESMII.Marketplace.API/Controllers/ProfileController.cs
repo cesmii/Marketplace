@@ -29,9 +29,10 @@ namespace CESMII.Marketplace.Api.Controllers
             ICloudLibDAL<MarketplaceItemModel> dalCloudLib,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
             IDal<RequestInfo, RequestInfoModel> dalRequestInfo,
+            UserDAL dalUser,
             MailRelayService mailRelayService,
             ConfigUtil config, ILogger<ProfileController> logger)
-            : base(config, logger)
+            : base(config, logger, dalUser)
         {
             _dalCloudLib = dalCloudLib;
             _dalAnalytics = dalAnalytics;
@@ -89,7 +90,8 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost, Route("Search/Admin")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(DALResult<MarketplaceItemModel>))]
         public async Task<IActionResult> AdminSearch([FromBody] MarketplaceSearchModel model)
         {
@@ -203,7 +205,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 //we are adding a request info with an smprofile, get the associated sm profile.
                 modelNew.SmProfile = smProfile;
 
-                var subject = REQUESTINFO_SUBJECT.Replace("{{RequestType}}", modelNew.RequestType.Name);
+                var subject = REQUESTINFO_SUBJECT.Replace("{{RequestType}}", "Download Nodeset Notification");
                 var body = await this.RenderViewAsync("~/Views/Template/RequestInfo.cshtml", modelNew);
                 var emailResult = await EmailRequestInfo(subject, body, _mailRelayService);
 

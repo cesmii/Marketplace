@@ -21,8 +21,9 @@ namespace CESMII.Marketplace.Api.Controllers
         private readonly IDal<ImageItem, ImageItemModel> _dal;
 
         public ImageController(IDal<ImageItem, ImageItemModel> dal,
+            UserDAL dalUser,
             ConfigUtil config, ILogger<ImageController> logger)
-            : base(config, logger)
+            : base(config, logger, dalUser)
         {
             _dal = dal;
         }
@@ -55,7 +56,8 @@ namespace CESMII.Marketplace.Api.Controllers
         #region Admin Image Endpoints
 
         [HttpPost, Route("all")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(List<ImageItemModel>))]
         [ProducesResponseType(400)]
         public IActionResult GetImagesByMarketplaceItemId([FromBody] IdStringModel model)
@@ -83,7 +85,8 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost, Route("update")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         public async Task<IActionResult> UpdateImage([FromBody] ImageItemModel model)
         {
@@ -135,7 +138,8 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost, Route("delete")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(ResultMessageModel))]
         public async Task<IActionResult> DeleteImage([FromBody] IdStringModel model)
         {
@@ -157,7 +161,8 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost, Route("add")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         public async Task<IActionResult> AddImage([FromBody] List<ImageItemModel> model)
         {

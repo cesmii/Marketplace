@@ -10,7 +10,6 @@ import Dropdown from 'react-bootstrap/Dropdown'
 import { AppSettings } from '../../utils/appsettings';
 import { generateLogMessageString, prepDateVal, validate_NoSpecialCharacters } from '../../utils/UtilityService'
 import { useLoadingContext } from "../../components/contexts/LoadingContext";
-import { useAuthState } from "../../components/authentication/AuthContext";
 
 import { SVGIcon } from "../../components/SVGIcon";
 import color from "../../components/Constants";
@@ -36,7 +35,6 @@ function AdminMarketplaceEntity() {
     const [isLoading, setIsLoading] = useState(true);
     const [isReadOnly, setIsReadOnly] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const authTicket = useAuthState();
     const [_isValid, setIsValid] = useState({
         name: true, nameFormat: true, displayName: true, abstract: true, description: true,
         status: true, type: true, publisher: true, publishDate: true,
@@ -150,7 +148,7 @@ function AdminMarketplaceEntity() {
         return () => {
             console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
         };
-    }, [id, parentId, authTicket.user]);
+    }, [id, parentId]);
 
     //-------------------------------------------------------------------
     // Region: hooks

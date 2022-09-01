@@ -1,4 +1,6 @@
-﻿namespace CESMII.Marketplace.Common.Models
+﻿using System.Collections.Generic;
+
+namespace CESMII.Marketplace.Common.Models
 {
     public class MarketplaceConfig
     {
@@ -12,6 +14,7 @@
     public class MarketplaceItemConfig
     {
         public string TypeId { get; set; }
+        public string Code { get; set; }
         //public string DefaultImageIdSquare { get; set; }
         public string DefaultImageIdPortrait { get; set; }
         public string DefaultImageIdLandscape { get; set; }

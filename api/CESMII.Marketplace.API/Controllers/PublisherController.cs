@@ -24,8 +24,9 @@ namespace CESMII.Marketplace.Api.Controllers
 
         public PublisherController(
             IDal<Publisher, PublisherModel> dal,
+            UserDAL dalUser,
             ConfigUtil config, ILogger<PublisherController> logger) 
-            : base(config, logger)
+            : base(config, logger, dalUser)
         {
             _dal = dal;
         }
@@ -67,7 +68,8 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("admin/search")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManagePublishers))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManagePublishers))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(DALResult<PublisherModel>))]
         [ProducesResponseType(400)]
         public IActionResult AdminSearch([FromBody] PagerFilterSimpleModel model)

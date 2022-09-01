@@ -29,9 +29,10 @@ namespace CESMII.Marketplace.Api.Controllers
         public RequestInfoController(
             IDal<RequestInfo, RequestInfoModel> dal,
             ICloudLibDAL<MarketplaceItemModel> dalCloudLib,
+            UserDAL dalUser,
             ConfigUtil config, ILogger<RequestInfoController> logger,
             MailRelayService mailRelayService)
-            : base(config, logger)
+            : base(config, logger, dalUser)
         {
             _dal = dal;
             _dalCloudLib = dalCloudLib;
@@ -40,7 +41,8 @@ namespace CESMII.Marketplace.Api.Controllers
 
 
         [HttpPost, Route("Search")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(DALResult<RequestInfoModel>))]
         [ProducesResponseType(400)]
         public IActionResult Search([FromBody] PagerFilterSimpleModel model)
@@ -69,7 +71,8 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("GetByID")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(RequestInfoModel))]
         [ProducesResponseType(400)]
         public async Task<IActionResult> GetByID([FromBody] IdStringModel model)
@@ -104,7 +107,6 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <returns></returns>
         [HttpPost, Route("Add")]
         [AllowAnonymous()]
-        // [Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         public async Task<IActionResult> Add([FromBody] RequestInfoModel model)
         {
@@ -137,8 +139,8 @@ namespace CESMII.Marketplace.Api.Controllers
                         modelNew.SmProfile = await _dalCloudLib.GetById(modelNew.SmProfileId.Value.ToString());
                     }
 
-                    var subject = REQUESTINFO_SUBJECT.Replace("{{RequestType}}", modelNew.RequestType.Name);
-                    var body = await this.RenderViewAsync("~/Views/Template/RequestInfo.cshtml", modelNew);
+                    var subject = GetEmailSubject(modelNew);
+                    var body = await this.RenderViewAsync(GetRenderViewUrl(modelNew), modelNew);
                     var emailResult = await EmailRequestInfo(subject, body, _mailRelayService);
 
                     if (!emailResult)
@@ -160,13 +162,45 @@ namespace CESMII.Marketplace.Api.Controllers
             }
         }
 
+        private static string GetEmailSubject(RequestInfoModel item)
+        {
+            switch (item.RequestType.Code.ToLower())
+            {
+                case "publisher":
+                case "sm-profile":
+                case "marketplaceitem":
+                    return REQUESTINFO_SUBJECT.Replace("{{RequestType}}", $"Request More Info | {item.RequestType.Name}");
+                case "membership":
+                case "contribute":
+                case "request-demo":
+                    return REQUESTINFO_SUBJECT.Replace("{{RequestType}}", $"{item.RequestType.Name} Inquiry");
+                case "subscribe":
+                    return REQUESTINFO_SUBJECT.Replace("{{RequestType}}", $"{item.RequestType.Name} to Newsletter Inquiry");
+                default:
+                    return REQUESTINFO_SUBJECT.Replace("{{RequestType}}", item.RequestType.Name);
+            }
+        }
+
+        private static string GetRenderViewUrl(RequestInfoModel item)
+        {
+            switch (item.RequestType.Code.ToLower())
+            {
+                case "publisher":
+                case "sm-profile":
+                case "marketplaceitem":
+                    return "~/Views/Template/RequestInfo.cshtml";
+                default:
+                    return "~/Views/Template/ContactUs.cshtml";
+            }
+        }
+
         /// <summary>
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpGet, Route("EmailTest")]
-        [AllowAnonymous()]
-        // [Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
+        //[AllowAnonymous()]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         public async Task<IActionResult> EmailTest()
         {
@@ -219,7 +253,8 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost, Route("Update")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         public async Task<IActionResult> Update([FromBody] RequestInfoModel model)
         {
@@ -260,7 +295,8 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost, Route("Delete")]
-        [Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        //[Authorize(Policy = nameof(PermissionEnum.CanManageRequestInfo))]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(ResultMessageModel))]
         public async Task<IActionResult> Delete([FromBody] IdStringModel model)
         {

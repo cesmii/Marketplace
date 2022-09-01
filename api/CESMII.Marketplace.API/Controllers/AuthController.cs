@@ -6,12 +6,9 @@ using Microsoft.Extensions.Logging;
 
 
 using CESMII.Marketplace.Common;
-using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.DAL;
-using CESMII.Marketplace.Api.Shared.Utils;
 using CESMII.Marketplace.Api.Shared.Models;
 using CESMII.Marketplace.Api.Shared.Controllers;
-using CESMII.Marketplace.Api.Shared.Extensions;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
@@ -20,15 +17,27 @@ namespace CESMII.Marketplace.Api.Controllers
     public class AuthController : BaseController<AuthController>
     {
         private readonly UserDAL _dal;
-        private readonly TokenUtils _tokenUtils;
+        //private readonly TokenUtils _tokenUtils;
 
-        public AuthController(UserDAL dal, TokenUtils tokenUtils, ConfigUtil config, ILogger<AuthController> logger) 
-            : base(config, logger)
+        public AuthController(UserDAL dal, ConfigUtil config, ILogger<AuthController> logger) 
+            : base(config, logger, dal)
         {
             _dal = dal;
-            _tokenUtils = tokenUtils;
+            //_tokenUtils = tokenUtils;
         }
 
+        [HttpPost, Route("onAADLogin")]
+        [Authorize(Roles = "cesmii.marketplace.user")]
+        public IActionResult OnAADLogin()
+        {
+            //extract user name from identity passed in via token
+            //check if that user record is in DB. If not, add it.
+            //InitLocalUser: this property checks for user, adds to db and returns a fully formed user model if one does not exist. 
+            var user = base.InitLocalUser(); 
+            return Ok(new ResultMessageModel() { IsSuccess = true, Message = $"On AAD Login, marketplace user {user.ObjectIdAAD} was initialized." });
+        }
+
+        /*
         [AllowAnonymous, HttpPost, Route("Login")]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
@@ -141,6 +150,6 @@ namespace CESMII.Marketplace.Api.Controllers
         {
             throw new NotImplementedException();
         }
-
+        */
     }
 }

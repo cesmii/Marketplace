@@ -5,8 +5,6 @@ import Modal from 'react-bootstrap/Modal'
 
 import axiosInstance from "../services/AxiosService";
 import { useLoadingContext } from "../components/contexts/LoadingContext";
-import { login } from './authentication/AuthActions';
-import { useAuthDispatch, useAuthState } from './authentication/AuthContext';
 import { generateLogMessageString } from '../utils/UtilityService';
 
 const CLASS_NAME = "ChangePasswordModal";
@@ -16,8 +14,6 @@ function ChangePasswordModal(props) { //props are item, showActions
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const authTicket = useAuthState();
-    const dispatch = useAuthDispatch() //get the dispatch method from the useDispatch custom hook
     const [_show, setShow] = useState(false);
     const [_errorMsg, setErrorMessage] = useState(null);
     const { setLoadingProps } = useLoadingContext();
@@ -40,7 +36,7 @@ function ChangePasswordModal(props) { //props are item, showActions
     // Region: Validation
     //-------------------------------------------------------------------
     const validateForm_oldPassword = (e) => {
-        var isValid = e.target.value != null && e.target.value.trim().length > 0;
+        var isValid = props.OldPasswordNotRequired || e.target.value != null && e.target.value.trim().length > 0;
         setIsValid({ ..._isValid, oldPassword: isValid });
     };
 
@@ -58,7 +54,7 @@ function ChangePasswordModal(props) { //props are item, showActions
     const validateForm = () => {
         console.log(generateLogMessageString(`validateForm`, CLASS_NAME));
 
-        _isValid.oldPassword = _item.oldPassword != null && _item.oldPassword.trim().length > 0;
+        _isValid.oldPassword = props.OldPasswordNotRequired || (_item.oldPassword != null && _item.oldPassword.trim().length > 0);
         _isValid.newPassword = _item.newPassword != null && _item.newPassword.trim().length > 0;
         _isValid.confirmPassword = _item.confirmPassword != null && _item.confirmPassword.trim().length > 0;
         _isValid.matchPassword = _item.newPassword === _item.confirmPassword;
@@ -124,15 +120,6 @@ function ChangePasswordModal(props) { //props are item, showActions
                             }
                         ]
                     });
-
-                    //update token in local storage - if this is the account change password flavor
-                    if (props.updateToken) {
-                        authTicket.token = JSON.parse(JSON.stringify(result.data.data));
-                        let loginAction = login(dispatch, authTicket) //loginUser action makes the request and handles all the neccessary state changes
-                        if (!loginAction) {
-                            console.error(generateLogMessageString(`onSave||loginAction||An error occurred setting the login state.`, CLASS_NAME));
-                        }
-                    }
 
                     if (props.onSave != null) props.onSave();
 
@@ -200,12 +187,12 @@ function ChangePasswordModal(props) { //props are item, showActions
                     <div className="col-md-12">
                         <Form.Group>
                             <Form.Label htmlFor="oldPassword" >Old Password</Form.Label>
-                            {!_isValid.oldPassword &&
+                            {!_isValid.oldPassword && !props.OldPasswordNotRequired &&
                                 <span className="invalid-field-message inline">
                                     Required
                                 </span>
                             }
-                            <Form.Control id="oldPassword" type="password" className={(!_isValid.oldPassword ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
+                            <Form.Control id="oldPassword" type="password" className={(!_isValid.oldPassword && !props.OldPasswordNotRequired ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
                                 value={_item.oldPassword == null ? '' : _item.oldPassword} onBlur={validateForm_oldPassword} onChange={onChange} />
                         </Form.Group>
                     </div>

@@ -18,6 +18,7 @@ using Microsoft.Extensions.Hosting;
 
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Microsoft.Identity.Web;
 
 using NLog;
 using NLog.Extensions.Logging;
@@ -33,6 +34,7 @@ using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.JobManager;
+using Microsoft.IdentityModel.Logging;
 
 namespace CESMII.Marketplace.Api
 {
@@ -68,11 +70,12 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IMongoRepository<RequestInfo>, MongoRepository<RequestInfo>>();
             services.AddScoped<IMongoRepository<ImageItem>, MongoRepository<ImageItem>>();
             services.AddScoped<IMongoRepository<ImageItemSimple>, MongoRepository<ImageItemSimple>>();
+            services.AddScoped<IMongoRepository<SearchKeyword>, MongoRepository<SearchKeyword>>();
 
             //stock tables
             services.AddScoped<IMongoRepository<Organization>, MongoRepository<Organization>>();
             services.AddScoped<IMongoRepository<User>, MongoRepository<User>>();
-            services.AddScoped<IMongoRepository<Permission>, MongoRepository<Permission>>();
+            //services.AddScoped<IMongoRepository<Permission>, MongoRepository<Permission>>();
             services.AddScoped<IMongoRepository<JobLog>, MongoRepository<JobLog>>();
             services.AddScoped<IMongoRepository<JobDefinition>, MongoRepository<JobDefinition>>();
 
@@ -88,6 +91,7 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IDal<ImageItem, ImageItemModel>, ImageItemDAL>();
             services.AddScoped<IDal<JobLog, JobLogModel>, JobLogDAL>();
             services.AddScoped<IDal<JobDefinition, JobDefinitionModel>, JobDefinitionDAL>();
+            services.AddScoped<IDal<SearchKeyword, SearchKeywordModel>, SearchKeywordDAL>();
 
             // Configuration, utils, one off objects
             services.AddSingleton<IConfiguration>(Configuration);
@@ -102,9 +106,10 @@ namespace CESMII.Marketplace.Api
             services.AddSingleton<CloudLibClient.ICloudLibWrapper,CloudLibClient.CloudLibWrapper>();
             services.AddScoped<ICloudLibDAL<MarketplaceItemModel>, CloudLibDAL>();
 
+            //AAD - no longer need this
             // Add token builder.
-            var configUtil = new ConfigUtil(Configuration);
-            services.AddTransient(provider => new TokenUtils(configUtil));
+            //var configUtil = new ConfigUtil(Configuration);
+            //services.AddTransient(provider => new TokenUtils(configUtil));
 
             services.AddControllers();
 
@@ -135,20 +140,24 @@ namespace CESMII.Marketplace.Api
             });
 
             // https://stackoverflow.com/questions/46112258/how-do-i-get-current-user-in-net-core-web-api-from-jwt-token
+            //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            //    .AddJwtBearer(options =>
+            //    {
+            //        options.TokenValidationParameters = new TokenValidationParameters
+            //        {
+            //            ValidateIssuer = true,
+            //            ValidateLifetime = true,
+            //            ValidateAudience = false,
+            //            ValidateIssuerSigningKey = true,
+            //            ValidIssuer = configUtil.JWTSettings.Issuer,
+            //            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configUtil.JWTSettings.Key))
+            //        };
+            //    });
+            //New - Azure AD approach replaces previous code above
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateLifetime = true,
-                        ValidateAudience = false,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = configUtil.JWTSettings.Issuer,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configUtil.JWTSettings.Key))
-                    };
-                });
+                .AddMicrosoftIdentityWebApi(Configuration, "AzureAdSettings");
 
+            //TBD - may not need these at all anymore since AAD implementation
             // Add permission authorization requirements.
             services.AddAuthorization(options =>
             {
@@ -158,23 +167,8 @@ namespace CESMII.Marketplace.Api
                     policy => policy.Requirements.Add(new PermissionRequirement(PermissionEnum.CanManageMarketplace)));
 
                 options.AddPolicy(
-                    nameof(PermissionEnum.CanManagePublishers),
-                    policy => policy.Requirements.Add(new PermissionRequirement(PermissionEnum.CanManagePublishers)));
-
-                // Ability to...
-                options.AddPolicy(
-                    nameof(PermissionEnum.CanManageSystemSettings),
-                    policy => policy.Requirements.Add(new PermissionRequirement(PermissionEnum.CanManageSystemSettings)));
-
-                // Ability to...
-                options.AddPolicy(
-                    nameof(PermissionEnum.CanManageUsers),
-                    policy => policy.Requirements.Add(new PermissionRequirement(PermissionEnum.CanManageUsers)));
-
-                // Ability to...
-                options.AddPolicy(
-                    nameof(PermissionEnum.CanManageRequestInfo),
-                    policy => policy.Requirements.Add(new PermissionRequirement(PermissionEnum.CanManageRequestInfo)));
+                    nameof(PermissionEnum.GeneralUser),
+                    policy => policy.Requirements.Add(new PermissionRequirement(PermissionEnum.GeneralUser)));
 
                 // Ability to...
                 options.AddPolicy(
@@ -229,7 +223,7 @@ namespace CESMII.Marketplace.Api
                     context.Response.Headers.Add("Access-Control-Allow-Headers", "authorization,content-type");
                     context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT");
                     context.Response.StatusCode = (int)System.Net.HttpStatusCode.NoContent;
-                    await context.Response.WriteAsync("Pre-flight check complete.");
+                    System.Diagnostics.Debug.WriteLine("Pre-flight check complete - {context.Request.Path}");
                 }
                 else
                 {
@@ -254,6 +248,7 @@ namespace CESMII.Marketplace.Api
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CESMII.Marketplace.Api v1"));
+                IdentityModelEventSource.ShowPII = true;
             }
             else
             {

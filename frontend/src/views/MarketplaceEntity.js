@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { Helmet } from "react-helmet"
-import axiosInstance from "../services/AxiosService";
+import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 
+import axiosInstance from "../services/AxiosService";
 import { AppSettings } from '../utils/appsettings';
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
-import { useAuthState } from "../components/authentication/AuthContext";
 
 import { MarketplaceBreadcrumbs } from './shared/MarketplaceBreadcrumbs';
 import SocialMedia from "../components/SocialMedia";
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
 import MarketplaceEntitySidebar from './shared/MarketplaceEntitySidebar';
 
-import { generateLogMessageString, getMarketplaceIconName } from '../utils/UtilityService'
+import { generateLogMessageString, getMarketplaceIconName, isInRole } from '../utils/UtilityService'
 import { clearSearchCriteria, toggleSearchFilterSelected } from '../services/MarketplaceService';
 import MarketplaceTileList from './shared/MarketplaceTileList';
 import { SvgVisibilityIcon } from '../components/SVGIcon';
@@ -32,7 +32,11 @@ function MarketplaceEntity() {
     const [item, setItem] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const authTicket = useAuthState();
+    const { instance } = useMsal();
+    const _isAuthenticated = useIsAuthenticated();
+    const _activeAccount = instance.getActiveAccount();
+    //Check for is authenticated. Check individual permissions - ie can manage marketplace items.
+    const _isAuthorized = _isAuthenticated && _activeAccount != null && (isInRole(_activeAccount, "cesmii.marketplace.marketplaceadmin"));
     ////is favorite calc
     //const [isFavorite, setIsFavorite] = useState((loadingProps.favoritesList != null && loadingProps.favoritesList.findIndex(x => x.url === history.location.pathname) > -1));
 
@@ -88,7 +92,7 @@ function MarketplaceEntity() {
         return () => {
             console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
         };
-    }, [id, authTicket.user]);
+    }, [id, _isAuthenticated]);
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
@@ -135,7 +139,7 @@ function MarketplaceEntity() {
 
         return (
             <>
-                <MarketplaceBreadcrumbs item={item} currentUserId={authTicket.currentUserId} />
+                <MarketplaceBreadcrumbs item={item} isAuthenticated={_isAuthenticated && _activeAccount != null} />
             </>
         );
     };
@@ -164,7 +168,7 @@ function MarketplaceEntity() {
                     {item.displayName}
                 </h1>
                 {/*<SVGIcon name={isFavorite ? "favorite" : "favorite-border"} size="24" fill={color.forestGreen} onClick={toggleFavoritesList} />*/}
-                {authTicket.user != null &&
+                {_isAuthorized &&
                     <a className="btn btn-icon-outline circle ml-auto" href={`/admin/library/${item.id}`} ><i className="material-icons">edit</i></a>
                 }
             </>
@@ -219,7 +223,7 @@ function MarketplaceEntity() {
         if (!loadingProps.isLoading && (item == null)) {
             return;
         }
-        return (<MarketplaceItemEntityHeader key={item.id} item={item} currentUserId={authTicket.user == null ? null : authTicket.user.id} showActions={true} cssClass="marketplace-list-item" />)
+        return (<MarketplaceItemEntityHeader key={item.id} item={item} isAuthenticated={_isAuthenticated && _activeAccount != null} isAuthorized={_isAuthorized} showActions={true} cssClass="marketplace-list-item" />)
     }
 
     //

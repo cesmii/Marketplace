@@ -9,7 +9,6 @@ import Button from 'react-bootstrap/Button'
 import { AppSettings, LookupData } from '../utils/appsettings';
 import { generateLogMessageString, formatDate, validate_Email, scrollTopScreen } from '../utils/UtilityService'
 import { useLoadingContext } from "../components/contexts/LoadingContext";
-import { useAuthState } from "../components/authentication/AuthContext";
 
 import PublisherSidebar from './shared/PublisherSidebar';
 import SocialMedia from '../components/SocialMedia';
@@ -26,7 +25,6 @@ function RequestInfo() {
 
     //can access this form for specific marketplace item (id) or for a specific publisher (publisherId)
     //TBD - update form to pull publisher info if coming from that angle.
-    const authTicket = useAuthState();
     const { id, publisherId, type, itemType } = useParams();
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_item, setItem] = useState(JSON.parse(JSON.stringify(AppSettings.requestInfoNew)));
@@ -101,7 +99,7 @@ function RequestInfo() {
         return () => {
             console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
         };
-    }, [id, publisherId, authTicket.user]);
+    }, [id, publisherId]);
 
 
     //-------------------------------------------------------------------
