@@ -68,7 +68,10 @@ function Navbar() {
                                 <a className={`nav-link py-1 px-2 ${history.location.pathname.indexOf("/contact-us/") > -1 ? "active" : ""}`}
                                     href="/contact-us/contribute">Contribute</a>
                             </li>
-                            <LoginButton />
+                            {/*Per DW, only show login button when on /admin page for now. */}
+                            {history.location.pathname === "/admin" &&
+                                <LoginButton />
+                            }
                             {renderAdminMenu()}
                         </ul>
                     </div>
