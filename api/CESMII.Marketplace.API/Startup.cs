@@ -70,6 +70,7 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IMongoRepository<RequestInfo>, MongoRepository<RequestInfo>>();
             services.AddScoped<IMongoRepository<ImageItem>, MongoRepository<ImageItem>>();
             services.AddScoped<IMongoRepository<ImageItemSimple>, MongoRepository<ImageItemSimple>>();
+            services.AddScoped<IMongoRepository<SearchKeyword>, MongoRepository<SearchKeyword>>();
 
             //stock tables
             services.AddScoped<IMongoRepository<Organization>, MongoRepository<Organization>>();
@@ -90,6 +91,7 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IDal<ImageItem, ImageItemModel>, ImageItemDAL>();
             services.AddScoped<IDal<JobLog, JobLogModel>, JobLogDAL>();
             services.AddScoped<IDal<JobDefinition, JobDefinitionModel>, JobDefinitionDAL>();
+            services.AddScoped<IDal<SearchKeyword, SearchKeywordModel>, SearchKeywordDAL>();
 
             // Configuration, utils, one off objects
             services.AddSingleton<IConfiguration>(Configuration);
