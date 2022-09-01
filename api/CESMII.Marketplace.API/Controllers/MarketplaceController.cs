@@ -310,9 +310,7 @@ namespace CESMII.Marketplace.Api.Controllers
 
             //Special handling for types
             //if model.query value has specially designated terms, then alter the item type filters or the model.filters for those items
-            bool useSpecialTypeSelection = PrepareAdvancedSearchTypeSelections(model);
-            PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Process);
-            PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.IndustryVertical);
+            var useSpecialTypeSelection = PrepareAdvancedSearchTypeSelections(model);
 
             //extract selected items within a list of items
             var cats = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.FirstOrDefault(x => x.EnumValue == LookupTypeEnum.Process).Items.Where(x => x.Selected).ToList();
@@ -372,23 +370,36 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         /// <summary>
-        /// if user enters a word in the search box equal to vertical, category, etc, we translate that into a vertical/category/etc selection.
+        /// If user enters a word in the search box equal to vertical, category, etc, we translate that into a vertical/category/etc selection.
+        /// We also return the items that would be associated with that category (if any)
         /// </summary>
         /// <remarks>model.Filters selected items could be altered in this method</remarks>
         /// <param name="model"></param>
-        private void PrepareAdvancedSearchFiltersSelections(MarketplaceSearchModel model, LookupTypeEnum enumVal)
+        private List<MarketplaceItemModel> PrepareAdvancedSearchFiltersSelections(MarketplaceSearchModel model, LookupTypeEnum enumVal)
         {
-            if (string.IsNullOrEmpty(model.Query)) return;
+            if (string.IsNullOrEmpty(model.Query)) return new List<MarketplaceItemModel>();
 
             var matches = _dalLookup.Where(x => x.LookupType.EnumValue == enumVal
                                 && x.IsActive
                                 && x.Name.ToLower().Equals(model.Query.ToLower())
                                 , null, null, false, false).Data.ToList();
 
-            var filters = model.Filters.FirstOrDefault(x => x.EnumValue == enumVal).Items;
-            foreach (var f in filters)
+            //find the matching items and then use this when assembling the where clause around the model.query
+            if (enumVal == LookupTypeEnum.IndustryVertical)
             {
-                f.Selected = f.Selected || matches.Any(y => y.ID.Equals(f.ID.ToLower()));
+                return _dal.Where(x => matches.Any(y => x.IndustryVerticals.Contains(new MongoDB.Bson.BsonObjectId(y.ID) ))
+                                && x.IsActive
+                                , null, null, false, false).Data.ToList();
+            }
+            else if (enumVal == LookupTypeEnum.Process)
+            {
+                return _dal.Where(x => matches.Any(y => x.Categories.Contains(new MongoDB.Bson.BsonObjectId(y.ID)))
+                                && x.IsActive
+                                , null, null, false, false).Data.ToList();
+            }
+            else
+            {
+                return new List<MarketplaceItemModel>();
             }
         }
 
@@ -476,6 +487,10 @@ namespace CESMII.Marketplace.Api.Controllers
             Func<MarketplaceItem, bool> predicateQuery = null;
             if (!string.IsNullOrEmpty(model.Query))
             {
+                //TBD - Academia - no longer returning value because not in name but is in category. Have to figure out 
+                //how to weave that into the mix.
+                //TBD - check that we can update appsettings values from Azure in Configuraiton area.
+
                 //add series of where conditions
                 if (useSpecialTypeSelection)
                 {
@@ -526,7 +541,7 @@ namespace CESMII.Marketplace.Api.Controllers
             //(ie (if cat == 'foo' || cat == 'bar') AND (if vert == 'a' || vert == 'b') AND (name.contains('blah') || description.contains('blah'))
             ///--------------------------------------------------------------------------------------------------------
             /// NOTE:
-            /// Because we are unifying two sources of information from separate sources, we need to wait on paging, sorting 
+            /// Because we are unifying two sources of information from separate sources (cloud lib, marketplace db), we need to wait on paging, sorting 
             /// and do not do this at the DB level. We have to get the filtered set of info and then apply a sort 
             /// and then the page. 
             ///--------------------------------------------------------------------------------------------------------
@@ -539,6 +554,15 @@ namespace CESMII.Marketplace.Api.Controllers
                 _dal.Where(predicates, null, null, true, false,
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName });
+
+            //Special handling for categories. If the search term matches a category name, we get that, too. 
+            //We do it as a separate query because the initial marketplace query already has an abundance of logic and 
+            //and complexity and it was not working to add in additional logic. We union it below.  
+            var itemsProcesses = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Process);
+            var itemsVerts = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.IndustryVertical);
+            if (itemsProcesses.Any()) result.Data = result.Data.Union(itemsProcesses).ToList();
+            if (itemsVerts.Any()) result.Data = result.Data.Union(itemsVerts).ToList();
+            result.Count = result.Data.Count;
 
             return result;
         }
