@@ -18,6 +18,7 @@ function LoginButton() {
     //-------------------------------------------------------------------
     const { instance, inProgress, accounts } = useMsal();
     const _isAuthenticated = useIsAuthenticated();
+    const _activeAccount = instance.getActiveAccount();
     const { loadingProps, setLoadingProps } = useLoadingContext();
 
     //-------------------------------------------------------------------
@@ -106,7 +107,7 @@ function LoginButton() {
     }
 
     //if already logged in, don't show button
-    if (_isAuthenticated) {
+    if (_isAuthenticated && _activeAccount != null) {
         return null;
     }
 

@@ -26,9 +26,7 @@ function AccountProfile() {
     const _activeAccount = instance.getActiveAccount();
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_item, setItem] = useState({});
-    const [_isValid, setIsValid] = useState({
-        userName: true, smipSettings: true
-    });
+    const [_isValid, setIsValid] = useState({organizationName: true, smipSettings: true});
     const [_changePasswordModal, setChangePasswordModal] = useState({ show: false, url: null, updateToken: false});
     var caption = 'My Profile';
 
@@ -88,7 +86,7 @@ function AccountProfile() {
         _isValid.smipSettings = validateFormSmipSettings();
 
         setIsValid(JSON.parse(JSON.stringify(_isValid)));
-        return (true);
+        return (_isValid.smipSettings && _isValid.organizationName);
     }
 
     //-------------------------------------------------------------------
@@ -313,7 +311,7 @@ function AccountProfile() {
                 </div>
                 <div className="row">
                     <div className="col-md-6 my-2">
-                        <Button variant="secondary" onClick={onChangePasswordOpen} data-url="user/smipSettings/changepassword" data-updatetoken={false} >Update SMIP Password</Button>
+                        <Button variant="link" onClick={onChangePasswordOpen} data-url="user/smipSettings/changepassword" data-updatetoken={false} >Update SMIP Password</Button>
                     </div>
                 </div>
             </>
@@ -366,8 +364,8 @@ function AccountProfile() {
                 <div className="row">
                     <div className="col-md-6">
                         <Form.Group>
-                            <Form.Label htmlFor="userName" >Organization</Form.Label>
-                            <Form.Control id="organization.name" className={(!_isValid.userName ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
+                            <Form.Label htmlFor="organization.name" >Organization</Form.Label>
+                            <Form.Control id="organization.name" className={(!_isValid.organizationName ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
                                 value={_item.organization == null ? "": _item.organization.name} readOnly='readonly' />
                         </Form.Group>
                     </div>
@@ -423,7 +421,8 @@ function AccountProfile() {
                 </div>
             </Form>
             <ChangePasswordModal userId={_item.id} onSave={onChangePasswordClose} onCancel={onChangePasswordClose}
-                show={_changePasswordModal.show} urlSave={_changePasswordModal.url} updateToken={_changePasswordModal.updateToken} />
+                show={_changePasswordModal.show} urlSave={_changePasswordModal.url} updateToken={_changePasswordModal.updateToken}
+                OldPasswordNotRequired={true} />
         </>
     )
 }

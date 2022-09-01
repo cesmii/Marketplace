@@ -202,15 +202,6 @@
 
         private bool ValidateSmipPassword(string id, string userName, string password)
         {
-            //check user name and password match for this user
-            if (string.IsNullOrEmpty(password))
-            {
-                // Null value is used on initial creation, therefore null may not be passed into this method.
-                var ex = new ArgumentNullException(password, "Password required.");
-                _logger.Error(ex); // Log this within all targets as an error.
-                throw ex; // Throw an explicit exception, those using this should be aware this cannot be allowed.
-            }
-
             //1. Validate against our encryption. Because we use the existing user's settings, we get the 
             // existing pw, parse it into parts and encrypt the new pw with the same settings to see if it matches
             var match = _repo.FindByCondition(u =>
@@ -218,6 +209,18 @@
                 u.SmipSettings?.UserName.ToLower() == userName.ToLower())
                 .FirstOrDefault();
             if (match == null) return false;
+
+            //scenario - newly minted user will not have SMIP data configured yet. Account for that
+            if (match.SmipSettings.Password == null) return string.IsNullOrEmpty(password);
+
+            //check password passed in IF the existing password is not null
+            if (string.IsNullOrEmpty(password))
+            {
+                // Null value is used on initial creation, therefore null may not be passed into this method.
+                var ex = new ArgumentNullException(password, "Password required.");
+                _logger.Error(ex); // Log this within all targets as an error.
+                return false;
+            }
 
             //SMIP password needs encrypt/decrypt ability so we use different technique than the account passwords
             //test against our encryption, means we match 
@@ -237,7 +240,7 @@
                     Organization = entity.OrganizationId == null ? null : MapToModelOrganization(entity.OrganizationId.ToString()),
                     LastLogin = entity.LastLogin,
                     Created = entity.Created,
-                    SmipSettings = entity.SmipSettings
+                    SmipSettings = entity.SmipSettings == null ? new SmipSettings() : entity.SmipSettings
                 };
             }
             else
