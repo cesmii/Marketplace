@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { Button } from 'react-bootstrap';
-import DownloadNodesetModal from '../../components/DownloadNodesetModal';
 
+import { useLoadingContext } from '../../components/contexts/LoadingContext';
+import DownloadNodesetModal from '../../components/DownloadNodesetModal';
 import { AppSettings } from '../../utils/appsettings';
 import { formatDate, generateLogMessageString, getImageUrl } from '../../utils/UtilityService';
 import { MarketplaceItemJobLauncher } from './MarketplaceItemJobLauncher';
@@ -14,6 +15,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
     // Region: Initialization
     //-------------------------------------------------------------------
     //used in popup profile add/edit ui. Default to new version
+    const { loadingProps } = useLoadingContext();
     const [_downloadModalShow, setDownloadModal] = useState(false);
 
     //-------------------------------------------------------------------
@@ -21,8 +23,20 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
     //-------------------------------------------------------------------
     const onDownloadStart = (e) => {
         console.log(generateLogMessageString(`onAdd`, CLASS_NAME));
-        setDownloadModal(true);
         e.preventDefault();
+
+        //if user already downloaded any nodeset in past, bypass email collection form
+        if (loadingProps.downloadNodesetCounter && loadingProps.downloadNodesetCounter > 0) {
+            var itm = JSON.parse(JSON.stringify(AppSettings.requestInfoNew));
+            itm.smProfileId = props.item.id;
+            itm.smProfile = props.item;
+            itm.requestTypeCode = "smprofile-download";
+            itm.email = "REPEAT";
+            if (props.onDownload) props.onDownload(itm);
+        }
+        else {
+            setDownloadModal(true);
+        }
     };
 
     const onDownload = (itm) => {
