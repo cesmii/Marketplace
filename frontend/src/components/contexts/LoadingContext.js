@@ -22,7 +22,8 @@ const initialState = {
     hasSidebar: false,
     searchCriteria: [],
     lookupDataStatic: [],
-    refreshSearchCriteria: null
+    refreshSearchCriteria: null,
+    downloadNodesetCounter: 0
 };
 
 //Split between local storage and session storage, unify the response
