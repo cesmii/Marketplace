@@ -129,7 +129,7 @@
             var data = _repo.FindByCondition(
                 predicate,
                 skip, take,
-                l => l.MarketplaceItemId, l => l.ID);  
+                l => l.MarketplaceItemId.ToString(), l => l.ID);  
             var count = returnCount ? _repo.Count(predicate) : 0;
 
             //map the data to the final result
