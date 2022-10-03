@@ -95,7 +95,7 @@ function ProfileEntity() {
         var msgs = loadingProps.downloadItems || [];
         //msgs.push({ profileId: p.id, fileName: cleanFileName(p.namespace || p.displayName), immediateDownload: true });
         msgs.push({ requestInfo: req, fileName: cleanFileName(req.smProfile.namespace || req.smProfile.displayName), immediateDownload: true });
-        setLoadingProps({ downloadItems: JSON.parse(JSON.stringify(msgs)), downloadNodesetCounter: (loadingProps.downloadNodesetCounter || 0) + 1 });
+        setLoadingProps({ downloadItems: JSON.parse(JSON.stringify(msgs)), downloadNodesetCounter: (loadingProps.downloadNodesetCounter == null ? 0 : loadingProps.downloadNodesetCounter) + 1 });
         scrollTopScreen();
     }
 
