@@ -1,7 +1,7 @@
 import React from 'react'
 import { useHistory } from "react-router-dom"
 import { InteractionStatus } from "@azure/msal-browser";
-import { useIsAuthenticated, useMsal } from "@azure/msal-react";
+import { useMsal } from "@azure/msal-react";
 
 import Dropdown from 'react-bootstrap/Dropdown'
 
@@ -12,6 +12,7 @@ import Color from './Constants'
 
 import './styles/Navbar.scss'
 import { AppSettings } from '../utils/appsettings';
+import { doLogout, useLoginStatus } from './OnLoginHandler';
 import LoginButton from './LoginButton';
 
 //const CLASS_NAME = "Navbar";
@@ -23,8 +24,8 @@ function Navbar() {
     //-------------------------------------------------------------------
     const history = useHistory();
     const { instance, inProgress } = useMsal();
-    const _isAuthenticated = useIsAuthenticated();
     const _activeAccount = instance.getActiveAccount();
+    const { isAuthenticated, isAuthorized } = useLoginStatus(null, [AppSettings.AADUserRole]);
 
     //-------------------------------------------------------------------
     // Region: Hooks
@@ -33,10 +34,9 @@ function Navbar() {
     //-------------------------------------------------------------------
     // Region: event handlers
     //-------------------------------------------------------------------
-    const onLogoutClick = () => {
-        //MSAL logout
-        instance.logoutPopup();
-        history.push(`/`);
+    const onLogoutClick = (e) => {
+        doLogout(history, instance, '/admin', true, true);
+        e.preventDefault();
     }
 
     const renderNav = () => {
@@ -69,7 +69,7 @@ function Navbar() {
                                     href="/contact-us/contribute">Contribute</a>
                             </li>
                             {/*Per DW, only show login button when on /admin page for now. */}
-                            {history.location.pathname === "/admin" &&
+                            {(history.location.pathname === "/admin" && (!isAuthenticated)) &&
                                 <LoginButton />
                             }
                             {renderAdminMenu()}
@@ -81,7 +81,7 @@ function Navbar() {
     };
 
     const renderAdminMenu = () => {
-        if (!_isAuthenticated || _activeAccount == null) return;
+        if (!isAuthenticated && !isAuthorized) return;
         return (
             <>
                 <li className="nav-item" >

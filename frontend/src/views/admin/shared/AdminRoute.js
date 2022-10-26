@@ -1,10 +1,10 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
-import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 
 import DownloadMessage from "../../../components/DownloadMessage";
 import { InlineMessage } from "../../../components/InlineMessage";
-import { isInRoles } from "../../../utils/UtilityService";
+import ModalMessage from "../../../components/ModalMessage";
+import { useLoginStatus } from "../../../components/OnLoginHandler";
 
 const AdminLayout = ({ children }) => (
 
@@ -14,23 +14,20 @@ const AdminLayout = ({ children }) => (
             <DownloadMessage />
             {children}
         </div>
+        <ModalMessage />
     </div>
 );
 
 function AdminRoute({ component: Component, ...rest }) {
 
-    const { instance } = useMsal();
-    const _isAuthenticated = useIsAuthenticated();
-    const _activeAccount = instance.getActiveAccount();
-    //Check for is authenticated. Check individual permissions - ie can manage marketplace items.
-    var isAuthorized = _isAuthenticated && _activeAccount != null && (rest.roles == null || isInRoles(_activeAccount, rest.roles));
+    const { isAuthenticated, isAuthorized, redirectUrl } = useLoginStatus(rest.location, rest.roles);
 
     return (
         <Route
             {...rest}
-            render={props => isAuthorized  ?
+            render={props => isAuthenticated && isAuthorized ?
                 (<AdminLayout><Component {...props} /></AdminLayout>) :
-                (<Redirect to="/" />)
+                (<Redirect to={redirectUrl} />)
             }
         />
     );
