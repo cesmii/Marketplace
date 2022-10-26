@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useHistory, useParams } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 import { useMsal } from "@azure/msal-react";
 import { axiosInstance } from "../services/AxiosService";
+import { useLoginStatus } from '../components/OnLoginHandler';
 
 import { AppSettings } from '../utils/appsettings'
 import { generateLogMessageString } from '../utils/UtilityService'
@@ -30,8 +31,10 @@ function Home() {
     // Region: Initialization
     //-------------------------------------------------------------------
     const history = useHistory();
+    const { returnUrl } = useParams();
     const { instance } = useMsal();
     const _activeAccount = instance.getActiveAccount();
+    const { isAuthenticated, isAuthorized } = useLoginStatus(null, [AppSettings.AADUserRole]);
     const [_refreshData, setRefreshData] = useState(true);
     //const [_dataRows, setDataRows] = useState({
     //    featured: [], new: [], popular: []
@@ -44,6 +47,12 @@ function Home() {
     const { loadingProps, setLoadingProps } = useLoadingContext();
     //make a copy of this. We don't want to update the global search state unless 
     const [_searchCriteriaLocal, setSearchCriteriaLocal] = useState(null);
+
+    //check for logged in status - redirect to home page/return url if already logged in.
+    if (history.location.pathname.indexOf('/admin/returnUrl=') > -1 && returnUrl != null && isAuthenticated && isAuthorized) {
+        //set this for downstream use post successful silent login
+        history.push(returnUrl ? decodeURIComponent(returnUrl) : '/');
+    }
 
     //-------------------------------------------------------------------
     // Region: Get data 
