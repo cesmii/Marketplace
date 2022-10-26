@@ -19,6 +19,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.Identity.Web;
+using Microsoft.IdentityModel.Logging;
 
 using NLog;
 using NLog.Extensions.Logging;
@@ -34,7 +35,7 @@ using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.JobManager;
-using Microsoft.IdentityModel.Logging;
+using CESMII.Marketplace.Api.Shared.Extensions;
 
 namespace CESMII.Marketplace.Api
 {
@@ -60,7 +61,7 @@ namespace CESMII.Marketplace.Api
             //TBD - Mongo db - log to DB
             //NLog.LogManager.Configuration.Variables["connectionString"] = connectionStringProfileDesigner;
             NLog.LogManager.Configuration.Variables["appName"] = "CESMII-Marketplace";
-           
+
 
             //marketplace and related data
             services.AddScoped<IMongoRepository<MarketplaceItem>, MongoRepository<MarketplaceItem>>();
@@ -97,13 +98,13 @@ namespace CESMII.Marketplace.Api
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddSingleton<ConfigUtil>();  //helper to allow us to bind to app settings data 
             services.AddSingleton<MailRelayService>();  //helper for emailing
-            services.AddSingleton<MongoClientGlobal>();  
-            services.AddScoped<IJobFactory, JobFactory>();  
-            services.AddScoped<IHttpApiFactory, HttpApiFactory>();  
+            services.AddSingleton<MongoClientGlobal>();
+            services.AddScoped<IJobFactory, JobFactory>();
+            services.AddScoped<IHttpApiFactory, HttpApiFactory>();
 
             //Cloud Lib
             services.AddSingleton<Opc.Ua.CloudLib.Client.UACloudLibClient>();
-            services.AddSingleton<CloudLibClient.ICloudLibWrapper,CloudLibClient.CloudLibWrapper>();
+            services.AddSingleton<CloudLibClient.ICloudLibWrapper, CloudLibClient.CloudLibWrapper>();
             services.AddScoped<ICloudLibDAL<MarketplaceItemModel>, CloudLibDAL>();
 
             //AAD - no longer need this
@@ -161,6 +162,7 @@ namespace CESMII.Marketplace.Api
             // Add permission authorization requirements.
             services.AddAuthorization(options =>
             {
+                /*
                 // Ability to...
                 options.AddPolicy(
                     nameof(PermissionEnum.CanManageMarketplace),
@@ -174,6 +176,11 @@ namespace CESMII.Marketplace.Api
                 options.AddPolicy(
                     nameof(PermissionEnum.CanManageJobDefinitions),
                     policy => policy.Requirements.Add(new PermissionRequirement(PermissionEnum.CanManageJobDefinitions)));
+				*/
+                // this "permission" is set once AD user has a mapping to a user record in the Mktplace DB
+                options.AddPolicy(
+                    nameof(PermissionEnum.UserAzureADMapped),
+                    policy => policy.Requirements.Add(new PermissionRequirement(PermissionEnum.UserAzureADMapped)));
             });
 
             services.AddCors(options =>
@@ -264,6 +271,8 @@ namespace CESMII.Marketplace.Api
 
             // Enable authentications (Jwt in our case)
             app.UseAuthentication();
+
+            app.UseMiddleware<UserAzureADMapping>();
 
             app.UseAuthorization();
 

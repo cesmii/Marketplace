@@ -96,7 +96,7 @@ export const AppSettings = {
         }
     }
     , MsalScopes: [process.env.REACT_APP_MSAL_SCOPE]  //tied to scope defined in app registration / scope, set in Azure AAD
-    
+    , AADUserRole: "cesmii.marketplace.user"
 }
 
 export const LookupData = {

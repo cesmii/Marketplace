@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 
 import axiosInstance from '../services/AxiosService'
 import { useLoadingContext } from "./contexts/LoadingContext";
@@ -17,6 +18,9 @@ export const OnLookupLoad = () => {
     // Region: Initialization
     //-------------------------------------------------------------------
     const { loadingProps, setLoadingProps } = useLoadingContext();
+    const { instance } = useMsal();
+    const _activeAccount = instance.getActiveAccount();
+    const _isAuthenticated = useIsAuthenticated() && _activeAccount != null;
 
     //-------------------------------------------------------------------
     // Region: hooks
@@ -24,9 +28,9 @@ export const OnLookupLoad = () => {
     //-------------------------------------------------------------------
     useEffect(() => {
         // Load lookup data upon certain triggers in the background
-        async function fetchLookupData() {
+        async function fetchData() {
 
-            var url = `lookup/all`;
+            const url = `lookup/all`;
             console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
 
             await axiosInstance.get(url).then(result => {
@@ -34,15 +38,18 @@ export const OnLookupLoad = () => {
                     //set the data in local storage
                     setLoadingProps({
                         lookupDataStatic: result.data,
-                        refreshLookupData: false
+                        refreshLookupData: false,
+                        lookupDataRefreshed: loadingProps.lookupDataRefreshed + 1
                     });
                 } else {
                     setLoadingProps({
                         lookupDataStatic: null,
-                        refreshLookupData: false
+                        refreshLookupData: false,
+                        lookupDataRefreshed: loadingProps.lookupDataRefreshed + 1
                     });
                 }
             }).catch(e => {
+                setLoadingProps({ refreshLookupData: false });
                 if (e.response && e.response.status === 401) {
                 }
                 else {
@@ -50,17 +57,12 @@ export const OnLookupLoad = () => {
                     console.log(e);
                 }
             });
-        };
-
-        if (loadingProps.lookupDataStatic == null || loadingProps.refreshLookupData === true) {
-            //console.log(generateLogMessageString('useEffect||refreshLookupData||Trigger fetch', CLASS_NAME));
-            fetchLookupData();
         }
 
-        //this will execute on unmount
-        return () => {
-            //console.log(generateLogMessageString('useEffect||refreshLookupData||Cleanup', CLASS_NAME));
-        };
+        if (loadingProps.lookupDataStatic == null || loadingProps.refreshLookupData === true) {
+            fetchData();
+        }
+
     }, [loadingProps.lookupDataStatic, loadingProps.refreshLookupData]);
 
     //-------------------------------------------------------------------
@@ -70,7 +72,7 @@ export const OnLookupLoad = () => {
     useEffect(() => {
         async function fetchData() {
 
-            var url = `lookup/searchcriteria`;
+            const url = `lookup/searchcriteria`;
             console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
 
             await axiosInstance.get(url).then(result => {
@@ -94,6 +96,7 @@ export const OnLookupLoad = () => {
                 }
 
             }).catch(e => {
+                setLoadingProps({ refreshSearchCriteria: false });
                 if ((e.response && e.response.status === 401) || e.toString().indexOf('Network Error') > -1) {
                     //do nothing, this is handled in routes.js using common interceptor
                     //setAuthTicket(null); //the call of this will clear the current user and the token
@@ -110,62 +113,56 @@ export const OnLookupLoad = () => {
         //trigger retrieval of lookup data - if necessary
         if (loadingProps == null || loadingProps.searchCriteria == null || loadingProps.searchCriteria.filters == null
             || loadingProps.refreshSearchCriteria) {
-            //console.log(generateLogMessageString('useEffect||refreshSearchCriteria||Trigger fetch', CLASS_NAME));
             fetchData();
         }
 
-        //this will execute on unmount
-        return () => {
-            //console.log(generateLogMessageString('useEffect||refreshSearchCriteria||Cleanup', CLASS_NAME));
-        };
-
     }, [loadingProps.searchCriteria, loadingProps.refreshSearchCriteria]);
 
+    /*
+    //-------------------------------------------------------------------
+    // Region: hooks
+    // useEffect - load & cache favorites list
+    //-------------------------------------------------------------------
+    useEffect(() => {
+        // Load lookup data upon certain triggers in the background
+        async function fetchData() {
 
-    ////-------------------------------------------------------------------
-    //// Region: hooks
-    //// useEffect - load & cache favorites list
-    ////-------------------------------------------------------------------
-    //useEffect(() => {
-    //    // Load lookup data upon certain triggers in the background
-    //    async function fetchData() {
+            const url = `marketplace/lookup/favorites`;
+            console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
 
-    //        var url = `marketplace/lookup/favorites`;
-    //        console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
+            await axiosInstance.get(url).then(result => {
+                if (result.status === 200) {
+                    //set the data in local storage
+                    setLoadingProps({
+                        favoritesList: result.data,
+                        refreshFavoritesList: false
+                    });
+                } else {
+                    setLoadingProps({
+                        favoritesList: null,
+                        refreshFavoritesList: false
+                    });
+                }
+            }).catch(e => {
+                setLoadingProps({refreshFavoritesList: false});
+                if (e.response && e.response.status === 401) {
+                }
+                else {
+                    console.log(generateLogMessageString('useEffect||fetchFavorites||' + JSON.stringify(e), CLASS_NAME, 'error'));
+                    console.log(e);
+                }
+            });
+        }
 
-    //        await axiosInstance.get(url).then(result => {
-    //            if (result.status === 200) {
-    //                //set the data in local storage
-    //                setLoadingProps({
-    //                    favoritesList: result.data,
-    //                    refreshFavoritesList: false
-    //                });
-    //            } else {
-    //                setLoadingProps({
-    //                    favoritesList: null,
-    //                    refreshFavoritesList: false
-    //                });
-    //            }
-    //        }).catch(e => {
-    //            if (e.response && e.response.status === 401) {
-    //            }
-    //            else {
-    //                console.log(generateLogMessageString('useEffect||fetchFavorites||' + JSON.stringify(e), CLASS_NAME, 'error'));
-    //                console.log(e);
-    //            }
-    //        });
-    //    };
+        //if not logged in yet, return
+        if (!_isAuthenticated || !loadingProps.refreshFavoritesList) return;
 
-    //    if (loadingProps.favoritesList == null || loadingProps.refreshFavoritesList === true) {
-    //        //console.log(generateLogMessageString('useEffect||refreshFavoritesList||Trigger fetch', CLASS_NAME));
-    //        fetchData();
-    //    }
+        if (loadingProps.favoritesList == null || loadingProps.refreshFavoritesList === true) {
+            fetchData();
+        }
 
-    //    //this will execute on unmount
-    //    return () => {
-    //        //console.log(generateLogMessageString('useEffect||refreshLookupData||Cleanup', CLASS_NAME));
-    //    };
-    //}, [loadingProps.favoritesList, loadingProps.refreshFavoritesList]);
+    }, [loadingProps.favoritesList, loadingProps.refreshFavoritesList, _isAuthenticated]);
+    */
 
     //-------------------------------------------------------------------
     // Region: Render

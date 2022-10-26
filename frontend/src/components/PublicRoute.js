@@ -3,6 +3,7 @@ import { Route } from "react-router-dom";
 import DownloadMessage from "./DownloadMessage";
 import { InlineMessage } from "./InlineMessage";
 import { JobMessage } from "./JobMessage";
+import ModalMessage from "./ModalMessage";
 
 const SimpleLayout = ({ children }) => (
 
@@ -13,6 +14,7 @@ const SimpleLayout = ({ children }) => (
             <DownloadMessage />
             {children}
         </div>
+        <ModalMessage />
     </div>
 );
 
@@ -25,6 +27,7 @@ const FilterLayout = ({ children }) => (
             <DownloadMessage />
             {children}
         </div>
+        <ModalMessage />
     </div>
 );
 
