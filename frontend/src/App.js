@@ -99,6 +99,7 @@ function App() {
             <Helmet>
                 <title>{AppSettings.Titles.Main}</title>
                 <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet"></link>
+                <meta name="description" content={AppSettings.MetaDescription.Default} />
             </Helmet>
             <Router>
                 <Navbar />

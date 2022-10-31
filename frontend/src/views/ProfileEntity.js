@@ -213,6 +213,10 @@ function ProfileEntity() {
         <>
             <Helmet>
                 <title>{AppSettings.Titles.Main + " | " + caption}</title>
+                <meta name="description" content=
+                    {`SM Profile: ${caption}. An SM Profile defines the Information Model 
+                        for a manufacturing asset or process, with a goal to arrive at common, re-usable interfaces
+                        for accessing data. ${AppSettings.MetaDescription.Abbreviated}`} />
             </Helmet>
             {(!loadingProps.isLoading && !isLoading) &&
                 <>
