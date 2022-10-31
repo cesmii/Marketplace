@@ -269,6 +269,8 @@ function MarketplaceEntity() {
         <>
             <Helmet>
                 <title>{AppSettings.Titles.Main + " | " + caption}</title>
+                <meta name="description" content=
+                    {`${caption} - ${item.abstract}. ${AppSettings.MetaDescription.Abbreviated}`} />
             </Helmet>
             {(!loadingProps.isLoading && !isLoading) &&
                 <>
