@@ -12,7 +12,7 @@ import SocialMedia from "../components/SocialMedia";
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
 import MarketplaceEntitySidebar from './shared/MarketplaceEntitySidebar';
 
-import { generateLogMessageString, getMarketplaceIconName, isInRole } from '../utils/UtilityService'
+import { convertHtmlToString, generateLogMessageString, getMarketplaceIconName, isInRole } from '../utils/UtilityService'
 import { clearSearchCriteria, toggleSearchFilterSelected } from '../services/MarketplaceService';
 import MarketplaceTileList from './shared/MarketplaceTileList';
 import { SvgVisibilityIcon } from '../components/SVGIcon';
@@ -270,7 +270,7 @@ function MarketplaceEntity() {
             <Helmet>
                 <title>{AppSettings.Titles.Main + " | " + caption}</title>
                 <meta name="description" content=
-                    {`${caption} - ${item.abstract}. ${AppSettings.MetaDescription.Abbreviated}`} />
+                    {`${caption} - ${convertHtmlToString(item.abstract)} ${AppSettings.MetaDescription.Abbreviated}`} />
             </Helmet>
             {(!loadingProps.isLoading && !isLoading) &&
                 <>
