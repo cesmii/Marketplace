@@ -107,6 +107,13 @@ function getlogMessageElapsedTimeModel(message, category, startDate, endDate) {
     return msg;
 }
 
+export function convertHtmlToString(html) {
+    if (!html) return "";
+    const d = document.createElement('div');
+    d.innerHTML = html; //"<p>Hi there</p>...";
+    return (d.textContent || d.innerText);
+}
+
 ///--------------------------------------------------------------------------
 /// Create a timestamp value in a consistent manner
 ///--------------------------------------------------------------------------

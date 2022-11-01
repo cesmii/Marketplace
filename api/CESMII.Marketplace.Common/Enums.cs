@@ -34,7 +34,11 @@
         GeneralUser = 2,
 
         [Description("cesmii.marketplace.jobadmin")]
-        CanManageJobDefinitions = 3
+        CanManageJobDefinitions = 3,
+
+        [Description("UserAzureADMapped")]
+        UserAzureADMapped = 130
+
     }
 
     public enum TaskStatusEnum
