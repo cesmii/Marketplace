@@ -69,7 +69,7 @@ function Navbar() {
                                     href="/contact-us/contribute">Contribute</a>
                             </li>
                             {/*Per DW, only show login button when on /admin page for now. */}
-                            {(history.location.pathname === "/admin" || history.location.pathname.indexOf("/admin/returnUrl=") > -1  && (!isAuthenticated)) &&
+                            {((history.location.pathname === "/admin" || history.location.pathname.indexOf("/admin/returnUrl=") > -1)  && (!isAuthenticated)) &&
                                 <LoginButton />
                             }
                             {renderAdminMenu()}
