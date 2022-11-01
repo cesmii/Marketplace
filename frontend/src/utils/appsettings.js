@@ -22,6 +22,10 @@ export const AppSettings = {
     , TrackAnalytics: process.env.REACT_APP_USE_GOOGLE_ANALYTICS  //false in dev, true in prod
     , PageSize: 10
     , PageSizeOptions: { FrontEnd: [10, 25, 50], Admin: [10, 25, 50, 1000] }
+    , MetaDescription: {
+        Default: 'The SM Marketplace is akin to an "App Store" where developers of Operational Technology (OT) applications can make their products available for use with the CESMII Smart Manufacturing Innovation Platform (SMIP) and for use in developing solutions to customer manufacturing use cases. The marketplace also includes SM Profiles representing structured information for devices, machines and processes. Profiles and applications are initially created for the SMIP SM Marketplace through institute funded projects, including Enabling R&D projects and Innovation projects.  And in the future, they will be crowd sourced through industry as a whole.',
+        Abbreviated: 'The SM Marketplace helps developers of Operational Technology (OT) applications make their products available for use within the Smart Manufacturing community.'
+    }
     , DateSettings: {
         DateFormat: 'M/d/yyyy'
         , DateFormat_Grid: 'MM/dd/yyyy'
@@ -96,7 +100,7 @@ export const AppSettings = {
         }
     }
     , MsalScopes: [process.env.REACT_APP_MSAL_SCOPE]  //tied to scope defined in app registration / scope, set in Azure AAD
-    
+    , AADUserRole: "cesmii.marketplace.user"
 }
 
 export const LookupData = {

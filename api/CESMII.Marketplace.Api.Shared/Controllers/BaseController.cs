@@ -28,20 +28,22 @@
         /// Simply use the new keyword to override.
         /// </summary>
         protected readonly ILogger<TController> _logger;
-        protected readonly UserDAL _dalUser;
         protected readonly ConfigUtil _configUtil;
         protected readonly MailConfig _mailConfig;
+        protected readonly UserDAL _dalUser;
 
         protected string UserID => LocalUser.ID;
 
-        private UserModel _user; 
-        protected UserModel LocalUser { 
-            get {
+        private UserModel _user;
+        protected UserModel LocalUser
+        {
+            get
+            {
                 if (_user == null)
                 {
-                    _user = InitLocalUser();
+                    _user = User.GetUserAAD(); // InitLocalUser();
                 }
-                return _user; 
+                return _user;
             }
         }
 
@@ -87,7 +89,7 @@
             return sb;
         }
 
-        protected async Task<bool> EmailRequestInfo(string subject, string body, MailRelayService _mailRelayService)
+		protected async Task<bool> EmailRequestInfo(string subject, string body, MailRelayService _mailRelayService)
         {
             var message = new MailMessage
             {
@@ -98,55 +100,6 @@
             };
 
             return await _mailRelayService.SendEmail(message);
-        }
-
-        protected UserModel InitLocalUser() {
-
-            UserModel result = null;
-
-            //extract user name from identity passed in via token
-            //check if that user record is in DB. If not, add it.
-            var userAAD = User.GetUserAAD();
-            var count = _dalUser.Count(x => x.ObjectIdAAD.ToLower().Equals(userAAD.ObjectIdAAD));
-            switch (count)
-            {
-                case 1:
-                    result = _dalUser.GetByIdAAD(userAAD.ObjectIdAAD);
-                    if (result == null)
-                    {
-                        _logger.LogWarning($"OnAADLogin||Could not update existing user: {userAAD.ObjectIdAAD}.");
-                        throw new ArgumentNullException($"On AAD Login, could not update existing user: {userAAD.ObjectIdAAD}.");
-                    }
-                    result.LastLogin = DateTime.UtcNow;
-                    result.DisplayName  = userAAD.DisplayName;
-                    _dalUser.Update(result, userAAD.ObjectIdAAD).Wait();
-                    break;
-                case 0:
-                    result = new UserModel()
-                    {
-                        ObjectIdAAD = userAAD.ObjectIdAAD,
-                        DisplayName = userAAD.DisplayName,
-                        LastLogin = DateTime.UtcNow
-                    };
-                    result.ID = _dalUser.Add(result, userAAD.ObjectIdAAD).Result;
-                    break;
-                default:
-                    _logger.LogWarning($"OnAADLogin||More than one Marketplace user found with user name {userAAD.ObjectIdAAD}.");
-                    throw new ArgumentNullException($"On AAD Login, more than one Marketplace user found with user name {userAAD.ObjectIdAAD}.");
-            }
-
-            //apply add'l claims not stored in db
-            //result.DisplayName = userAAD.DisplayName;
-            result.UserName = userAAD.UserName;
-            result.FirstName = userAAD.FirstName;
-            result.LastName = userAAD.LastName;
-            result.Email = userAAD.Email;
-            result.Roles = userAAD.Roles;
-            result.Scope = userAAD.Scope;
-            result.TenantId = userAAD.TenantId;
-
-            //return success message object
-            return result;
         }
 
         /// <summary>

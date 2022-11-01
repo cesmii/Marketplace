@@ -99,9 +99,17 @@ namespace CESMII.Marketplace.Api.Controllers
         [ProducesResponseType(400)]
         public IActionResult GetMineMsal()
         {
-            //clear out SMIP password so not sent to front end. Change password dialog will force user to enter existing password.
             var result = LocalUser;
+            var usr = _dalUser.GetByIdAAD(result.ObjectIdAAD);
+            if (usr == null) return BadRequest($"User not found for id: {result.ObjectIdAAD}");
+
+            //transfer over data only stored in the markeptplace db
+            result.Organization = usr.Organization;
+            result.SmipSettings = usr.SmipSettings != null ? usr.SmipSettings : new SmipSettings();
+
+            //clear out SMIP password so not sent to front end. Change password dialog will force user to enter existing password.
             result.SmipSettings.Password = "";
+            
             return Ok(result);
         }
 
