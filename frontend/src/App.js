@@ -98,8 +98,10 @@ function App() {
         <div>
             <Helmet>
                 <title>{AppSettings.Titles.Main}</title>
-                <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet"></link>
                 <meta name="description" content={AppSettings.MetaDescription.Default} />
+                <meta property="og:title" content={AppSettings.Titles.Main} />
+                <meta property="og:description" content={AppSettings.MetaDescription.Default} />
+                <link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet"></link>
             </Helmet>
             <Router>
                 <Navbar />

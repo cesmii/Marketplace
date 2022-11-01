@@ -12,7 +12,7 @@ import SocialMedia from "../components/SocialMedia";
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
 import MarketplaceEntitySidebar from './shared/MarketplaceEntitySidebar';
 
-import { convertHtmlToString, generateLogMessageString, getMarketplaceIconName, isInRole } from '../utils/UtilityService'
+import { convertHtmlToString, generateLogMessageString, getImageUrl, getMarketplaceIconName, isInRole } from '../utils/UtilityService'
 import { clearSearchCriteria, toggleSearchFilterSelected } from '../services/MarketplaceService';
 import MarketplaceTileList from './shared/MarketplaceTileList';
 import { SvgVisibilityIcon } from '../components/SVGIcon';
@@ -262,15 +262,24 @@ function MarketplaceEntity() {
     // Region: Render
     //-------------------------------------------------------------------
     //var caption = getMarketplaceCaption(item);
-    var caption = item != null && item.displayName != null ? item.displayName : id;
+    const _caption = item != null && item.displayName != null ? item.displayName : id;
+    const _title = AppSettings.Titles.Main + " | " + _caption;
+    const _typeCaption = item.type == null || item.type.name === null ? 'Smart Manufacturing App'
+        : item.type.name.replace('SM ', 'Smart Manufacturing ');
+    const _description = `${_caption} - ${convertHtmlToString(item.abstract)} ${AppSettings.MetaDescription.Abbreviated}`;
 
     //return final ui
     return (
         <>
             <Helmet>
-                <title>{AppSettings.Titles.Main + " | " + caption}</title>
-                <meta name="description" content=
-                    {`${caption} - ${convertHtmlToString(item.abstract)} ${AppSettings.MetaDescription.Abbreviated}`} />
+                <title>{_title}</title>
+                <meta name="description" content={_description} />
+                <meta property="og:title" content={_title} />
+                <meta property="og:description" content={_description} />
+                <meta property="og:type" content={_typeCaption} />
+                {item.imageLandscape &&
+                    <meta property="og:image" content={getImageUrl(item.imageLandscape)} />
+                }
             </Helmet>
             {(!loadingProps.isLoading && !isLoading) &&
                 <>

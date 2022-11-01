@@ -6,7 +6,7 @@ import axiosInstance from "../services/AxiosService";
 import { AppSettings } from '../utils/appsettings';
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
-import { cleanFileName, generateLogMessageString, getMarketplaceIconName, scrollTopScreen } from '../utils/UtilityService'
+import { cleanFileName, generateLogMessageString, getImageUrl, getMarketplaceIconName, scrollTopScreen } from '../utils/UtilityService'
 import MarketplaceTileList from './shared/MarketplaceTileList';
 
 import './styles/MarketplaceEntity.scss';
@@ -206,17 +206,26 @@ function ProfileEntity() {
     // Region: Render
     //-------------------------------------------------------------------
     //var caption = getMarketplaceCaption(item);
-    var caption = item != null && item.displayName != null ? item.displayName : id;
+    const _caption = item != null && item.displayName != null ? item.displayName : id;
+    const _title = AppSettings.Titles.Main + " | " + _caption;
+    const _typeCaption = item.type == null || item.type.name === null ? 'Smart Manufacturing App'
+        : item.type.name.replace('SM ', 'Smart Manufacturing ');
+    const _description = `SM Profile: ${_caption}. An SM Profile defines the Information Model 
+                        for a manufacturing asset or process, with a goal to arrive at common, re-usable interfaces
+                        for accessing data. ${AppSettings.MetaDescription.Abbreviated}`;
 
     //return final ui
     return (
         <>
             <Helmet>
-                <title>{AppSettings.Titles.Main + " | " + caption}</title>
-                <meta name="description" content=
-                    {`SM Profile: ${caption}. An SM Profile defines the Information Model 
-                        for a manufacturing asset or process, with a goal to arrive at common, re-usable interfaces
-                        for accessing data. ${AppSettings.MetaDescription.Abbreviated}`} />
+                <title>{_title}</title>
+                <meta name="description" content={_description} />
+                <meta property="og:title" content={_title} />
+                <meta property="og:description" content={_description} />
+                <meta property="og:type" content={_typeCaption} />
+                {item.imageLandscape &&
+                    <meta property="og:image" content={getImageUrl(item.imageLandscape)} />
+                }
             </Helmet>
             {(!loadingProps.isLoading && !isLoading) &&
                 <>
