@@ -108,7 +108,13 @@ function Navbar() {
                             }
                             {(isInRole(_activeAccount, 'cesmii.marketplace.jobadmin')) &&
                                 <>
-                                    <Dropdown.Item eventKey="8" href="/admin/jobdefinition/list">Manage Job Definitions</Dropdown.Item>
+                                    <Dropdown.Item eventKey="10" href="/admin/jobdefinition/list">Manage Job Definitions</Dropdown.Item>
+                                    <Dropdown.Divider />
+                                </>
+                            }
+                            {(isInRole(_activeAccount, 'cesmii.marketplace.marketplaceadmin')) &&
+                                <>
+                                    <Dropdown.Item eventKey="11" href="/admin/sitemap/generate">Generate Sitemap...</Dropdown.Item>
                                     <Dropdown.Divider />
                                 </>
                             }
