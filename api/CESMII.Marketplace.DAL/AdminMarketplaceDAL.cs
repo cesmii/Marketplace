@@ -242,6 +242,7 @@
                         _lookupItemsAll.Where(x => x.LookupType.EnumValue.Equals(LookupTypeEnum.SmItemType)).ToList()),
                     AuthorId = entity.AuthorId,
                     Created = entity.Created,
+                    Updated = entity.Updated,
                     PublishDate = entity.PublishDate,
                     Version = entity.Version,
                     //Type = new LookupItemModel() { ID = entity.TypeId, Name = entity.Type.Name }

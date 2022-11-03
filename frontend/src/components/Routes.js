@@ -25,6 +25,7 @@ import AdminMarketplaceList from '../views/admin/AdminMarketplaceList'
 import AdminPublisherList from '../views/admin/AdminPublisherList'
 import AdminJobDefinitionList from '../views/admin/AdminJobDefinitionList'
 import AdminJobDefinitionEntity from '../views/admin/AdminJobDefinitionEntity'
+import SitemapGenerator from '../views/admin/SitemapGenerator'
 import AccountProfile from '../views/AccountProfile'
 
 //const CLASS_NAME = "Routes";
@@ -66,6 +67,7 @@ function Routes() {
             <AdminRoute path="/admin/lookup/:id" component={AdminLookupEntity} roles={['cesmii.marketplace.marketplaceadmin']} />
             <AdminRoute path="/admin/jobDefinition/list" component={AdminJobDefinitionList} roles={['cesmii.marketplace.jobadmin']} />
             <AdminRoute path="/admin/jobDefinition/:id" component={AdminJobDefinitionEntity} roles={['cesmii.marketplace.jobadmin']} />
+            <AdminRoute path="/admin/sitemap/generate" component={SitemapGenerator} roles={['cesmii.marketplace.marketplaceadmin']} />
 
             <AdminRoute path="/account" component={AccountProfile} />
 
