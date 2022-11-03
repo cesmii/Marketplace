@@ -26,6 +26,11 @@
             _dalLookup = dalLookup;
         }
 
+        public MarketplaceUtil(IDal<LookupItem, LookupItemModel> dalLookup)
+        {
+            _dalLookup = dalLookup;
+        }
+
         public List<MarketplaceItemModel> SimilarItems(MarketplaceItemModel item)
         {
             //union passed in list w/ lookup list.
