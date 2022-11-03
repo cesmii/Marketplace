@@ -5,6 +5,7 @@ import { useLoadingContext } from "../../components/contexts/LoadingContext";
 import { AppSettings } from '../../utils/appsettings';
 import { generateLogMessageString } from '../../utils/UtilityService';
 import { Form } from 'react-bootstrap';
+import { Helmet } from 'react-helmet';
 
 const CLASS_NAME = "SitemapGenerator";
 
