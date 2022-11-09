@@ -162,7 +162,7 @@ function Home() {
             var url = `marketplace/featured`;
             console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
 
-            axiosInstance.post(url, loadingProps).then(result => {
+            axiosInstance.post(url).then(result => {
                 if (result.status === 200) {
 
                     //set state on fetch of data
@@ -189,7 +189,7 @@ function Home() {
             var url = `marketplace/recent`;
             console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
 
-            await axiosInstance.post(url, loadingProps).then(result => {
+            await axiosInstance.post(url).then(result => {
                 if (result.status === 200) {
 
                     //set state on fetch of data
@@ -217,7 +217,7 @@ function Home() {
             var url = `marketplace/popular`;
             console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
 
-            await axiosInstance.post(url, loadingProps).then(result => {
+            await axiosInstance.post(url).then(result => {
                 if (result.status === 200) {
 
                     //set state on fetch of data

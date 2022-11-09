@@ -143,6 +143,31 @@
 
         }
 
+        /// <summary>
+        /// This should be used when getting all sites and the calling code should pass in the where clause.
+        /// </summary>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
+        public override DALResult<MarketplaceItemAnalyticsModel> Where(Func<MarketplaceItemAnalytics, bool> predicate, int? skip, int? take, bool returnCount = false, bool verbose = false,
+            params OrderByExpression<MarketplaceItemAnalytics>[] orderByExpressions)
+        {
+            //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
+            var data = _repo.FindByCondition(
+                predicate,
+                skip, take, orderByExpressions);
+            var count = returnCount ? _repo.Count(predicate) : 0;
+
+            //map the data to the final result
+            var result = new DALResult<MarketplaceItemAnalyticsModel>
+            {
+                Count = count,
+                Data = MapToModels(data.ToList(), verbose),
+                SummaryData = null
+            };
+            return result;
+
+        }
+
         protected override MarketplaceItemAnalyticsModel MapToModel(MarketplaceItemAnalytics entity, bool verbose = false)
         {
             if (entity != null)
