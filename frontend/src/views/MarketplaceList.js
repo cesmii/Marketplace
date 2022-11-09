@@ -274,10 +274,14 @@ function MarketplaceList() {
     //-------------------------------------------------------------------
     // Region: Render final output
     //-------------------------------------------------------------------
+    const _description = `Search the CESMII SM Marketplace Library for apps, hardware and SM Profiles that can integrate into your SM Innovation Platform. ${AppSettings.MetaDescription.Abbreviated}`;
     return (
         <>
             <Helmet>
                 <title>{AppSettings.Titles.Main + " | " + caption}</title>
+                <meta name="description" content={_description} />
+                <meta property="og:title" content={AppSettings.Titles.Main + " | " + caption} />
+                <meta property="og:description" content={_description} />
             </Helmet>
             {renderHeaderRow()}
 

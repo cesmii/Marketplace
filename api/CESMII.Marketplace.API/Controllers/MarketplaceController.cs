@@ -63,7 +63,7 @@ namespace CESMII.Marketplace.Api.Controllers
         [HttpPost, Route("home")]
         [ProducesResponseType(200, Type = typeof(MarketplaceHomeModel))]
         [ProducesResponseType(400)]
-        public IActionResult Home()
+        public async Task<IActionResult> Home()
         {
             var result = new MarketplaceHomeModel
             {
@@ -73,8 +73,8 @@ namespace CESMII.Marketplace.Api.Controllers
                 new OrderByExpression<MarketplaceItem>() { Expression = x => x.PublishDate, IsDescending = true }).Data
             };
             //calculate most popular based on analytics counts
-            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
-            result.PopularItems = util.PopularItems();
+            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
+            result.PopularItems = await util.PopularItems();
 
             return Ok(result);
         }
@@ -90,7 +90,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 x => x.IsFeatured && x.IsActive
             };
             //limit to publish status of live
-            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
             predicates.Add(util.BuildStatusFilterPredicate());
 
             var result = _dal.Where(predicates, null, null, false, false,
@@ -109,7 +109,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 x => x.IsActive
             };
             //limit to publish status of live
-            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
             predicates.Add(util.BuildStatusFilterPredicate());
 
             //trim down to 3 most recent 
@@ -121,11 +121,11 @@ namespace CESMII.Marketplace.Api.Controllers
         [HttpPost, Route("popular")]
         [ProducesResponseType(200, Type = typeof(List<MarketplaceItemModel>))]
         [ProducesResponseType(400)]
-        public IActionResult GetPopular()
+        public async Task<IActionResult> GetPopular()
         {
             //calculate most popular based on analytics counts
-            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
-            var result = util.PopularItems();
+            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
+            var result = await util.PopularItems();
             return Ok(result);
         }
         #endregion
@@ -168,7 +168,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 result.Analytics = analytic;
             }
             //get related items
-            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
             result.SimilarItems = util.SimilarItems(result);
 
             return Ok(result);
@@ -221,7 +221,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 result.Analytics = analytic;
             }
             //get related items
-            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
             result.SimilarItems = util.SimilarItems(result);
 
             return Ok(result);
@@ -420,7 +420,7 @@ namespace CESMII.Marketplace.Api.Controllers
             , bool useSpecialTypeSelection
             , bool liveOnly = true)
         {
-            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
 
             //lowercase model.query
             model.Query = string.IsNullOrEmpty(model.Query) ? model.Query : model.Query.ToLower();
@@ -597,7 +597,7 @@ namespace CESMII.Marketplace.Api.Controllers
             if (pubs.Count == 0)
             {
                 //NEW: now search CloudLib.
-                result = await _dalCloudLib.Where(query,
+                result = await _dalCloudLib.Where(query, null,
                     cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
                     verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList(),
                     _configUtil.CloudLibSettings?.ExcludedNodeSets);
