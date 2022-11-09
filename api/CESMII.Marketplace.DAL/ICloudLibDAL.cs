@@ -30,11 +30,12 @@
         /// are being sent into the generic keywords search which searches on lots of stuff. 
         /// </remarks>
         /// <param name="query"></param>
+        /// <param name="ids"></param>
         /// <param name="processes"></param>
         /// <param name="verticals"></param>
         /// <param name="exclude">List of namespace uris to exclude from results</param>
         /// <returns></returns>
-        Task<List<TModel>> Where(string query, List<string> processes = null, List<string> verticals = null, List<string> exclude = null);
+        Task<List<TModel>> Where(string query, List<string> ids = null, List<string> processes = null, List<string> verticals = null, List<string> exclude = null);
 
     }
 

@@ -80,15 +80,19 @@
             return result;
         }
 
-        public async Task<List<MarketplaceItemModel>> Where(string query, 
-            List<string> processes = null, List<string> verticals = null, List<string> exclude = null)
+        public async Task<List<MarketplaceItemModel>> Where(string query,
+            List<string> ids = null, List<string> processes = null, List<string> verticals = null, List<string> exclude = null)
         {
             //Note - splitting out each word in query into a separate string in the list
             //Per team, don't split out query into multiple keyword items
             //var keywords = string.IsNullOrEmpty(query) ? new List<string>() : query.Split(" ").ToList();
             var keywords = new List<string>();
 
-            //append processes, verticals
+            //append list of ids, processes, verticals
+            if (ids != null)
+            {
+                keywords = keywords.Union(ids).ToList();
+            }
             if (processes != null)
             { 
                 keywords = keywords.Union(processes).ToList();

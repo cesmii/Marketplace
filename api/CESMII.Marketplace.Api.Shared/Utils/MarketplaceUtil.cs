@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading.Tasks;
 
     using CESMII.Marketplace.Data.Entities;
     using CESMII.Marketplace.DAL;
@@ -13,15 +14,18 @@
     public class MarketplaceUtil
     {
         private readonly IDal<MarketplaceItem, MarketplaceItemModel> _dalMarketplace;
+        private readonly ICloudLibDAL<MarketplaceItemModel> _dalCloudLib;
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
         private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
 
         public MarketplaceUtil(IDal<MarketplaceItem, MarketplaceItemModel> dalMarketplace,
+            ICloudLibDAL<MarketplaceItemModel> dalCloudLib,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
             IDal<LookupItem, LookupItemModel> dalLookup
             )
         {
             _dalMarketplace = dalMarketplace;
+            _dalCloudLib = dalCloudLib;
             _dalAnalytics = dalAnalytics;
             _dalLookup = dalLookup;
         }
@@ -90,35 +94,44 @@
             return result;
         }
 
-        public List<MarketplaceItemModel> PopularItems()
+        public async Task<List<MarketplaceItemModel>> PopularItems()
         {
             //get list of popular items in analytics collection
             //build list of order bys to sort result by most important factors first - this is essentially giving us most popular 
             var orderBys = new List<OrderByExpression<MarketplaceItemAnalytics>>
             {
                 new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.DownloadCount, IsDescending = true },
+                new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.PageVisitCount, IsDescending = true },
                 new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.LikeCount, IsDescending = true },
                 new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.ShareCount, IsDescending = true },
                 new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.MoreInfoCount, IsDescending = true },
-                new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.PageVisitCount, IsDescending = true },
                 new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.DislikeCount, IsDescending = false }
             };
 
-            var popular = _dalAnalytics.GetAllPaged(null, 4, false, false, orderBys.ToArray()).Data.Select(x => x.MarketplaceItemId).ToArray();
+            var popularMarketplace = _dalAnalytics.Where(x => string.IsNullOrEmpty(x.CloudLibId), null, 4, false, false, orderBys.ToArray()).Data
+                .Select(x => x.MarketplaceItemId).ToArray();
+            var popularCloudLib = _dalAnalytics.Where(x => !string.IsNullOrEmpty(x.CloudLibId), null, 4, false, false, orderBys.ToArray()).Data
+                .Select(x => x.CloudLibId).ToList();
 
             //now get the marketplace items with popular rankings
             //filter our inactive and non-live items
-            var predicates = new List<Func<MarketplaceItem, bool>>
+            var predicatesMarketplace = new List<Func<MarketplaceItem, bool>>
             {
                 //limit to isActive
                 x => x.IsActive,
                 //limit to publish status of live
                 this.BuildStatusFilterPredicate(),
                 //only get items which are most popular based on previous query of analytics
-                x => popular.Any(m => m == x.ID.ToString())
+                x => popularMarketplace.Any(m => m == x.ID.ToString())
             };
 
-            return _dalMarketplace.Where(predicates, null, 4, false, false).Data;
+            var itemsMarketplace = _dalMarketplace.Where(predicatesMarketplace, null, 4, false, false).Data;
+
+            //now get the cloudlib items with popular rankings
+            var itemsCloudLib = await _dalCloudLib.Where(null, popularCloudLib, null, null, null);
+
+            return itemsMarketplace.Union(itemsCloudLib).ToList();
+
         }
 
         /// <summary>
