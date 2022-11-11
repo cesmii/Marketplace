@@ -111,7 +111,10 @@ export function convertHtmlToString(html) {
     if (!html) return "";
     const d = document.createElement('div');
     d.innerHTML = html; //"<p>Hi there</p>...";
-    return (d.textContent || d.innerText);
+    var result = (d.textContent || d.innerText);
+    //replace &nbsp;
+    var re = new RegExp(String.fromCharCode(160), "g");
+    return result.replace(re, "");
 }
 
 ///--------------------------------------------------------------------------

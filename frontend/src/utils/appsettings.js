@@ -17,7 +17,7 @@ const _isFirefox = _firefox > 0; // Only needed if you need to support the redir
 ///--------------------------------------------------------------------------
 export const AppSettings = {
     BASE_API_URL: process.env.REACT_APP_BASE_API_URL  //mock api server url - environment specific
-    , Titles: { Anonymous: 'CESMII | SM Marketplace', Main: 'CESMII | SM Marketplace', Caption: "SM Marketplace"}
+    , Titles: { Anonymous: 'SM Marketplace | CESMII', Main: 'SM Marketplace | CESMII', Caption: "SM Marketplace"}
     , GoogleAnalyticsId: 'G-M6FGMLFKM7' //'G-EPPSP1B05X'
     , TrackAnalytics: process.env.REACT_APP_USE_GOOGLE_ANALYTICS  //false in dev, true in prod
     , PageSize: 10

@@ -22,7 +22,8 @@ function PageNotFound() {
     return (
         <>
             <Helmet>
-                <title>{AppSettings.Titles.Main + " | " + caption}</title>
+                <title>{`${caption} | ${AppSettings.Titles.Main}`}</title>
+                <meta property="og:title" content={`${caption} | ${AppSettings.Titles.Main}`} />
             </Helmet>
             {renderHeaderRow()}
             <div className="card p-4">

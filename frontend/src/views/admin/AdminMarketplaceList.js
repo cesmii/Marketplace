@@ -305,7 +305,7 @@ function AdminMarketplaceList() {
     return (
         <>
             <Helmet>
-                <title>{AppSettings.Titles.Main + " Admin | " + caption}</title>
+                <title>{`${caption} | Admin | ${AppSettings.Titles.Main}`}</title>
             </Helmet>
             <div className="row py-2 pb-4">
                 <div className="col-sm-9">
