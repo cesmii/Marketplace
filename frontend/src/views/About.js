@@ -79,7 +79,7 @@ function About() {
     return (
         <>
             <Helmet>
-                <title>{AppSettings.Titles.Main + " | " + _caption}</title>
+                <title>{`${_caption} | ${AppSettings.Titles.Main}`}</title>
             </Helmet>
             {renderAboutMarketplace()}
             {renderMission()}

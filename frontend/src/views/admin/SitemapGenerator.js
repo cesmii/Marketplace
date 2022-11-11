@@ -276,7 +276,7 @@ function SitemapGenerator() {
     return (
         <>
             <Helmet>
-                <title>{AppSettings.Titles.Main + " | Sitemap Generator"}</title>
+                <title>{`Sitemap Generator | Admin | ${AppSettings.Titles.Main}`}</title>
             </Helmet>
             <div className="row mb-2" >
                 <div className="col-12 d-flex" >

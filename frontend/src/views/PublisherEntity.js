@@ -5,7 +5,7 @@ import axiosInstance from "../services/AxiosService";
 import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 
 import { AppSettings } from '../utils/appsettings';
-import { generateLogMessageString, getMarketplaceIconName, getMarketplaceCaption, isInRole } from '../utils/UtilityService'
+import { generateLogMessageString, getMarketplaceIconName, getMarketplaceCaption, isInRole, convertHtmlToString } from '../utils/UtilityService'
 import { MarketplaceBreadcrumbs } from './shared/MarketplaceBreadcrumbs';
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
 
@@ -224,13 +224,20 @@ function PublisherEntity() {
     //-------------------------------------------------------------------
     // Region: Render
     //-------------------------------------------------------------------
-    var caption = getMarketplaceCaption(item);
+    const _title = `${item.displayName ?? item.name} | Publisher | ${AppSettings.Titles.Main}`;
+    //this might be long.
+    var _description = convertHtmlToString(item.description).trimStart().trimEnd();
+    _description = _description.length > 300 ? _description.substring(0, 300) + '...' : _description;
 
     //return final ui
     return (
         <>
             <Helmet>
-                <title>{AppSettings.Titles.Main + " | " + caption}</title>
+                <title>{_title}</title>
+                <meta name="description" content={_description} />
+                <meta property="og:title" content={_title} />
+                <meta property="og:description" content={_description} />
+                <meta property="og:type" content={'publisher'} />
             </Helmet>
             {(!loadingProps.isLoading && !isLoading) &&
                 <>
