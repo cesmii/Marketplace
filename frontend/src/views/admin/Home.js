@@ -35,7 +35,7 @@ function AdminHome() {
     return (
         <>
             <Helmet>
-                <title>{AppSettings.Titles.Main + " | Admin "+ " | " + caption}</title>
+                <title>{`${caption} | Admin | ${AppSettings.Titles.Main}`}</title>
             </Helmet>
             {renderHeaderRow()}
             <div id="--cesmii-main-content">

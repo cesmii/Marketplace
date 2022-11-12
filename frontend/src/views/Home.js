@@ -406,7 +406,8 @@ function Home() {
     return (
         <>
             <Helmet>
-                <title>{AppSettings.Titles.Main + " | " + _caption}</title>
+                <title>{`${_caption} | ${AppSettings.Titles.Main}`}</title>
+                <meta property="og:title" content={`${_caption} | ${AppSettings.Titles.Main}`} />
             </Helmet>
             {renderHeaderRow()}
             <div className="row" >
