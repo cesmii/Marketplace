@@ -85,7 +85,7 @@ function ErrorPage({ error, resetErrorBoundary }) {
     return (
         <>
             <Helmet>
-                <title>{AppSettings.Titles.Main + " | Error" }</title>
+                <title>{"Error | " + AppSettings.Titles.Main }</title>
             </Helmet>
             <div className="row mt-4 no-gutters vh-100">
             <div className="col-sm-6 mx-auto">

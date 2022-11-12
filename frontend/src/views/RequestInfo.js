@@ -505,10 +505,13 @@ function RequestInfo() {
     // Region: Render
     //-------------------------------------------------------------------
     //return final ui
+    const _title = `${_formDisplay.caption} | ${AppSettings.Titles.Main}`;
+
     return (
         <>
             <Helmet>
-                <title>{AppSettings.Titles.Main + " | " + _formDisplay.caption}</title>
+                <title>{_title}</title>
+                <meta property="og:title" content={_title} />
             </Helmet>
             <div className="row py-2 pb-3" >
                 <div className="col-sm-3 d-flex align-items-center" >

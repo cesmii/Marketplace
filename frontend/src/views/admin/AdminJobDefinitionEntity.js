@@ -639,7 +639,7 @@ function AdminJobDefinitionEntity() {
     return (
         <>
             <Helmet>
-                <title>{AppSettings.Titles.Main + " Admin | " + caption}</title>
+                <title>{`${caption} | Admin | ${AppSettings.Titles.Main}`}</title>
             </Helmet>
             <Form noValidate>
                 {renderHeaderRow()}

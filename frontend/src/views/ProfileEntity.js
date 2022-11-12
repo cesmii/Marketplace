@@ -207,7 +207,7 @@ function ProfileEntity() {
     //-------------------------------------------------------------------
     //var caption = getMarketplaceCaption(item);
     const _caption = item != null && item.displayName != null ? item.displayName : id;
-    const _title = AppSettings.Titles.Main + " | " + _caption;
+    const _title = `${_caption} | ${AppSettings.Titles.Main}`;
     const _typeCaption = item.type == null || item.type.name === null ? 'Smart Manufacturing App'
         : item.type.name.replace('SM ', 'Smart Manufacturing ');
     const _description = `SM Profile: ${_caption}. An SM Profile defines the Information Model 

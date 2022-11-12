@@ -263,10 +263,10 @@ function MarketplaceEntity() {
     //-------------------------------------------------------------------
     //var caption = getMarketplaceCaption(item);
     const _caption = item != null && item.displayName != null ? item.displayName : id;
-    const _title = AppSettings.Titles.Main + " | " + _caption;
+    const _title = `${_caption} | ${AppSettings.Titles.Main}`;
     const _typeCaption = item.type == null || item.type.name === null ? 'Smart Manufacturing App'
         : item.type.name.replace('SM ', 'Smart Manufacturing ');
-    const _description = `${_caption} - ${convertHtmlToString(item.abstract)} ${AppSettings.MetaDescription.Abbreviated}`;
+    const _description = `${convertHtmlToString(item.abstract)} ${AppSettings.MetaDescription.Abbreviated}`;
 
     //return final ui
     return (
