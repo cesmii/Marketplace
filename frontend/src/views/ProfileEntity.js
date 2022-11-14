@@ -10,6 +10,7 @@ import { cleanFileName, generateLogMessageString, getImageUrl, getMarketplaceIco
 import MarketplaceTileList from './shared/MarketplaceTileList';
 
 import './styles/MarketplaceEntity.scss';
+import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
 
 const CLASS_NAME = "ProfileEntity";
 
@@ -226,6 +227,7 @@ function ProfileEntity() {
                 {item.imageLandscape &&
                     <meta property="og:image" content={getImageUrl(item.imageLandscape)} />
                 }
+                {renderSchemaOrgContentMarketplaceItem(item)}
             </Helmet>
             {(!loadingProps.isLoading && !isLoading) &&
                 <>
