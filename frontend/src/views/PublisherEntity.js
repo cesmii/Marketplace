@@ -15,6 +15,7 @@ import SocialMedia from "../components/SocialMedia";
 import { clearSearchCriteria, toggleSearchFilterSelected } from '../services/MarketplaceService';
 import MarketplaceTileList from './shared/MarketplaceTileList';
 import PublisherEntitySidebar from './shared/PublisherEntitySidebar';
+import { renderSchemaOrgContentPublisher } from '../utils/schemaOrgUtil';
 
 const CLASS_NAME = "PublisherEntity";
 
@@ -238,6 +239,7 @@ function PublisherEntity() {
                 <meta property="og:title" content={_title} />
                 <meta property="og:description" content={_description} />
                 <meta property="og:type" content={'publisher'} />
+                {renderSchemaOrgContentPublisher(item)}
             </Helmet>
             {(!loadingProps.isLoading && !isLoading) &&
                 <>
