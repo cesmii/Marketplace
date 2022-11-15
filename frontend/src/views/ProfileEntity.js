@@ -6,7 +6,7 @@ import axiosInstance from "../services/AxiosService";
 import { AppSettings } from '../utils/appsettings';
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
-import { cleanFileName, generateLogMessageString, getImageUrl, getMarketplaceIconName, scrollTopScreen } from '../utils/UtilityService'
+import { cleanFileName, convertHtmlToString, generateLogMessageString, getImageUrl, getMarketplaceIconName, scrollTopScreen } from '../utils/UtilityService'
 import MarketplaceTileList from './shared/MarketplaceTileList';
 
 import './styles/MarketplaceEntity.scss';
@@ -211,9 +211,9 @@ function ProfileEntity() {
     const _title = `${_caption} | ${AppSettings.Titles.Main}`;
     const _typeCaption = item.type == null || item.type.name === null ? 'Smart Manufacturing App'
         : item.type.name.replace('SM ', 'Smart Manufacturing ');
-    const _description = `SM Profile: ${_caption}. An SM Profile defines the Information Model 
+    const _description = `SM Profile: ${_caption}. An SM Profile defines the Information Model
                         for a manufacturing asset or process, with a goal to arrive at common, re-usable interfaces
-                        for accessing data. ${AppSettings.MetaDescription.Abbreviated}`;
+                        for accessing data.`;
 
     //return final ui
     return (
@@ -227,7 +227,7 @@ function ProfileEntity() {
                 {item.imageLandscape &&
                     <meta property="og:image" content={getImageUrl(item.imageLandscape)} />
                 }
-                {renderSchemaOrgContentMarketplaceItem(item)}
+                {renderSchemaOrgContentMarketplaceItem(_title, _description, item)}
             </Helmet>
             {(!loadingProps.isLoading && !isLoading) &&
                 <>

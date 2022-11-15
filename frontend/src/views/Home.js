@@ -20,6 +20,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import '../components/styles/SlickSlider.scss';
 import { clearSearchCriteria } from '../services/MarketplaceService';
+import { renderSchemaOrgContentHome } from '../utils/schemaOrgUtil';
 import './styles/Home.scss';
 
 
@@ -408,6 +409,7 @@ function Home() {
             <Helmet>
                 <title>{`${_caption} | ${AppSettings.Titles.Main}`}</title>
                 <meta property="og:title" content={`${_caption} | ${AppSettings.Titles.Main}`} />
+                {renderSchemaOrgContentHome(`${_caption} | ${AppSettings.Titles.Main}`, AppSettings.MetaDescription.Main)}
             </Helmet>
             {renderHeaderRow()}
             <div className="row" >
