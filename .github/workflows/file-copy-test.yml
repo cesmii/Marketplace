@@ -21,8 +21,23 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ env.NODE_VERSION }}
-    - name: 'Copy robots.Staging.txt into robots.txt'
-      working-directory: ${{ env.GITHUB_WORKSPACE }}/frontend/
+    - name: 'Show readme.MD'
+      run: | 
+        #GITHUB_WORKSPACE - ${{ env.GITHUB_WORKSPACE }}
+        #GITHUB_PATH - ${{ env.GITHUB_PATH }}
+        #GITHUB_ACTION_PATH - ${{ env.GITHUB_ACTION_PATH }}
+        #dir
+        dir
+        cat README.MD
+    - name: '1. Copy robots.Staging.txt into robots.txt'
+      working-directory: ${{ env.GITHUB_PATH }}/frontend/
+      run: | 
+        #copying robots.Staging.txt robots.txt 
+        #cp robots.Staging.txt robots.txt 
+        #viewing file contents
+        cat .env
+    - name: '2. Copy robots.Staging.txt into robots.txt'
+      working-directory: ${{ env.GITHUB_ACTION_PATH }}/frontend/
       run: | 
         #copying robots.Staging.txt robots.txt 
         #cp robots.Staging.txt robots.txt 
