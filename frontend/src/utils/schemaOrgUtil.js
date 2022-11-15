@@ -62,13 +62,7 @@ export function renderSchemaOrgContentMarketplaceItem(title, description, item) 
     if (item.type?.name != null) cats.push(item.type.name);
 
     //manually add keywords for sm profile
-    let keywords = [];
-    if (item.type?.name.toLowerCase() === 'sm profile') {
-        //type of "code" does not support applicationCategory attribute, wipe out values
-        cats = [];
-        keywords.push(item.type.name);
-        keywords.push('OPC UA Nodeset');
-    }
+    if (item.type?.name.toLowerCase() === 'sm profile') cats.push('OPC UA Nodeset');
 
     let result = {
         '@context': 'https://schema.org'
@@ -76,17 +70,38 @@ export function renderSchemaOrgContentMarketplaceItem(title, description, item) 
         , 'name': title
         , 'url': item.namespace != null ? item.namespace : window.location.href
         , 'description': description
-        , 'version': item.version
         , 'image': imageUrl
     };
-    if (cats.length > 0) {
-        result.applicationCategory = cats.join(', ');
-    }
-    if (keywords.length > 0) {
-        result.keywords = keywords.join(', ');
-    }
-    if (item.publisher != null) {
-        result.publisher = { '@type': 'Organization', 'name': item.publisher.displayName };
+
+    //type specific treatment
+    switch (item.type?.name.toLowerCase()) {
+        case "sm hardware":
+            if (cats.length > 0) {
+                result.keywords = cats.join(', ');
+            }
+            if (item.publisher != null) {
+                result.manufacturer = { '@type': 'Organization', 'name': item.publisher.displayName };
+            }
+            break;
+        case "sm profile":
+            if (cats.length > 0) {
+                result.keywords = cats.join(', ');
+            }
+            if (item.publisher != null) {
+                result.publisher = { '@type': 'Organization', 'name': item.publisher.displayName };
+            }
+            result.version = item.version;
+            break;
+        case "sm app":
+        default:
+            if (cats.length > 0) {
+                result.applicationCategory = cats.join(', ');
+            }
+            if (item.publisher != null) {
+                result.publisher = { '@type': 'Organization', 'name': item.publisher.displayName };
+            }
+            result.version = item.version;
+            break;
     }
 
     return (
