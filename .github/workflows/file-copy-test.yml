@@ -21,19 +21,10 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ env.NODE_VERSION }}
-    - name: 'Build React Code - npm install, build'
-      working-directory: ${{ env.WORKING_DIRECTORY }}
-      env:
-        CI: '' #bypass treating-warnings-as-errors-because-process-env-ci-true 
-      run: |
-        # Build the project, then
-        # deploy to Azure Web App.
-        npm install
-        npm run build:staging --if-present
     - name: 'Copy robots.Staging.txt into robots.txt'
-      working-directory: ${{ env.WORKING_DIRECTORY }}
+      working-directory: ${{ GITHUB_WORKSPACE }}/frontend/
       run: | 
         #copying robots.Staging.txt robots.txt 
         #cp robots.Staging.txt robots.txt 
         #viewing file contents
-        cat robots.txt
+        cat .env
