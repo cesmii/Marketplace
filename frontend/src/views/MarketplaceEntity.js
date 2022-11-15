@@ -281,7 +281,7 @@ function MarketplaceEntity() {
                 {item.imageLandscape &&
                     <meta property="og:image" content={getImageUrl(item.imageLandscape)} />
                 }
-                {renderSchemaOrgContentMarketplaceItem(item)}
+                {renderSchemaOrgContentMarketplaceItem(_title, _description, item)}
             </Helmet>
             {(!loadingProps.isLoading && !isLoading) &&
                 <>
