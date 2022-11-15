@@ -13,7 +13,7 @@ env:
 
 jobs:
   Build-and-Deploy-FrontEnd:
-    name: 'Build and Deploy React front End'
+    name: 'File Read me, copy test'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -28,7 +28,16 @@ jobs:
         #GITHUB_ACTION_PATH - ${{ env.GITHUB_ACTION_PATH }}
         #dir
         dir
-        cat README.MD
+        # Readme.md -------------------------
+        cat README.md
+        # .env - 1 -------------------------
+        cat frontend/.env
+        # .env - 2 -------------------------
+        cat frontend/.env
+        #-----------------------------------
+        #GITHUB_WORKSPACE - $GITHUB_WORKSPACE
+        #GITHUB_PATH - $GITHUB_PATH
+        #GITHUB_ACTION_PATH - $GITHUB_ACTION_PATH
     - name: '1. Copy robots.Staging.txt into robots.txt'
       working-directory: ${{ env.GITHUB_PATH }}/frontend/
       run: | 
