@@ -15,7 +15,9 @@ import MarketplaceEntitySidebar from './shared/MarketplaceEntitySidebar';
 import { convertHtmlToString, generateLogMessageString, getImageUrl, getMarketplaceIconName, isInRole } from '../utils/UtilityService'
 import { clearSearchCriteria, toggleSearchFilterSelected } from '../services/MarketplaceService';
 import MarketplaceTileList from './shared/MarketplaceTileList';
+import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
 import { SvgVisibilityIcon } from '../components/SVGIcon';
+
 import color from '../components/Constants';
 import './styles/MarketplaceEntity.scss';
 
@@ -257,7 +259,6 @@ function MarketplaceEntity() {
         );
     }
 
-
     //-------------------------------------------------------------------
     // Region: Render
     //-------------------------------------------------------------------
@@ -280,6 +281,7 @@ function MarketplaceEntity() {
                 {item.imageLandscape &&
                     <meta property="og:image" content={getImageUrl(item.imageLandscape)} />
                 }
+                {renderSchemaOrgContentMarketplaceItem(item)}
             </Helmet>
             {(!loadingProps.isLoading && !isLoading) &&
                 <>
