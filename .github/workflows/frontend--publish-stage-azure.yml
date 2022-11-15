@@ -70,7 +70,7 @@ jobs:
         dir
         echo ''
         echo '#remove Sitemap.xml:'
-        rm sitemap.xml
+        rm frontend/public/sitemap.xml
         echo ''
     - name: 'Build React Code - npm install, build'
       working-directory: ${{ env.WORKING_DIRECTORY }}
