@@ -28,7 +28,8 @@ function SitemapGenerator() {
     const [_items, setItems] = useState(null);
     const [_itemsLoaded, setItemsLoaded] = useState(false);
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const [_isValid, setIsValid] = useState({domainName: true, domainNameFormat: true, deployDate: true, deployDateValid: true});
+    const [_isValid, setIsValid] = useState({ domainName: true, domainNameFormat: true, deployDate: true, deployDateValid: true });
+    const [_xmlSiteMap, setXmlSiteMap] = useState('');
 
     //-------------------------------------------------------------------
     // Region: Get data 
@@ -49,11 +50,11 @@ function SitemapGenerator() {
                     //get most recent change date
                     var maxDate = _item.maxDate;
                     result.data.forEach(itm => {
-                        if (itm.updated != null && Date.parse(itm.updated) > Date.parse(_minDate)) {
+                        if (itm.updated != null && Date.parse(itm.updated) > Date.parse(_item.maxDate)) {
                             maxDate = itm.updated;
                         }
                     });
-                    if (maxDate !== _item.maxDate) setItem({ ..._item, maxDate: maxDate });
+                    if (maxDate !== _item.maxDate) setItem({ ..._item, maxDate: new Date(maxDate) });
 
                     //hide a spinner
                     setLoadingProps({ isLoading: false, message: null });
@@ -86,6 +87,22 @@ function SitemapGenerator() {
         fetchData();
 
     }, [_itemsLoaded]);
+
+
+    //-------------------------------------------------------------------
+    // Region: useEffect
+    //  re-generate sitemap XML - based on certain triggers
+    //-------------------------------------------------------------------
+    useEffect(() => {
+        if (_items == null) return;
+
+        //dynamic items
+        setXmlSiteMap(`<?xml version="1.0" encoding="UTF-8"?>
+    <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    ${generateItems()}
+    </sitemapindex>`);
+
+    }, [_items, _item.deployDate, _item.domainName]);
 
     //-------------------------------------------------------------------
     // Region: Event Handling
@@ -133,9 +150,12 @@ function SitemapGenerator() {
                     var dt = new Date(e.target.value);
                     if (dt.getFullYear() < 2000) return;
                 }
-
+                
                 //update the state
                 _item[e.target.id] = e.target.value === '' ? null : e.target.value;
+                //update maxDate value   //fix one day offset
+                _item.maxDate = new Date(e.target.value);
+                _item.maxDate = new Date(_item.maxDate.setDate(_item.maxDate.getDate() + 1));
                 break;
             default:
                 return;
@@ -191,8 +211,8 @@ function SitemapGenerator() {
                     itm.type === AppSettings.itemTypeCode.smProfile ? `${_item.domainName}/profile/${itm.id}` :
                         `${_item.domainName}/library/${itm.name}`;
             //don't let date be less than min date, otherwise, use updated date
-            const modDate = itm.updated == null ? _minDate :
-                new Date(itm.updated) < new Date(_minDate) ? _minDate : itm.updated;
+            const modDate = itm.updated == null ? _item.maxDate :
+                new Date(itm.updated) < new Date(_item.maxDate) ? _item.maxDate : itm.updated;
             result += `${i === 0 ? '    ' : '                '}<sitemap>
                 <loc>${url}</loc>
                 <lastmod>${formatDate(modDate)}</lastmod>
@@ -267,12 +287,6 @@ function SitemapGenerator() {
     //-------------------------------------------------------------------
     // Region: Render final output
     //-------------------------------------------------------------------
-    //dynamic items
-    var _xmlSiteMap = `<?xml version="1.0" encoding="UTF-8"?>
-    <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    ${generateItems()}
-    </sitemapindex>`;
-
     return (
         <>
             <Helmet>
@@ -289,7 +303,7 @@ function SitemapGenerator() {
             {renderForm()}
             <div className="row" >
                 <div className="col-12" >
-                    {(_items == null) ?
+                    {(_items == null || _xmlSiteMap == null || _xmlSiteMap === '') ?
                         <pre className="border bg-white d-block w-100 p-1">
 
                             Generating sitemap...
