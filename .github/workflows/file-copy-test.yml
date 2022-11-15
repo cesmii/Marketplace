@@ -34,6 +34,6 @@ jobs:
       working-directory: ${{ env.WORKING_DIRECTORY }}
       run: | 
         #copying robots.Staging.txt robots.txt 
-        cp robots.Staging.txt robots.txt 
+        #cp robots.Staging.txt robots.txt 
         #viewing file contents
         cat robots.txt
