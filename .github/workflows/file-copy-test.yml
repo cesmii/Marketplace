@@ -29,7 +29,7 @@ jobs:
         #dir
         dir
         echo 'robots.Staging.txt ---------------------------'
-        cat robots.Staging.txt
+        cat frontend/robots.Staging.txt
         echo '---------------------------'
         echo '---------------------------'
         echo 'robots.txt ---------------------------'
@@ -37,7 +37,7 @@ jobs:
         echo '---------------------------'
         echo '---------------------------'
         echo 'copying robots.txt - staging ---------------------------'
-        cp robots.Staging.txt frontend/public/robots.txt
+        cp frontend/robots.Staging.txt frontend/public/robots.txt
         echo 'robots.txt - revised ---------------------------'
         cat frontend/public/robots.txt
         echo '---------------------------'
