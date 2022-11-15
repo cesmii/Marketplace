@@ -50,19 +50,27 @@ jobs:
         echo '#dir command'
         dir
         echo ''
-        echo '#robots.Staging.txt contents:---------------------------'
+        echo '#robots.Staging.txt contents:'
         cat frontend/robots.Staging.txt
         echo '---------------------------'
         echo ''
-        echo '#robots.txt contents:---------------------------'
+        echo '#robots.txt contents:'
         cat frontend/public/robots.txt
         echo ''
-        echo '#copying robots.txt - staging ---------------------------'
+        echo '#copying robots.txt - staging'
         cp frontend/robots.Staging.txt frontend/public/robots.txt
         echo ''
-        echo '#robots.txt contents REVISED:---------------------------'
+        echo '#robots.txt contents REVISED:'
         cat frontend/public/robots.txt
         echo '---------------------------'
+        echo ''
+    - name: 'Remove sitemap.xml (stage environment only)'
+      run: | 
+        echo '#dir command'
+        dir
+        echo ''
+        echo '#remove Sitemap.xml:'
+        rm frontend/public/sitemap.xml
         echo ''
     - name: 'Build React Code - npm install, build'
       working-directory: ${{ env.WORKING_DIRECTORY }}
