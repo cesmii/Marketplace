@@ -16,6 +16,7 @@ import HeaderSearch from '../components/HeaderSearch';
 import './styles/MarketplaceList.scss';
 import ProfileItemRow from './shared/ProfileItemRow';
 import MarketplaceItemTypeFilter from './shared/MarketplaceItemTypeFilter';
+import { renderSchemaOrgContentMarketplaceItemList } from '../utils/schemaOrgUtil';
 
 const CLASS_NAME = "MarketplaceList";
 const entityInfo = {
@@ -284,6 +285,7 @@ function MarketplaceList() {
                 <meta name="description" content={_description} />
                 <meta property="og:title" content={_title} />
                 <meta property="og:description" content={_description} />
+                {renderSchemaOrgContentMarketplaceItemList(_title, _description)}
             </Helmet>
             {renderHeaderRow()}
 

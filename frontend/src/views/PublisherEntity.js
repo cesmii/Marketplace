@@ -239,7 +239,7 @@ function PublisherEntity() {
                 <meta property="og:title" content={_title} />
                 <meta property="og:description" content={_description} />
                 <meta property="og:type" content={'publisher'} />
-                {renderSchemaOrgContentPublisher(item)}
+                {renderSchemaOrgContentPublisher(_title, _description, item)}
             </Helmet>
             {(!loadingProps.isLoading && !isLoading) &&
                 <>
