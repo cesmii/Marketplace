@@ -22,7 +22,7 @@ jobs:
       with:
         node-version: ${{ env.NODE_VERSION }}
     - name: 'Copy robots.Staging.txt into robots.txt'
-      working-directory: ${{ GITHUB_WORKSPACE }}/frontend/
+      working-directory: ${{ env.GITHUB_WORKSPACE }}/frontend/
       run: | 
         #copying robots.Staging.txt robots.txt 
         #cp robots.Staging.txt robots.txt 
