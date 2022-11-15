@@ -28,27 +28,25 @@ jobs:
         #GITHUB_ACTION_PATH - ${{ env.GITHUB_ACTION_PATH }}
         #dir
         dir
+        echo 'robots.Staging.txt ---------------------------'
+        cat robots.Staging.txt
+        echo '---------------------------'
+        echo '---------------------------'
+        echo 'robots.txt ---------------------------'
+        cat frontend/public/robots.txt
+        echo '---------------------------'
+        echo '---------------------------'
+        echo 'copying robots.txt - staging ---------------------------'
+        cp robots.Staging.txt frontend/public/robots.txt
+        echo 'robots.txt - revised ---------------------------'
+        cat frontend/public/robots.txt
+        echo '---------------------------'
+        echo '---------------------------'
         # Readme.md -------------------------
-        cat README.md
+        #cat README.md
         # .env - 1 -------------------------
-        cat frontend/.env
+        #cat frontend/.env
         # .env - 2 -------------------------
-        cat frontend/.env
+        #cat frontend/.env
         #-----------------------------------
-        #GITHUB_WORKSPACE - $GITHUB_WORKSPACE
-        #GITHUB_PATH - $GITHUB_PATH
-        #GITHUB_ACTION_PATH - $GITHUB_ACTION_PATH
-    - name: '1. Copy robots.Staging.txt into robots.txt'
-      working-directory: ${{ env.GITHUB_PATH }}/frontend/
-      run: | 
-        #copying robots.Staging.txt robots.txt 
-        #cp robots.Staging.txt robots.txt 
-        #viewing file contents
-        cat .env
-    - name: '2. Copy robots.Staging.txt into robots.txt'
-      working-directory: ${{ env.GITHUB_ACTION_PATH }}/frontend/
-      run: | 
-        #copying robots.Staging.txt robots.txt 
-        #cp robots.Staging.txt robots.txt 
-        #viewing file contents
-        cat .env
+        echo '#GITHUB_WORKSPACE - ${{env.GITHUB_WORKSPACE}}'
