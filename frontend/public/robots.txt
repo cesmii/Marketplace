@@ -2,5 +2,9 @@
 User-agent: *
 Disallow: /admin
 Disallow: /Admin
+Disallow: /more-info/
+Disallow: /More-Info/
+Disallow: /request-info/
+Disallow: /Request-Info/
 
 Sitemap: https://marketplace.cesmii.net/sitemap.xml
