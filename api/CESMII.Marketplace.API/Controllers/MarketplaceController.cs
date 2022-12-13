@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -309,6 +310,7 @@ namespace CESMII.Marketplace.Api.Controllers
         private async Task<IActionResult> AdvancedSearch([FromBody] MarketplaceSearchModel model
             , bool includeCloudLib = true, bool liveOnly = true)
         {
+            var timer = Stopwatch.StartNew();
             //init and then flags set by user or system will determine which of the following get applied
 
             //Special handling for types
@@ -323,7 +325,7 @@ namespace CESMII.Marketplace.Api.Controllers
 
             //SM Apps, Hardware, etc. - anything other than sm profile types
             //User driven flag to select only a certain type. Determine if none are selected or if item type of sm app is selected.
-            var result = AdvancedSearchMarketplace(model, types, cats, verts, pubs, useSpecialTypeSelection, liveOnly);
+            DALResult<MarketplaceItemModel> result;
 
             //SM Profiles
             //User driven flag to select only a certain type. Determine if none are selected or if item type of sm profile is selected.
@@ -332,11 +334,35 @@ namespace CESMII.Marketplace.Api.Controllers
             //Skip over this in certain scenarios. ie. admin section
             if (_configUtil.MarketplaceSettings.EnableCloudLibSearch && includeCloudLib && includeSmProfileTypes)
             {
-                var resultCloudLib = await AdvancedSearchCloudLib(model, cats, verts, pubs, useSpecialTypeSelection);
+                var searchMarketplaceTask = AdvancedSearchMarketplace(model, types, cats, verts, pubs, useSpecialTypeSelection, liveOnly);
+                var searchCloudLibTask = AdvancedSearchCloudLib(model, cats, verts, pubs, useSpecialTypeSelection);
+                //run in parallel
+                var allTasks = Task.WhenAll(searchMarketplaceTask, searchCloudLibTask);
+
+                //wrap exception handling around the tasks execution so no task exception gets lost
+                try
+                {
+                    await allTasks;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogCritical(ex, $"MarketplaceController|AdvancedSearch|All Tasks Exception|{ex.Message}.");
+                    throw allTasks.Exception;
+                }
+
+                //get the tasks results into format we can use
+                var resultSearchMarketplace = await searchMarketplaceTask;
+                var resultSearchCloudLib = await searchCloudLibTask;
 
                 //unify the results, sort, handle paging
-                result = MergeSortPageSearchedItems(result.Data, resultCloudLib, model);
+                result = MergeSortPageSearchedItems(resultSearchMarketplace.Data, resultSearchCloudLib, model);
             }
+            else
+            {
+                result = await AdvancedSearchMarketplace(model, types, cats, verts, pubs, useSpecialTypeSelection, liveOnly);
+            }
+
+            _logger.LogInformation($"MarketplaceController|AdvancedSearch|Duration: { timer.ElapsedMilliseconds}ms.");
 
             if (result == null)
             {
@@ -378,7 +404,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// </summary>
         /// <remarks>model.Filters selected items could be altered in this method</remarks>
         /// <param name="model"></param>
-        private List<MarketplaceItemModel> PrepareAdvancedSearchFiltersSelections(MarketplaceSearchModel model, LookupTypeEnum enumVal)
+        private async Task<List<MarketplaceItemModel>> PrepareAdvancedSearchFiltersSelections(MarketplaceSearchModel model, LookupTypeEnum enumVal)
         {
             if (string.IsNullOrEmpty(model.Query)) return new List<MarketplaceItemModel>();
 
@@ -412,7 +438,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private DALResult<MarketplaceItemModel> AdvancedSearchMarketplace([FromBody] MarketplaceSearchModel model
+        private async Task<DALResult<MarketplaceItemModel>> AdvancedSearchMarketplace([FromBody] MarketplaceSearchModel model
             , List<LookupItemFilterModel> types
             , List<LookupItemFilterModel> cats
             , List<LookupItemFilterModel> verts
@@ -420,6 +446,7 @@ namespace CESMII.Marketplace.Api.Controllers
             , bool useSpecialTypeSelection
             , bool liveOnly = true)
         {
+            var timer = Stopwatch.StartNew();    
             var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
 
             //lowercase model.query
@@ -561,12 +588,22 @@ namespace CESMII.Marketplace.Api.Controllers
             //Special handling for categories. If the search term matches a category name, we get that, too. 
             //We do it as a separate query because the initial marketplace query already has an abundance of logic and 
             //and complexity and it was not working to add in additional logic. We union it below.  
-            var itemsProcesses = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Process);
-            var itemsVerts = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.IndustryVertical);
+            //run in parallel
+            //var itemsProcesses = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Process);
+            //var itemsVerts = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.IndustryVertical);
+            var matchesProcesses = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Process);
+            var matchesVerts = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.IndustryVertical);
+            await Task.WhenAll(matchesProcesses, matchesVerts);
+
+            //get the tasks results into format we can use
+            var itemsProcesses = await matchesProcesses;
+            var itemsVerts = await matchesVerts;
+
             if (itemsProcesses.Any()) result.Data = result.Data.Union(itemsProcesses).ToList();
             if (itemsVerts.Any()) result.Data = result.Data.Union(itemsVerts).ToList();
             result.Count = result.Data.Count;
 
+            _logger.LogInformation($"MarketplaceController|AdvancedSearchMarketplace|Duration: { timer.ElapsedMilliseconds}ms.");
             return result;
         }
 
@@ -583,6 +620,8 @@ namespace CESMII.Marketplace.Api.Controllers
             , bool useSpecialTypeSelection
             )
         {
+            var timer = Stopwatch.StartNew();
+
             //lowercase model.query - preserve original value in model.Query for use elsewere
             var query = string.IsNullOrEmpty(model.Query) ? model.Query : model.Query.ToLower();
             //if useSpecialTypeSelection == true and we get to this function, then we deduce that the special type was
@@ -610,6 +649,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 }
             }
 
+            _logger.LogInformation($"MarketplaceController|AdvancedSearchCloudLib|Duration: { timer.ElapsedMilliseconds}ms.");
             return result;
         }
 
