@@ -404,7 +404,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// </summary>
         /// <remarks>model.Filters selected items could be altered in this method</remarks>
         /// <param name="model"></param>
-        private List<MarketplaceItemModel> PrepareAdvancedSearchFiltersSelections(MarketplaceSearchModel model, LookupTypeEnum enumVal)
+        private async Task<List<MarketplaceItemModel>> PrepareAdvancedSearchFiltersSelections(MarketplaceSearchModel model, LookupTypeEnum enumVal)
         {
             if (string.IsNullOrEmpty(model.Query)) return new List<MarketplaceItemModel>();
 
@@ -588,8 +588,17 @@ namespace CESMII.Marketplace.Api.Controllers
             //Special handling for categories. If the search term matches a category name, we get that, too. 
             //We do it as a separate query because the initial marketplace query already has an abundance of logic and 
             //and complexity and it was not working to add in additional logic. We union it below.  
-            var itemsProcesses = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Process);
-            var itemsVerts = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.IndustryVertical);
+            //run in parallel
+            //var itemsProcesses = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Process);
+            //var itemsVerts = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.IndustryVertical);
+            var matchesProcesses = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Process);
+            var matchesVerts = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.IndustryVertical);
+            await Task.WhenAll(matchesProcesses, matchesVerts);
+
+            //get the tasks results into format we can use
+            var itemsProcesses = await matchesProcesses;
+            var itemsVerts = await matchesVerts;
+
             if (itemsProcesses.Any()) result.Data = result.Data.Union(itemsProcesses).ToList();
             if (itemsVerts.Any()) result.Data = result.Data.Union(itemsVerts).ToList();
             result.Count = result.Data.Count;
