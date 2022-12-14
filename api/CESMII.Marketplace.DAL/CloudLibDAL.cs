@@ -13,9 +13,9 @@
     using CESMII.Marketplace.Common.Models;
     using CESMII.Marketplace.DAL.Models;
     using CESMII.Marketplace.Data.Entities;
-    using CESMII.Marketplace.CloudLibClient;
+    using CESMII.Common.CloudLibClient;
 
-    using Opc.Ua.CloudLib.Client;
+    using Opc.Ua.Cloud.Library.Client;
 
     /// <summary>
     /// Most lookup data is contained in this single entity and differntiated by a lookup type. 
@@ -31,7 +31,7 @@
         //supporting data
         protected List<ImageItemModel> _images;
 
-        public CloudLibDAL(CloudLibClient.ICloudLibWrapper cloudLib,
+        public CloudLibDAL(ICloudLibWrapper cloudLib,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IDal<ImageItem, ImageItemModel> dalImages,
             ConfigUtil configUtil)
@@ -56,14 +56,15 @@
         }
 
         public async Task<MarketplaceItemModel> GetById(string id) {
-            var entity = await _cloudLib.GetById(id);
+            var entity = await _cloudLib.DownloadAsync(id);
+            //var entity = await _cloudLib.GetById(id);
             if (entity == null) return null;
             return MapToModelNamespace(entity);
         }
 
         public async Task<ProfileItemExportModel> Export(string id)
         {
-            var entity = await _cloudLib.GetById(id);
+            var entity = await _cloudLib.DownloadAsync(id);
             if (entity == null) return null;
             //return the whole thing because we also email some info to request info and use
             //other data in this entity.
@@ -106,16 +107,16 @@
             if (string.IsNullOrEmpty(query) && keywords.Count == 0) keywords.Add("*");
             if (!string.IsNullOrEmpty(query)) keywords.Add(query);
 
-            var matches = await _cloudLib.Search(keywords, exclude);
-            if (matches ==null || matches.Count == 0) return new List<MarketplaceItemModel>();
+            var matches = await _cloudLib.SearchAsync(null, null, false, keywords, exclude);
+            if (matches ==null || matches.Edges == null) return new List<MarketplaceItemModel>();
 
             //TBD - exclude some nodesets which are core nodesets - list defined in appSettings
 
 
-            return MapToModelsNodesetResult(matches);
+            return MapToModelsNodesetResult(matches.Edges);
         }
 
-        protected List<MarketplaceItemModel> MapToModelsNodesetResult(List<UANodesetResult> entities)
+        protected List<MarketplaceItemModel> MapToModelsNodesetResult(List<GraphQlNodeAndCursor<Nodeset>> entities)
         {
             var result = new List<MarketplaceItemModel>();
 
@@ -131,24 +132,24 @@
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        protected MarketplaceItemModel MapToModelNodesetResult(UANodesetResult entity)
+        protected MarketplaceItemModel MapToModelNodesetResult(GraphQlNodeAndCursor<Nodeset> entity)
         {
-            if (entity != null)
+            if (entity != null && entity.Node != null)
             {
                 //map results to a format that is common with marketplace items
                 return new MarketplaceItemModel()
                 {
-                    ID = entity.Id.ToString(),
-                    Name = entity.Id.ToString(),  //in marketplace items, name is used for navigation in friendly url
-                    ExternalAuthor = entity.Contributor,
-                    Publisher = new PublisherModel() { DisplayName = entity.Contributor, Name = entity.Contributor },
+                    ID = entity.Node.Identifier.ToString(),
+                    Name = entity.Node.Identifier.ToString(),  //in marketplace items, name is used for navigation in friendly url
+                    ExternalAuthor = entity.Node.Metadata.Contributor.Name,
+                    Publisher = new PublisherModel() { DisplayName = entity.Node.Metadata.Contributor.Name, Name = entity.Node.Metadata.Contributor.Name },
                     //TBD
-                    //Description = "Description..." + entity.Title,
-                    DisplayName = entity.Title,
-                    Namespace = entity.NameSpaceUri.ToString(),
-                    PublishDate = entity.CreationTime,
+                    Description = entity.Node.Metadata.Description,
+                    DisplayName = !string.IsNullOrEmpty(entity.Node.Metadata.Title) ? entity.Node.Metadata.Title : entity.Node.NamespaceUri.AbsolutePath,
+                    Namespace = entity.Node.NamespaceUri.ToString(),
+                    PublishDate = entity.Node.PublicationDate,
                     Type = _smItemType,
-                    Version = entity.Version,
+                    Version = entity.Node.Version,
                     IsFeatured = false,
                     ImagePortrait = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdPortrait)),
                     //ImageSquare = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdSquare)),
