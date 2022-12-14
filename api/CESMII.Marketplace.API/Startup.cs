@@ -36,6 +36,7 @@ using CESMII.Marketplace.Common.Enums;
 using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.JobManager;
 using CESMII.Marketplace.Api.Shared.Extensions;
+using CESMII.Common.CloudLibClient;
 
 namespace CESMII.Marketplace.Api
 {
@@ -103,8 +104,9 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IHttpApiFactory, HttpApiFactory>();
 
             //Cloud Lib
-            services.AddSingleton<Opc.Ua.CloudLib.Client.UACloudLibClient>();
-            services.AddSingleton<CloudLibClient.ICloudLibWrapper, CloudLibClient.CloudLibWrapper>();
+            services.Configure<Opc.Ua.Cloud.Library.Client.UACloudLibClient.Options>(Configuration.GetSection("CloudLibrary"));
+            services.AddSingleton<Opc.Ua.Cloud.Library.Client.UACloudLibClient>();
+            services.AddSingleton<ICloudLibWrapper, CloudLibWrapper>();
             services.AddScoped<ICloudLibDAL<MarketplaceItemModel>, CloudLibDAL>();
 
             //AAD - no longer need this
