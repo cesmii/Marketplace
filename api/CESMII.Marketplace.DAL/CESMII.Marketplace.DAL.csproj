@@ -6,16 +6,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CESMII.OpcUa.NodeSetImporter" Version="1.0.3" />
     <PackageReference Include="NLog" Version="4.7.10" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Common\CESMII.Common.CloudLibClient\CESMII.Common.CloudLibClient.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Common\CESMII.Marketplace.Common.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Data\CESMII.Marketplace.Data.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!--<ItemGroup>
     <Reference Include="CESMII.Common.CloudLibClient">
       <HintPath>..\..\packages-local\CESMII.Common.CloudLibClient\CESMII.Common.CloudLibClient.dll</HintPath>
     </Reference>
@@ -28,6 +28,6 @@
     <Reference Include="System.Reactive">
       <HintPath>..\..\packages-local\CESMII.Common.CloudLibClient\System.Reactive.dll</HintPath>
     </Reference>
-  </ItemGroup>
+  </ItemGroup>-->
 
 </Project>

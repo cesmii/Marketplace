@@ -13,8 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.DAL", "C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.Data", "CESMII.Marketplace.Data\CESMII.Marketplace.Data.csproj", "{71ECE5E2-70AE-4F53-9784-C7A8F5B1EFBF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.CloudLibClient", "CESMII.Marketplace.CloudLibClient\CESMII.Marketplace.CloudLibClient.csproj", "{7702D6AE-83BB-4456-9808-EED12E73CC74}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.JobManager", "CESMII.Marketplace.JobManager\CESMII.Marketplace.JobManager.csproj", "{F334A962-F4FA-4B3F-B7D1-B5F51D47BD23}"
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "frontend", "..\frontend\frontend.esproj", "{227450B5-5A5B-40B8-9246-5114B1B2C8F6}"
@@ -28,6 +26,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readme", "Readme", "{9B364B
 		..\.github\workflows\frontend--publish-stage-azure.yml = ..\.github\workflows\frontend--publish-stage-azure.yml
 		..\README.md = ..\README.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Common.CloudLibClient", "..\..\ProfileDesigner\api\CESMII.Marketplace.CloudLibClient\CESMII.Common.CloudLibClient.csproj", "{E7D7D56F-C9E4-4F52-AA69-1E48D071748D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Opc.Ua.Cloud.Library.Client", "..\Common\Opc.Ua.Cloud.Library.Client\Opc.Ua.Cloud.Library.Client.csproj", "{15AE09A4-20FB-4BAC-8479-7C5B88207B19}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -66,12 +68,6 @@ Global
 		{71ECE5E2-70AE-4F53-9784-C7A8F5B1EFBF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{71ECE5E2-70AE-4F53-9784-C7A8F5B1EFBF}.Staging|Any CPU.ActiveCfg = Staging|Any CPU
 		{71ECE5E2-70AE-4F53-9784-C7A8F5B1EFBF}.Staging|Any CPU.Build.0 = Staging|Any CPU
-		{7702D6AE-83BB-4456-9808-EED12E73CC74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7702D6AE-83BB-4456-9808-EED12E73CC74}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7702D6AE-83BB-4456-9808-EED12E73CC74}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7702D6AE-83BB-4456-9808-EED12E73CC74}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7702D6AE-83BB-4456-9808-EED12E73CC74}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
-		{7702D6AE-83BB-4456-9808-EED12E73CC74}.Staging|Any CPU.Build.0 = Debug|Any CPU
 		{F334A962-F4FA-4B3F-B7D1-B5F51D47BD23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F334A962-F4FA-4B3F-B7D1-B5F51D47BD23}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F334A962-F4FA-4B3F-B7D1-B5F51D47BD23}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -87,6 +83,18 @@ Global
 		{227450B5-5A5B-40B8-9246-5114B1B2C8F6}.Staging|Any CPU.ActiveCfg = Release|Any CPU
 		{227450B5-5A5B-40B8-9246-5114B1B2C8F6}.Staging|Any CPU.Build.0 = Release|Any CPU
 		{227450B5-5A5B-40B8-9246-5114B1B2C8F6}.Staging|Any CPU.Deploy.0 = Release|Any CPU
+		{E7D7D56F-C9E4-4F52-AA69-1E48D071748D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7D7D56F-C9E4-4F52-AA69-1E48D071748D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7D7D56F-C9E4-4F52-AA69-1E48D071748D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7D7D56F-C9E4-4F52-AA69-1E48D071748D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7D7D56F-C9E4-4F52-AA69-1E48D071748D}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7D7D56F-C9E4-4F52-AA69-1E48D071748D}.Staging|Any CPU.Build.0 = Debug|Any CPU
+		{15AE09A4-20FB-4BAC-8479-7C5B88207B19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15AE09A4-20FB-4BAC-8479-7C5B88207B19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15AE09A4-20FB-4BAC-8479-7C5B88207B19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15AE09A4-20FB-4BAC-8479-7C5B88207B19}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15AE09A4-20FB-4BAC-8479-7C5B88207B19}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
+		{15AE09A4-20FB-4BAC-8479-7C5B88207B19}.Staging|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
