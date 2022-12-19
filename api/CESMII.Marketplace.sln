@@ -27,7 +27,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readme", "Readme", "{9B364B
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Common.CloudLibClient", "..\..\ProfileDesigner\api\CESMII.Marketplace.CloudLibClient\CESMII.Common.CloudLibClient.csproj", "{E7D7D56F-C9E4-4F52-AA69-1E48D071748D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Common.CloudLibClient", "..\Common\CESMII.Common.CloudLibClient\CESMII.Common.CloudLibClient.csproj", "{E7D7D56F-C9E4-4F52-AA69-1E48D071748D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Opc.Ua.Cloud.Library.Client", "..\Common\Opc.Ua.Cloud.Library.Client\Opc.Ua.Cloud.Library.Client.csproj", "{15AE09A4-20FB-4BAC-8479-7C5B88207B19}"
 EndProject

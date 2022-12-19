@@ -107,7 +107,7 @@
             if (string.IsNullOrEmpty(query) && keywords.Count == 0) keywords.Add("*");
             if (!string.IsNullOrEmpty(query)) keywords.Add(query);
 
-            var matches = await _cloudLib.SearchAsync(null, null, false, keywords, exclude);
+            var matches = await _cloudLib.SearchAsync(null, null, false, keywords, exclude, true);
             if (matches ==null || matches.Edges == null) return new List<MarketplaceItemModel>();
 
             //TBD - exclude some nodesets which are core nodesets - list defined in appSettings
