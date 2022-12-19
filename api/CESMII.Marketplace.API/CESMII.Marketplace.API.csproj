@@ -18,14 +18,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CESMII.Marketplace.Api.Shared\CESMII.Marketplace.Api.Shared.csproj" />
-    <ProjectReference Include="..\CESMII.Marketplace.CloudLibClient\CESMII.Marketplace.CloudLibClient.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Common\CESMII.Marketplace.Common.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.DAL\CESMII.Marketplace.DAL.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Data\CESMII.Marketplace.Data.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.JobManager\CESMII.Marketplace.JobManager.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
+  <!--<ItemGroup>
     <Reference Include="CESMII.Common.CloudLibClient">
       <HintPath>..\..\packages-local\CESMII.Common.CloudLibClient\CESMII.Common.CloudLibClient.dll</HintPath>
     </Reference>
@@ -35,7 +34,7 @@
     <Reference Include="Opc.Ua.Cloud.Library.Client">
       <HintPath>..\..\packages-local\CESMII.Common.CloudLibClient\Opc.Ua.Cloud.Library.Client.dll</HintPath>
     </Reference>
-  </ItemGroup>
+  </ItemGroup>-->
 
 	<ItemGroup>
     <Content Update="NLog.config">
