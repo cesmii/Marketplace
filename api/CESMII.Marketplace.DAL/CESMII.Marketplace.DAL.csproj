@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Common\CESMII.Common.CloudLibClient\CESMII.Common.CloudLibClient.csproj" />
+    <ProjectReference Include="..\..\common\CESMII.Common.CloudLibClient\CESMII.Common.CloudLibClient.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Common\CESMII.Marketplace.Common.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Data\CESMII.Marketplace.Data.csproj" />
   </ItemGroup>

@@ -3,17 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32414.318
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.API", "API\CESMII.Marketplace.API\CESMII.Marketplace.API.csproj", "{0590CD8B-3AE1-48FE-A120-A564B5ECD30A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.API", "api\CESMII.Marketplace.API\CESMII.Marketplace.API.csproj", "{0590CD8B-3AE1-48FE-A120-A564B5ECD30A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.Api.Shared", "API\CESMII.Marketplace.Api.Shared\CESMII.Marketplace.Api.Shared.csproj", "{4A76305F-A039-497C-B347-C718793E144B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.Api.Shared", "api\CESMII.Marketplace.Api.Shared\CESMII.Marketplace.Api.Shared.csproj", "{4A76305F-A039-497C-B347-C718793E144B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.Common", "API\CESMII.Marketplace.Common\CESMII.Marketplace.Common.csproj", "{0E32D2AC-1F08-4D91-806A-B4D383D6D528}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.Common", "api\CESMII.Marketplace.Common\CESMII.Marketplace.Common.csproj", "{0E32D2AC-1F08-4D91-806A-B4D383D6D528}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.DAL", "API\CESMII.Marketplace.DAL\CESMII.Marketplace.DAL.csproj", "{9CE0F804-5BCA-4FE6-A489-F959FE221EED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.DAL", "api\CESMII.Marketplace.DAL\CESMII.Marketplace.DAL.csproj", "{9CE0F804-5BCA-4FE6-A489-F959FE221EED}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.Data", "API\CESMII.Marketplace.Data\CESMII.Marketplace.Data.csproj", "{71ECE5E2-70AE-4F53-9784-C7A8F5B1EFBF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.Data", "api\CESMII.Marketplace.Data\CESMII.Marketplace.Data.csproj", "{71ECE5E2-70AE-4F53-9784-C7A8F5B1EFBF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.JobManager", "API\CESMII.Marketplace.JobManager\CESMII.Marketplace.JobManager.csproj", "{F334A962-F4FA-4B3F-B7D1-B5F51D47BD23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.JobManager", "api\CESMII.Marketplace.JobManager\CESMII.Marketplace.JobManager.csproj", "{F334A962-F4FA-4B3F-B7D1-B5F51D47BD23}"
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "frontend", "frontend\frontend.esproj", "{227450B5-5A5B-40B8-9246-5114B1B2C8F6}"
 EndProject
@@ -28,9 +28,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readme", "Readme", "{9B364B
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Common.CloudLibClient", "Common\CESMII.Common.CloudLibClient\CESMII.Common.CloudLibClient.csproj", "{E7D7D56F-C9E4-4F52-AA69-1E48D071748D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Common.CloudLibClient", "common\CESMII.Common.CloudLibClient\CESMII.Common.CloudLibClient.csproj", "{E7D7D56F-C9E4-4F52-AA69-1E48D071748D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Opc.Ua.Cloud.Library.Client", "Common\Opc.Ua.Cloud.Library.Client\Opc.Ua.Cloud.Library.Client.csproj", "{15AE09A4-20FB-4BAC-8479-7C5B88207B19}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Opc.Ua.Cloud.Library.Client", "common\Opc.Ua.Cloud.Library.Client\Opc.Ua.Cloud.Library.Client.csproj", "{15AE09A4-20FB-4BAC-8479-7C5B88207B19}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
