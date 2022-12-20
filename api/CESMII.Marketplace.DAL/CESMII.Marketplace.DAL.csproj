@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -10,16 +10,24 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CESMII.Marketplace.CloudLibClient\CESMII.Marketplace.CloudLibClient.csproj" />
+    <ProjectReference Include="..\..\common\CESMII.Common.CloudLibClient\CESMII.Common.CloudLibClient.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Common\CESMII.Marketplace.Common.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Data\CESMII.Marketplace.Data.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Opc.Ua.CloudLib.Client">
-      <HintPath>..\..\packages-local\Opc.Ua.CloudLib.Client\Opc.Ua.CloudLib.Client.dll</HintPath>
-      <CopyLocal>True</CopyLocal>
+  <!--<ItemGroup>
+    <Reference Include="CESMII.Common.CloudLibClient">
+      <HintPath>..\..\packages-local\CESMII.Common.CloudLibClient\CESMII.Common.CloudLibClient.dll</HintPath>
     </Reference>
-  </ItemGroup>
+    <Reference Include="CESMII.OpcUa.CloudLibraryResolver">
+      <HintPath>..\..\packages-local\CESMII.Common.CloudLibClient\CESMII.OpcUa.CloudLibraryResolver.dll</HintPath>
+    </Reference>
+    <Reference Include="Opc.Ua.Cloud.Library.Client">
+      <HintPath>..\..\packages-local\CESMII.Common.CloudLibClient\Opc.Ua.Cloud.Library.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive">
+      <HintPath>..\..\packages-local\CESMII.Common.CloudLibClient\System.Reactive.dll</HintPath>
+    </Reference>
+  </ItemGroup>-->
 
 </Project>

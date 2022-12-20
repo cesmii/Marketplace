@@ -16,6 +16,7 @@ using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Marketplace.Api.Shared.Utils;
+using System.Diagnostics;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
@@ -334,14 +335,27 @@ namespace CESMII.Marketplace.Api.Controllers
             //Skip over this in certain scenarios. ie. admin section
             if (_configUtil.MarketplaceSettings.EnableCloudLibSearch && includeCloudLib && includeSmProfileTypes)
             {
-                var searchMarketplaceTask = AdvancedSearchMarketplace(model, types, cats, verts, pubs, useSpecialTypeSelection, liveOnly);
+                _logger.LogWarning($"MarketplaceController|AdvancedSearch|Setting up tasks.");
+                long swMarketPlaceStarted = timer.ElapsedMilliseconds;
+                var searchMarketplaceTask = Task.Run(() =>
+                {
+                    return AdvancedSearchMarketplace(model, types, cats, verts, pubs, useSpecialTypeSelection, liveOnly);
+                });
+                long swMarketPlaceFinished = 0;
+                _ = searchMarketplaceTask.ContinueWith(t => swMarketPlaceFinished = timer.ElapsedMilliseconds);
+
+                long swCloudLibStarted = timer.ElapsedMilliseconds;
                 var searchCloudLibTask = AdvancedSearchCloudLib(model, cats, verts, pubs, useSpecialTypeSelection);
+                long swCloudLibFinished = 0;
+                _ = searchCloudLibTask.ContinueWith(t => swCloudLibFinished = timer.ElapsedMilliseconds);
                 //run in parallel
+                long swWaitStarted = timer.ElapsedMilliseconds;
                 var allTasks = Task.WhenAll(searchMarketplaceTask, searchCloudLibTask);
 
                 //wrap exception handling around the tasks execution so no task exception gets lost
                 try
                 {
+                    _logger.LogWarning($"MarketplaceController|AdvancedSearch|Await outcome of .whenAll");
                     await allTasks;
                 }
                 catch (Exception ex)
@@ -350,19 +364,30 @@ namespace CESMII.Marketplace.Api.Controllers
                     throw allTasks.Exception;
                 }
 
+                long swWaitFinished = timer.ElapsedMilliseconds;
+
                 //get the tasks results into format we can use
+                _logger.LogWarning($"MarketplaceController|AdvancedSearch|Executing tasks using await...");
                 var resultSearchMarketplace = await searchMarketplaceTask;
                 var resultSearchCloudLib = await searchCloudLibTask;
 
+                long mergeStarted = timer.ElapsedMilliseconds;
+                _logger.LogWarning($"MarketplaceController|AdvancedSearch|Unifying results...");
+
                 //unify the results, sort, handle paging
                 result = MergeSortPageSearchedItems(resultSearchMarketplace.Data, resultSearchCloudLib, model);
+                long mergeFinished = timer.ElapsedMilliseconds;
+                _logger.LogInformation($"MarketplaceController|AdvancedSearch|Duration: {timer.ElapsedMilliseconds}ms. (Marketplace: {swMarketPlaceFinished - swMarketPlaceStarted} ms. CloudLib {swCloudLibFinished - swCloudLibStarted}. MPS: {swMarketPlaceStarted}. ClStart: {swCloudLibStarted}). WaitS/F: {swWaitStarted}/{swWaitFinished}. Merge S/F: {mergeStarted}/{mergeFinished}");
             }
             else
             {
+                long swMarketPlaceStarted = timer.ElapsedMilliseconds;
                 result = await AdvancedSearchMarketplace(model, types, cats, verts, pubs, useSpecialTypeSelection, liveOnly);
+                long swMarketPlaceFinished = timer.ElapsedMilliseconds;
+                _logger.LogInformation($"MarketplaceController|AdvancedSearch|Duration: {timer.ElapsedMilliseconds}ms. (Marketplace: {swMarketPlaceFinished - swMarketPlaceStarted} ms.");
             }
 
-            _logger.LogInformation($"MarketplaceController|AdvancedSearch|Duration: { timer.ElapsedMilliseconds}ms.");
+            //_logger.LogWarning($"MarketplaceController|AdvancedSearch|Duration: { timer.ElapsedMilliseconds}ms.");
 
             if (result == null)
             {
@@ -404,7 +429,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// </summary>
         /// <remarks>model.Filters selected items could be altered in this method</remarks>
         /// <param name="model"></param>
-        private async Task<List<MarketplaceItemModel>> PrepareAdvancedSearchFiltersSelections(MarketplaceSearchModel model, LookupTypeEnum enumVal)
+        private List<MarketplaceItemModel> PrepareAdvancedSearchFiltersSelections(MarketplaceSearchModel model, LookupTypeEnum enumVal)
         {
             if (string.IsNullOrEmpty(model.Query)) return new List<MarketplaceItemModel>();
 
@@ -446,6 +471,7 @@ namespace CESMII.Marketplace.Api.Controllers
             , bool useSpecialTypeSelection
             , bool liveOnly = true)
         {
+            _logger.LogWarning($"MarketplaceController|AdvancedSearchMarketplace|Starting...");
             var timer = Stopwatch.StartNew();    
             var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
 
@@ -580,10 +606,14 @@ namespace CESMII.Marketplace.Api.Controllers
             //        new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
             //        new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName });
             //new - no paging,sorting
-            var result = predicates.Count == 0 ? _dal.GetAllPaged(null, null, true, false) :
+            _logger.LogWarning($"MarketplaceController|AdvancedSearchMarketplace|calling DAL...");
+            var result = await Task.Run(() =>
+            {
+                return predicates.Count == 0 ? _dal.GetAllPaged(null, null, true, false) :
                 _dal.Where(predicates, null, null, true, false,
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName });
+            });
 
             //Special handling for categories. If the search term matches a category name, we get that, too. 
             //We do it as a separate query because the initial marketplace query already has an abundance of logic and 
@@ -591,19 +621,25 @@ namespace CESMII.Marketplace.Api.Controllers
             //run in parallel
             //var itemsProcesses = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Process);
             //var itemsVerts = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.IndustryVertical);
-            var matchesProcesses = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Process);
-            var matchesVerts = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.IndustryVertical);
-            await Task.WhenAll(matchesProcesses, matchesVerts);
+            var matchesProcesses = Task.Run(() =>
+            {
+                return PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Process);
+            });
+            var matchesVerts = Task.Run(() =>
+            {
+                return PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.IndustryVertical);
+            });
+            //await Task.WhenAll(matchesProcesses, matchesVerts);
 
             //get the tasks results into format we can use
             var itemsProcesses = await matchesProcesses;
-            var itemsVerts = await matchesVerts;
+            var itemsVerts = await matchesVerts; 
 
             if (itemsProcesses.Any()) result.Data = result.Data.Union(itemsProcesses).ToList();
             if (itemsVerts.Any()) result.Data = result.Data.Union(itemsVerts).ToList();
             result.Count = result.Data.Count;
 
-            _logger.LogInformation($"MarketplaceController|AdvancedSearchMarketplace|Duration: { timer.ElapsedMilliseconds}ms.");
+            _logger.LogWarning($"MarketplaceController|AdvancedSearchMarketplace|Duration: { timer.ElapsedMilliseconds}ms.");
             return result;
         }
 
@@ -620,6 +656,7 @@ namespace CESMII.Marketplace.Api.Controllers
             , bool useSpecialTypeSelection
             )
         {
+            _logger.LogWarning($"MarketplaceController|AdvancedSearchCloudLib|Starting...");
             var timer = Stopwatch.StartNew();
 
             //lowercase model.query - preserve original value in model.Query for use elsewere
@@ -636,6 +673,7 @@ namespace CESMII.Marketplace.Api.Controllers
             if (pubs.Count == 0)
             {
                 //NEW: now search CloudLib.
+                _logger.LogWarning($"MarketplaceController|AdvancedSearchCloudLib|calling DAL...");
                 result = await _dalCloudLib.Where(query, null,
                     cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
                     verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList(),
@@ -645,15 +683,15 @@ namespace CESMII.Marketplace.Api.Controllers
                 if (cats.Count == 0 && verts.Count == 0 && string.IsNullOrEmpty(query)
                     && result.Count == 0)
                 {
-                    _logger.LogWarning($"MarketplaceController|AdvancedSearch|No CloudLib records found yet search criteria was wildcard.");
+                    _logger.LogWarning($"MarketplaceController|AdvancedSearchCloudLib|No CloudLib records found yet search criteria was wildcard.");
                 }
             }
 
-            _logger.LogInformation($"MarketplaceController|AdvancedSearchCloudLib|Duration: { timer.ElapsedMilliseconds}ms.");
+            _logger.LogWarning($"MarketplaceController|AdvancedSearchCloudLib|Duration: { timer.ElapsedMilliseconds}ms.");
             return result;
         }
 
-        
+
         /// <summary>
         /// Because we are unifying two sources of information from separate sources, we need to wait on paging 
         /// and do not do this at the DB level. We have to get the filtered set of info and then apply a sort 
@@ -680,11 +718,11 @@ namespace CESMII.Marketplace.Api.Controllers
             //    .ThenBy(x => x.DisplayName); //.ToList();
             combined = combined
                 .OrderByDescending(x => x.IsFeatured)
-                .ThenBy(x => x.DisplayName); 
+                .ThenBy(x => x.DisplayName);
 
             //now page the data. 
             combined = combined.Skip(model.Skip).Take(model.Take);
-            return new DALResult<MarketplaceItemModel>() { 
+            return new DALResult<MarketplaceItemModel>() {
                 Count = count,
                 Data = combined.ToList()
             };
