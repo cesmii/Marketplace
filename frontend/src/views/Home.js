@@ -35,7 +35,7 @@ function Home() {
     const { returnUrl } = useParams();
     const { instance } = useMsal();
     const _activeAccount = instance.getActiveAccount();
-    const { isAuthenticated, isAuthorized } = useLoginStatus(null, [AppSettings.AADUserRole]);
+    const { isAuthenticated, isAuthorized } = useLoginStatus(null, null /*[AppSettings.AADUserRole]*/);
     const [_refreshData, setRefreshData] = useState(true);
     //const [_dataRows, setDataRows] = useState({
     //    featured: [], new: [], popular: []
