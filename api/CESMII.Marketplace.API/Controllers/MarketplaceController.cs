@@ -16,7 +16,6 @@ using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Marketplace.Api.Shared.Utils;
-using System.Diagnostics;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
@@ -287,8 +286,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost, Route("Search/Admin")]
-        //[Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
-        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin", Policy = nameof(PermissionEnum.UserAzureADMapped))]
         [ProducesResponseType(200, Type = typeof(DALResult<MarketplaceItemModel>))]
         public async Task<IActionResult> AdminSearch([FromBody] MarketplaceSearchModel model)
         {
@@ -735,8 +733,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost, Route("analytics/IncrementLikeCount")]
-        //[Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
-        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin", Policy = nameof(PermissionEnum.UserAzureADMapped))]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         public async Task<IActionResult> IncrementLikeCount([FromBody] IdStringModel model)
         {
@@ -780,8 +777,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost, Route("analytics/IncrementDislikeCount")]
-        //[Authorize(Policy = nameof(PermissionEnum.CanManageMarketplace))]
-        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin", Policy = nameof(PermissionEnum.UserAzureADMapped))]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         public async Task<IActionResult> IncrementDislikeCount([FromBody] IdStringModel model)
         {

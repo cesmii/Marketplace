@@ -18,7 +18,7 @@ using CESMII.Marketplace.Data.Extensions;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
-    [Authorize(), Route("api/admin/jobdefinition")]
+    [Authorize(Roles = "cesmii.marketplace.jobadmin", Policy = nameof(PermissionEnum.UserAzureADMapped)), Route("api/admin/jobdefinition")]
     public class AdminJobDefinitionController : BaseController<AdminJobDefinitionController>
     {
 
@@ -40,8 +40,6 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("search")]
-        //[Authorize(Policy = nameof(PermissionEnum.CanManageJobDefinitions))]
-        [Authorize(Roles = "cesmii.marketplace.jobadmin")]
         [ProducesResponseType(200, Type = typeof(DALResult<JobDefinitionModel>))]
         [ProducesResponseType(400)]
         public IActionResult Search([FromBody] PagerFilterSimpleModel model)
@@ -69,8 +67,6 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("init")]
-        //[Authorize(Policy = nameof(PermissionEnum.CanManageJobDefinitions))]
-        [Authorize(Roles = "cesmii.marketplace.jobadmin")]
         [ProducesResponseType(200, Type = typeof(JobDefinitionModel))]
         [ProducesResponseType(400)]
         public IActionResult Init()
@@ -84,8 +80,6 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("GetByID")]
-        //[Authorize(Policy = nameof(PermissionEnum.CanManageJobDefinitions))]
-        [Authorize(Roles = "cesmii.marketplace.jobadmin")]
         [ProducesResponseType(200, Type = typeof(JobDefinitionModel))]
         [ProducesResponseType(400)]
         public IActionResult GetByID([FromBody] IdStringModel model)
@@ -107,8 +101,6 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("copy")]
-        //[Authorize(Policy = nameof(PermissionEnum.CanManageJobDefinitions))]
-        [Authorize(Roles = "cesmii.marketplace.jobadmin")]
         [ProducesResponseType(200, Type = typeof(JobDefinitionModel))]
         [ProducesResponseType(400)]
         public IActionResult CopyItem([FromBody] IdStringModel model)
@@ -140,8 +132,6 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost, Route("Update")]
-        //[Authorize(Policy = nameof(PermissionEnum.CanManageJobDefinitions))]
-        [Authorize(Roles = "cesmii.marketplace.jobadmin")]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         public async Task<IActionResult> Update([FromBody] JobDefinitionModel model)
         {
@@ -192,8 +182,6 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost, Route("Delete")]
-        //[Authorize(Policy = nameof(PermissionEnum.CanManageJobDefinitions))]
-        [Authorize(Roles = "cesmii.marketplace.jobadmin")]
         [ProducesResponseType(200, Type = typeof(ResultMessageModel))]
         public async Task<IActionResult> Delete([FromBody] IdStringModel model)
         {
@@ -216,8 +204,6 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost, Route("Add")]
-        //[Authorize(Policy = nameof(PermissionEnum.CanManageJobDefinitions))]
-        [Authorize(Roles = "cesmii.marketplace.jobadmin")]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         public async Task<IActionResult> Add([FromBody] JobDefinitionModel model)
         {

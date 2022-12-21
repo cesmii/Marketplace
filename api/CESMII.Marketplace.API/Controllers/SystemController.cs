@@ -73,7 +73,6 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [AllowAnonymous, HttpPost, Route("dynamic/sitemap")]
-        //[Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
         [ProducesResponseType(200, Type = typeof(List<SiteMapModel>))]
         public async Task<IActionResult> DynamicSitemap()
         {
