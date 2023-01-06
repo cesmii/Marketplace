@@ -43,7 +43,7 @@ function DownloadMessage() {
                     //check for success message OR check if some validation failed
 
                     //if success show w/ link for download
-                    //update item
+                    //update item status to show success
                     item = {
                         ...item,
                         show: true,
@@ -55,11 +55,11 @@ function DownloadMessage() {
                         warnings: result.data.warnings
                     };
 
-                    //we can either download file immediately - or have user see link on screen.
-                    //if (item.immediateDownload) {
-                    //    openFile(item);
-                    //}
-
+                    //FIX - because some nodesets are large, they cause us to exceed a max storage limit in local storage. 
+                    //  so, open the file immediately and then don't save item w/ file contents
+                    //  below the state will be updated w/o the large file so user will see a confirmation of the completion
+                    openFile(item);
+                    item.data = null;
                 }
                 else {
                     item = {
