@@ -15,6 +15,7 @@ import AdminMarketplaceEntity from '../views/admin/AdminMarketplaceEntity'
 import AdminPubisherEntity from '../views/admin/AdminPubisherEntity'
 import RequestInfo from '../views/RequestInfo'
 import Home from '../views/Home'
+import NotAuthorized from '../views/NotAuthorized'
 
 import AdminRequestInfoEntity from '../views/admin/AdminRequestInfoEntity'
 import AdminRequestInfoList from '../views/admin/AdminRequestInfoList'
@@ -27,6 +28,7 @@ import AdminJobDefinitionList from '../views/admin/AdminJobDefinitionList'
 import AdminJobDefinitionEntity from '../views/admin/AdminJobDefinitionEntity'
 import SitemapGenerator from '../views/admin/SitemapGenerator'
 import AccountProfile from '../views/AccountProfile'
+import LoginSuccess from '../views/LoginSuccess'
 
 //const CLASS_NAME = "Routes";
 
@@ -40,6 +42,7 @@ function Routes() {
         <Switch>
             {/* Route order matters in the profile/ routes* - TBD - update to admin versions of the forms... */}
             <PublicRouteWFilter exact path="/" component={Home} />
+            <PublicRouteWFilter exact path="/login/success" component={LoginSuccess} />
             <PublicRouteWFilter path="/admin/returnUrl=:returnUrl" component={Home} />
             <PublicRouteWFilter exact path="/admin" component={Home} />
             {/*<PublicRoute exact path="/about" component={About} />*/}
@@ -71,6 +74,8 @@ function Routes() {
 
             <AdminRoute path="/account" component={AccountProfile} />
 
+            <PublicRoute path="/notpermitted" component={NotAuthorized} />
+            <PublicRoute path="/notauthorized" component={NotAuthorized} />
             <PublicRoute component={PageNotFound} />
         </Switch>
 
