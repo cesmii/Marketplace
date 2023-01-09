@@ -43,7 +43,7 @@ function DownloadMessage() {
                     //check for success message OR check if some validation failed
 
                     //if success show w/ link for download
-                    //update item
+                    //update item status to show success
                     item = {
                         ...item,
                         show: true,
