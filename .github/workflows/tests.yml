@@ -1,0 +1,50 @@
+# This workflow will build and test a .NET 6 web API
+#
+# For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
+name: Test|API|Marketplace
+on:
+  #manually trigger deploy
+  workflow_dispatch:
+  # Trigger the workflow on push
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+    branches:
+      - develop
+      - main
+
+env:
+  # set this to the path to your solution file, defaults to the repository root (this is the folder in the git repo)
+  SOLUTION_DIRECTORY: './'      
+  # set this to the path to your web app project, defaults to the repository root (this is the folder in the git repo)
+  PROJECT_DIRECTORY: './api/CESMII.Marketplace.Api'      
+  # Solution file to use
+  SOLUTION_FILE: 'CESMII.Marketplace.sln'      
+  # Project file to use
+  PROJECT_NAME: 'CESMII.Marketplace.Api'      
+  # set this to the .NET core version to use
+  NETCORE_VERSION: "6.0.x"
+
+jobs:
+  build:
+    name: Build and Test .NET6 Web API
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Set up dotnet Core ${{ env.NETCORE_VERSION }}
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ env.NETCORE_VERSION }}
+      - name: Restore dependencies (${{env.SOLUTION_FILE}})
+        run: dotnet restore ${{env.SOLUTION_FILE}}
+        working-directory: ${{env.SOLUTION_DIRECTORY}}
+      - name: Build (${{env.SOLUTION_FILE}})
+        run: dotnet build ${{env.SOLUTION_FILE}} --configuration Staging --no-restore
+        working-directory: ${{env.SOLUTION_DIRECTORY}}
+#      - name: Test (${{env.SOLUTION_FILE}})
+#        run: dotnet test ${{env.SOLUTION_FILE}} --configuration Staging --no-build --verbosity normal -l:"console;verbosity=normal"
+#        working-directory: ${{env.SOLUTION_DIRECTORY}}

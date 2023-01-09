@@ -68,8 +68,7 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("admin/search")]
-        //[Authorize(Policy = nameof(PermissionEnum.CanManagePublishers))]
-        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin")]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin", Policy = nameof(PermissionEnum.UserAzureADMapped))]
         [ProducesResponseType(200, Type = typeof(DALResult<PublisherModel>))]
         [ProducesResponseType(400)]
         public IActionResult AdminSearch([FromBody] PagerFilterSimpleModel model)

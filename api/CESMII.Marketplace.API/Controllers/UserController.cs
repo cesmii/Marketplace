@@ -20,8 +20,7 @@ using CESMII.Marketplace.Api.Shared.Extensions;
 namespace CESMII.Marketplace.Api.Controllers
 {
     
-    [Route("api/[controller]")]
-    [Authorize]
+    [Authorize, Route("api/[controller]")]
     public class UserController : BaseController<UserController>
     {
         private readonly UserDAL _dal;
@@ -35,8 +34,7 @@ namespace CESMII.Marketplace.Api.Controllers
 
 
         [HttpGet, Route("All")]
-        //[Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
-        [Authorize(Roles = "cesmii.marketplace.useradmin")]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin", Policy = nameof(PermissionEnum.UserAzureADMapped))]
         [ProducesResponseType(200, Type = typeof(List<UserModel>))]
         [ProducesResponseType(400)]
         public IActionResult GetAll()
@@ -50,8 +48,7 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("GetByID")]
-        //[Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
-        [Authorize(Roles = "cesmii.marketplace.useradmin")]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin", Policy = nameof(PermissionEnum.UserAzureADMapped))]
         [ProducesResponseType(200, Type = typeof(UserModel))]
         [ProducesResponseType(400)]
         public IActionResult GetByID([FromBody] IdStringModel model)
@@ -229,8 +226,7 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("Delete")]
-        //[Authorize(Policy = nameof(PermissionEnum.CanManageUsers))]
-        [Authorize(Roles = "cesmii.marketplace.useradmin")]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin", Policy = nameof(PermissionEnum.UserAzureADMapped))]
         [ProducesResponseType(200, Type = typeof(List<UserModel>))]
         public async Task<IActionResult> Delete([FromBody] IdStringModel model)
         {

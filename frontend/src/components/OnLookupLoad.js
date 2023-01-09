@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 
 import axiosInstance from '../services/AxiosService'
 import { useLoadingContext } from "./contexts/LoadingContext";
@@ -18,9 +17,6 @@ export const OnLookupLoad = () => {
     // Region: Initialization
     //-------------------------------------------------------------------
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const { instance } = useMsal();
-    const _activeAccount = instance.getActiveAccount();
-    const _isAuthenticated = useIsAuthenticated() && _activeAccount != null;
 
     //-------------------------------------------------------------------
     // Region: hooks

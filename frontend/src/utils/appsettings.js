@@ -1,6 +1,9 @@
 //#region MSAL Helper Settings
 // Browser check variables
 // If you support IE, our recommendation is that you sign-in using Redirect APIs
+
+import { LogLevel } from "@azure/msal-browser";
+
 // If you as a developer are testing using Edge InPrivate mode, please add "isEdge" to the if check
 const _ua = window.navigator.userAgent;
 const _msie = _ua.indexOf("MSIE ");
@@ -17,7 +20,7 @@ const _isFirefox = _firefox > 0; // Only needed if you need to support the redir
 ///--------------------------------------------------------------------------
 export const AppSettings = {
     BASE_API_URL: process.env.REACT_APP_BASE_API_URL  //mock api server url - environment specific
-    , Titles: { Anonymous: 'SM Marketplace | CESMII', Main: 'SM Marketplace | CESMII', Caption: "SM Marketplace"}
+    , Titles: { Anonymous: 'SM Marketplace | CESMII', Main: 'SM Marketplace | CESMII', Caption: "SM Marketplace" }
     , GoogleAnalyticsId: 'G-M6FGMLFKM7' //'G-EPPSP1B05X'
     , TrackAnalytics: process.env.REACT_APP_USE_GOOGLE_ANALYTICS  //false in dev, true in prod
     , PageSize: 10
@@ -47,7 +50,7 @@ export const AppSettings = {
     }
     , ValidatorPatterns: {
         //Email: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$',
-          Password: '(?=[^a-z]*[a-z])'
+        Password: '(?=[^a-z]*[a-z])'
         , HasUpperLowerCase: '^(?=.*[a-z])(?=[A-Z])$' // (?=.*[A-Za-z])'
         , HasNumber: '^[0-9]$'
         , HasSpecialCharacter: '^[a-z]$' //'^[$@!%*?&]$'
@@ -63,7 +66,7 @@ export const AppSettings = {
         MembershipStatus: 9,
         SmItemType: 10
     },
-     requestInfoNew: {
+    requestInfoNew: {
         marketplaceItemId: null,
         publisherId: null,
         smProfileId: null,
@@ -87,20 +90,47 @@ export const AppSettings = {
         Cancelled: 11
     }
     //MSAL (Authentication) Config
-    ,MsalConfig : {
+    , MsalConfig: {
         auth: {
             clientId: process.env.REACT_APP_MSAL_CLIENT_ID, //Application (client) id in Azure of the registered application
             authority: process.env.REACT_APP_MSAL_AUTHORITY, //MSAL code will append client id, oauth path
-            redirectUri: "/library", //must match with the redirect url specified in the Azure App Application. Note Azure will also need https://domainname.com/library
+            redirectUri: "/login/success", //must match with the redirect url specified in the Azure App Application. Note Azure will also need https://domainname.com/library
             postLogoutRedirectUri: "/"
         },
         cache: {
             cacheLocation: "localStorage",
             storeAuthStateInCookie: _isIE || _isEdge || _isFirefox
-        }
+        },
+        system: {
+            iframeHashTimeout: 10000, //avoid monitor time out error on silent login
+            loggerOptions: {
+                logLevel: LogLevel.Info,
+                loggerCallback: (level, message, containsPii) => {
+                    if (containsPii) {
+                        return;
+                    }
+                    switch (level) {
+                        case LogLevel.Error:
+                            console.error(message);
+                            return;
+                        case LogLevel.Verbose:
+                            console.debug(message);
+                            return;
+                        case LogLevel.Warning:
+                            console.warn(message);
+                            return;
+                        case LogLevel.Info:
+                        default:
+                            console.info(message);
+                            return;
+                    }
+                },
+                piiLoggingEnabled: false
+            }
+        },
     }
     , MsalScopes: [process.env.REACT_APP_MSAL_SCOPE]  //tied to scope defined in app registration / scope, set in Azure AAD
-    , AADUserRole: "cesmii.marketplace.user"
+    //, AADUserRole: "cesmii.marketplace.user"
 }
 
 export const LookupData = {
@@ -122,7 +152,7 @@ export const LookupData = {
         }
     ],
     searchFields: [
-          { caption: "Author", val: "author.fullName", dataType: "string" }
+        { caption: "Author", val: "author.fullName", dataType: "string" }
         , { caption: "Description", val: "description", dataType: "string" }
         , { caption: "Id", val: "id", dataType: "numeric" }
         , { caption: "Interface", val: "interface.name", dataType: "string" }

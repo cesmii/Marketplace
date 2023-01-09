@@ -4,7 +4,7 @@ import { useMsal } from "@azure/msal-react";
 
 import { generateLogMessageString } from '../utils/UtilityService'
 import { useLoadingContext } from "../components/contexts/LoadingContext";
-import { doLoginPopup } from "./OnLoginHandler";
+import { doLoginPopup, doLoginRedirect } from "./OnLoginHandler";
 
 const CLASS_NAME = "LoginButton";
 
@@ -13,8 +13,9 @@ function LoginButton() {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const { instance, inProgress, accounts } = useMsal();
+    const { instance, inProgress } = useMsal();
     const { loadingProps, setLoadingProps } = useLoadingContext();
+    const _mode = "redirect";
 
     //-------------------------------------------------------------------
     // Region: API call
@@ -26,7 +27,8 @@ function LoginButton() {
 
     const onLoginClick = (e) => {
         console.log(generateLogMessageString('onLoginClick', CLASS_NAME));
-        doLoginPopup(instance, inProgress, accounts, setLoadingProps);
+        if (_mode === "popup") doLoginPopup(instance, inProgress, setLoadingProps);
+        else doLoginRedirect(instance, inProgress);
     }
 
     //if already logged in, don't show button
