@@ -110,6 +110,10 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         {props.onDownload &&
                             <p className="my-4" ><Button variant="secondary" type="button" className="px-4" onClick={onDownloadStart} >Download Nodeset XML</Button></p>
                         }
+                        {props.showProfileDesignerLink &&
+                            <p className="mb-2" ><Button variant="secondary" type="link" target="_blank" className="px-4" href={`${AppSettings.ProfileDesignerUrl}cloudlibrary/viewer/${props.item.id}`} >
+                                View in SM Profile Designer</Button></p>
+                        }
                     </div>
                 </div>
             </>
