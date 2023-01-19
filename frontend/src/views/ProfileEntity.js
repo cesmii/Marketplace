@@ -6,11 +6,12 @@ import axiosInstance from "../services/AxiosService";
 import { AppSettings } from '../utils/appsettings';
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
-import { cleanFileName, convertHtmlToString, generateLogMessageString, getImageUrl, getMarketplaceIconName, scrollTopScreen } from '../utils/UtilityService'
+import { cleanFileName, generateLogMessageString, getImageUrl, getMarketplaceIconName, scrollTopScreen } from '../utils/UtilityService'
 import MarketplaceTileList from './shared/MarketplaceTileList';
+import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
+import { useLoginStatus } from '../components/OnLoginHandler';
 
 import './styles/MarketplaceEntity.scss';
-import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
 
 const CLASS_NAME = "ProfileEntity";
 
@@ -24,6 +25,7 @@ function ProfileEntity() {
     const [item, setItem] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
+    const { isAuthenticated } = useLoginStatus(null, null);
     ////is favorite calc
     //const [isFavorite, setIsFavorite] = useState((loadingProps.favoritesList != null && loadingProps.favoritesList.findIndex(x => x.url === history.location.pathname) > -1));
 
@@ -35,8 +37,8 @@ function ProfileEntity() {
 
             var result = null;
             try {
-                var data = { id: id, isTracking: true };
-                var url = `profile/getbyid`;
+                const data = { id: id, isTracking: true };
+                const url = `profile/getbyid`;
                 result = await axiosInstance.post(url, data);
             }
             catch (err) {
@@ -167,7 +169,8 @@ function ProfileEntity() {
             return;
         }
         return (
-            <MarketplaceItemEntityHeader key={item.id} item={item} currentUserId={null} showActions={true} cssClass="marketplace-list-item" onDownload={downloadProfile} />
+            <MarketplaceItemEntityHeader key={item.id} item={item} currentUserId={null} showActions={true} cssClass="marketplace-list-item"
+                onDownload={downloadProfile} showProfileDesignerLink={isAuthenticated} />
         )
     }
 
