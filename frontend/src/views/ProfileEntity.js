@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet"
 import axiosInstance from "../services/AxiosService";
 
 import { AppSettings } from '../utils/appsettings';
+import { useLoginStatus } from '../components/OnLoginHandler';
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
 import { cleanFileName, generateLogMessageString, getImageUrl, getMarketplaceIconName, scrollTopScreen } from '../utils/UtilityService'
@@ -24,6 +25,7 @@ function ProfileEntity() {
     const [item, setItem] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
+    const { isAuthenticated, isAuthorized } = useLoginStatus(null, [AppSettings.AADAdminRole]);
     ////is favorite calc
     //const [isFavorite, setIsFavorite] = useState((loadingProps.favoritesList != null && loadingProps.favoritesList.findIndex(x => x.url === history.location.pathname) > -1));
 
@@ -164,7 +166,7 @@ function ProfileEntity() {
             return;
         }
         return (
-            <MarketplaceItemEntityHeader key={item.id} item={item} currentUserId={null} showActions={true} cssClass="marketplace-list-item"
+            <MarketplaceItemEntityHeader key={item.id} item={item} isAuthenticated={isAuthenticated} isAuthorized={isAuthorized} showActions={true} cssClass="marketplace-list-item"
                 onDownload={downloadProfile} showProfileDesignerLink={true} />
         )
     }

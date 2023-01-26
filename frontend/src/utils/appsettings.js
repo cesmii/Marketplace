@@ -132,7 +132,7 @@ export const AppSettings = {
         },
     }
     , MsalScopes: [process.env.REACT_APP_MSAL_SCOPE]  //tied to scope defined in app registration / scope, set in Azure AAD
-    //, AADUserRole: "cesmii.marketplace.user"
+    , AADAdminRole: "cesmii.marketplace.marketplaceadmin"
     , ProfileDesignerUrl: process.env.REACT_APP_PROFILEDESIGNER_URL
 }
 

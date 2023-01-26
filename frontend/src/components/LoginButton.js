@@ -47,11 +47,6 @@ function LoginButton() {
         doCreateAccount(instance, inProgress);
     }
 
-    //if already logged in, don't show button
-    //if (_isAuthenticated && _activeAccount != null) {
-    //    return null;
-    //}
-
     //-------------------------------------------------------------------
     // Region: render helpers
     //-------------------------------------------------------------------
