@@ -40,7 +40,7 @@ function InlineMessage() {
 
     //console.log(generateLogMessageString('loading', CLASS_NAME));
     //TBD - check for dup messages and don't show.
-    const renderMessages = loadingProps.inlineMessages.map((msg) => {
+    const renderMessages = loadingProps.inlineMessages?.map((msg) => {
         //apply special handling for sev="processing"
         var isProcessing = msg.severity === "processing";
         var sev = msg.severity == null || msg.severity === "" || msg.severity === "processing" ? "info" : msg.severity;
