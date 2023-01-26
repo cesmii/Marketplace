@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { Helmet } from "react-helmet"
-import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 
 import axiosInstance from "../services/AxiosService";
+import { useLoginStatus } from '../components/OnLoginHandler';
 import { AppSettings } from '../utils/appsettings';
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
 
@@ -34,11 +34,8 @@ function MarketplaceEntity() {
     const [item, setItem] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const { instance } = useMsal();
-    const _isAuthenticated = useIsAuthenticated();
-    const _activeAccount = instance.getActiveAccount();
-    //Check for is authenticated. Check individual permissions - ie can manage marketplace items.
-    const _isAuthorized = _isAuthenticated && _activeAccount != null && (isInRole(_activeAccount, "cesmii.marketplace.marketplaceadmin"));
+    const { isAuthenticated, isAuthorized } = useLoginStatus(null, [AppSettings.AADAdminRole]);
+
     ////is favorite calc
     //const [isFavorite, setIsFavorite] = useState((loadingProps.favoritesList != null && loadingProps.favoritesList.findIndex(x => x.url === history.location.pathname) > -1));
 
@@ -50,8 +47,8 @@ function MarketplaceEntity() {
 
             var result = null;
             try {
-                var data = { id: id, isTracking: true };
-                var url = `marketplace/getbyname`;
+                const data = { id: id, isTracking: true };
+                const url = `marketplace/getbyname`;
                 result = await axiosInstance.post(url, data);
             }
             catch (err) {
@@ -79,7 +76,7 @@ function MarketplaceEntity() {
             setLoadingProps({ isLoading: false, message: null });
 
             //add to the recent file list to keep track of where we have been
-            var revisedList = UpdateRecentFileList(loadingProps.recentFileList, {
+            const revisedList = UpdateRecentFileList(loadingProps.recentFileList, {
                 url: history.location.pathname, caption: result.data.displayName, iconName: getMarketplaceIconName(result.data),
                 authorId: result.data.author != null ? result.data.author.id : null
             });
@@ -94,7 +91,7 @@ function MarketplaceEntity() {
         return () => {
             console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
         };
-    }, [id, _isAuthenticated]);
+    }, [id, isAuthenticated]);
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
@@ -141,7 +138,7 @@ function MarketplaceEntity() {
 
         return (
             <>
-                <MarketplaceBreadcrumbs item={item} isAuthenticated={_isAuthenticated && _activeAccount != null} />
+                <MarketplaceBreadcrumbs item={item} isAuthenticated={isAuthenticated} />
             </>
         );
     };
@@ -170,7 +167,7 @@ function MarketplaceEntity() {
                     {item.displayName}
                 </h1>
                 {/*<SVGIcon name={isFavorite ? "favorite" : "favorite-border"} size="24" fill={color.forestGreen} onClick={toggleFavoritesList} />*/}
-                {_isAuthorized &&
+                {isAuthorized &&
                     <a className="btn btn-icon-outline circle ml-auto" href={`/admin/library/${item.id}`} ><i className="material-icons">edit</i></a>
                 }
             </>
@@ -180,7 +177,7 @@ function MarketplaceEntity() {
     const renderSolutionDetails = () => {
 
         //show heading based on type
-        var subHeading = item.type == null || item.type.name === null ? 'Smart Manufacturing App'
+        const subHeading = item.type == null || item.type.name === null ? 'Smart Manufacturing App'
             : item.type.name.replace('SM ', 'Smart Manufacturing ');
 
         return (
@@ -225,7 +222,7 @@ function MarketplaceEntity() {
         if (!loadingProps.isLoading && (item == null)) {
             return;
         }
-        return (<MarketplaceItemEntityHeader key={item.id} item={item} isAuthenticated={_isAuthenticated && _activeAccount != null} isAuthorized={_isAuthorized} showActions={true} cssClass="marketplace-list-item" />)
+        return (<MarketplaceItemEntityHeader key={item.id} item={item} isAuthenticated={isAuthenticated} isAuthorized={isAuthorized} showActions={true} cssClass="marketplace-list-item" />)
     }
 
     //
