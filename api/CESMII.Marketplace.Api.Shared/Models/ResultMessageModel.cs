@@ -21,6 +21,11 @@ namespace CESMII.Marketplace.Api.Shared.Models
     public class ResultMessageExportModel : ResultMessageWithDataModel
     {
         public List<string> Warnings { get; set; }
+
+        /// <summary>
+        /// Encrypted email. Obfuscate name so it is less obvious. 
+        /// </summary>
+        public string Uid { get; set; }
     }
 
 }

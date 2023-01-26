@@ -21,22 +21,22 @@ function DownloadMessage() {
     //-------------------------------------------------------------------
     useEffect(() => {
         function updateMessageItemState(item) {
-            var x = loadingProps.downloadItems.findIndex(msg => { return msg.id.toString() === item.id.toString(); });
+            const x = loadingProps.downloadItems.findIndex(msg => { return msg.id.toString() === item.id.toString(); });
             //no item found
             if (x < 0) {
                 console.warn(generateLogMessageString(`downloadProfile||no item found with this id: ${item.id}`, CLASS_NAME));
                 return;
             }
             loadingProps.downloadItems[x] = JSON.parse(JSON.stringify(item));
-            setLoadingProps({ downloadItems: JSON.parse(JSON.stringify(loadingProps.downloadItems)) });
+            setLoadingProps({ downloadItems: JSON.parse(JSON.stringify(loadingProps.downloadItems)), downloadNodesetUid: item.uid });
         }
 
         async function downloadProfile(item) {
-            var url = `profile/export`;
+            const url = `profile/export`;
             console.log(generateLogMessageString(`downloadProfile||${url}`));
 
             //var data = { id: item.profileId };
-            var data = item.requestInfo;
+            const data = item.requestInfo;
             await axiosInstance.post(url, data).then(async result => {
                 console.log(generateLogMessageString(`downloadProfile||${result.data.isSuccess ? 'success' : 'fail'}`));
                 if (result.status === 200 && result.data.isSuccess) {
@@ -50,6 +50,7 @@ function DownloadMessage() {
                         statusName: result.data.warnings == null || result.data.warnings.length === 0 ? 'completed' : "warning",
                         message: result.data.message,
                         data: result.data.data,
+                        uid: result.data.uid, 
                         download: `${item.fileName}.xml`,
                         caption: `${item.fileName}.xml`,
                         warnings: result.data.warnings
