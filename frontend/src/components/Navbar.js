@@ -10,10 +10,11 @@ import logo from './img/Logo-CESMII.svg'
 import { SVGIcon } from './SVGIcon'
 import Color from './Constants'
 
-import './styles/Navbar.scss'
 import { AppSettings } from '../utils/appsettings';
 import { doLogout, useLoginStatus } from './OnLoginHandler';
 import LoginButton from './LoginButton';
+
+import './styles/Navbar.scss'
 
 //const CLASS_NAME = "Navbar";
 
@@ -25,7 +26,7 @@ function Navbar() {
     const history = useHistory();
     const { instance, inProgress } = useMsal();
     const _activeAccount = instance.getActiveAccount();
-    const { isAuthenticated, isAuthorized } = useLoginStatus(null, null /*[AppSettings.AADUserRole]*/);
+    const { isAuthenticated, isAuthorized } = useLoginStatus(null, [AppSettings.AADAdminRole]);
 
     //-------------------------------------------------------------------
     // Region: Hooks
@@ -86,7 +87,7 @@ function Navbar() {
                 <Dropdown.Menu>
                     <Dropdown.Item eventKey="1" href="/account">Account Profile</Dropdown.Item>
                     <Dropdown.Divider />
-                    {(isInRole(_activeAccount, 'cesmii.marketplace.marketplaceadmin')) &&
+                    {isAuthorized &&
                         <>
                             <Dropdown.Item eventKey="2" href="/admin/library/new">Add Marketplace Item</Dropdown.Item>
                             <Dropdown.Item eventKey="3" href="/admin/publisher/new">Add Publisher</Dropdown.Item>
@@ -99,13 +100,13 @@ function Navbar() {
                             <Dropdown.Divider />
                         </>
                     }
-                    {(isInRole(_activeAccount, 'cesmii.marketplace.jobadmin')) &&
+                    {(isInRole(_activeAccount, AppSettings.AADJobAdminRole)) &&
                         <>
                             <Dropdown.Item eventKey="10" href="/admin/jobdefinition/list">Manage Job Definitions</Dropdown.Item>
                             <Dropdown.Divider />
                         </>
                     }
-                    {(isInRole(_activeAccount, 'cesmii.marketplace.marketplaceadmin')) &&
+                    {isAuthorized &&
                         <>
                             <Dropdown.Item eventKey="11" href="/admin/sitemap/generate">Generate Sitemap...</Dropdown.Item>
                             <Dropdown.Divider />
