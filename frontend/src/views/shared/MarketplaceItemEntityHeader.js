@@ -26,12 +26,13 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
         e.preventDefault();
 
         //if user already downloaded any nodeset in past, bypass email collection form
-        if (loadingProps.downloadNodesetCounter && loadingProps.downloadNodesetCounter > 0) {
-            var itm = JSON.parse(JSON.stringify(AppSettings.requestInfoNew));
+        if (loadingProps.downloadNodesetUid) {
+            const itm = JSON.parse(JSON.stringify(AppSettings.requestInfoNew));
             itm.smProfileId = props.item.id;
             itm.smProfile = props.item;
             itm.requestTypeCode = "smprofile-download";
             itm.email = "REPEAT";
+            itm.uid = loadingProps.downloadNodesetUid;
             if (props.onDownload) props.onDownload(itm);
         }
         else {
@@ -54,7 +55,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
     //-------------------------------------------------------------------
     const renderImageBg = () => {
 
-        var bgImageStyle = props.item.imageLandscape == null ? {} :
+        const bgImageStyle = props.item.imageLandscape == null ? {} :
             {
                 backgroundImage: `url(${getImageUrl(props.item.imageLandscape)})`
         };

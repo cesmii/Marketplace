@@ -26,7 +26,7 @@ function ProfileItemRow(props) { //props are item, showActions
     const renderMetaTagsRandom = (items, limit) => {
         if (items == null) return;
 
-        var randomIndexes = getRandomArrayIndexes(items, limit);
+        const randomIndexes = getRandomArrayIndexes(items, limit);
         if (randomIndexes == null || randomIndexes.length === 0) return;
         return (
             randomIndexes.map((i) => {
@@ -42,7 +42,7 @@ function ProfileItemRow(props) { //props are item, showActions
     const renderCategoryTagsRandom = (items, limit) => {
         if (items == null) return;
 
-        var randomIndexes = getRandomArrayIndexes(items, limit);
+        const randomIndexes = getRandomArrayIndexes(items, limit);
         if (randomIndexes == null || randomIndexes.length === 0) return;
         return (
             randomIndexes.map((i) => {
@@ -88,7 +88,7 @@ function ProfileItemRow(props) { //props are item, showActions
 
     const renderImageCompact = () => {
 
-        var style = 
+        const style = 
             {
                 width: '100%'
             };

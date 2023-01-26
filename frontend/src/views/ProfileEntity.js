@@ -9,7 +9,6 @@ import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
 import { cleanFileName, generateLogMessageString, getImageUrl, getMarketplaceIconName, scrollTopScreen } from '../utils/UtilityService'
 import MarketplaceTileList from './shared/MarketplaceTileList';
 import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
-import { useLoginStatus } from '../components/OnLoginHandler';
 
 import './styles/MarketplaceEntity.scss';
 
@@ -25,7 +24,6 @@ function ProfileEntity() {
     const [item, setItem] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const { isAuthenticated } = useLoginStatus(null, null);
     ////is favorite calc
     //const [isFavorite, setIsFavorite] = useState((loadingProps.favoritesList != null && loadingProps.favoritesList.findIndex(x => x.url === history.location.pathname) > -1));
 
@@ -98,7 +96,7 @@ function ProfileEntity() {
         var msgs = loadingProps.downloadItems || [];
         //msgs.push({ profileId: p.id, fileName: cleanFileName(p.namespace || p.displayName), immediateDownload: true });
         msgs.push({ requestInfo: req, fileName: cleanFileName(req.smProfile.namespace || req.smProfile.displayName), immediateDownload: true });
-        setLoadingProps({ downloadItems: JSON.parse(JSON.stringify(msgs)), downloadNodesetCounter: (loadingProps.downloadNodesetCounter == null ? 0 : loadingProps.downloadNodesetCounter) + 1 });
+        setLoadingProps({ downloadItems: JSON.parse(JSON.stringify(msgs)) });
         scrollTopScreen();
     }
 
@@ -145,20 +143,17 @@ function ProfileEntity() {
                         <div className="mb-3" dangerouslySetInnerHTML={{ __html: item.description }} ></div>
                     </div>
                 </div>
-                <div className="row" >
-                    <div className="col-sm-8">
-                        <span className="m-0 mr-2 mb-2 mb-md-0">
-                            <b className="mr-1" >Published By:</b>
-                            <br className="d-block d-md-none" />
-                            {item.publisher.displayName}
-                        </span>
+                {item.publisher?.displayName &&
+                    <div className="row" >
+                        <div className="col-sm-8">
+                            <span className="m-0 mr-2 mb-2 mb-md-0">
+                                <b className="mr-1" >Published By:</b>
+                                <br className="d-block d-md-none" />
+                                {item.publisher.displayName}
+                            </span>
+                        </div>
                     </div>
-                {/*    {(item.publisher.socialMediaLinks != null && item.publisher.socialMediaLinks.length > 0) && */}
-                {/*        <div className="col-sm-4 d-flex justify-content-md-end mb-2 mb-md-0 align-items-center">*/}
-                {/*            <SocialMedia items={item.publisher.socialMediaLinks} />*/}
-                {/*        </div>*/}
-                {/*    }*/}
-                </div>
+                }
             </>
         )
     }
@@ -170,7 +165,7 @@ function ProfileEntity() {
         }
         return (
             <MarketplaceItemEntityHeader key={item.id} item={item} currentUserId={null} showActions={true} cssClass="marketplace-list-item"
-                onDownload={downloadProfile} showProfileDesignerLink={isAuthenticated} />
+                onDownload={downloadProfile} showProfileDesignerLink={true} />
         )
     }
 
