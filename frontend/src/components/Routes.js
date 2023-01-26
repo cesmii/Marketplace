@@ -43,8 +43,8 @@ function Routes() {
             {/* Route order matters in the profile/ routes* - TBD - update to admin versions of the forms... */}
             <PublicRouteWFilter exact path="/" component={Home} />
             <PublicRouteWFilter exact path="/login/success" component={LoginSuccess} />
-            <PublicRouteWFilter path="/admin/returnUrl=:returnUrl" component={Home} />
-            <PublicRouteWFilter exact path="/admin" component={Home} />
+            <PublicRouteWFilter path="/login/returnUrl=:returnUrl" component={Home} />
+            <PublicRouteWFilter exact path="/login" component={Home} />
             {/*<PublicRoute exact path="/about" component={About} />*/}
             <PublicRoute exact path="/library/:id" component={MarketplaceEntity} />
             <PublicRoute exact path="/profile/:id" component={ProfileEntity} />
