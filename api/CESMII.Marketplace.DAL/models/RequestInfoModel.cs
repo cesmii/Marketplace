@@ -43,6 +43,11 @@ namespace CESMII.Marketplace.DAL.Models
 
         public string Email { get; set; }
 
+        /// <summary>
+        /// Encrypted email. Obfuscate name so it is less obvious. 
+        /// </summary>
+        public string Uid { get; set; }
+
         public string Phone { get; set; }
 
         public string Industries { get; set; }
