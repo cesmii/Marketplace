@@ -164,7 +164,7 @@
 
         }
 
-        private async Task<List<MarketplaceItemModel>> PopularItemsMarketplace(List<OrderByExpression<MarketplaceItemAnalytics>> orderBys)
+        private Task<List<MarketplaceItemModel>> PopularItemsMarketplace(List<OrderByExpression<MarketplaceItemAnalytics>> orderBys)
         {
             //run in parallel
             var popularMarketplace = _dalAnalytics.Where(x => string.IsNullOrEmpty(x.CloudLibId), null, 4, false, false, orderBys.ToArray()).Data
@@ -184,7 +184,7 @@
 
             //run in parallel
             var itemsMarketplace = _dalMarketplace.Where(predicatesMarketplace, null, 4, false, false).Data;
-            return itemsMarketplace.ToList();
+            return Task.FromResult(itemsMarketplace.ToList());
         }
 
         private async Task<List<MarketplaceItemModel>> PopularItemsCloudLib(List<OrderByExpression<MarketplaceItemAnalytics>> orderBys)

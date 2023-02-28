@@ -51,17 +51,17 @@
             return MapToModel(entity, true);
         }
 
-        public async Task<string> Add(PublisherModel model, string userId)
+        public Task<string> Add(PublisherModel model, string userId)
         {
             throw new NotSupportedException("For adding publisher items, use AdminPublisherDAL");
         }
 
-        public async Task<int> Update(PublisherModel model, string userId)
+        public Task<int> Update(PublisherModel model, string userId)
         {
             throw new NotSupportedException("For saving publisher items, use AdminPublisherDAL");
         }
 
-        public override async Task<int> Delete(string id, string userId)
+        public override Task<int> Delete(string id, string userId)
         {
             throw new NotSupportedException("For deleting publisher items, use AdminPublisherDAL");
         }
