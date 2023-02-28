@@ -46,12 +46,12 @@
 
         }
 
-        public async Task<string> Add(MarketplaceItemModel model, string userId)
+        public Task<string> Add(MarketplaceItemModel model, string userId)
         {
             throw new NotSupportedException("For adding marketplace items, use AdminMarketplaceDAL");
         }
 
-        public async Task<int> Update(MarketplaceItemModel model, string userId)
+        public Task<int> Update(MarketplaceItemModel model, string userId)
         {
             throw new NotSupportedException("For saving marketplace items, use AdminMarketplaceDAL");
         }
@@ -204,7 +204,7 @@
 
         }
 
-        public override async Task<int> Delete(string id, string userId)
+        public override Task<int> Delete(string id, string userId)
         {
             throw new NotSupportedException("For deleting marketplace items, use AdminMarketplaceDAL");
         }
