@@ -31,11 +31,11 @@ function InlineMessage() {
         dismissMessage(id);
     }
 
-    const dismissMessageTimed = (msgId) => {
+    const dismissMessageTimed = (msgId, ms = 6000) => {
         console.log(generateLogMessageString('dismissMessageTimed||', CLASS_NAME));
         setTimeout(() => {
             dismissMessage(msgId);
-        }, 6000);
+        }, ms);
     }
 
     //console.log(generateLogMessageString('loading', CLASS_NAME));
@@ -45,8 +45,9 @@ function InlineMessage() {
         var isProcessing = msg.severity === "processing";
         var sev = msg.severity == null || msg.severity === "" || msg.severity === "processing" ? "info" : msg.severity;
 
-        if (msg.isTimed)
-            dismissMessageTimed(msg.id);  //dismiss the message on a timed basis
+        //dismiss the message on a timed basis - short if isTimed is true, 
+        //long if isTimed is false - still get rid of it after awhile
+        dismissMessageTimed(msg.id, msg.isTimed ? 6000 : 3000001); //6 seconds or 5 minutes
 
         return (
             <div key={"inline-msg-" + msg.id} className={"alert alert-" + sev + " ml-5 mr-5 mt-3 mb-2"} >

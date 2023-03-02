@@ -58,7 +58,7 @@ function Footer() {
                         <div>
                             <span className="headline-3 d-block mb-2">{AppSettings.Titles.Caption}</span>
                             <SocialMedia items={LookupData.socialMediaLinks} />
-                            <span className="muted d-block mt-2" >Copyright 2021, CESMII</span>
+                            <span className="muted d-block mt-2" >&copy;2022-2023 CESMII. All rights reserved.</span>
                         </div>
                     </div>
                 </div>
