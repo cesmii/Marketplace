@@ -169,21 +169,34 @@ namespace CESMII.Marketplace.Api.Controllers
                 await _dalAnalytics.Update(analytic, null);
             }
 
-            //add request info object so we capture who downloaded
-            //if uid is populated, then decrypt and use that - it contains email, f name, l name.
-            var delimiter = "$";
-            var key = _configUtil.PasswordConfigSettings.EncryptionSettings.EncryptDecryptRequestInfoKey;
-            string[] uid = String.IsNullOrEmpty(model.Uid) ? null : PasswordUtils.DecryptString(model.Uid, key).Split(delimiter);
-            model.Email = uid == null || uid.Length < 1 ? model.Email : uid[0];
-            model.FirstName = uid == null || uid.Length < 2 ? model.FirstName : uid[1];
-            model.LastName = uid == null || uid.Length < 1 ? model.LastName : uid[2];
+            try
+            {
+                //add request info object so we capture who downloaded
+                //if uid is populated, then decrypt and use that - it contains email, f name, l name.
+                var delimiter = "$";
+                var key = _configUtil.PasswordConfigSettings.EncryptionSettings.EncryptDecryptRequestInfoKey;
+                if (!string.IsNullOrEmpty(key))
+                {
+                    string[] uid = String.IsNullOrEmpty(model.Uid) ? null : PasswordUtils.DecryptString(model.Uid, key).Split(delimiter);
+                    model.Email = uid == null || uid.Length < 1 ? model.Email : uid[0];
+                    model.FirstName = uid == null || uid.Length < 2 ? model.FirstName : uid[1];
+                    model.LastName = uid == null || uid.Length < 1 ? model.LastName : uid[2];
 
-            //save the request info in the DB and notify via email
-            await SaveRequestInfo(model, smProfile.Item );
+                    //save the request info in the DB and notify via email
+                    await SaveRequestInfo(model, smProfile.Item);
 
-            //encrypt data for repeat scenario
-            model.Uid = PasswordUtils.EncryptString($"{model.Email}{delimiter}{model.FirstName}{delimiter}{model.LastName}", key);
-
+                    //encrypt data for repeat scenario
+                    model.Uid = PasswordUtils.EncryptString($"{model.Email}{delimiter}{model.FirstName}{delimiter}{model.LastName}", key);
+                }
+                else
+                {
+                    _logger.LogError($"Cannot submit request info: no encryption key configured.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Cannot submit request info: internal error.");
+            }
             return Ok(new ResultMessageExportModel()
             {
                 IsSuccess = true,
