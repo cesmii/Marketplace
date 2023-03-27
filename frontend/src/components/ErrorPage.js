@@ -54,8 +54,8 @@ function ErrorPage({ error, resetErrorBoundary }) {
         console.log(JSON.stringify(error));
 
         //Call API to log message
-        var data = { message: error.message, url: history.location.pathname };
-        var url = `system/log/${(!_isAuthenticated ? "public" : "private")}`;
+        const data = { message: error.message, url: history.location.pathname };
+        const url = `system/log/${(!_isAuthenticated ? "public" : "private")}`;
         axiosInstance.post(url, data).then(result => {
             if (result.status === 200) {
                 console.log(generateLogMessageString(`logError||Error was logged to the server.`, CLASS_NAME));

@@ -49,7 +49,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
     const renderMetaTagsRandom = (items, limit) => {
         if (items == null) return;
 
-        var randomIndexes = getRandomArrayIndexes(items, limit);
+        const randomIndexes = getRandomArrayIndexes(items, limit);
         if (randomIndexes == null || randomIndexes.length === 0) return;
         return (
             randomIndexes.map((i) => {
@@ -97,7 +97,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
     const renderCategoryTagsRandom = (items, limit) => {
         if (items == null) return;
 
-        var randomIndexes = getRandomArrayIndexes(items, limit);
+        const randomIndexes = getRandomArrayIndexes(items, limit);
         if (randomIndexes == null || randomIndexes.length === 0) return;
         return (
             randomIndexes.map((i) => {
@@ -139,7 +139,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
             </div>
         );
         */
-        var bgImageStyle = props.item.imagePortrait == null ? {} :
+        const bgImageStyle = props.item.imagePortrait == null ? {} :
             {
                 backgroundImage: `url(${getImageUrl(props.item.imagePortrait)})`
             };
@@ -169,7 +169,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
                     <div className="d-flex align-items-center mb-2" >
                         <h2 className="mb-0" >{props.item.displayName}
                         </h2>
-                        {(props.currentUserId != null) &&
+                        {(props.isAuthorized) &&
                             <a className="btn btn-icon-outline circle ml-auto" href={`/admin/library/${props.item.id}`} ><i className="material-icons">edit</i></a>
                         }
                     </div>
