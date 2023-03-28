@@ -16,6 +16,7 @@
     using CESMII.Marketplace.Common.Utils;
     using CESMII.Marketplace.DAL;
     using CESMII.Marketplace.DAL.Models;
+    using CESMII.Common.SelfServiceSignUp.Services;
 
     public class BaseController<TController> : Controller where TController : Controller
     {
