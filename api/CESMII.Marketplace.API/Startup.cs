@@ -37,6 +37,7 @@ using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.JobManager;
 using CESMII.Marketplace.Api.Shared.Extensions;
 using CESMII.Common.CloudLibClient;
+using CESMII.Common.SelfServiceSignUp.Services;
 
 namespace CESMII.Marketplace.Api
 {
