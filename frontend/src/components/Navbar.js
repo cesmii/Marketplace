@@ -106,7 +106,7 @@ function Navbar() {
                                     <Dropdown.Divider />
                                 </>
                             }
-                            {(isInRole(_activeAccount, 'cesmii.marketplace.jobadmin')) &&
+                            {(isInRole(_activeAccount, 'cesmii.marketplace.marketplaceadmin')) &&
                                 <>
                                     <Dropdown.Item eventKey="10" href="/admin/jobdefinition/list">Manage Job Definitions</Dropdown.Item>
                                     <Dropdown.Divider />

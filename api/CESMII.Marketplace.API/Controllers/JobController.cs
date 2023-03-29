@@ -46,7 +46,26 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest($"Invalid model (null)");
             }
 
-            var result = await _jobFactory.ExecuteJob(model, base.LocalUser);
+            //get full user record from db.
+            var user = _dalUser.GetById(base.LocalUser.ID);
+            if (user == null)
+            {
+                return Ok(new ResultMessageWithDataModel()
+                {
+                    Data = null,
+                    IsSuccess = false,
+                    Message = "Could not retrieve your user information."
+                });
+            }
+            //apply settings to user from db
+            user.FirstName = base.LocalUser.FirstName;
+            user.LastName = base.LocalUser.LastName;
+            user.DisplayName = base.LocalUser.DisplayName;
+            user.Email = base.LocalUser.Email;
+            user.Organization = base.LocalUser.Organization;
+
+            //execute job
+            var result = await _jobFactory.ExecuteJob(model, user);
 
             return Ok(new ResultMessageWithDataModel() {
                 Data = result,
