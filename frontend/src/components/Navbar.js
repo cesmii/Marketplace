@@ -100,7 +100,7 @@ function Navbar() {
                             <Dropdown.Divider />
                         </>
                     }
-                    {(isInRole(_activeAccount, AppSettings.AADJobAdminRole)) &&
+                    {isAuthorized &&
                         <>
                             <Dropdown.Item eventKey="10" href="/admin/jobdefinition/list">Manage Job Definitions</Dropdown.Item>
                             <Dropdown.Divider />
