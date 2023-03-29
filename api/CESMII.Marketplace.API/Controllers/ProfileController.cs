@@ -14,6 +14,7 @@ using CESMII.Marketplace.Api.Shared.Extensions;
 using CESMII.Marketplace.Api.Shared.Controllers;
 using CESMII.Marketplace.Api.Shared.Models;
 using CESMII.Marketplace.Common.Utils;
+using CESMII.Common.SelfServiceSignUp.Services;
 
 namespace CESMII.Marketplace.Api.Controllers
 {

@@ -30,26 +30,47 @@ header {
 }
 
 //nav link overrides
-.nav-item {
-    a.nav-link {
-        font-family: $font-family-base;
-        color: color('white') !important;
-        opacity: 0.9;
+.nav-link {
+    font-family: $font-family-base;
+    color: color('white') !important;
+    opacity: 0.9;
 
-        &:hover {
-            opacity: 0.75;
-        }
-
-        &.active {
-            font-weight: 500;
-            opacity: 1.0;
-            @include background-opacity(color("white"), 0.2);
-            border-radius: 3rem;
-        }
+    &:hover {
+        opacity: 0.75;
     }
 
-    .dropdown-toggle {
-        color: color('white') !important;
-        opacity: 0.9;
+    &.active {
+        font-weight: 500;
+        opacity: 1.0;
+        @include background-opacity(color("white"), 0.2);
+        border-radius: 3rem;
     }
 }
+
+.dropdown-toggle {
+    color: color('white') !important;
+    opacity: 0.9;
+}
+
+.slide-in-panel.login {
+    z-index: 1030;
+    background-color: color("almost-white");
+    margin-top: $navbarHeight;
+    width: 90%;
+    max-width: $rightPanelWidth;
+    margin-right: -$rightPanelWidth;
+    position: fixed;
+    top: 0;
+    right: 0;
+    transition: all 1000ms ease-out;
+    @include globalShadow;
+    border-left: 1px solid color("silver");
+    border-bottom: 1px solid color("silver");
+    color: color("textPrimary");
+    
+    &.open {
+        margin-right: 1%;
+    }
+}
+
+
