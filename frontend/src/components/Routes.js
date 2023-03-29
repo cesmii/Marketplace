@@ -69,10 +69,9 @@ function Routes() {
             <AdminRoute path="/admin/images/list" component={AdminStockImageList} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/lookup/list" component={AdminLookupList} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/lookup/:id" component={AdminLookupEntity} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/jobDefinition/list" component={AdminJobDefinitionList} roles={[AppSettings.AADJobAdminRole]} />
-            <AdminRoute path="/admin/jobDefinition/:id" component={AdminJobDefinitionEntity} roles={[AppSettings.AADJobAdminRole]} />
+            <AdminRoute path="/admin/jobDefinition/list" component={AdminJobDefinitionList} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/jobDefinition/:id" component={AdminJobDefinitionEntity} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/sitemap/generate" component={SitemapGenerator} roles={[AppSettings.AADAdminRole]} />
-
             <AdminRoute path="/account" component={AccountProfile} />
 
             <PublicRoute path="/notpermitted" component={NotAuthorized} />
