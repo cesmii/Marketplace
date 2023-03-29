@@ -68,8 +68,8 @@ function Routes() {
             <AdminRoute path="/admin/images/list" component={AdminStockImageList} roles={['cesmii.marketplace.marketplaceadmin']} />
             <AdminRoute path="/admin/lookup/list" component={AdminLookupList} roles={['cesmii.marketplace.marketplaceadmin']} />
             <AdminRoute path="/admin/lookup/:id" component={AdminLookupEntity} roles={['cesmii.marketplace.marketplaceadmin']} />
-            <AdminRoute path="/admin/jobDefinition/list" component={AdminJobDefinitionList} roles={['cesmii.marketplace.jobadmin']} />
-            <AdminRoute path="/admin/jobDefinition/:id" component={AdminJobDefinitionEntity} roles={['cesmii.marketplace.jobadmin']} />
+            <AdminRoute path="/admin/jobDefinition/list" component={AdminJobDefinitionList} roles={['cesmii.marketplace.marketplaceadmin']} />
+            <AdminRoute path="/admin/jobDefinition/:id" component={AdminJobDefinitionEntity} roles={['cesmii.marketplace.marketplaceadmin']} />
             <AdminRoute path="/admin/sitemap/generate" component={SitemapGenerator} roles={['cesmii.marketplace.marketplaceadmin']} />
 
             <AdminRoute path="/account" component={AccountProfile} />
