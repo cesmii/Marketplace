@@ -5,6 +5,7 @@ import axiosInstance from "../services/AxiosService";
 import ReactGA from 'react-ga4';
 
 import { clearSearchCriteria, setMarketplacePageSize } from '../services/MarketplaceService';
+import { useLoginStatus } from '../components/OnLoginHandler';
 import { AppSettings } from '../utils/appsettings'
 import { generateLogMessageString, renderTitleBlock } from '../utils/UtilityService'
 import GridPager from '../components/GridPager'
@@ -42,6 +43,7 @@ function MarketplaceList() {
     const caption = 'Library';
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_queryLocal, setQueryLocal] = useState(loadingProps.query);
+    const { isAuthenticated, isAuthorized } = useLoginStatus(null, [AppSettings.AADAdminRole]);
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
@@ -238,10 +240,10 @@ function MarketplaceList() {
         }
         const mainBody = _dataRows.all.map((item) => {
             if (item.type != null && item.type.code === AppSettings.itemTypeCode.smProfile) {
-                return (<ProfileItemRow key={item.id} item={item} showActions={true} cssClass="marketplace-list-item" />)
+                return (<ProfileItemRow key={item.id} item={item} showActions={true} cssClass="marketplace-list-item" isAuthenticated={isAuthenticated} isAuthorized={isAuthorized} />)
             }
             else {
-                return (<MarketplaceItemRow key={item.id} item={item} showActions={true} cssClass="marketplace-list-item" />)
+                return (<MarketplaceItemRow key={item.id} item={item} showActions={true} cssClass="marketplace-list-item" isAuthenticated={isAuthenticated} isAuthorized={isAuthorized} />)
             }
         });
 

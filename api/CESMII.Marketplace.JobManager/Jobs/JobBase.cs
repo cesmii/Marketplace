@@ -10,7 +10,7 @@ using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Enums;
-using CESMII.Marketplace.Common.Utils;
+using CESMII.Common.SelfServiceSignUp.Services;
 
 namespace CESMII.Marketplace.JobManager.Jobs
 {

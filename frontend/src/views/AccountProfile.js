@@ -12,6 +12,7 @@ import { AppSettings } from '../utils/appsettings';
 import { generateLogMessageString } from '../utils/UtilityService'
 
 import ChangePasswordModal from '../components/ChangePasswordModal';
+import { useLoginStatus } from '../components/OnLoginHandler';
 
 const CLASS_NAME = "AccountProfile";
 
@@ -24,11 +25,13 @@ function AccountProfile() {
     const history = useHistory();
     const { instance } = useMsal();
     const _activeAccount = instance.getActiveAccount();
+    const { isAuthenticated, isAuthorized } = useLoginStatus(null, [AppSettings.AADAdminRole]);
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_item, setItem] = useState({});
     const [_isValid, setIsValid] = useState({organizationName: true, smipSettings: true});
     const [_changePasswordModal, setChangePasswordModal] = useState({ show: false, url: null, updateToken: false});
-    var caption = 'My Profile';
+    const _caption = 'My Profile';
+
 
     //-------------------------------------------------------------------
     // Region: Hooks
@@ -42,7 +45,7 @@ function AccountProfile() {
             //get my latest profile info
             var result = null;
             try {
-                var url = `user/profile/mine/msal`
+                const url = `user/profile/mine/msal`
                 result = await axiosInstance.post(url);
             }
             catch (err) {
@@ -110,7 +113,7 @@ function AccountProfile() {
         setLoadingProps({ isLoading: true, message: "" });
 
         //perform insert call
-        var url = `user/profile/update`;
+        const url = `user/profile/update`;
         axiosInstance.post(url, _item)
             .then(result => {
                 if (result.data.isSuccess) {
@@ -172,8 +175,8 @@ function AccountProfile() {
 
     const onChangePasswordOpen = (e) => {
         console.log(generateLogMessageString(`onChangePasswordOpen`, CLASS_NAME));
-        var url = e.currentTarget.getAttribute("data-url");
-        var updateToken = e.currentTarget.getAttribute("data-updatetoken");
+        const url = e.currentTarget.getAttribute("data-url");
+        const updateToken = e.currentTarget.getAttribute("data-updatetoken");
         setChangePasswordModal({ show: true, url: url, updateToken: updateToken === "true" });
     };
 
@@ -191,22 +194,22 @@ function AccountProfile() {
     });
 
     const validateFormSmipSettings_userName = (e) => {
-        var isValid = e.target.value != null && e.target.value.trim().length > 0;
+        const isValid = e.target.value != null && e.target.value.trim().length > 0;
         setIsValidSmipSettings({ ..._isValidSmipSettings, userName: isValid });
     };
 
     const validateFormSmipSettings_graphQlUrl = (e) => {
-        var isValid = e.target.value != null && e.target.value.trim().length > 0;
+        const isValid = e.target.value != null && e.target.value.trim().length > 0;
         setIsValidSmipSettings({ ..._isValidSmipSettings, graphQlUrl: isValid });
     };
 
     const validateFormSmipSettings_authenticator = (e) => {
-        var isValid = e.target.value != null && e.target.value.trim().length > 0;
+        const isValid = e.target.value != null && e.target.value.trim().length > 0;
         setIsValidSmipSettings({ ..._isValidSmipSettings, authenticator: isValid });
     };
 
     const validateFormSmipSettings_authenticatorRole = (e) => {
-        var isValid = e.target.value != null && e.target.value.trim().length > 0;
+        const isValid = e.target.value != null && e.target.value.trim().length > 0;
         setIsValidSmipSettings({ ..._isValidSmipSettings, authenticatorRole: isValid });
     };
 
@@ -226,6 +229,8 @@ function AccountProfile() {
     //on change handler to update state
     const onChangeSmipSettings = (e) => {
 
+        if (!isAuthorized) return;
+
         //note you must update the state value for the input to be read only. It is not enough to simply have the onChange handler.
         switch (e.target.id) {
             case "smipSettings.userName":
@@ -243,6 +248,7 @@ function AccountProfile() {
     }
 
     const renderSMIPSettings = () => {
+
         return (
             <>
                 <div className="row">
@@ -260,7 +266,9 @@ function AccountProfile() {
                                 </span>
                             }
                             <Form.Control id="smipSettings.userName" className={(!_isValidSmipSettings.userName ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
-                                value={_item.smipSettings?.userName == null ? '' : _item.smipSettings.userName} onBlur={validateFormSmipSettings_userName} onChange={onChangeSmipSettings} />
+                                value={_item.smipSettings?.userName == null ? '' : _item.smipSettings.userName} onBlur={validateFormSmipSettings_userName} onChange={onChangeSmipSettings}
+                                readOnly={!isAuthorized}
+                            />
                         </Form.Group>
                     </div>
                 </div>
@@ -275,7 +283,7 @@ function AccountProfile() {
                             }
                             <Form.Control id="smipSettings.graphQlUrl" className={(!_isValidSmipSettings.graphQlUrl ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
                                 value={_item.smipSettings?.graphQlUrl == null ? '' : _item.smipSettings.graphQlUrl} onBlur={validateFormSmipSettings_graphQlUrl} onChange={onChangeSmipSettings}
-                                readOnly={_item.smipSettings == null || _item.smipSettings.userName == null ? 'readonly' : ''} />
+                                readOnly={!isAuthorized || _item.smipSettings == null || _item.smipSettings.userName == null ? 'readonly' : ''} />
                         </Form.Group>
                     </div>
                 </div>
@@ -290,7 +298,7 @@ function AccountProfile() {
                             }
                             <Form.Control id="smipSettings.authenticator" className={(!_isValidSmipSettings.authenticator ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
                                 value={_item.smipSettings?.authenticator == null ? '' : _item.smipSettings.authenticator} onBlur={validateFormSmipSettings_authenticator} onChange={onChangeSmipSettings}
-                                readOnly={_item.smipSettings == null || _item.smipSettings.userName == null ? 'readonly' : ''} />
+                                readOnly={!isAuthorized || _item.smipSettings == null || _item.smipSettings.userName == null ? 'readonly' : ''} />
                         </Form.Group>
                     </div>
                 </div>
@@ -305,15 +313,17 @@ function AccountProfile() {
                             }
                             <Form.Control id="smipSettings.authenticatorRole" className={(!_isValidSmipSettings.authenticatorRole ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
                                 value={_item.smipSettings?.authenticatorRole == null ? '' : _item.smipSettings.authenticatorRole} onBlur={validateFormSmipSettings_authenticatorRole} onChange={onChangeSmipSettings}
-                                readOnly={_item.smipSettings == null || _item.smipSettings.userName == null ? 'readonly' : ''} />
+                                readOnly={!isAuthorized || _item.smipSettings == null || _item.smipSettings.userName == null ? 'readonly' : ''} />
                         </Form.Group>
                     </div>
                 </div>
-                <div className="row">
-                    <div className="col-md-6 my-2">
-                        <Button variant="link" onClick={onChangePasswordOpen} data-url="user/smipSettings/changepassword" data-updatetoken={false} >Update SMIP Password</Button>
+                {isAuthorized &&
+                    <div className="row">
+                        <div className="col-md-6 my-2">
+                            <Button variant="link" onClick={onChangePasswordOpen} data-url="user/smipSettings/changepassword" data-updatetoken={false} >Update SMIP Password</Button>
+                        </div>
                     </div>
-                </div>
+                }
             </>
         )
     }
@@ -361,15 +371,17 @@ function AccountProfile() {
                         </Form.Group>
                     </div>
                 </div>
-                <div className="row">
-                    <div className="col-md-6">
-                        <Form.Group>
-                            <Form.Label htmlFor="organization.name" >Organization</Form.Label>
-                            <Form.Control id="organization.name" className={(!_isValid.organizationName ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
-                                value={_item.organization == null ? "": _item.organization.name} readOnly='readonly' />
-                        </Form.Group>
+                {_item.organization != null &&
+                    <div className="row">
+                        <div className="col-md-6">
+                            <Form.Group>
+                                <Form.Label htmlFor="organization.name" >Organization</Form.Label>
+                                <Form.Control id="organization.name" className={(!_isValid.organizationName ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
+                                    value={_item.organization == null ? "" : _item.organization.name} readOnly='readonly' />
+                            </Form.Group>
+                        </div>
                     </div>
-                </div>
+                }
                 <hr />
                 {renderSMIPSettings()}
             </>
@@ -391,10 +403,12 @@ function AccountProfile() {
         return (
             <>
                 <h1 className="m-0 mr-2">
-                    {caption}
+                    {_caption}
                 </h1>
                 <div className="ml-auto d-flex align-items-center" >
-                    {renderButtons()}
+                    {isAuthorized &&
+                        renderButtons()
+                    }
                 </div>
             </>
         )
@@ -404,13 +418,13 @@ function AccountProfile() {
     //-------------------------------------------------------------------
     // Region: Render
     //-------------------------------------------------------------------
-    if (loadingProps.isLoading) return null;
+    if (!isAuthenticated || loadingProps.isLoading) return null;
 
     //return final ui
     return (
         <>
             <Helmet>
-                <title>{`${caption} | ${AppSettings.Titles.Main}`}</title>
+                <title>{`${_caption} | ${AppSettings.Titles.Main}`}</title>
             </Helmet>
             <Form noValidate>
                 {renderHeaderRow()}

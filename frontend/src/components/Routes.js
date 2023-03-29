@@ -29,6 +29,7 @@ import AdminJobDefinitionEntity from '../views/admin/AdminJobDefinitionEntity'
 import SitemapGenerator from '../views/admin/SitemapGenerator'
 import AccountProfile from '../views/AccountProfile'
 import LoginSuccess from '../views/LoginSuccess'
+import { AppSettings } from '../utils/appsettings'
 
 //const CLASS_NAME = "Routes";
 
@@ -43,8 +44,8 @@ function Routes() {
             {/* Route order matters in the profile/ routes* - TBD - update to admin versions of the forms... */}
             <PublicRouteWFilter exact path="/" component={Home} />
             <PublicRouteWFilter exact path="/login/success" component={LoginSuccess} />
-            <PublicRouteWFilter path="/admin/returnUrl=:returnUrl" component={Home} />
-            <PublicRouteWFilter exact path="/admin" component={Home} />
+            <PublicRouteWFilter path="/login/returnUrl=:returnUrl" component={Home} />
+            <PublicRouteWFilter exact path="/login" component={Home} />
             {/*<PublicRoute exact path="/about" component={About} />*/}
             <PublicRoute exact path="/library/:id" component={MarketplaceEntity} />
             <PublicRoute exact path="/profile/:id" component={ProfileEntity} />
@@ -57,21 +58,20 @@ function Routes() {
             <PublicRoute exact path="/contact-us/:type" component={RequestInfo} />
 
             {/* Admin UI order matters in the profile/ routes* - TBD - update to admin versions of the forms...*/}
-            <AdminRoute path="/admin/library/list" component={AdminMarketplaceList} roles={['cesmii.marketplace.marketplaceadmin']} />
-            <AdminRoute path="/admin/library/copy/:parentId" component={AdminMarketplaceEntity} roles={['cesmii.marketplace.marketplaceadmin']} />
-            <AdminRoute path="/admin/library/:id" component={AdminMarketplaceEntity} roles={['cesmii.marketplace.marketplaceadmin']} />
-            <AdminRoute path="/admin/publisher/list" component={AdminPublisherList} roles={['cesmii.marketplace.marketplaceadmin']} />
-            <AdminRoute path="/admin/publisher/copy/:parentId" component={AdminPubisherEntity} roles={['cesmii.marketplace.marketplaceadmin']} />
-            <AdminRoute path="/admin/publisher/:id" component={AdminPubisherEntity} roles={['cesmii.marketplace.marketplaceadmin']} />
-            <AdminRoute path="/admin/requestinfo/list" component={AdminRequestInfoList} roles={['cesmii.marketplace.marketplaceadmin']} />
-            <AdminRoute path="/admin/requestinfo/:id" component={AdminRequestInfoEntity} roles={['cesmii.marketplace.marketplaceadmin']} />
-            <AdminRoute path="/admin/images/list" component={AdminStockImageList} roles={['cesmii.marketplace.marketplaceadmin']} />
-            <AdminRoute path="/admin/lookup/list" component={AdminLookupList} roles={['cesmii.marketplace.marketplaceadmin']} />
-            <AdminRoute path="/admin/lookup/:id" component={AdminLookupEntity} roles={['cesmii.marketplace.marketplaceadmin']} />
-            <AdminRoute path="/admin/jobDefinition/list" component={AdminJobDefinitionList} roles={['cesmii.marketplace.marketplaceadmin']} />
-            <AdminRoute path="/admin/jobDefinition/:id" component={AdminJobDefinitionEntity} roles={['cesmii.marketplace.marketplaceadmin']} />
-            <AdminRoute path="/admin/sitemap/generate" component={SitemapGenerator} roles={['cesmii.marketplace.marketplaceadmin']} />
-
+            <AdminRoute path="/admin/library/list" component={AdminMarketplaceList} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/library/copy/:parentId" component={AdminMarketplaceEntity} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/library/:id" component={AdminMarketplaceEntity} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/publisher/list" component={AdminPublisherList} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/publisher/copy/:parentId" component={AdminPubisherEntity} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/publisher/:id" component={AdminPubisherEntity} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/requestinfo/list" component={AdminRequestInfoList} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/requestinfo/:id" component={AdminRequestInfoEntity} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/images/list" component={AdminStockImageList} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/lookup/list" component={AdminLookupList} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/lookup/:id" component={AdminLookupEntity} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/jobDefinition/list" component={AdminJobDefinitionList} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/jobDefinition/:id" component={AdminJobDefinitionEntity} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/sitemap/generate" component={SitemapGenerator} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/account" component={AccountProfile} />
 
             <PublicRoute path="/notpermitted" component={NotAuthorized} />
