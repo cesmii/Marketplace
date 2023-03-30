@@ -18,7 +18,7 @@ using CESMII.Marketplace.Data.Extensions;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
-    [Authorize(Roles = "cesmii.marketplace.jobadmin", Policy = nameof(PermissionEnum.UserAzureADMapped)), Route("api/admin/jobdefinition")]
+    [Authorize(Roles = "cesmii.marketplace.marketplaceadmin", Policy = nameof(PermissionEnum.UserAzureADMapped)), Route("api/admin/jobdefinition")]
     public class AdminJobDefinitionController : BaseController<AdminJobDefinitionController>
     {
 
