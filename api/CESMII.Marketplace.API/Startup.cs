@@ -23,6 +23,7 @@ using Microsoft.IdentityModel.Logging;
 
 using NLog;
 using NLog.Extensions.Logging;
+using NLog.Fluent;
 
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Utils;
@@ -63,7 +64,6 @@ namespace CESMII.Marketplace.Api
             //TBD - Mongo db - log to DB
             //NLog.LogManager.Configuration.Variables["connectionString"] = connectionStringProfileDesigner;
             NLog.LogManager.Configuration.Variables["appName"] = "CESMII-Marketplace";
-
 
             //marketplace and related data
             services.AddScoped<IMongoRepository<MarketplaceItem>, MongoRepository<MarketplaceItem>>();
