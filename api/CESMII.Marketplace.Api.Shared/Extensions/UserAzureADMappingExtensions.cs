@@ -7,10 +7,12 @@
 
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json;
 
     using CESMII.Marketplace.Common.Enums;
     using CESMII.Marketplace.Common.Utils;
     using CESMII.Marketplace.DAL;
+    using CESMII.Marketplace.DAL.Models;
 
     public class UserAzureADMapping
     {
@@ -29,14 +31,21 @@
             //maintained user id. In that table, there is an Azure object id which maps us to Azure.
             if (context.User != null && context.User.Identity.IsAuthenticated)
             {
-                var oId = GetAppUserId(context.User, logger, dalUser);
+                var u = GetAppUser(context.User, logger, dalUser);
 
-                if (!string.IsNullOrEmpty(oId))
+                if (u != null)
                 {
                     var permission = EnumUtils.GetEnumDescription(PermissionEnum.UserAzureADMapped);
+                    string strOrg = (u.Organization == null) ? "" :
+                                    (u.Organization.Name == null) ? "" :
+                                    u.Organization.Name.ToString();
+                    string jsonSMIP = u.SmipSettings == null ? null : JsonConvert.SerializeObject(u.SmipSettings);
+
                     var claims = new List<Claim>()
                     {
-                        new Claim(permission, oId)
+                        new Claim($"{permission}", u.ID.ToString()),  // key = UserAzureADMapped
+                        new Claim($"{permission}_org", strOrg),             // key = UserAzureADMapped_org
+                        new Claim($"{permission}_smipsettings", jsonSMIP)              // key = UserAzureADMapped_org
                     };
 
                     var appIdentity = new ClaimsIdentity(claims);
@@ -48,7 +57,7 @@
         }
 
 
-        protected string GetAppUserId(ClaimsPrincipal user, ILogger<UserAzureADMapping> logger, UserDAL dalUser)
+        protected UserModel GetAppUser(ClaimsPrincipal user, ILogger<UserAzureADMapping> logger, UserDAL dalUser)
         {
             //Get Object id from user.identity. Then try and lookup in the local db to get the local id associated with 
             //that Azure object id. If not present yet, the onAADLogin endpoint will add it there. 
@@ -57,7 +66,7 @@
             switch (matches.Count)
             {
                 case 1:
-                    return matches[0].ID;
+                    return matches[0];
                 case 0:
                     return null;
                 default:
