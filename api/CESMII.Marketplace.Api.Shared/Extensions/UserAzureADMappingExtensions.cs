@@ -43,9 +43,9 @@
 
                     var claims = new List<Claim>()
                     {
-                        new Claim($"{permission}", u.ID.ToString()),  // key = UserAzureADMapped
+                        new Claim($"{permission}", u.ID.ToString()),        // key = UserAzureADMapped
                         new Claim($"{permission}_org", strOrg),             // key = UserAzureADMapped_org
-                        new Claim($"{permission}_smipsettings", jsonSMIP)              // key = UserAzureADMapped_org
+                        new Claim($"{permission}_smipsettings", jsonSMIP)   // key = UserAzureADMapped_org
                     };
 
                     var appIdentity = new ClaimsIdentity(claims);
@@ -62,7 +62,9 @@
             //Get Object id from user.identity. Then try and lookup in the local db to get the local id associated with 
             //that Azure object id. If not present yet, the onAADLogin endpoint will add it there. 
             var oId = user.GetUserIdAAD();
-            var matches = dalUser.Where(x => x.ObjectIdAAD.ToLower().Equals(oId), null, null).Data;
+
+            // ObjectID could be null when record added by Self-Service Sign-Up API connector.
+            var matches = dalUser.Where(x => x.ObjectIdAAD != null && x.ObjectIdAAD.ToLower().Equals(oId), null, null).Data;
             switch (matches.Count)
             {
                 case 1:
@@ -70,8 +72,9 @@
                 case 0:
                     return null;
                 default:
-                    logger.LogWarning($"GetAppUserId||More than one user record found with user name {oId}.");
-                    throw new InvalidOperationException($"GetAppUserId: More than one record user found with user name {oId}.");
+                    string strMessage = $"GetAppUserId||More than one user document record found with Azuer Object Id = {oId}.";
+                    logger.LogWarning(strMessage);
+                    throw new InvalidOperationException(strMessage);
             }
         }
     }
