@@ -74,6 +74,8 @@
         public OrganizationModel Organization { get; set; }
 
         public Data.Entities.SmipSettings SmipSettings { get; set; }
+        public string? SelfServiceSignUp_Organization_Name { get; set; }
+        public bool? SelfServiceSignUp_IsCesmiiMember { get; set; }
     }
 
     public class UserSimpleModel : AbstractModel
