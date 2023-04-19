@@ -31,6 +31,10 @@ namespace NLog.Mongo
                 ConnectionString = connectionString ?? string.Empty;
                 CollectionName = collectionName ?? string.Empty;
                 DatabaseName = databaseName ?? string.Empty;
+
+                if (_str_OverrideConnectionString != null) ConnectionString = _str_OverrideConnectionString;
+                if (_str_OverrideCollectionName != null) CollectionName = _str_OverrideCollectionName;
+                if (_str_OverrideDatabaseName != null) DatabaseName = _str_OverrideDatabaseName;
             }
 
             public bool Equals(MongoConnectionKey other)
@@ -68,6 +72,26 @@ namespace NLog.Mongo
             IncludeEventProperties = true;
         }
 
+        private static string _str_OverrideConnectionString = null;
+        private static string _str_OverrideCollectionName = null;
+        private static string _str_OverrideDatabaseName = null;
+
+        /// <summary>
+        /// SetNLogMongoOverrides
+        /// </summary>
+        /// <param name="strConnectionString"></param>
+        /// <param name="strCollectionName"></param>
+        /// <param name="strDatabaseName"></param>
+        /// <returns></returns>
+        public static bool SetNLogMongoOverrides(string strConnectionString, string strCollectionName, string strDatabaseName)
+        {
+            _str_OverrideConnectionString = strConnectionString;
+            _str_OverrideCollectionName = strCollectionName;
+            _str_OverrideDatabaseName = strDatabaseName;
+
+            return true;
+        }
+
         /// <summary>
         /// Gets the fields collection.
         /// </summary>
@@ -95,7 +119,12 @@ namespace NLog.Mongo
         public string ConnectionString
         {
             get => (_connectionString as SimpleLayout)?.Text;
-            set => _connectionString = value ?? string.Empty;
+            set
+            {
+                 _connectionString = value ?? string.Empty;
+                if (!string.IsNullOrEmpty(_str_OverrideConnectionString))
+                    _connectionString = _str_OverrideConnectionString;
+            }
         }
         private Layout _connectionString;
 
@@ -124,7 +153,13 @@ namespace NLog.Mongo
         public string DatabaseName
         {
             get => (_databaseName as SimpleLayout)?.Text;
-            set => _databaseName = value ?? string.Empty;
+            set
+            {
+                _databaseName = value ?? string.Empty;
+                if (!string.IsNullOrEmpty(_str_OverrideDatabaseName))
+                    _databaseName = _str_OverrideDatabaseName;  
+            }
+            
         }
         private Layout _databaseName;
 
@@ -137,7 +172,12 @@ namespace NLog.Mongo
         public string CollectionName
         {
             get => (_collectionName as SimpleLayout)?.Text;
-            set => _collectionName = value ?? string.Empty;
+            set
+            {
+                _collectionName = value ?? string.Empty;
+                if (!string.IsNullOrEmpty (_str_OverrideCollectionName))
+                    _collectionName = _str_OverrideCollectionName;
+            }
         }
         private Layout _collectionName;
 

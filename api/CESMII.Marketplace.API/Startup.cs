@@ -39,6 +39,8 @@ using CESMII.Marketplace.JobManager;
 using CESMII.Marketplace.Api.Shared.Extensions;
 using CESMII.Common.CloudLibClient;
 using CESMII.Common.SelfServiceSignUp.Services;
+using CESMII.Common.SelfServiceSignUp.Models;
+using System.Security;
 
 namespace CESMII.Marketplace.Api
 {
@@ -60,9 +62,14 @@ namespace CESMII.Marketplace.Api
             //MongoDB approach
             services.Configure<MongoDBConfig>(Configuration);
 
-            //set variables used in nLog.config
-            //TBD - Mongo db - log to DB
-            //NLog.LogManager.Configuration.Variables["connectionString"] = connectionStringProfileDesigner;
+            string strConnectionString = Configuration["MongoDBSettings:ConnectionString"];
+            string strDatabase = Configuration["MongoDBSettings:DatabaseName"];
+            string strCollection = Configuration["MongoDBSettings:NLogCollectionName"];
+            NLog.Mongo.MongoTarget.SetNLogMongoOverrides(strConnectionString: strConnectionString,
+                                                         strCollectionName: strCollection,
+                                                         strDatabaseName: strDatabase);
+
+            // Set variable used in nLog.config
             NLog.LogManager.Configuration.Variables["appName"] = "CESMII-Marketplace";
 
             //marketplace and related data
@@ -84,6 +91,8 @@ namespace CESMII.Marketplace.Api
 
             //DAL objects
             services.AddScoped<UserDAL>();  //this one has extra methods outside of the IDal interface
+            services.AddScoped<OrganizationDAL>();
+            services.AddScoped<IUserSignUpData, UserSignUpData>();
             services.AddScoped<IDal<MarketplaceItem, MarketplaceItemModel>, MarketplaceDAL>();
             services.AddScoped<IDal<MarketplaceItem, AdminMarketplaceItemModel>, AdminMarketplaceDAL>();
             services.AddScoped<IDal<LookupItem, LookupItemModel>, LookupDAL>();
