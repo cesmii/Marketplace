@@ -64,12 +64,11 @@ function LoginButton() {
                 <p className="font-weight-bold text-center mb-3">Don't have an account?</p>
                 <div className="d-flex mt-auto mx-auto">
                     <Button variant="primary" className="mx-auto ml-2 border" type="submit" onClick={onCreateAccountClick} disabled={loadingProps.isLoading ? "disabled" : ""} >
-                        Sign Up
+                        Create Account
                     </Button>
                 </div>
                 <p className="mt-3 mb-0 text-center" >
-                    or email us at <a href="mailto:devops@cesmii.org" >devops@cesmii.org</a> to get registered.
-                    Please provide your project name or SOPO number with your request.
+                    To sign-up, click button.
                 </p>
             </div>
         );
