@@ -64,11 +64,11 @@ function LoginButton() {
                 <p className="font-weight-bold text-center mb-3">Don't have an account?</p>
                 <div className="d-flex mt-auto mx-auto">
                     <Button variant="primary" className="mx-auto ml-2 border" type="submit" onClick={onCreateAccountClick} disabled={loadingProps.isLoading ? "disabled" : ""} >
-                        Create Account
+                        Sign Up
                     </Button>
                 </div>
                 <p className="mt-3 mb-0 text-center" >
-                    To sign-up, click button.
+                    Click button to sign-up for an account.
                 </p>
             </div>
         );
