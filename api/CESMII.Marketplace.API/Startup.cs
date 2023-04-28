@@ -251,9 +251,11 @@ namespace CESMII.Marketplace.Api
                 }
             });
 
+            #pragma warning disable CS1998  // Silence warning: This async method lacks 'await' operators and will run synchronously.
             app.Use(async (context, next) =>
             {
-                context.Response.OnStarting(async o => {
+                context.Response.OnStarting(async o =>
+                {
                     if (o is HttpContext ctx)
                     {
                         ctx.Response.Headers["x-api-version"] = _version;
