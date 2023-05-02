@@ -351,3 +351,7 @@ MigrationBackup/
 /front-end/src/views/shared/MarketplaceItemRow.js
 /images
 /frontend/package-lock.json
+/frontend/mpfe.bat
+/frontend/.env
+/frontend/.env.development
+/api/CESMII.Marketplace.API/appsettings.Development.json
