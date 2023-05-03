@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import { Button } from 'react-bootstrap';
+import color from '../../components/Constants';
 
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
 import DownloadNodesetModal from '../../components/DownloadNodesetModal';
 import { AppSettings } from '../../utils/appsettings';
-import { formatDate, generateLogMessageString, getImageUrl } from '../../utils/UtilityService';
+import { formatDate, generateLogMessageString, getImageUrl, renderMenuColorIcon } from '../../utils/UtilityService';
 import { MarketplaceItemJobLauncher } from './MarketplaceItemJobLauncher';
 
 const CLASS_NAME = "MarketplaceItemEntityHeader";
@@ -83,6 +84,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         {/*<div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderCategoryItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderMetaTagItem(props.item)}</div>*/}
+                        <a className="btn btn-primary align-items-center mt-4 px-1 px-md-4 auto-width text-nowrap" href={`/more-info/app/${props.item.id}`} >Request More Info</a>
                         {renderJobDefinitions()}
                     </div>
                 </div>
@@ -109,12 +111,18 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         <p className="mb-2" ><b className="mr-2" >Published:</b>{formatDate(props.item.publishDate)}</p>
                         <p className="mb-2" ><b className="mr-2" >Version:</b>{props.item.version}</p>
                         {props.onDownload &&
-                            <p className="my-4" ><Button variant="secondary" type="button" className="px-4" onClick={onDownloadStart} >Download Nodeset XML</Button></p>
+                            <p className="my-3" >
+                            <Button variant="link" type="button" className="px-0" onClick={onDownloadStart} >
+                                {renderMenuColorIcon('download', null, color.link, 'mr-1')}Download Nodeset XML</Button>
+                            </p>
                         }
                         {props.showProfileDesignerLink &&
-                            <p className="mb-2" ><Button variant="secondary" type="link" target="_blank" className="px-4" href={`${AppSettings.ProfileDesignerUrl}cloudlibrary/viewer/${props.item.id}`} >
-                                View in SM Profile Designer</Button></p>
+                            <p className="mb-3" >
+                            <Button variant="link" type="button" target="_blank" className="px-0" href={`${AppSettings.ProfileDesignerUrl}cloudlibrary/viewer/${props.item.id}`} >
+                                {renderMenuColorIcon('profile', null, color.cornflower, 'mr-1')}View in SM Profile Designer</Button>
+                            </p>
                         }
+                        <a className="btn btn-primary align-items-center mt-2 px-1 px-md-4 auto-width text-nowrap" href={`/more-info/profile/${props.item.id}`} >Request More Info</a>
                     </div>
                 </div>
             </>

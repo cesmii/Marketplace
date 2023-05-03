@@ -34,6 +34,22 @@ function MarketplaceTileList(props) {
         );
     }
 
+    const renderCardImageBannerAbbreviated = (item, isfirst, isLast) => {
+        const imgSrc = item.imageLandscape == null ? stockTilePhoto : getImageUrl(item.imageLandscape);
+
+        //some of the css is trying to achieve same height for tiles in a row based on variable content
+        return (
+            <Card className="h-100 border-0 mb-0 marketplace-tile">
+                <Card.Body className="h-100 p-0 tile-body">
+                    <img className="card-img-top" src={imgSrc} alt={`${item.name}-${getImageAlt(item.imageLandscape)}`} />
+                    <div className="body-content p-2 px-4" >
+                        <span className="card-title font-weight-bold d-block bitter">{item.displayName}</span>
+                    </div>
+                </Card.Body>
+            </Card>
+        );
+    }
+
 
     //portrait image down left side of tile
     const renderCardThumbnail = (item, isfirst, isLast) => {
@@ -83,6 +99,9 @@ function MarketplaceTileList(props) {
             var tile = null;
             if (props.layout === "banner") {
                 tile = renderCardImageBanner(itm, isFirst, isLast);
+            }
+            else if (props.layout === "banner-abbreviated") {
+                tile = renderCardImageBannerAbbreviated(itm, isFirst, isLast);
             }
             else {
                 tile = renderCardThumbnail(itm, isFirst, isLast);
