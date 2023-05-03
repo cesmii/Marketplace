@@ -50,5 +50,12 @@
         Cancelled = 11
     }
 
+    public enum RelatedTypeEnum
+    {
+        Required = 1,
+        Recommended = 2,
+        Similar = 3
+    }
+
 
 }

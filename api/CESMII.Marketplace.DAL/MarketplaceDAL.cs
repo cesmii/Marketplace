@@ -69,7 +69,7 @@
                 .FirstOrDefault();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetMarketplaceRelatedData(
+            GetDependentData(
                 new List<MongoDB.Bson.BsonObjectId>() { new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(id)) },
                 new List<MongoDB.Bson.BsonObjectId>() { entity.PublisherId });
 
@@ -106,7 +106,7 @@
             var data = query.ToList();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetMarketplaceRelatedData(
+            GetDependentData(
                 data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList(),
                 data.Select(x => x.PublisherId).Distinct().ToList());
 
@@ -139,7 +139,7 @@
             var data = query.ToList();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetMarketplaceRelatedData(
+            GetDependentData(
                 data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList(),
                 data.Select(x => x.PublisherId).Distinct().ToList());
 
@@ -189,7 +189,7 @@
             var data = query.ToList();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetMarketplaceRelatedData(
+            GetDependentData(
                 data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList(),
                 data.Select(x => x.PublisherId).Distinct().ToList());
 
@@ -253,6 +253,10 @@
                             .Where(x => x.MarketplaceItemId.ToString().Equals(entity.ID))
                             .Select(x => new JobDefinitionSimpleModel { ID = x.ID, Name = x.Name }).ToList();
                     }
+                    //map related items into specific buckets - required, recommended
+                    result.RequiredItems = MapToModelRelatedItems(entity.RelatedItems, RelatedTypeEnum.Required);
+                    result.RecommendedItems = MapToModelRelatedItems(entity.RelatedItems, RelatedTypeEnum.Recommended);
+                    result.SimilarItems = MapToModelRelatedItems(entity.RelatedItems, RelatedTypeEnum.Similar);
                 }
                 return result;
             }
@@ -286,6 +290,37 @@
             };
 
         }
+
+        /// <summary>
+        /// Get related items from DB, filter out each group based on required/recommended/related flag
+        /// assume all related items in same collection and a type id distinguishes between the types. 
+        /// </summary>
+        protected List<MarketplaceItemRelatedModel> MapToModelRelatedItems(List<RelatedItem> items, RelatedTypeEnum relatedType)
+        {
+            if (items == null)
+            {
+                return new List<MarketplaceItemRelatedModel>();
+            }
+
+            //get list of marketplace items associated with this list of ids, map to return object
+            var matches = _repo.FindByCondition(x => 
+                items.Any(y => y.RelatedTypeId ==  (int)relatedType && y.MarketplaceItemId.Equals(
+                new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))))).ToList();
+            return matches.Select(x => new MarketplaceItemRelatedModel()
+            {
+                ID = x.ID,
+                Abstract = x.Abstract,
+                DisplayName = x.DisplayName,
+                Description = x.Description,
+                Name = x.Name,
+                Type = MapToModelLookupItem(x.ItemTypeId ?? _smItemTypeIdDefault,
+                        _lookupItemsAll.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.SmItemType)).ToList()),
+                Version = x.Version,
+                ImagePortrait = x.ImagePortraitId == null ? null : MapToModelImageSimple(z => z.ID.Equals(x.ImagePortraitId.ToString()), _imagesAll),
+                ImageLandscape = x.ImageLandscapeId == null ? null : MapToModelImageSimple(z => z.ID.Equals(x.ImageLandscapeId.ToString()), _imagesAll)
+            }).ToList();
+        }
+
         protected override void MapToEntity(ref MarketplaceItem entity, MarketplaceItemModel model)
         {
             //ensure this value is always without spaces and is lowercase. 
@@ -312,7 +347,7 @@
         /// </summary>
         /// <param name="marketplaceIds"></param>
         /// <param name="publisherIds"></param>
-        protected void GetMarketplaceRelatedData(List<MongoDB.Bson.BsonObjectId> marketplaceIds, List<MongoDB.Bson.BsonObjectId> publisherIds)
+        protected void GetDependentData(List<MongoDB.Bson.BsonObjectId> marketplaceIds, List<MongoDB.Bson.BsonObjectId> publisherIds)
         {
             _lookupItemsAll = _repoLookup.GetAll();
 

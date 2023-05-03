@@ -35,7 +35,7 @@
             _dalLookup = dalLookup;
         }
 
-        public List<MarketplaceItemModel> SimilarItems(MarketplaceItemModel item)
+        public List<MarketplaceItemRelatedModel> SimilarItems(MarketplaceItemModel item)
         {
             //union passed in list w/ lookup list.
             var cats = item.Categories.Select(x => x.ID).ToArray();
@@ -91,7 +91,22 @@
             var result = _dalMarketplace.Where(predFinal, null, 30, false, false, 
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName }).Data;
-            return result;
+            //convert to a simplified version of the marketplace item object
+            var autoMatches = result.Select(x => new MarketplaceItemRelatedModel() {
+                ID = x.ID,
+                Abstract = x.Abstract,
+                DisplayName = x.DisplayName,
+                Description = x.Description,
+                Name = x.Name,
+                Type = x.Type,
+                Version = x.Version,
+                ImagePortrait = x.ImagePortrait,
+                ImageLandscape = x.ImageLandscape
+            }).ToList();
+
+            //now combine auto matches with manual matches (if there are any manual matches)
+            return item.SimilarItems.Any() ? autoMatches.Union(item.SimilarItems).ToList() : autoMatches;
+
         }
 
         public async Task<List<MarketplaceItemModel>> PopularItems()
