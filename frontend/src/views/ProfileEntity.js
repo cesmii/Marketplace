@@ -132,14 +132,6 @@ function ProfileEntity() {
 
         return (
             <>
-                <div className="row mb-2 mb-md-3" >
-                    <div className="col-sm-12 d-flex align-items-center">
-                        <h2 className="m-0 mr-2">
-                            <span className="d-none d-md-inline">Smart Manufacturing Profile </span> Details
-                        </h2>
-                        <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/profile/${item.id}`} >Request More Info</a>
-                    </div>
-                </div>
                 <div className="row" >
                     <div className="col-sm-12">
                         <div className="mb-3" dangerouslySetInnerHTML={{ __html: item.description }} ></div>
@@ -178,7 +170,59 @@ function ProfileEntity() {
         );
     }
 
-    //render new
+    //render
+    const renderConfigurationSection = () => {
+        if (loadingProps.isLoading) return;
+
+        if (item.similarItems == null || item.similarItems.length === 0) return;
+        //if (item.configurationItems == null || item.configurationItems.length === 0) return;
+
+        //TEMP - create a structure to mimic required/recommended
+        let mid = Math.floor(item.similarItems.length / 2);
+        item.configurationItems = {
+            required: item.similarItems.slice(0, mid),
+            recommended: item.similarItems.slice(mid, item.similarItems.length)
+        };
+
+        return (
+            <>
+                {(item.configurationItems?.required != null && item.configurationItems?.required.length > 0) &&
+                    <>
+                        <div className="row" >
+                            <div className="col-sm-12 mb-3" >
+                                <h3 className="m-0 small">
+                                    Required SM Apps, SM Hardware & SM Profiles
+                                </h3>
+                            </div>
+                        </div>
+                        <div className="row" >
+                            <div className="col-sm-12">
+                                <MarketplaceTileList items={item.configurationItems.required} layout="banner-abbreviated" colCount={3} />
+                            </div>
+                        </div>
+                    </>
+                }
+                {(item.configurationItems?.recommended != null && item.configurationItems?.recommended.length > 0) &&
+                    <>
+                        <div className="row" >
+                            <div className="col-sm-12 my-3 pt-3 border-top" >
+                                <h3 className="m-0 small">
+                                    Recommended SM Apps, SM Hardware & SM Profiles
+                                </h3>
+                            </div>
+                        </div>
+                        <div className="row" >
+                            <div className="col-sm-12">
+                                <MarketplaceTileList items={item.configurationItems.recommended} layout="banner-abbreviated" colCount={3} />
+                            </div>
+                        </div>
+                    </>
+                }
+            </>
+        );
+    }
+
+    //render similar items
     const renderSimilarItems = () => {
         if (loadingProps.isLoading) return;
 
@@ -186,13 +230,6 @@ function ProfileEntity() {
 
         return (
             <>
-                <div className="row" >
-                    <div className="col-sm-12 mt-5 mb-3" >
-                        <h3 className="m-0">
-                            Related
-                        </h3>
-                    </div>
-                </div>
                 <div className="row" >
                     <div className="col-sm-12">
                         <MarketplaceTileList items={item.similarItems} layout="banner" colCount={3} />
@@ -202,6 +239,62 @@ function ProfileEntity() {
         );
     }
 
+    const renderAccordion = () => {
+        if (loadingProps.isLoading) return;
+
+        return (
+            <>
+                <div className="accordion" id="accordionExample">
+                    <div className="card mb-0">
+                        <div className="card-header bg-transparent p-0 border-bottom-0" id="headingOne">
+                            <button className="btn btn-content-accordion p-3 py-2 text-left d-block w-100" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                <h2 className="mb-0">
+                                    Smart Manufacturing Profile Details
+                                </h2>
+                            </button>
+                        </div>
+                        <div id="collapseOne" className="collapse show mb-3" aria-labelledby="headingOne" >
+                            <div className="card-body">
+                                {renderSolutionDetails()}
+                            </div>
+                        </div>
+                    </div>
+                    {(item.similarItems != null && item.similarItems.length > 0) &&
+                        <div className="card mb-0">
+                            <div className="card-header bg-transparent p-0 border-bottom-0" id="headingTwo">
+                                <button className="btn btn-content-accordion p-3 py-2 text-left d-block w-100" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    <h2 className="mb-0">
+                                        Configuration Specifications
+                                    </h2>
+                                </button>
+                            </div>
+                            <div id="collapseTwo" className="collapse mb-3" aria-labelledby="headingTwo" >
+                                <div className="card-body">
+                                    {renderConfigurationSection()}
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    {(item.similarItems != null && item.similarItems.length > 0) &&
+                        <div className="card mb-0">
+                            <div className="card-header bg-transparent p-0 border-bottom-0" id="headingThree">
+                                <button className="btn btn-content-accordion p-3 py-2 text-left d-block w-100" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    <h2 className="mb-0">
+                                        Other Items You Might Be Interested In
+                                    </h2>
+                                </button>
+                            </div>
+                            <div id="collapseThree" className="collapse mb-3" aria-labelledby="headingThree">
+                                <div className="card-body">
+                                    {renderSimilarItems()}
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </>
+        );
+    }
 
     //-------------------------------------------------------------------
     // Region: Render
@@ -237,8 +330,7 @@ function ProfileEntity() {
                             {(!loadingProps.isLoading && !isLoading) &&
                                 <div className="marketplace-entity">
                                     {renderItemRow()}
-                                    {renderSolutionDetails()}
-                                    {renderSimilarItems()}
+                                    {renderAccordion()}
                                 </div>
                             }
                         </div>

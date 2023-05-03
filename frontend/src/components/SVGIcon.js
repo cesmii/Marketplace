@@ -42,6 +42,20 @@ const icons = {
 
 //note React gives error if we use stroke-width (multi-name attribute). Changing it to camelcase to resolve.
 export const SVGIcon = (props) => {
+
+    //special handling of download icon which has more complex structure
+    if (props.name === 'download') {
+        return (
+            SVGDownloadIcon(props)
+        );
+    }
+    if (props.name === 'check') {
+        return (
+            SVGCheckIcon(props)
+        );
+    }
+
+
     return (
         <svg
             className={props.className}

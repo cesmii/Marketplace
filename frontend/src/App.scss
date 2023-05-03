@@ -83,7 +83,14 @@ h3 {
     font-size: 1.15rem;
     font-weight: 700;
     line-height: 1.25rem;
+
+    &.small {
+        font-size: 0.9rem;
+        font-weight: bold;
+        line-height: 1.25rem;
+    }
 }
+
 
 p {
     line-height: 24px;
@@ -502,6 +509,46 @@ option.selected {
 
     &.expanded, &.open:hover {
         background-color: color("cararra");
+    }
+}
+
+.btn-content-accordion {
+    min-width: unset;
+    text-decoration: none;
+    color: inherit;
+    background-color: transparent;
+
+    &:focus {
+        box-shadow: none;
+    }
+
+    &:hover {
+        h2 {
+            color: color("cornflower");
+        }
+    }
+
+    h2 {
+        display: flex;
+
+        &:after {
+            font-size: 1.9rem;
+            font-weight: normal;
+            align-content: flex-end;
+            margin-left: auto;
+            font-family: 'Material Icons';
+            content: "expand_less";
+            -webkit-font-feature-settings: 'liga';
+        }
+    }
+
+    &[aria-expanded="false"], 
+    &.collapsed {
+        h2 {
+            &:after {
+                content: "expand_more";
+            }
+        }
     }
 }
 
