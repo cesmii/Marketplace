@@ -81,6 +81,10 @@
 
         public List<BsonObjectId> IndustryVerticals { get; set; }
 
+        public List<RelatedItem> RelatedItems { get; set; }
+
+        public List<string> RelatedProfiles { get; set; }
+
         public BsonObjectId Analytics { get; set; }
 
         public BsonObjectId PublisherId { get; set; }
@@ -108,6 +112,17 @@
     {
         public string Name { get; set; }
         public string DisplayName { get; set; }
+    }
+
+
+    /// <summary>
+    /// This contains the structure to use for related items to a marketplace item. 
+    /// It is the marketplaceItem id and the related type (recommended, required, related)
+    /// </summary>
+    public class RelatedItem : AbstractEntity
+    {
+        public BsonObjectId MarketplaceItemId { get; set; }
+        public int RelatedTypeId { get; set; }
     }
 
 

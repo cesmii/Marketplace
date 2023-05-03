@@ -174,19 +174,12 @@ function ProfileEntity() {
     const renderConfigurationSection = () => {
         if (loadingProps.isLoading) return;
 
-        if (item.similarItems == null || item.similarItems.length === 0) return;
-        //if (item.configurationItems == null || item.configurationItems.length === 0) return;
-
-        //TEMP - create a structure to mimic required/recommended
-        let mid = Math.floor(item.similarItems.length / 2);
-        item.configurationItems = {
-            required: item.similarItems.slice(0, mid),
-            recommended: item.similarItems.slice(mid, item.similarItems.length)
-        };
+        if ((item.requiredItems == null || item.requiredItems.length === 0) &&
+            (item.recommendedItems == null || item.recommendedItems.length === 0)) return;
 
         return (
             <>
-                {(item.configurationItems?.required != null && item.configurationItems?.required.length > 0) &&
+                {(item.requiredItems != null && item.requiredItems.length > 0) &&
                     <>
                         <div className="row" >
                             <div className="col-sm-12 mb-3" >
@@ -197,12 +190,12 @@ function ProfileEntity() {
                         </div>
                         <div className="row" >
                             <div className="col-sm-12">
-                                <MarketplaceTileList items={item.configurationItems.required} layout="banner-abbreviated" colCount={3} />
+                                <MarketplaceTileList items={item.requiredItems} layout="banner-abbreviated" colCount={3} />
                             </div>
                         </div>
                     </>
                 }
-                {(item.configurationItems?.recommended != null && item.configurationItems?.recommended.length > 0) &&
+                {(item.recommendedItems != null && item.recommendedItems.length > 0) &&
                     <>
                         <div className="row" >
                             <div className="col-sm-12 my-3 pt-3 border-top" >
@@ -213,7 +206,7 @@ function ProfileEntity() {
                         </div>
                         <div className="row" >
                             <div className="col-sm-12">
-                                <MarketplaceTileList items={item.configurationItems.recommended} layout="banner-abbreviated" colCount={3} />
+                            <MarketplaceTileList items={item.recommendedItems} layout="banner-abbreviated" colCount={3} />
                             </div>
                         </div>
                     </>
@@ -259,7 +252,8 @@ function ProfileEntity() {
                             </div>
                         </div>
                     </div>
-                    {(item.similarItems != null && item.similarItems.length > 0) &&
+                    {(item.requiredItems != null && item.requiredItems.length > 0 &&
+                        item.recommendedItems != null && item.recommendedItems.length > 0) &&
                         <div className="card mb-0">
                             <div className="card-header bg-transparent p-0 border-bottom-0" id="headingTwo">
                                 <button className="btn btn-content-accordion p-3 py-2 text-left d-block w-100" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">

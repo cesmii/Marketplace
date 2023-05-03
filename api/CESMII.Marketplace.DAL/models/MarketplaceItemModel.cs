@@ -86,10 +86,11 @@
         public bool IsVerified { get; set; }
 
         /// <summary>
-        /// This is only used by controller to find and set 
-        /// similar items related to this item.
+        /// List of items that have been marked as related for this marketplace item by admin. Could be
+        /// apps, hardware, profiles.
         /// </summary>
-        public List<MarketplaceItemModel> SimilarItems { get; set; }
+        /// <remarks>This will get merged in with util.SimilarItems set in controller based on common processes, industry verts, etc. </remarks>
+        public List<MarketplaceItemRelatedModel> SimilarItems { get; set; }
 
         public ImageItemSimpleModel ImagePortrait { get; set; }
         
@@ -107,6 +108,17 @@
         public virtual List<LookupItemModel> IndustryVerticals { get; set; }
 
         public virtual MarketplaceItemAnalyticsModel Analytics { get; set; }
+
+        /// <summary>
+        /// List of items that have been marked as required for this marketplace item. Could be
+        /// apps, hardware, profiles.
+        /// </summary>
+        public virtual List<MarketplaceItemRelatedModel> RequiredItems { get; set; }
+        /// <summary>
+        /// List of items that have been marked as recommended for this marketplace item. Could be
+        /// apps, hardware, profiles.
+        /// </summary>
+        public virtual List<MarketplaceItemRelatedModel> RecommendedItems { get; set; }
     }
 
     public class AdminMarketplaceItemModel : MarketplaceItemModelBase
@@ -136,5 +148,31 @@
         public string DisplayName { get; set; }
     }
 
+    /// <summary>
+    /// A model with abbreviated marketplace item data used for related data 
+    /// where keeping data small is helpful
+    /// </summary>
+    public class MarketplaceItemRelatedModel : MarketplaceItemSimpleModel
+    {
+        public string Version { get; set; }
+
+        /// <summary>
+        /// Namespace URI. Only applies to profiles pulled from CloudLib
+        /// </summary>
+        public string Namespace { get; set; }
+
+        public string Abstract { get; set; }
+
+        public string Description { get; set; }
+
+        /// <summary>
+        /// Type of marketplace item: profile, app
+        /// </summary>
+        public virtual LookupItemModel Type { get; set; }
+
+        public ImageItemSimpleModel ImagePortrait { get; set; }
+
+        public ImageItemSimpleModel ImageLandscape { get; set; }
+    }
 
 }
