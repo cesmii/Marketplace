@@ -3,6 +3,7 @@ import { Card } from 'react-bootstrap';
 
 import stockTilePhoto from '../../components/img/icon-molecule-landscape.svg'
 import iconMolecule from '../../components/img/icon-molecule-portrait.svg'
+import { AppSettings } from '../../utils/appsettings';
 import { getImageAlt, getImageUrl } from '../../utils/UtilityService';
 import '../styles/MarketplaceTileList.scss';
 
@@ -106,9 +107,12 @@ function MarketplaceTileList(props) {
             else {
                 tile = renderCardThumbnail(itm, isFirst, isLast);
             }
+            const url = itm.type?.code === AppSettings.itemTypeCode.smProfile ? `/profile/${itm.id}` :
+                    `/library/${itm.name}`;
+
             return (
                 <div key={itm.id} className={`${colCountCss} pb-4`}>
-                    <a href={`/library/${itm.name}`} className="tile-link" >
+                    <a href={url} className="tile-link" >
                         {tile}
                     </a>
                 </div>
