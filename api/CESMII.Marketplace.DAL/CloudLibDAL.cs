@@ -116,6 +116,14 @@
             return MapToModelsNodesetResult(matches.Edges);
         }
 
+        public async Task<List<MarketplaceItemModel>> GetManyById(List<string> ids)
+        {
+            var matches = await _cloudLib.GetManyAsync(ids);
+            if (matches == null || matches.Edges == null) return new List<MarketplaceItemModel>();
+
+            return MapToModelsNodesetResult(matches.Edges);
+        }
+
         protected List<MarketplaceItemModel> MapToModelsNodesetResult(List<GraphQlNodeAndCursor<Nodeset>> entities)
         {
             var result = new List<MarketplaceItemModel>();
