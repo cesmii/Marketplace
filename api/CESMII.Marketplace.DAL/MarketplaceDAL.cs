@@ -200,9 +200,9 @@
             //if verbose, then pull in images from relatedItems child collection.
             if (verbose)
             {
-                var relatedItemIds = data.SelectMany(x => x.RelatedItems.Any() ?
-                    x.RelatedItems.Select(y => y.MarketplaceItemId) :
-                    new List<MongoDB.Bson.BsonObjectId>()).ToList();
+                var relatedItemIds = data.SelectMany(x => x.RelatedItems == null || !x.RelatedItems.Any() ?
+                    new List<MongoDB.Bson.BsonObjectId>() :
+                    x.RelatedItems.Select(y => y.MarketplaceItemId)).ToList();
                 ids = ids.Union(relatedItemIds).ToList();
             }
             GetDependentData(ids,
