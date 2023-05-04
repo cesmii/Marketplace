@@ -23,6 +23,8 @@
         protected List<ImageItemSimple> _imagesAll;
         protected IMongoRepository<JobDefinition> _repoJobDefinition; 
         protected List<JobDefinition> _jobDefinitionAll;
+        protected readonly ICloudLibDAL<MarketplaceItemModel> _cloudLibDAL;
+
         //default type - use if none assigned yet.
         private readonly MongoDB.Bson.BsonObjectId _smItemTypeIdDefault;
 
@@ -31,6 +33,7 @@
             IMongoRepository<MarketplaceItemAnalytics> repoAnalytics,
             IMongoRepository<ImageItemSimple> repoImages,
             IMongoRepository<JobDefinition> repoJobDefinition,
+            ICloudLibDAL<MarketplaceItemModel> cloudLibDAL,
             ConfigUtil configUtil
             ) : base(repo)
         {
@@ -39,6 +42,7 @@
             _repoAnalytics = repoAnalytics;
             _repoImages = repoImages;
             _repoJobDefinition = repoJobDefinition;
+            _cloudLibDAL = cloudLibDAL;
 
             //init some stuff we will use during the mapping methods
             _smItemTypeIdDefault = new MongoDB.Bson.BsonObjectId(
@@ -69,8 +73,11 @@
                 .FirstOrDefault();
 
             //get related data - pass list of item ids and publisher ids. 
+            //pass in this id as well as ids from relatedItems
+            var ids = new List<MongoDB.Bson.BsonObjectId>() { new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(id)) };
+            ids = !entity.RelatedItems.Any() ? ids : ids.Union(entity.RelatedItems.Select(x => x.MarketplaceItemId)).ToList();
             GetDependentData(
-                new List<MongoDB.Bson.BsonObjectId>() { new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(id)) },
+                ids,
                 new List<MongoDB.Bson.BsonObjectId>() { entity.PublisherId });
 
             return MapToModel(entity, true);
@@ -189,8 +196,16 @@
             var data = query.ToList();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetDependentData(
-                data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList(),
+            var ids = data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList();
+            //if verbose, then pull in images from relatedItems child collection.
+            if (verbose)
+            {
+                var relatedItemIds = data.SelectMany(x => x.RelatedItems.Any() ?
+                    x.RelatedItems.Select(y => y.MarketplaceItemId) :
+                    new List<MongoDB.Bson.BsonObjectId>()).ToList();
+                ids = ids.Union(relatedItemIds).ToList();
+            }
+            GetDependentData(ids,
                 data.Select(x => x.PublisherId).Distinct().ToList());
 
             //map the data to the final result
@@ -253,10 +268,17 @@
                             .Where(x => x.MarketplaceItemId.ToString().Equals(entity.ID))
                             .Select(x => new JobDefinitionSimpleModel { ID = x.ID, Name = x.Name }).ToList();
                     }
+
+                    //get list of marketplace items associated with this list of ids, map to return object
+                    var relatedItems = MapToModelRelatedItems(entity.RelatedItems);
+
+                    //get related profiles from CloudLib
+                    var relatedProfiles = MapToModelRelatedProfiles(entity.RelatedProfiles);
+
                     //map related items into specific buckets - required, recommended
-                    result.RequiredItems = MapToModelRelatedItems(entity.RelatedItems, RelatedTypeEnum.Required);
-                    result.RecommendedItems = MapToModelRelatedItems(entity.RelatedItems, RelatedTypeEnum.Recommended);
-                    result.SimilarItems = MapToModelRelatedItems(entity.RelatedItems, RelatedTypeEnum.Similar);
+                    result.RequiredItems = MergeRelatedItems(relatedItems, relatedProfiles, RelatedTypeEnum.Required);
+                    result.RecommendedItems = MergeRelatedItems(relatedItems, relatedProfiles, RelatedTypeEnum.Recommended);
+                    result.SimilarItems = MergeRelatedItems(relatedItems, relatedProfiles, RelatedTypeEnum.Similar);
                 }
                 return result;
             }
@@ -295,7 +317,7 @@
         /// Get related items from DB, filter out each group based on required/recommended/related flag
         /// assume all related items in same collection and a type id distinguishes between the types. 
         /// </summary>
-        protected List<MarketplaceItemRelatedModel> MapToModelRelatedItems(List<RelatedItem> items, RelatedTypeEnum relatedType)
+        protected List<MarketplaceItemRelatedModel> MapToModelRelatedItems(List<RelatedItem> items)
         {
             if (items == null)
             {
@@ -304,22 +326,84 @@
 
             //get list of marketplace items associated with this list of ids, map to return object
             var matches = _repo.FindByCondition(x => 
-                items.Any(y => y.RelatedTypeId ==  (int)relatedType && y.MarketplaceItemId.Equals(
+                items.Any(y => y.MarketplaceItemId.Equals(
                 new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))))).ToList();
-            return matches.Select(x => new MarketplaceItemRelatedModel()
-            {
-                ID = x.ID,
-                Abstract = x.Abstract,
-                DisplayName = x.DisplayName,
-                Description = x.Description,
-                Name = x.Name,
-                Type = MapToModelLookupItem(x.ItemTypeId ?? _smItemTypeIdDefault,
-                        _lookupItemsAll.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.SmItemType)).ToList()),
-                Version = x.Version,
-                ImagePortrait = x.ImagePortraitId == null ? null : MapToModelImageSimple(z => z.ID.Equals(x.ImagePortraitId.ToString()), _imagesAll),
-                ImageLandscape = x.ImageLandscapeId == null ? null : MapToModelImageSimple(z => z.ID.Equals(x.ImageLandscapeId.ToString()), _imagesAll)
-            }).ToList();
+            return !matches.Any() ? new List<MarketplaceItemRelatedModel>() :
+                matches.Select(x => new MarketplaceItemRelatedModel()
+                {
+                    ID = x.ID,
+                    Abstract = x.Abstract,
+                    DisplayName = x.DisplayName,
+                    Description = x.Description,
+                    Name = x.Name,
+                    Type = MapToModelLookupItem(x.ItemTypeId ?? _smItemTypeIdDefault,
+                            _lookupItemsAll.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.SmItemType)).ToList()),
+                    Version = x.Version,
+                    ImagePortrait = x.ImagePortraitId == null ? null : MapToModelImageSimple(z => z.ID.Equals(x.ImagePortraitId.ToString()), _imagesAll),
+                    ImageLandscape = x.ImageLandscapeId == null ? null : MapToModelImageSimple(z => z.ID.Equals(x.ImageLandscapeId.ToString()), _imagesAll),
+                    //assumes only one related item per type
+                    RelatedType = (RelatedTypeEnum)items.Find(z => z.MarketplaceItemId.ToString().Equals(x.ID)).RelatedTypeId
+                }).ToList();
         }
+
+        /// <summary>
+        /// Get related items from DB, filter out each group based on required/recommended/related flag
+        /// assume all related items in same collection and a type id distinguishes between the types. 
+        /// </summary>
+        protected List<MarketplaceItemRelatedModel> MapToModelRelatedProfiles(List<RelatedProfileItem> items)
+        {
+            if (items == null)
+            {
+                return new List<MarketplaceItemRelatedModel>();
+            }
+
+            //get list of profile items associated with this list of ids, call CloudLib to get the supporting info for these
+            var matches = _cloudLibDAL.GetManyById(items.Select(x => x.ProfileId).ToList()).Result;
+            return !matches.Any() ? new List<MarketplaceItemRelatedModel>() : 
+                matches.Select(x => new MarketplaceItemRelatedModel()
+                {
+                    ID = x.ID,
+                    Abstract = x.Abstract,
+                    DisplayName = x.DisplayName,
+                    Description = x.Description,
+                    Name = x.Name,
+                    Namespace = x.Namespace,
+                    Type = x.Type,
+                    Version = x.Version,
+                    ImagePortrait = x.ImagePortrait,
+                    ImageLandscape = x.ImageLandscape,
+                    //assumes only one related item per type
+                    RelatedType = (RelatedTypeEnum)items.Find(z => z.ProfileId.Equals(x.ID)).RelatedTypeId
+                }).ToList();
+        }
+
+        /// <summary>
+        /// Take two related sets and union them, filter them by related type and order them
+        /// </summary>
+        /// <param name="items"></param>
+        /// <param name="itemsProfile"></param>
+        /// <param name="relatedType"></param>
+        /// <returns></returns>
+        protected List<MarketplaceItemRelatedModel> MergeRelatedItems(
+            List<MarketplaceItemRelatedModel> items,
+            List<MarketplaceItemRelatedModel> itemsProfile,
+            RelatedTypeEnum relatedType)
+        {
+            if (items == null && itemsProfile == null)
+            {
+                return new List<MarketplaceItemRelatedModel>();
+            }
+            //union of the two sets filtered by type
+            return items
+                .Where(x => x.RelatedType.Equals(relatedType))
+                .Union(itemsProfile.Where(x => x.RelatedType.Equals(relatedType)))
+                .OrderBy(x => x.DisplayName)
+                .ThenBy(x => x.Name)
+                .ThenBy(x => x.Namespace)
+                .ThenBy(x => x.Version)
+                .ToList();
+        }
+
 
         protected override void MapToEntity(ref MarketplaceItem entity, MarketplaceItemModel model)
         {

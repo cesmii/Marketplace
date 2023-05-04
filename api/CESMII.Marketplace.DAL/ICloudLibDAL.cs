@@ -19,6 +19,13 @@
         /// <returns></returns>
         Task<ProfileItemExportModel> Export(string id);
 
+        /// <summary>
+        /// Get a list of profiles by passing a list of profile ids to CloudLib.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<List<TModel>> GetManyById(List<string> id);
+
         Task<List<TModel>> GetAll();
 
         /// <summary>

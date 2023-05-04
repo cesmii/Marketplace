@@ -1,5 +1,6 @@
 ﻿namespace CESMII.Marketplace.DAL.Models
 {
+    using CESMII.Marketplace.Common.Enums;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -173,6 +174,10 @@
         public ImageItemSimpleModel ImagePortrait { get; set; }
 
         public ImageItemSimpleModel ImageLandscape { get; set; }
+
+        public RelatedTypeEnum RelatedType { get; set; }
+
+
     }
 
 }

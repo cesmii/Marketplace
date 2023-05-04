@@ -83,7 +83,7 @@
 
         public List<RelatedItem> RelatedItems { get; set; }
 
-        public List<string> RelatedProfiles { get; set; }
+        public List<RelatedProfileItem> RelatedProfiles { get; set; }
 
         public BsonObjectId Analytics { get; set; }
 
@@ -122,6 +122,25 @@
     public class RelatedItem : AbstractEntity
     {
         public BsonObjectId MarketplaceItemId { get; set; }
+        /// <summary>
+        /// This will map to an enum we have in the code for RelatedType
+        /// </summary>
+        public int RelatedTypeId { get; set; }
+    }
+
+    /// <summary>
+    /// This contains the structure to use for related profile items to a marketplace item. 
+    /// It is the profile id and the related type (recommended, required, related)
+    /// </summary>
+    public class RelatedProfileItem : AbstractEntity
+    {
+        /// <summary>
+        /// This is the id from the CloudLib
+        /// </summary>
+        public string ProfileId { get; set; }
+        /// <summary>
+        /// This will map to an enum we have in the code for RelatedType
+        /// </summary>
         public int RelatedTypeId { get; set; }
     }
 
