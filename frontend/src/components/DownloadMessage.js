@@ -61,6 +61,7 @@ function DownloadMessage() {
                     //  below the state will be updated w/o the large file so user will see a confirmation of the completion
                     openFile(item);
                     item.data = null;
+
                 }
                 else {
                     item = {
