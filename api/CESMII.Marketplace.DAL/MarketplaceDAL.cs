@@ -78,7 +78,7 @@
             ids = !entity.RelatedItems.Any() ? ids : ids.Union(entity.RelatedItems.Select(x => x.MarketplaceItemId)).ToList();
             GetDependentData(
                 ids,
-                new List<MongoDB.Bson.BsonObjectId>() { entity.PublisherId });
+                new List<MongoDB.Bson.BsonObjectId>() { entity.PublisherId }).Wait();
 
             return MapToModel(entity, true);
         }
@@ -115,7 +115,7 @@
             //get related data - pass list of item ids and publisher ids. 
             GetDependentData(
                 data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList(),
-                data.Select(x => x.PublisherId).Distinct().ToList());
+                data.Select(x => x.PublisherId).Distinct().ToList()).Wait();
 
             //map the data to the final result
             var result = new DALResult<MarketplaceItemModel>
@@ -148,7 +148,7 @@
             //get related data - pass list of item ids and publisher ids. 
             GetDependentData(
                 data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList(),
-                data.Select(x => x.PublisherId).Distinct().ToList());
+                data.Select(x => x.PublisherId).Distinct().ToList()).Wait();
 
             //map the data to the final result
             var result = new DALResult<MarketplaceItemModel>
@@ -206,7 +206,7 @@
                 ids = ids.Union(relatedItemIds).ToList();
             }
             GetDependentData(ids,
-                data.Select(x => x.PublisherId).Distinct().ToList());
+                data.Select(x => x.PublisherId).Distinct().ToList()).Wait();
 
             //map the data to the final result
             var result = new DALResult<MarketplaceItemModel>
@@ -431,24 +431,29 @@
         /// </summary>
         /// <param name="marketplaceIds"></param>
         /// <param name="publisherIds"></param>
-        protected void GetDependentData(List<MongoDB.Bson.BsonObjectId> marketplaceIds, List<MongoDB.Bson.BsonObjectId> publisherIds)
+        protected async Task GetDependentData(List<MongoDB.Bson.BsonObjectId> marketplaceIds, List<MongoDB.Bson.BsonObjectId> publisherIds)
         {
             _lookupItemsAll = _repoLookup.GetAll();
 
             //TBD - revisit and use BSONObject id for both parts. Requires to change ID type.
-            var filterPubs = MongoDB.Driver.Builders<Publisher>.Filter.In(x => x.ID, publisherIds.Select(y => y.ToString()).ToArray());
-            _publishersAll = _repoPublisher.AggregateMatch(filterPubs);
+            var filterPubs = MongoDB.Driver.Builders<Publisher>.Filter.In(x => x.ID, publisherIds.Select(y => y.ToString()));
+            _publishersAll = await _repoPublisher.AggregateMatchAsync(filterPubs);
 
             var filterImages = MongoDB.Driver.Builders<ImageItemSimple>.Filter.In(x => x.MarketplaceItemId, marketplaceIds);
             var fieldList = new List<string>() 
                 { nameof(ImageItemSimple.MarketplaceItemId), nameof(ImageItemSimple.FileName), nameof(ImageItemSimple.Type)};
-            _imagesAll = _repoImages.AggregateMatch(filterImages, fieldList);
+            _imagesAll = await _repoImages.AggregateMatchAsync(filterImages, fieldList);
 
             var filterAnalytics = MongoDB.Driver.Builders<MarketplaceItemAnalytics>.Filter.In(x => x.MarketplaceItemId, marketplaceIds);
-            _marketplaceItemAnalyticsAll = _repoAnalytics.AggregateMatch(filterAnalytics);
+            _marketplaceItemAnalyticsAll = await _repoAnalytics.AggregateMatchAsync(filterAnalytics);
 
             var filterJobDef = MongoDB.Driver.Builders<JobDefinition>.Filter.In(x => x.MarketplaceItemId, marketplaceIds);
-            _jobDefinitionAll = _repoJobDefinition.AggregateMatch(filterJobDef);
+            _jobDefinitionAll = await _repoJobDefinition.AggregateMatchAsync(filterJobDef);
+
+            if (_publishersAll.Count() == 0 && publisherIds.Any())
+            {
+                _logger.Warn($"GetDependentData || _publishersAll - item count 0: {string.Join(", ", publisherIds.Any())}.");
+            }
         }
 
     }

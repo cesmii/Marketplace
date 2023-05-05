@@ -196,6 +196,12 @@
         {
 
             var pubItem = allItems.FirstOrDefault(x => x.ID == publisherId.ToString());
+            //warn if allItems has stuff and can't find pub item
+            if (pubItem == null && allItems.Any())
+            {
+                _logger.Warn($"Publisher '{publisherId}' item not found in allItems (count: {allItems.Count()}).");
+            }
+            //if can't find item, return empty
             if (pubItem == null) return new PublisherModel();
 
             return new PublisherModel()
