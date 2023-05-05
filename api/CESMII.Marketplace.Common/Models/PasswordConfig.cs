@@ -19,6 +19,7 @@
         public List<EncryptionLevelConfig> Levels { get; set; }
         
         public string EncryptDecryptKey { get; set; }
+        public string EncryptDecryptRequestInfoKey { get; set; }
     }
 
     public class EncryptionLevelConfig

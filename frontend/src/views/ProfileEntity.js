@@ -6,11 +6,11 @@ import axiosInstance from "../services/AxiosService";
 import { AppSettings } from '../utils/appsettings';
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
-import { cleanFileName, convertHtmlToString, generateLogMessageString, getImageUrl, getMarketplaceIconName, scrollTopScreen } from '../utils/UtilityService'
+import { cleanFileName, generateLogMessageString, getImageUrl, getMarketplaceIconName, scrollTopScreen } from '../utils/UtilityService'
 import MarketplaceTileList from './shared/MarketplaceTileList';
+import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
 
 import './styles/MarketplaceEntity.scss';
-import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
 
 const CLASS_NAME = "ProfileEntity";
 
@@ -35,8 +35,8 @@ function ProfileEntity() {
 
             var result = null;
             try {
-                var data = { id: id, isTracking: true };
-                var url = `profile/getbyid`;
+                const data = { id: id, isTracking: true };
+                const url = `profile/getbyid`;
                 result = await axiosInstance.post(url, data);
             }
             catch (err) {
@@ -96,7 +96,7 @@ function ProfileEntity() {
         var msgs = loadingProps.downloadItems || [];
         //msgs.push({ profileId: p.id, fileName: cleanFileName(p.namespace || p.displayName), immediateDownload: true });
         msgs.push({ requestInfo: req, fileName: cleanFileName(req.smProfile.namespace || req.smProfile.displayName), immediateDownload: true });
-        setLoadingProps({ downloadItems: JSON.parse(JSON.stringify(msgs)), downloadNodesetCounter: (loadingProps.downloadNodesetCounter == null ? 0 : loadingProps.downloadNodesetCounter) + 1 });
+        setLoadingProps({ downloadItems: JSON.parse(JSON.stringify(msgs)) });
         scrollTopScreen();
     }
 
@@ -143,20 +143,17 @@ function ProfileEntity() {
                         <div className="mb-3" dangerouslySetInnerHTML={{ __html: item.description }} ></div>
                     </div>
                 </div>
-                <div className="row" >
-                    <div className="col-sm-8">
-                        <span className="m-0 mr-2 mb-2 mb-md-0">
-                            <b className="mr-1" >Published By:</b>
-                            <br className="d-block d-md-none" />
-                            {item.publisher.displayName}
-                        </span>
+                {item.publisher?.displayName &&
+                    <div className="row" >
+                        <div className="col-sm-8">
+                            <span className="m-0 mr-2 mb-2 mb-md-0">
+                                <b className="mr-1" >Published By:</b>
+                                <br className="d-block d-md-none" />
+                                {item.publisher.displayName}
+                            </span>
+                        </div>
                     </div>
-                {/*    {(item.publisher.socialMediaLinks != null && item.publisher.socialMediaLinks.length > 0) && */}
-                {/*        <div className="col-sm-4 d-flex justify-content-md-end mb-2 mb-md-0 align-items-center">*/}
-                {/*            <SocialMedia items={item.publisher.socialMediaLinks} />*/}
-                {/*        </div>*/}
-                {/*    }*/}
-                </div>
+                }
             </>
         )
     }
@@ -167,7 +164,8 @@ function ProfileEntity() {
             return;
         }
         return (
-            <MarketplaceItemEntityHeader key={item.id} item={item} currentUserId={null} showActions={true} cssClass="marketplace-list-item" onDownload={downloadProfile} />
+            <MarketplaceItemEntityHeader key={item.id} item={item} currentUserId={null} showActions={true} cssClass="marketplace-list-item"
+                onDownload={downloadProfile} showProfileDesignerLink={true} />
         )
     }
 

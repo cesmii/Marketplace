@@ -174,7 +174,7 @@
             if (entity != null)
             {
                 //metatags
-                var metatags = entity.Keywords.ToList();
+                var metatags = entity.Keywords?.ToList();
                 //if (entity.Category != null) metatags.Add(entity.Category.Name);
 
                 //map results to a format that is common with marketplace items
@@ -183,13 +183,13 @@
                     ID = entity.Nodeset.Identifier.ToString(),
                     Name = entity.Nodeset.Identifier.ToString(),  //in marketplace items, name is used for navigation in friendly url
                     //Abstract = ns.Title,
-                    ExternalAuthor = entity.Contributor.Name,
+                    ExternalAuthor = entity.Contributor?.Name,
                     Publisher = new PublisherModel()
                     {
-                        DisplayName = entity.Contributor.Name,
-                        Name = entity.Contributor.Name,
-                        CompanyUrl = entity.Contributor.Website?.ToString(),
-                        Description = entity.Contributor.Description,
+                        DisplayName = entity.Contributor?.Name,
+                        Name = entity.Contributor?.Name,
+                        CompanyUrl = entity.Contributor?.Website?.ToString(),
+                        Description = entity.Contributor?.Description,
                     },
                     //TBD
                     Description =
@@ -201,11 +201,11 @@
                         (entity.PurchasingInformationUrl == null ? "" : $"<p><a href='{entity.PurchasingInformationUrl.ToString()}' target='_blank' rel='noreferrer' >Purchasing Information: {entity.PurchasingInformationUrl.ToString()}</a></p>") +
                         (string.IsNullOrEmpty(entity.CopyrightText) ? "" : $"<p>{entity.CopyrightText}</p>"),
                     DisplayName = entity.Title,
-                    Namespace = entity.Nodeset.NamespaceUri?.ToString(),
+                    Namespace = entity.Nodeset?.NamespaceUri?.ToString(),
                     MetaTags = metatags,
-                    PublishDate = entity.Nodeset.PublicationDate,
+                    PublishDate = entity.Nodeset?.PublicationDate,
                     Type = _smItemType,
-                    Version = entity.Nodeset.Version,
+                    Version = entity.Nodeset?.Version,
                     IsFeatured = false,
                     ImagePortrait = entity.IconUrl == null ? 
                         _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdPortrait)) :
@@ -214,7 +214,7 @@
                     ImageLandscape = entity.IconUrl == null ?
                         _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdLandscape)) :
                         new ImageItemModel() { Src = entity.IconUrl.ToString() },
-                    Updated = entity.Nodeset.LastModifiedDate
+                    Updated = entity.Nodeset?.LastModifiedDate
                 };
             }
             else
