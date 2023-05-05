@@ -317,7 +317,7 @@
             _lookupItemsAll = _repoLookup.GetAll();
 
             //TBD - revisit and use BSONObject id for both parts. Requires to change ID type.
-            var filterPubs = MongoDB.Driver.Builders<Publisher>.Filter.In(x => x.ID, publisherIds.Select(y => y.ToString()).ToArray());
+            var filterPubs = MongoDB.Driver.Builders<Publisher>.Filter.In(x => x.ID, publisherIds.Select(y => y.ToString()));
             _publishersAll = _repoPublisher.AggregateMatch(filterPubs);
 
             var filterImages = MongoDB.Driver.Builders<ImageItemSimple>.Filter.In(x => x.MarketplaceItemId, marketplaceIds);
