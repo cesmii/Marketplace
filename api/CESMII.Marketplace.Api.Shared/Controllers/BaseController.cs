@@ -103,6 +103,53 @@
             return await _mailRelayService.SendEmail(message);
         }
 
+        protected async Task<bool> EmailRequestInfo(string subject, string body, MailRelayService _mailRelayService, string[] astrEmailAddress, string[] astrName, bool[] abSendTo)
+        {
+            var message = new MailMessage
+            {
+                From = new MailAddress(_mailConfig.MailFromAddress),
+                Subject = subject,
+                Body = body,
+                IsBodyHtml = true
+            };
+
+            int count = astrEmailAddress.Length;
+
+            for (int i= 0; i < count; i++)
+            {
+                string strEmail = astrEmailAddress[i];
+                string strName = "";
+                if (astrName.Length > i)
+                    strName = astrName[i];
+
+                if (abSendTo[i])
+                {
+                    if (string.IsNullOrEmpty(strName))
+                    {
+                        message.To.Add(new MailAddress(strEmail));
+                    }
+                    else
+                    {
+                        message.To.Add(new MailAddress(strEmail, strName));
+                    }
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(strName))
+                    {
+                        message.CC.Add(new MailAddress(strEmail));
+                    }
+                    else
+                    {
+                        message.CC.Add(new MailAddress(strEmail, strName));
+                    }
+                }
+            }
+
+            return await _mailRelayService.SendEmail(message);
+        }
+
+
         /// <summary>
         /// Override this in the descendant classes to handle disposal of unmanaged resources.
         /// </summary>

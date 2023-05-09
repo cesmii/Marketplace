@@ -98,6 +98,12 @@
         public ImageItemSimpleModel ImageLandscape { get; set; }
 
         public virtual List<JobDefinitionSimpleModel> JobDefinitions { get; set; }
+
+        public string ccName1 { get; set; }
+        public string ccEmail1 { get; set; }
+        public string ccName2 { get; set; }
+        public string ccEmail2 { get; set; }
+
     }
 
     public class MarketplaceItemModel : MarketplaceItemModelBase
