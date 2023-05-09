@@ -196,6 +196,8 @@
         {
 
             var pubItem = allItems.FirstOrDefault(x => x.ID == publisherId.ToString());
+            if (pubItem == null) return new PublisherModel();
+
             return new PublisherModel()
             {
                 ID = pubItem.ID,
