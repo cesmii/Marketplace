@@ -98,6 +98,11 @@
         public BsonObjectId ImageSquareId { get; set; }
         public BsonObjectId ImageLandscapeId { get; set; }
 
+        public string _ccName1;
+        public string _ccEmail1;
+        public string _ccName2;
+        public string _ccEmail2;
+
     }
 
     /// <summary>
