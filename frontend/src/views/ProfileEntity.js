@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 import axiosInstance from "../services/AxiosService";
@@ -8,10 +8,10 @@ import { useLoginStatus } from '../components/OnLoginHandler';
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
 import { cleanFileName, generateLogMessageString, getImageUrl, getMarketplaceIconName, scrollTopScreen } from '../utils/UtilityService'
-import MarketplaceTileList from './shared/MarketplaceTileList';
 import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
 
 import './styles/MarketplaceEntity.scss';
+import { MarketplaceRelatedItems} from '../services/MarketplaceService';
 
 const CLASS_NAME = "ProfileEntity";
 
@@ -21,6 +21,9 @@ function ProfileEntity() {
     // Region: Initialization
     //-------------------------------------------------------------------
     const history = useHistory();
+    const _scrollToSpecs = useRef(null);
+    const _scrollToRelated = useRef(null);
+
     const { id } = useParams();
     const [item, setItem] = useState({});
     const [isLoading, setIsLoading] = useState(true);
@@ -102,6 +105,16 @@ function ProfileEntity() {
         scrollTopScreen();
     }
 
+    const onViewSpecifications = (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: (_scrollToSpecs.current.getBoundingClientRect().y - 80), behavior: 'smooth' });
+    }
+
+    const onViewRelatedItems = (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: (_scrollToRelated.current.getBoundingClientRect().y - 80), behavior: 'smooth' });
+    }
+
     //-------------------------------------------------------------------
     // Region: Render Helpers
     //-------------------------------------------------------------------
@@ -158,8 +171,10 @@ function ProfileEntity() {
             return;
         }
         return (
-            <MarketplaceItemEntityHeader key={item.id} item={item} isAuthenticated={isAuthenticated} isAuthorized={isAuthorized} showActions={true} cssClass="marketplace-list-item"
-                onDownload={downloadProfile} showProfileDesignerLink={true} />
+            <MarketplaceItemEntityHeader key={item.id} item={item} isAuthenticated={isAuthenticated}
+                isAuthorized={isAuthorized} showActions={true} cssClass="marketplace-list-item"
+                onDownload={downloadProfile} showProfileDesignerLink={true}
+                onViewSpecifications={onViewSpecifications} onViewRelatedItems={onViewRelatedItems} />
         )
     }
 
@@ -170,68 +185,6 @@ function ProfileEntity() {
         );
     }
 
-    //render
-    const renderConfigurationSection = () => {
-        if (loadingProps.isLoading) return;
-
-        if ((item.requiredItems == null || item.requiredItems.length === 0) &&
-            (item.recommendedItems == null || item.recommendedItems.length === 0)) return;
-
-        return (
-            <>
-                {(item.requiredItems != null && item.requiredItems.length > 0) &&
-                    <>
-                        <div className="row" >
-                            <div className="col-sm-12 mb-3" >
-                                <h3 className="m-0 small">
-                                    Required SM Apps, SM Hardware & SM Profiles
-                                </h3>
-                            </div>
-                        </div>
-                        <div className="row" >
-                            <div className="col-sm-12">
-                                <MarketplaceTileList items={item.requiredItems} layout="banner-abbreviated" colCount={3} />
-                            </div>
-                        </div>
-                    </>
-                }
-                {(item.recommendedItems != null && item.recommendedItems.length > 0) &&
-                    <>
-                        <div className="row" >
-                            <div className="col-sm-12 my-3 pt-3 border-top" >
-                                <h3 className="m-0 small">
-                                    Recommended SM Apps, SM Hardware & SM Profiles
-                                </h3>
-                            </div>
-                        </div>
-                        <div className="row" >
-                            <div className="col-sm-12">
-                            <MarketplaceTileList items={item.recommendedItems} layout="banner-abbreviated" colCount={3} />
-                            </div>
-                        </div>
-                    </>
-                }
-            </>
-        );
-    }
-
-    //render similar items
-    const renderSimilarItems = () => {
-        if (loadingProps.isLoading) return;
-
-        if (item.similarItems == null || item.similarItems.length === 0) return;
-
-        return (
-            <>
-                <div className="row" >
-                    <div className="col-sm-12">
-                        <MarketplaceTileList items={item.similarItems} layout="banner" colCount={3} />
-                    </div>
-                </div>
-            </>
-        );
-    }
-
     const renderAccordion = () => {
         if (loadingProps.isLoading) return;
 
@@ -239,12 +192,13 @@ function ProfileEntity() {
             <>
                 <div className="accordion" id="accordionExample">
                     <div className="card mb-0">
-                        <div className="card-header bg-transparent p-0 border-bottom-0" id="headingOne">
-                            <button className="btn btn-content-accordion p-3 py-2 text-left d-block w-100" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                <h2 className="mb-0">
+                        <div className="card-header bg-transparent p-2 pt-3 border-bottom-0" id="headingOne">
+                            <div className="col-sm-12 d-flex align-items-center">
+                                <h2 className="m-0 mr-2">
                                     Smart Manufacturing Profile Details
                                 </h2>
-                            </button>
+                                <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/profile/${item.id}`} >Request More Info</a>
+                            </div>
                         </div>
                         <div id="collapseOne" className="collapse show mb-3" aria-labelledby="headingOne" >
                             <div className="card-body">
@@ -255,32 +209,32 @@ function ProfileEntity() {
                     {(item.requiredItems != null && item.requiredItems.length > 0 &&
                         item.recommendedItems != null && item.recommendedItems.length > 0) &&
                         <div className="card mb-0">
-                            <div className="card-header bg-transparent p-0 border-bottom-0" id="headingTwo">
+                            <div ref={_scrollToSpecs} className="card-header bg-transparent p-0 border-bottom-0" id="headingTwo">
                                 <button className="btn btn-content-accordion p-3 py-2 text-left d-block w-100" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
                                     <h2 className="mb-0">
-                                        Configuration Specifications
+                                        Specifications
                                     </h2>
                                 </button>
                             </div>
                             <div id="collapseTwo" className="collapse mb-3" aria-labelledby="headingTwo" >
                                 <div className="card-body">
-                                    {renderConfigurationSection()}
+                                    <MarketplaceRelatedItems item={item} displayMode="specifications" />
                                 </div>
                             </div>
                         </div>
                     }
                     {(item.similarItems != null && item.similarItems.length > 0) &&
                         <div className="card mb-0">
-                            <div className="card-header bg-transparent p-0 border-bottom-0" id="headingThree">
+                            <div ref={_scrollToRelated} className="card-header bg-transparent p-0 border-bottom-0" id="headingThree">
                                 <button className="btn btn-content-accordion p-3 py-2 text-left d-block w-100" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
                                     <h2 className="mb-0">
-                                        Other Items You Might Be Interested In
+                                        Related Items
                                     </h2>
                                 </button>
                             </div>
                             <div id="collapseThree" className="collapse mb-3" aria-labelledby="headingThree">
                                 <div className="card-body">
-                                    {renderSimilarItems()}
+                                    <MarketplaceRelatedItems item={item} displayMode="similarItems" />
                                 </div>
                             </div>
                         </div>

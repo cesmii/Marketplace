@@ -54,6 +54,11 @@ export const SVGIcon = (props) => {
             SVGCheckIcon(props)
         );
     }
+    if (props.name === 'view') {
+        return (
+            SvgVisibilityIcon(props)
+        );
+    }
 
 
     return (
