@@ -19,6 +19,9 @@
         /// </summary>
         public string DisplayName { get; set; }
 
+        [BsonDefaultValue("")]
+        public string Email { get; set; }
+
         public DateTime? Created { get; set; }
 
         public DateTime? LastLogin { get; set; }
@@ -26,6 +29,10 @@
         public BsonObjectId OrganizationId { get; set; }
 
         public SmipSettings SmipSettings { get; set; }
+
+        public string? SelfServiceSignUp_Organization_Name { get; set; }
+        public bool? SelfServiceSignUp_IsCesmiiMember { get; set; }
+
     }
 
     /// <summary>

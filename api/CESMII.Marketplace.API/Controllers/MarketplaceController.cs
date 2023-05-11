@@ -422,30 +422,44 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         /// <summary>
-        /// If user enters a word in the search box equal to vertical, category, etc, we translate that into a vertical/category/etc selection.
-        /// We also return the items that would be associated with that category (if any)
+        /// If user enters a word in the search box whose value is contained in any of the following:
+        /// (a) An Industry Vertical, 
+        /// (b) Processes, or
+        /// (c) The name of a publisher.
+        /// We return the marketplace items as if the user had clicked on the associated
+        /// item in the three groups of selection filters in the Marketplace library.
         /// </summary>
         /// <remarks>model.Filters selected items could be altered in this method</remarks>
         /// <param name="model"></param>
         private List<MarketplaceItemModel> PrepareAdvancedSearchFiltersSelections(MarketplaceSearchModel model, LookupTypeEnum enumVal)
         {
+            // We are looking for something typed into the search box. If empty, we return an empty list.
             if (string.IsNullOrEmpty(model.Query)) return new List<MarketplaceItemModel>();
 
+            // Only include active items (table field "IsActive" = true).
             var matches = _dalLookup.Where(x => x.LookupType.EnumValue == enumVal
                                 && x.IsActive
                                 && x.Name.ToLower().Equals(model.Query.ToLower())
                                 , null, null, false, false).Data.ToList();
 
-            //find the matching items and then use this when assembling the where clause around the model.query
+            // Add items when all or part of an industry vertical (academia, aerospace, agriculture, etc) is typed into the search box.
             if (enumVal == LookupTypeEnum.IndustryVertical)
             {
                 return _dal.Where(x => matches.Any(y => x.IndustryVerticals.Contains(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y.ID))))
                                 && x.IsActive
                                 , null, null, false, false).Data.ToList();
             }
+            // Add items where all or part of a defined processes (air compressing, analytics, blowing, chilling, etc) is typed into the search box.
             else if (enumVal == LookupTypeEnum.Process)
             {
                 return _dal.Where(x => matches.Any(y => x.Categories.Contains(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y.ID))))
+                                && x.IsActive
+                                , null, null, false, false).Data.ToList();
+            }
+            // Add items where all or part of a publisher name is typed into the search box.
+            else if (enumVal == LookupTypeEnum.Publisher)
+            {
+                return _dal.Where(x => matches.Any(y => x.PublisherId.Equals(new MongoDB.Bson.ObjectId(y.ID)))
                                 && x.IsActive
                                 , null, null, false, false).Data.ToList();
             }
@@ -613,12 +627,14 @@ namespace CESMII.Marketplace.Api.Controllers
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName });
             });
 
-            //Special handling for categories. If the search term matches a category name, we get that, too. 
-            //We do it as a separate query because the initial marketplace query already has an abundance of logic and 
-            //and complexity and it was not working to add in additional logic. We union it below.  
-            //run in parallel
-            //var itemsProcesses = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Process);
-            //var itemsVerts = PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.IndustryVertical);
+            // Special handling for processes, industry verticals, and publishers. If the search box contains a
+            // term in one of these three categories, the corresponding market items are added to the list of
+            // items to include. 
+
+            // We do it as a separate query because the initial marketplace query already has an abundance of logic and 
+            // and complexity and it was not working to add in additional logic.
+
+            // First -- run the searches.
             var matchesProcesses = Task.Run(() =>
             {
                 return PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Process);
@@ -627,14 +643,23 @@ namespace CESMII.Marketplace.Api.Controllers
             {
                 return PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.IndustryVertical);
             });
-            //await Task.WhenAll(matchesProcesses, matchesVerts);
 
-            //get the tasks results into format we can use
+            var matchesPublishers = Task.Run(() =>
+            {
+                return PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Publisher);
+            });
+
+
+
+            // Second - grab the results.
             var itemsProcesses = await matchesProcesses;
             var itemsVerts = await matchesVerts; 
+            var itemsPublishers = await matchesPublishers;
 
+            // Third - Join the results together.
             if (itemsProcesses.Any()) result.Data = result.Data.Union(itemsProcesses).ToList();
             if (itemsVerts.Any()) result.Data = result.Data.Union(itemsVerts).ToList();
+            if (itemsPublishers.Any()) result.Data = result.Data.Union(itemsPublishers).ToList();
             result.Count = result.Data.Count;
 
             _logger.LogWarning($"MarketplaceController|AdvancedSearchMarketplace|Duration: { timer.ElapsedMilliseconds}ms.");

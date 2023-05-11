@@ -1,12 +1,14 @@
 ﻿namespace CESMII.Marketplace.Api.Shared.Extensions
 {
-    using System.Collections.Generic;
     using System.Linq;
     using System.Security.Claims;
+
+    using Newtonsoft.Json;
 
     using CESMII.Marketplace.Common.Enums;
     using CESMII.Marketplace.Common.Utils;
     using CESMII.Marketplace.DAL.Models;
+    using CESMII.Marketplace.Data.Entities;
 
     public static class UserExtension
     {
@@ -67,6 +69,23 @@
             //apply id - should be present after onlogin handler, it gets set by middleware when request is inbound
             var permission = EnumUtils.GetEnumDescription(PermissionEnum.UserAzureADMapped);
             result.ID = user.FindFirst(x => x.Type.ToLower().Equals(permission.ToLower()))?.Value;
+
+            string strClaimOrg = $"{permission}_org";
+            var strOrgName = user.FindFirst(x => x.Type.ToLower().Equals(strClaimOrg.ToLower()))?.Value;
+            if (strOrgName != null)
+            {
+                result.Organization = new OrganizationModel()
+                {
+                    Name = strOrgName
+                };
+            }
+
+            string claimSMIP = $"{permission}_smipsettings";
+            var jsonSMIP = user.FindFirst(x => x.Type.ToLower().Equals(claimSMIP.ToLower()))?.Value;
+            if (jsonSMIP != null)
+            {
+                result.SmipSettings = JsonConvert.DeserializeObject<Data.Entities.SmipSettings>(jsonSMIP);
+            }
 
             return result;
         }

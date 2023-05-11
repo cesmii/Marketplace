@@ -68,8 +68,7 @@ function LoginButton() {
                     </Button>
                 </div>
                 <p className="mt-3 mb-0 text-center" >
-                    or email us at <a href="mailto:devops@cesmii.org" >devops@cesmii.org</a> to get registered.
-                    Please provide your project name or SOPO number with your request.
+                    Click button to sign-up for an account.
                 </p>
             </div>
         );
