@@ -84,7 +84,19 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         {/*<div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderCategoryItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderMetaTagItem(props.item)}</div>*/}
-                        <a className="btn btn-primary align-items-center mt-4 px-1 px-md-4 auto-width text-nowrap" href={`/more-info/app/${props.item.id}`} >Request More Info</a>
+                        {(props.item.requiredItems != null && props.item.requiredItems.length > 0 &&
+                            props.item.recommendedItems != null && props.item.recommendedItems.length > 0) &&
+                            <p className="mt-2" >
+                                <Button variant="link" type="button" className="px-0" onClick={props.onViewSpecifications} >
+                                    {renderMenuColorIcon('view', null, color.cornflower, 'mr-1')}View Specifications</Button>
+                            </p>
+                        }
+                        {(props.item.similarItems != null && props.item.similarItems.length > 0) &&
+                            <p className="mt-2 mb-0" >
+                                <Button variant="link" type="button" className="px-0" onClick={props.onViewRelatedItems} >
+                                {renderMenuColorIcon('group', null, color.cornflower, 'mr-1')}View Related Items</Button>
+                            </p>
+                        }
                         {renderJobDefinitions()}
                     </div>
                 </div>
@@ -110,19 +122,31 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         }
                         <p className="mb-2" ><b className="mr-2" >Published:</b>{formatDate(props.item.publishDate)}</p>
                         <p className="mb-2" ><b className="mr-2" >Version:</b>{props.item.version}</p>
+                        {(props.item.requiredItems != null && props.item.requiredItems.length > 0 &&
+                            props.item.recommendedItems != null && props.item.recommendedItems.length > 0) &&
+                            <p className="mt-2" >
+                                <Button variant="link" type="button" className="px-0" onClick={props.onViewSpecifications} >
+                                    {renderMenuColorIcon('view', null, color.cornflower, 'mr-1')}View Specifications</Button>
+                            </p>
+                        }
+                        {(props.item.similarItems != null && props.item.similarItems.length > 0) &&
+                            <p className="mt-2 mb-0" >
+                                <Button variant="link" type="button" className="px-0" onClick={props.onViewRelatedItems} >
+                                    {renderMenuColorIcon('group', null, color.cornflower, 'mr-1')}View Related Items</Button>
+                            </p>
+                        }
                         {props.onDownload &&
-                            <p className="my-3" >
+                            <p className="mt-2" >
                             <Button variant="link" type="button" className="px-0" onClick={onDownloadStart} >
-                                {renderMenuColorIcon('download', null, color.link, 'mr-1')}Download Nodeset XML</Button>
+                                {renderMenuColorIcon('download', null, color.cornflower, 'mr-1')}Download Nodeset XML</Button>
                             </p>
                         }
                         {props.showProfileDesignerLink &&
-                            <p className="mb-3" >
+                            <p className="mt-2" >
                             <Button variant="link" type="button" target="_blank" className="px-0" href={`${AppSettings.ProfileDesignerUrl}cloudlibrary/viewer/${props.item.id}`} >
                                 {renderMenuColorIcon('profile', null, color.cornflower, 'mr-1')}View in SM Profile Designer</Button>
                             </p>
                         }
-                        <a className="btn btn-primary align-items-center mt-2 px-1 px-md-4 auto-width text-nowrap" href={`/more-info/profile/${props.item.id}`} >Request More Info</a>
                     </div>
                 </div>
             </>

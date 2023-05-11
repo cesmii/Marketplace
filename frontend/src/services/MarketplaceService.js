@@ -1,4 +1,5 @@
 import { generateLogMessageString, getUserPreferences, setUserPreferences } from '../utils/UtilityService';
+import MarketplaceTileList from '../views/shared/MarketplaceTileList';
 
 const CLASS_NAME = "MarketplaceService";
 
@@ -59,3 +60,81 @@ export function toggleSearchFilterSelected(criteria, id) {
     item.selected = !item.selected;
 }
 
+export function MarketplaceRelatedItems(props) {
+    //-------------------------------------------------------------------
+    // Common render helpers
+    //-------------------------------------------------------------------
+    //-------------------------------------------------------------------
+    // Render Specifications for a profile or marketplace item
+    //-------------------------------------------------------------------
+    const renderSpecifications = (item) => {
+        if ((item.requiredItems == null || item.requiredItems.length === 0) &&
+            (item.recommendedItems == null || item.recommendedItems.length === 0)) return;
+
+        return (
+            <>
+                {(item.requiredItems != null && item.requiredItems.length > 0) &&
+                    <>
+                        <div className="row" >
+                            <div className="col-sm-12 mb-3" >
+                                <h3 className="m-0 small">
+                                    Required SM Apps, SM Hardware & SM Profiles
+                                </h3>
+                            </div>
+                        </div>
+                        <div className="row" >
+                            <div className="col-sm-12">
+                                <MarketplaceTileList items={item.requiredItems} layout="banner-abbreviated" colCount={3} />
+                            </div>
+                        </div>
+                    </>
+                }
+                {(item.recommendedItems != null && item.recommendedItems.length > 0) &&
+                    <>
+                        <div className="row" >
+                            <div className="col-sm-12 my-3 pt-3 border-top" >
+                                <h3 className="m-0 small">
+                                    Recommended SM Apps, SM Hardware & SM Profiles
+                                </h3>
+                            </div>
+                        </div>
+                        <div className="row" >
+                            <div className="col-sm-12">
+                                <MarketplaceTileList items={item.recommendedItems} layout="banner-abbreviated" colCount={3} />
+                            </div>
+                        </div>
+                    </>
+                }
+            </>
+        );
+    }
+
+    //-------------------------------------------------------------------
+    // Render Similar Items for a profile or marketplace item
+    //-------------------------------------------------------------------
+    const renderSimilarItems = (item) => {
+
+        if (item.similarItems == null || item.similarItems.length === 0) return;
+
+        return (
+            <>
+                <div className="row" >
+                    <div className="col-sm-12">
+                        <MarketplaceTileList items={item.similarItems} layout="banner" colCount={3} />
+                    </div>
+                </div>
+            </>
+        );
+    }
+
+    //-------------------------------------------------------------------
+    // Render
+    //-------------------------------------------------------------------
+    if (props.displayMode === "similarItems") {
+        return (renderSimilarItems(props.item))
+    }
+    if (props.displayMode === "specifications") {
+        return (renderSpecifications(props.item))
+    }
+    return null;
+}
