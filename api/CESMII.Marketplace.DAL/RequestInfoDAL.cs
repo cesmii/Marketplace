@@ -254,7 +254,11 @@
                 Name = entity.Name.ToLower().Trim().Replace(" ", "-").Replace("_", "-"),
                 DisplayName = entity.DisplayName,
                 Abstract = entity.Abstract,
-                PublishDate = entity.PublishDate
+                PublishDate = entity.PublishDate,
+                ccName1 = entity._ccName1,
+                ccName2 = entity._ccName2,
+                ccEmail1 = entity._ccEmail1,
+                ccEmail2 = entity._ccEmail2
             };
         }
 

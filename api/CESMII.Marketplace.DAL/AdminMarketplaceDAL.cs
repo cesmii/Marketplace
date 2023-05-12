@@ -253,7 +253,11 @@
                     Publisher = MapToModelPublisher(entity.PublisherId, _publishersAll),
                     IsActive = entity.IsActive,
                     ImagePortrait = entity.ImagePortraitId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImagePortraitId.ToString()), _imagesAll),
-                    ImageLandscape = entity.ImageLandscapeId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageLandscapeId.ToString()), _imagesAll)
+                    ImageLandscape = entity.ImageLandscapeId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageLandscapeId.ToString()), _imagesAll),
+                    ccName1 = entity._ccName1,
+                    ccName2 = entity._ccName2,
+                    ccEmail1 = entity._ccEmail1,
+                    ccEmail2 = entity._ccEmail2
                 };
                 if (verbose)
                 {
@@ -298,6 +302,11 @@
             entity.ImageLandscapeId = model.ImageLandscape == null ?
                 MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY) :
                 MongoDB.Bson.ObjectId.Parse(model.ImageLandscape.ID); 
+
+            entity._ccName1 = model.ccName1;
+            entity._ccEmail1 = model.ccEmail1;
+            entity._ccName2 = model.ccName2;
+            entity._ccEmail2 = model.ccEmail2;
         }
 
         /// <summary>

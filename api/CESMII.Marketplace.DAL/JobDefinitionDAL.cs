@@ -9,6 +9,8 @@
     using CESMII.Marketplace.DAL.Models;
     using CESMII.Marketplace.Data.Entities;
     using CESMII.Marketplace.Data.Repositories;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// </summary>
@@ -16,14 +18,23 @@
     {
         protected IMongoRepository<MarketplaceItem> _repoMarketplaceItem;
         protected List<MarketplaceItem> _marketplaceItemAll;
+        protected new ILogger<JobDefinitionDAL> _logger;
+
+        // Put this key in this in the following config setting location: PasswordSettings.EncryptionSettings.EncryptDecryptKey
         protected string _encryptDecryptKey;
 
         public JobDefinitionDAL(IMongoRepository<JobDefinition> repo,
             IMongoRepository<MarketplaceItem> repoMarketplaceItem,
-            ConfigUtil configUtil) : base(repo)
+            ConfigUtil configUtil, ILogger<JobDefinitionDAL> logger) : base(repo)
         {
             _repoMarketplaceItem = repoMarketplaceItem;
             _encryptDecryptKey = configUtil.PasswordConfigSettings.EncryptionSettings.EncryptDecryptKey;
+            _logger = logger;
+            if (string.IsNullOrEmpty(_encryptDecryptKey))
+            {
+                _logger.LogError($"Missing configuration for encryption key: cannot read or write job configuration information.");
+                throw new Exception("Configuration value missing.");
+            }
         }
 
         public async Task<string> Add(JobDefinitionModel model, string userId)
