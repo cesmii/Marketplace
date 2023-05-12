@@ -86,13 +86,13 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         {/*<div className="d-none d-lg-inline" >{renderMetaTagItem(props.item)}</div>*/}
                         {(props.item.requiredItems != null && props.item.requiredItems.length > 0 &&
                             props.item.recommendedItems != null && props.item.recommendedItems.length > 0) &&
-                            <p className="mt-2" >
+                            <p className="mt-3 mb-0" >
                                 <Button variant="link" type="button" className="px-0" onClick={props.onViewSpecifications} >
                                     {renderMenuColorIcon('view', null, color.cornflower, 'mr-1')}View Specifications</Button>
                             </p>
                         }
                         {(props.item.similarItems != null && props.item.similarItems.length > 0) &&
-                            <p className="mt-2 mb-0" >
+                            <p className="mt-3 mb-0" >
                                 <Button variant="link" type="button" className="px-0" onClick={props.onViewRelatedItems} >
                                 {renderMenuColorIcon('group', null, color.cornflower, 'mr-1')}View Related Items</Button>
                             </p>
@@ -122,29 +122,29 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         }
                         <p className="mb-2" ><b className="mr-2" >Published:</b>{formatDate(props.item.publishDate)}</p>
                         <p className="mb-2" ><b className="mr-2" >Version:</b>{props.item.version}</p>
+                        {props.onDownload &&
+                            <p className="mt-3 mb-0" >
+                                <Button variant="link" type="button" className="px-0" onClick={onDownloadStart} >
+                                    {renderMenuColorIcon('download', null, color.cornflower, 'mr-1')}Download Nodeset XML</Button>
+                            </p>
+                        }
+                        {props.showProfileDesignerLink &&
+                            <p className="mt-3 mb-0" >
+                                <Button variant="link" type="button" target="_blank" className="px-0" href={`${AppSettings.ProfileDesignerUrl}cloudlibrary/viewer/${props.item.id}`} >
+                                    {renderMenuColorIcon('profile', null, color.cornflower, 'mr-1')}View in SM Profile Designer</Button>
+                            </p>
+                        }
                         {(props.item.requiredItems != null && props.item.requiredItems.length > 0 &&
                             props.item.recommendedItems != null && props.item.recommendedItems.length > 0) &&
-                            <p className="mt-2" >
+                            <p className="mt-3 mb-0" >
                                 <Button variant="link" type="button" className="px-0" onClick={props.onViewSpecifications} >
                                     {renderMenuColorIcon('view', null, color.cornflower, 'mr-1')}View Specifications</Button>
                             </p>
                         }
                         {(props.item.similarItems != null && props.item.similarItems.length > 0) &&
-                            <p className="mt-2 mb-0" >
+                            <p className="mt-3 mb-0" >
                                 <Button variant="link" type="button" className="px-0" onClick={props.onViewRelatedItems} >
                                     {renderMenuColorIcon('group', null, color.cornflower, 'mr-1')}View Related Items</Button>
-                            </p>
-                        }
-                        {props.onDownload &&
-                            <p className="mt-2" >
-                            <Button variant="link" type="button" className="px-0" onClick={onDownloadStart} >
-                                {renderMenuColorIcon('download', null, color.cornflower, 'mr-1')}Download Nodeset XML</Button>
-                            </p>
-                        }
-                        {props.showProfileDesignerLink &&
-                            <p className="mt-2" >
-                            <Button variant="link" type="button" target="_blank" className="px-0" href={`${AppSettings.ProfileDesignerUrl}cloudlibrary/viewer/${props.item.id}`} >
-                                {renderMenuColorIcon('profile', null, color.cornflower, 'mr-1')}View in SM Profile Designer</Button>
                             </p>
                         }
                     </div>
