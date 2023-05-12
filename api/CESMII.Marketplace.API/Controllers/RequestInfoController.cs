@@ -137,9 +137,35 @@ namespace CESMII.Marketplace.Api.Controllers
 
                     var subject = GetEmailSubject(modelNew);
                     var body = await this.RenderViewAsync(GetRenderViewUrl(modelNew), modelNew);
-                    var emailResult = await EmailRequestInfo(subject, body, _mailRelayService);
+                    string strRequestType = modelNew.RequestType.Code.ToLower();
 
-                    if (!emailResult)
+                    bool bEmailSuccess = false;
+
+                    if (strRequestType == "marketplaceitem")
+                    {
+                        bool[] abSendTo = new bool[3];
+                        abSendTo[0] = true;
+                        abSendTo[1] = false;
+                        abSendTo[2] = false;
+
+                        string[] astrEmail = new string[3];
+                        astrEmail[0] = modelNew.Email;
+                        astrEmail[1] = modelNew.MarketplaceItem.ccEmail1;
+                        astrEmail[2] = modelNew.MarketplaceItem.ccEmail2;
+
+                        string[] astrName = new string[3];
+                        astrName[0] = $"{modelNew.FirstName} {modelNew.LastName}";
+                        astrName[1] = modelNew.MarketplaceItem.ccName1;
+                        astrName[2] = modelNew.MarketplaceItem.ccName2;
+
+                        bEmailSuccess = await EmailRequestInfo(subject, body, _mailRelayService, astrEmail, astrName, abSendTo);
+                    }
+                    else
+                    {
+                        bEmailSuccess = await EmailRequestInfo(subject, body, _mailRelayService);
+                    }
+
+                    if (!bEmailSuccess)
                     {
                         _logger.LogCritical($"RequestInfoController|Add|RequestInfo Item added (good)|Error: send failed.");
                     }
@@ -181,9 +207,11 @@ namespace CESMII.Marketplace.Api.Controllers
         {
             switch (item.RequestType.Code.ToLower())
             {
+                case "marketplaceitem":
+                    return "~/Views/Template/MoreInfoRequest.cshtml";
+
                 case "publisher":
                 case "sm-profile":
-                case "marketplaceitem":
                     return "~/Views/Template/RequestInfo.cshtml";
                 default:
                     return "~/Views/Template/ContactUs.cshtml";

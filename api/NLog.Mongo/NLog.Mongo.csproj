@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="common.props" />
+
+  <PropertyGroup>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <TargetFrameworks>.net60</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="NLog.Mongo.deps.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="NLog.Mongo.deps.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" Version="2.17.1" />
+    <PackageReference Include="NLog" Version="4.7.10" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0-preview.2.23128.3" />
+  </ItemGroup>
+
+</Project>

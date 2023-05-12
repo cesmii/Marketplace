@@ -438,6 +438,10 @@ function AdminMarketplaceEntity() {
             case "abstract":
             case "version":
             case "metaTagsConcatenated":
+            case "ccName1":
+            case "ccName2":
+            case "ccEmail1":
+            case "ccEmail2":
                 item[e.target.id] = e.target.value;
                 break;
             case "name":
@@ -826,6 +830,34 @@ function AdminMarketplaceEntity() {
                                     onChange={onChange} readOnly={isReadOnly} />
                             </Form.Group>
                         </div>
+                    </div>
+                </div>
+                <div className="row mt-2">
+                    <div className="col-sm-6 col-lg-4">
+                        <Form.Group>
+                            <Form.Label>Recipient Name 1 (for CC)</Form.Label>
+                            <Form.Control id="ccName1" type="" placeholder="" value={item.ccName1 == null ? '' : item.ccName1} onChange={onChange} readOnly={isReadOnly} />
+                        </Form.Group>
+                    </div>
+                    <div className="col-sm-6 col-lg-4">
+                        <Form.Group>
+                            <Form.Label>Email Address 1</Form.Label>
+                            <Form.Control id="ccEmail1" type="" placeholder="" value={item.ccEmail1 == null ? '' : item.ccEmail1} onChange={onChange} readOnly={isReadOnly} />
+                        </Form.Group>
+                    </div>
+                </div>
+                <div className="row mt-2">
+                    <div className="col-sm-6 col-lg-4">
+                        <Form.Group>
+                            <Form.Label>Recipient Name 2 (for CC)</Form.Label>
+                            <Form.Control id="ccName2" type="" placeholder="" value={item.ccName2 == null ? '' : item.ccName2} onChange={onChange} readOnly={isReadOnly} />
+                        </Form.Group>
+                    </div>
+                    <div className="col-sm-6 col-lg-4">
+                        <Form.Group>
+                            <Form.Label>Email Address 2</Form.Label>
+                            <Form.Control id="ccEmail2" type="" placeholder="" value={item.ccEmail2 == null ? '' : item.ccEmail2} onChange={onChange} readOnly={isReadOnly} />
+                        </Form.Group>
                     </div>
                 </div>
                 <div className="row mt-2">
