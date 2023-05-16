@@ -13,7 +13,7 @@ import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
 import MarketplaceEntitySidebar from './shared/MarketplaceEntitySidebar';
 
 import { convertHtmlToString, generateLogMessageString, getImageUrl, getMarketplaceIconName } from '../utils/UtilityService'
-import { clearSearchCriteria, MarketplaceRelatedItems, renderSimilarItems, renderSpecifications, toggleSearchFilterSelected } from '../services/MarketplaceService';
+import { clearSearchCriteria, hasRelatedItems, MarketplaceRelatedItems, renderSimilarItems, renderSpecifications, toggleSearchFilterSelected } from '../services/MarketplaceService';
 import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
 import { SvgVisibilityIcon } from '../components/SVGIcon';
 
@@ -256,8 +256,7 @@ function MarketplaceEntity() {
                             </div>
                         </div>
                     </div>
-                    {(item.requiredItems != null && item.requiredItems.length > 0 &&
-                        item.recommendedItems != null && item.recommendedItems.length > 0) &&
+                    {(hasRelatedItems(item, "required") || hasRelatedItems(item, "recommended")) &&
                         <div className="card mb-0">
                             <div ref={_scrollToSpecs} className="card-header bg-transparent p-0 border-bottom-0" id="headingTwo">
                                 <button className="btn btn-content-accordion p-3 py-2 text-left d-block w-100" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
@@ -273,12 +272,12 @@ function MarketplaceEntity() {
                             </div>
                         </div>
                     }
-                    {(item.similarItems != null && item.similarItems.length > 0) &&
+                    {hasRelatedItems(item, "similar") &&
                         <div className="card mb-0">
                             <div className="card-header bg-transparent p-0 border-bottom-0" id="headingThree">
                                 <button ref={_scrollToRelated} className="btn btn-content-accordion p-3 py-2 text-left d-block w-100" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
                                     <h2 className="mb-0">
-                                        Related Items
+                                        Similar Items
                                     </h2>
                                 </button>
                             </div>

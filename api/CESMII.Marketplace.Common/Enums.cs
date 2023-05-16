@@ -20,6 +20,9 @@
         MembershipStatus = 9,
         [Description("SM Type")]
         SmItemType = 10,
+        [Description("Related Type")]
+        RelatedType = 11
+
     }
 
     //TBD - update these...adjust to align with this data. 
@@ -49,13 +52,5 @@
         Failed = 10,
         Cancelled = 11
     }
-
-    public enum RelatedTypeEnum
-    {
-        Required = 1,
-        Recommended = 2,
-        Similar = 3
-    }
-
 
 }

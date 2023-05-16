@@ -130,7 +130,7 @@
         /// <summary>
         /// This will map to an enum we have in the code for RelatedType
         /// </summary>
-        public int RelatedTypeId { get; set; }
+        public BsonObjectId RelatedTypeId { get; set; }
     }
 
     /// <summary>
@@ -144,9 +144,9 @@
         /// </summary>
         public string ProfileId { get; set; }
         /// <summary>
-        /// This will map to an enum we have in the code for RelatedType
+        /// This will map to a lookup record for RelatedType
         /// </summary>
-        public int RelatedTypeId { get; set; }
+        public BsonObjectId RelatedTypeId { get; set; }
     }
 
 

@@ -35,7 +35,12 @@
             _dalLookup = dalLookup;
         }
 
-        public List<MarketplaceItemRelatedModel> SimilarItems(MarketplaceItemModel item)
+        /// <summary>
+        /// Take the existing related group by and append in the automated similar items 
+        /// discovered here.
+        /// </summary>
+        /// <param name="item"></param>
+        public void AppendSimilarItems(ref MarketplaceItemModel item)
         {
             //union passed in list w/ lookup list.
             var cats = item.Categories.Select(x => x.ID).ToArray();
@@ -69,7 +74,8 @@
             }
 
             //build where clause - publisher id 
-            predicates.Add(x => x.PublisherId.ToString().Equals(item.Publisher.ID));
+            var pubId = item.Publisher.ID;
+            predicates.Add(x => x.PublisherId.ToString().Equals(pubId));
 
             //now combine all predicates into one predicate and use the OR extension so that we cast a wider net. 
             Func<MarketplaceItem, bool> predFinal = null;
@@ -82,7 +88,8 @@
             //limit to isActive
             predFinal = predFinal.And(x => x.IsActive);
             //remove self
-            predFinal = predFinal.And(x => !x.ID.Equals(item.ID));
+            var id = item.ID;
+            predFinal = predFinal.And(x => !x.ID.Equals(id));
             //limit to publish status of live
             predFinal = predFinal.And(this.BuildStatusFilterPredicate());
 
@@ -91,8 +98,13 @@
             var result = _dalMarketplace.Where(predFinal, null, 30, false, false, 
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName }).Data;
+            //filter out any items already represented in related items collection
+            var relatedItems = item.RelatedItemsGrouped.SelectMany(x => x.Items).Select(y => y.ID);
+
             //convert to a simplified version of the marketplace item object
-            var autoMatches = result.Select(x => new MarketplaceItemRelatedModel() {
+            var autoMatches = result
+                .Where(x => !relatedItems.Contains(x.ID)) //filter out items already represented
+                .Select(x => new MarketplaceItemRelatedModel() {
                 ID = x.ID,
                 Abstract = x.Abstract,
                 DisplayName = x.DisplayName,
@@ -104,9 +116,26 @@
                 ImageLandscape = x.ImageLandscape
             }).ToList();
 
-            //now combine auto matches with manual matches (if there are any manual matches)
-            return item.SimilarItems.Any() ? autoMatches.Union(item.SimilarItems).ToList() : autoMatches;
 
+            //now combine auto matches with manual matches (if there are any manual matches)
+            var similarGroup = item.RelatedItemsGrouped.Find(x => x.RelatedType.Code.ToLower().Equals("similar"));
+            if (similarGroup != null)
+            {
+                similarGroup.Items = similarGroup.Items == null ? autoMatches : similarGroup.Items.Union(autoMatches).ToList();
+            }
+            else
+            {
+                var similarType = _dalLookup.Where(x => x.LookupType.EnumValue == LookupTypeEnum.RelatedType, null, null, false).Data
+                                        .Find(x => (x.Code == null ? "" : x.Code).ToLower().Equals("similar"));
+                if (similarType != null)
+                {
+                    item.RelatedItemsGrouped.Add(new RelatedItemsGroupBy()
+                    {
+                        RelatedType = similarType,
+                        Items = autoMatches
+                    });
+                }
+            }
         }
 
         public async Task<List<MarketplaceItemModel>> PopularItems()
