@@ -60,6 +60,20 @@ export function toggleSearchFilterSelected(criteria, id) {
     item.selected = !item.selected;
 }
 
+//-------------------------------------------------------------------
+// hasRelatedItems - does this marketplace item have a specific kind of related item
+//-------------------------------------------------------------------
+export function hasRelatedItems(item, code) {
+
+    if (item.relatedItemsGrouped == null || item.relatedItemsGrouped.length === 0) return false;
+
+    //split specific groups into something front end will display
+    const grp = item.relatedItemsGrouped.find(x => x.relatedType.code.toLowerCase() === code.toLowerCase());
+
+    //true if there are items in the group
+    return (grp?.items != null && grp?.items.length > 0);
+}
+
 export function MarketplaceRelatedItems(props) {
     //-------------------------------------------------------------------
     // Common render helpers
@@ -68,12 +82,19 @@ export function MarketplaceRelatedItems(props) {
     // Render Specifications for a profile or marketplace item
     //-------------------------------------------------------------------
     const renderSpecifications = (item) => {
-        if ((item.requiredItems == null || item.requiredItems.length === 0) &&
-            (item.recommendedItems == null || item.recommendedItems.length === 0)) return;
+
+        if (item.relatedItemsGrouped == null || item.relatedItemsGrouped.length === 0) return null;
+
+        //split specific groups into something front end will display
+        const grpRequired = item.relatedItemsGrouped.find(x => x.relatedType.code.toLowerCase() === "required");
+        const grpRecommended = item.relatedItemsGrouped.find(x => x.relatedType.code.toLowerCase() === "recommended");
+
+        if ((grpRequired?.items == null || grpRequired?.items.length === 0) &&
+            (grpRecommended?.items == null || grpRecommended?.items.length === 0)) return null;
 
         return (
             <>
-                {(item.requiredItems != null && item.requiredItems.length > 0) &&
+                {(grpRequired?.items != null && grpRequired?.items.length > 0) &&
                     <>
                         <div className="row" >
                             <div className="col-sm-12 mb-3" >
@@ -84,12 +105,12 @@ export function MarketplaceRelatedItems(props) {
                         </div>
                         <div className="row" >
                             <div className="col-sm-12">
-                                <MarketplaceTileList items={item.requiredItems} layout="banner-abbreviated" colCount={3} />
+                                <MarketplaceTileList items={grpRequired?.items} layout="banner-abbreviated" colCount={3} />
                             </div>
                         </div>
                     </>
                 }
-                {(item.recommendedItems != null && item.recommendedItems.length > 0) &&
+                {(grpRecommended?.items != null && grpRecommended?.items.length > 0) &&
                     <>
                         <div className="row" >
                             <div className="col-sm-12 my-3 pt-3 border-top" >
@@ -100,7 +121,7 @@ export function MarketplaceRelatedItems(props) {
                         </div>
                         <div className="row" >
                             <div className="col-sm-12">
-                                <MarketplaceTileList items={item.recommendedItems} layout="banner-abbreviated" colCount={3} />
+                                <MarketplaceTileList items={grpRecommended?.items} layout="banner-abbreviated" colCount={3} />
                             </div>
                         </div>
                     </>
@@ -114,13 +135,18 @@ export function MarketplaceRelatedItems(props) {
     //-------------------------------------------------------------------
     const renderSimilarItems = (item) => {
 
-        if (item.similarItems == null || item.similarItems.length === 0) return;
+        if (item.relatedItemsGrouped == null || item.relatedItemsGrouped.length === 0) return null;
+
+        //split specific groups into something front end will display
+        const grpSimilar = item.relatedItemsGrouped.find(x => x.relatedType.code.toLowerCase() === "similar");
+
+        if ((grpSimilar?.items == null || grpSimilar?.items.length === 0)) return null;
 
         return (
             <>
                 <div className="row" >
                     <div className="col-sm-12">
-                        <MarketplaceTileList items={item.similarItems} layout="banner" colCount={3} />
+                        <MarketplaceTileList items={grpSimilar?.items} layout="banner" colCount={3} />
                     </div>
                 </div>
             </>

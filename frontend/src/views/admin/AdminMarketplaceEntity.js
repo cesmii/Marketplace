@@ -17,6 +17,8 @@ import MultiSelect from '../../components/MultiSelect';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { WysiwygEditor } from '../../components/WysiwygEditor';
 import AdminImageList from './shared/AdminImageList';
+import AdminRelatedItemList from './shared/AdminRelatedItemList';
+import { clearSearchCriteria } from '../../services/MarketplaceService';
 
 const CLASS_NAME = "AdminMarketplaceEntity";
 
@@ -45,6 +47,9 @@ function AdminMarketplaceEntity() {
     const [_refreshImageData, setRefreshImageData] = useState(true);
     const [_imageRows, setImageRows] = useState([]);
     var caption = 'Marketplace Item';
+
+    const [_itemsLookup, setItemsLookup] = useState([]);  //marketplace items 
+    const [_loadLookupData, setLoadLookupData] = useState(null);
 
     //-------------------------------------------------------------------
     // Region: Hooks
@@ -205,6 +210,65 @@ function AdminMarketplaceEntity() {
         };
     }, [loadingProps.lookupDataStatic]);
 
+    //-------------------------------------------------------------------
+    // Trigger get related items lookups - all mktplace items, all profiles.
+    //-------------------------------------------------------------------
+    useEffect(() => {
+        // Load lookup data upon certain triggers in the background
+        async function fetchData(url) {
+            //show a spinner
+            setLoadingProps({ isLoading: true, message: null });
+
+            console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
+
+            //get copy of search criteria structure from session storage
+            var criteria = JSON.parse(JSON.stringify(loadingProps.searchCriteria));
+            criteria = clearSearchCriteria(criteria);
+            criteria = { ...criteria, Query: null, Skip: 0, Take: 999 };
+            await axiosInstance.post(url, criteria).then(result => {
+                if (result.status === 200) {
+
+                    //set state on fetch of data
+                    setItemsLookup(result.data);
+                    setLoadLookupData(false);
+
+                    //hide a spinner
+                    setLoadingProps({ isLoading: false, message: null });
+                } else {
+                    setLoadingProps({
+                        isLoading: false, message: null, inlineMessages: [
+                            { id: new Date().getTime(), severity: "danger", body: 'An error occurred retrieving these items.', isTimed: true }]
+                    });
+                }
+                //hide a spinner
+                setLoadingProps({ isLoading: false, message: null });
+                setLoadLookupData(false);
+
+            }).catch(e => {
+                if ((e.response && e.response.status === 401) || e.toString().indexOf('Network Error') > -1) {
+                    //do nothing, this is handled in routes.js using common interceptor
+                    //setAuthTicket(null); //the call of this will clear the current user and the token
+                }
+                else {
+                    setLoadingProps({
+                        isLoading: false, message: null, inlineMessages: [
+                            { id: new Date().getTime(), severity: "danger", body: 'An error occurred retrieving the related items.', isTimed: true }]
+                    });
+                }
+                setLoadLookupData(false);
+            });
+        }
+
+        //go get the data.
+        if (_loadLookupData == null || _loadLookupData === true) {
+            fetchData(`marketplace/admin/lookup/related`);
+        }
+
+        //this will execute on unmount
+        return () => {
+            //
+        };
+    }, [_loadLookupData]);
 
     //-------------------------------------------------------------------
     // Region: 
@@ -519,6 +583,62 @@ function AdminMarketplaceEntity() {
     }
 
     //-------------------------------------------------------------------
+    // Region: Event handler - related items, related profiles
+    //-------------------------------------------------------------------
+    const onChangeRelatedItem = (currentId, arg) => {
+        console.log(generateLogMessageString('onChangeRelatedItem', CLASS_NAME));
+        var match = item.relatedItems.find(x => x.relatedId === currentId);
+        match.relatedId = arg.relatedId;
+        match.displayName = arg.displayName;
+        match.relatedType = arg.relatedType;
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    const onChangeRelatedProfile = (currentId, arg) => {
+        console.log(generateLogMessageString('onChangeRelatedProfile', CLASS_NAME));
+        var match = item.relatedProfiles.find(x => x.relatedId === currentId);
+        match.relatedId = arg.relatedId;
+        match.displayName = arg.displayName;
+        match.relatedType = arg.relatedType;
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    const onAddRelatedItem = () => {
+        console.log(generateLogMessageString('onAddRelatedItem', CLASS_NAME));
+        //we need to be aware of newly added rows and those will be signified by a negative -id. 
+        //Once saved server side, these will be issued ids from db.
+        //Depending on how we are adding (single row or multiple rows), the id generation will be different. Both need 
+        //a starting point negative id
+        var id = (-1) * (item.relatedItems == null ? 1 : item.relatedItems.length + 1);
+
+        item.relatedItems.push({ relatedId: id, relatedType: { id: "-1" } });
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    const onAddRelatedProfile = () => {
+        console.log(generateLogMessageString('onAddRelatedProfile', CLASS_NAME));
+        //we need to be aware of newly added rows and those will be signified by a negative -id. 
+        //Once saved server side, these will be issued ids from db.
+        //Depending on how we are adding (single row or multiple rows), the id generation will be different. Both need 
+        //a starting point negative id
+        var id = (-1) * (item.relatedProfiles == null ? 1 : item.relatedProfiles.length + 1);
+        item.relatedProfiles.push({ relatedId: id, relatedType: { id: "-1" } });
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    const onDeleteRelatedItem = (e, id) => {
+        console.log(generateLogMessageString('onDeleteRelatedItem', CLASS_NAME));
+        item.relatedItems = item.relatedItems.filter(x => x.relatedId !== id);
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    const onDeleteRelatedProfile = (e, id) => {
+        console.log(generateLogMessageString('onDeleteRelatedProfile', CLASS_NAME));
+        item.relatedProfiles = item.relatedProfiles.filter(x => x.relatedId !== id);
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    //-------------------------------------------------------------------
     // Region: Render Helpers
     //-------------------------------------------------------------------
     const renderMarketplaceStatus = () => {
@@ -777,6 +897,22 @@ function AdminMarketplaceEntity() {
                     </div>
                     <div className="col-md-4">
                         {renderMarketplaceStatus()}
+                    </div>
+                </div>
+                <div className="row mt-2">
+                    <div className="col-12 pt-2">
+                        <AdminRelatedItemList caption="Related Marketplace Items" items={item.relatedItems}
+                            itemsLookup={_itemsLookup?.lookupItems}
+                            type={AppSettings.itemTypeCode.smApp} onChangeItem={onChangeRelatedItem}
+                            onAdd={onAddRelatedItem} onDelete={onDeleteRelatedItem} />
+                    </div>
+                </div>
+                <div className="row mt-2">
+                    <div className="col-12 pt-2">
+                        <AdminRelatedItemList caption="Related SM Profiles" items={item.relatedProfiles}
+                            itemsLookup={_itemsLookup?.lookupProfiles}
+                            type={AppSettings.itemTypeCode.smProfile} onChangeItem={onChangeRelatedProfile}
+                            onAdd={onAddRelatedProfile} onDelete={onDeleteRelatedProfile} />
                     </div>
                 </div>
                 <div className="row">

@@ -274,11 +274,9 @@
 
                     //get related profiles from CloudLib
                     var relatedProfiles = MapToModelRelatedProfiles(entity.RelatedProfiles);
-
+                    
                     //map related items into specific buckets - required, recommended
-                    result.RequiredItems = MergeRelatedItems(relatedItems, relatedProfiles, RelatedTypeEnum.Required);
-                    result.RecommendedItems = MergeRelatedItems(relatedItems, relatedProfiles, RelatedTypeEnum.Recommended);
-                    result.SimilarItems = MergeRelatedItems(relatedItems, relatedProfiles, RelatedTypeEnum.Similar);
+                    result.RelatedItemsGrouped = GroupAndMergeRelatedItems(relatedItems, relatedProfiles);
                 }
                 return result;
             }
@@ -342,7 +340,8 @@
                     ImagePortrait = x.ImagePortraitId == null ? null : MapToModelImageSimple(z => z.ID.Equals(x.ImagePortraitId.ToString()), _imagesAll),
                     ImageLandscape = x.ImageLandscapeId == null ? null : MapToModelImageSimple(z => z.ID.Equals(x.ImageLandscapeId.ToString()), _imagesAll),
                     //assumes only one related item per type
-                    RelatedType = (RelatedTypeEnum)items.Find(z => z.MarketplaceItemId.ToString().Equals(x.ID)).RelatedTypeId
+                    RelatedType = MapToModelLookupItem(items.Find(z => z.MarketplaceItemId.ToString().Equals(x.ID)).RelatedTypeId,
+                            _lookupItemsAll.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList()),
                 }).ToList();
         }
 
@@ -373,37 +372,81 @@
                     ImagePortrait = x.ImagePortrait,
                     ImageLandscape = x.ImageLandscape,
                     //assumes only one related item per type
-                    RelatedType = (RelatedTypeEnum)items.Find(z => z.ProfileId.Equals(x.ID)).RelatedTypeId
+                    RelatedType = MapToModelLookupItem(items.Find(z => z.ProfileId.ToString().Equals(x.ID)).RelatedTypeId,
+                            _lookupItemsAll.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList()),
                 }).ToList();
         }
 
         /// <summary>
-        /// Take two related sets and union them, filter them by related type and order them
+        /// Take two related sets, group them by type and union them, filter them by related type and order them
         /// </summary>
         /// <param name="items"></param>
         /// <param name="itemsProfile"></param>
         /// <param name="relatedType"></param>
         /// <returns></returns>
-        protected List<MarketplaceItemRelatedModel> MergeRelatedItems(
+        protected List<RelatedItemsGroupBy> GroupAndMergeRelatedItems(
             List<MarketplaceItemRelatedModel> items,
-            List<MarketplaceItemRelatedModel> itemsProfile,
-            RelatedTypeEnum relatedType)
+            List<MarketplaceItemRelatedModel> itemsProfile)
         {
             if (items == null && itemsProfile == null)
             {
-                return new List<MarketplaceItemRelatedModel>();
+                return new List<RelatedItemsGroupBy>();
             }
-            //union of the two sets filtered by type
-            return items
-                .Where(x => x.RelatedType.Equals(relatedType))
-                .Union(itemsProfile.Where(x => x.RelatedType.Equals(relatedType)))
-                .OrderBy(x => x.DisplayName)
-                .ThenBy(x => x.Name)
-                .ThenBy(x => x.Namespace)
-                .ThenBy(x => x.Version)
-                .ToList();
-        }
+            //group by both sets and then merge
+            var result = new List<RelatedItemsGroupBy>();
 
+            //convert group to return type
+            if (items?.Count > 0)
+            {
+                var grpItems = items.GroupBy(x => new { ID = x.RelatedType.ID, RelatedType = x.RelatedType });
+                foreach (var item in grpItems)
+                {
+                    result.Add(new RelatedItemsGroupBy()
+                    {
+                        RelatedType = item.Key.RelatedType,
+                        Items = items.Where(x => x.RelatedType.ID.Equals(item.Key.ID)).ToList() // item.ToList()
+                    });
+                }
+            }
+
+            //append profiles group to existing group (if present)
+            if (itemsProfile?.Count > 0)
+            {
+                //var grpProfile = itemsProfile.GroupBy(x => x.RelatedType);
+                var grpProfile = itemsProfile.GroupBy(x => new { ID = x.RelatedType.ID, RelatedType = x.RelatedType });
+                foreach (var item in grpProfile)
+                {
+                    var matches = itemsProfile.Where(x => x.RelatedType.ID.Equals(item.Key.ID)).ToList();
+
+                    var existingGroup = result.Find(x => x.RelatedType.ID.Equals(item.Key.ID));
+                    if (existingGroup == null)
+                    {
+                        result.Add(new RelatedItemsGroupBy()
+                        {
+                            RelatedType = item.Key.RelatedType,
+                            Items = matches
+                        });
+                    }
+                    else
+                    {
+                        existingGroup.Items = existingGroup.Items.Union(matches).ToList();
+                    }
+                }
+            }
+
+            //do some ordering
+            foreach (var g in result)
+            {
+                g.Items = g.Items
+                    .OrderBy(x => x.DisplayName)
+                    .ThenBy(x => x.Name)
+                    .ThenBy(x => x.Namespace)
+                    .ThenBy(x => x.Version)
+                    .ToList();
+            }
+
+            return result;
+        }
 
         protected override void MapToEntity(ref MarketplaceItem entity, MarketplaceItemModel model)
         {

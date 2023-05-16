@@ -93,6 +93,12 @@
         /// <remarks>This will get merged in with util.SimilarItems set in controller based on common processes, industry verts, etc. </remarks>
         public List<MarketplaceItemRelatedModel> SimilarItems { get; set; }
 
+        /// <summary>
+        /// Groups of related items. 
+        /// </summary>
+        /// <remarks>Doing it this way allows for additional groups to be added w/o additional back end coding</remarks>
+        public List<RelatedItemsGroupBy> RelatedItemsGrouped { get; set; }
+
         public ImageItemSimpleModel ImagePortrait { get; set; }
         
         [Obsolete("Retire ImageSquare")]
@@ -116,16 +122,6 @@
 
         public virtual MarketplaceItemAnalyticsModel Analytics { get; set; }
 
-        /// <summary>
-        /// List of items that have been marked as required for this marketplace item. Could be
-        /// apps, hardware, profiles.
-        /// </summary>
-        public virtual List<MarketplaceItemRelatedModel> RequiredItems { get; set; }
-        /// <summary>
-        /// List of items that have been marked as recommended for this marketplace item. Could be
-        /// apps, hardware, profiles.
-        /// </summary>
-        public virtual List<MarketplaceItemRelatedModel> RecommendedItems { get; set; }
     }
 
     public class AdminMarketplaceItemModel : MarketplaceItemModelBase
@@ -134,15 +130,15 @@
 
         public List<LookupItemFilterModel> IndustryVerticals { get; set; }
 
-    }
+        /// <summary>
+        /// List of items that are related to this item.
+        /// </summary>
+        public virtual List<MarketplaceItemFilterModel> RelatedItems { get; set; }
 
-    /// <summary>
-    /// Extend marketplaceitemmodel for the export scenario.
-    /// </summary>
-    public class ProfileItemExportModel
-    {
-        public MarketplaceItemModel Item { get; set; }
-        public string NodesetXml { get; set; }
+        /// <summary>
+        /// List of items that are related to this item.
+        /// </summary>
+        public virtual List<ProfileItemFilterModel> RelatedProfiles { get; set; }
     }
 
     /// <summary>
@@ -181,9 +177,22 @@
 
         public ImageItemSimpleModel ImageLandscape { get; set; }
 
-        public RelatedTypeEnum RelatedType { get; set; }
-
-
+        public LookupItemModel RelatedType { get; set; }
     }
 
+
+    public class MarketplaceItemFilterModel : MarketplaceItemRelatedModel
+    {
+        /// <summary>
+        /// This represents the Marketplace item id.
+        /// </summary>
+        public string RelatedId { get; set; }
+        public bool Selected { get; set; }
+    }
+
+    public class RelatedItemsGroupBy
+    {
+        public LookupItemModel RelatedType { get; set; }
+        public List<MarketplaceItemRelatedModel> Items { get; set; }
+    }
 }

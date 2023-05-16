@@ -11,7 +11,7 @@ import { cleanFileName, generateLogMessageString, getImageUrl, getMarketplaceIco
 import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
 
 import './styles/MarketplaceEntity.scss';
-import { MarketplaceRelatedItems} from '../services/MarketplaceService';
+import { hasRelatedItems, MarketplaceRelatedItems} from '../services/MarketplaceService';
 
 const CLASS_NAME = "ProfileEntity";
 
@@ -206,8 +206,7 @@ function ProfileEntity() {
                             </div>
                         </div>
                     </div>
-                    {(item.requiredItems != null && item.requiredItems.length > 0 &&
-                        item.recommendedItems != null && item.recommendedItems.length > 0) &&
+                    {(hasRelatedItems(item, "required") || hasRelatedItems(item, "recommended")) &&
                         <div className="card mb-0">
                             <div ref={_scrollToSpecs} className="card-header bg-transparent p-0 border-bottom-0" id="headingTwo">
                                 <button className="btn btn-content-accordion p-3 py-2 text-left d-block w-100" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
@@ -223,12 +222,12 @@ function ProfileEntity() {
                             </div>
                         </div>
                     }
-                    {(item.similarItems != null && item.similarItems.length > 0) &&
+                    {hasRelatedItems(item, "similar") &&
                         <div className="card mb-0">
                             <div ref={_scrollToRelated} className="card-header bg-transparent p-0 border-bottom-0" id="headingThree">
                                 <button className="btn btn-content-accordion p-3 py-2 text-left d-block w-100" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
                                     <h2 className="mb-0">
-                                        Related Items
+                                        Similar Items
                                     </h2>
                                 </button>
                             </div>

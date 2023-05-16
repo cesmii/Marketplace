@@ -170,7 +170,7 @@ namespace CESMII.Marketplace.Api.Controllers
             }
             //get related items
             var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
-            result.SimilarItems = util.SimilarItems(result);
+            util.AppendSimilarItems(ref result);
 
             return Ok(result);
         }
@@ -223,7 +223,7 @@ namespace CESMII.Marketplace.Api.Controllers
             }
             //get related items
             var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
-            result.SimilarItems = util.SimilarItems(result);
+            util.AppendSimilarItems(ref result);
 
             return Ok(result);
         }
@@ -297,6 +297,31 @@ namespace CESMII.Marketplace.Api.Controllers
             }
 
             return await AdvancedSearch(model, false, false);
+        }
+
+
+        /// <summary>
+        /// Return a list of marketplace items and profiles to use for the admin ui. This is intended to be used for
+        /// setting related items.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost, Route("admin/lookup/related")]
+        [Authorize(Roles = "cesmii.marketplace.marketplaceadmin", Policy = nameof(PermissionEnum.UserAzureADMapped))]
+        [ProducesResponseType(200, Type = typeof(DALResult<MarketplaceItemModel>))]
+        public async Task<IActionResult> AdminLookupProfiles([FromBody] MarketplaceSearchModel model)
+        {
+            if (model == null)
+            {
+                _logger.LogWarning($"MarketplaceController|AdminLookup|Invalid model (null)");
+                return BadRequest($"Invalid model (null)");
+            }
+
+            var resultItems = _dal.GetAll()
+                .Select(x => new { ID = x.ID, DisplayName = x.DisplayName, Version = x.Version, Namespace = x.Namespace });
+            var resultProfiles = (await _dalCloudLib.GetAll())
+                .Select(x => new { ID = x.ID, DisplayName = x.DisplayName, Version = x.Version, Namespace = x.Namespace });
+            return Ok(new { LookupItems = resultItems, LookupProfiles = resultProfiles });
         }
 
 
