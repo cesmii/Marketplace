@@ -53,7 +53,6 @@ function AdminMarketplaceEntity() {
     const [_error, setError] = useState({ show: false, message: null, caption: null });
     const [_refreshImageData, setRefreshImageData] = useState(true);
     const [_imageRows, setImageRows] = useState([]);
-    var caption = 'Marketplace Item';
 
     const [_itemsLookup, setItemsLookup] = useState([]);  //marketplace items 
     const [_loadLookupData, setLoadLookupData] = useState(null);
@@ -1254,7 +1253,7 @@ function AdminMarketplaceEntity() {
     return (
         <>
             <Helmet>
-                <title>{`${caption} | Admin | ${AppSettings.Titles.Main}`}</title>
+                <title>{`${item?.displayName != null ? item?.displayName + ' | ' : '' } Admin | ${AppSettings.Titles.Main}`}</title>
             </Helmet>
             <Form noValidate>
             {renderHeaderRow()}
