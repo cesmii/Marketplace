@@ -24,10 +24,10 @@ function MarketplaceTileList(props) {
             return (
                 <>
                     {item.displayName}
-                    {(item.namespace != null && item.namespace !== '') &&
+                    {(item.version != null && item.version !== '') &&
                         <>
                             <br />
-                            <span className="font-weight-normal" style={{ wordBreak: "break-word" }} >{item.namespace} (v. {item.version})</span>
+                            <span className="font-weight-normal" >(v. {item.version})</span>
                         </>
                     }
                 </>
@@ -35,6 +35,18 @@ function MarketplaceTileList(props) {
         }
 
         return (item.displayName);
+    };
+
+    const renderProfileAbstract = (item) => {
+        return (
+            <>
+                {(item.namespace != null && item.namespace !== '') &&
+                    <>
+                        <span style={{ wordBreak: "break-word" }} >{item.namespace}</span>
+                    </>
+                }
+            </>
+        );
     };
 
     //-------------------------------------------------------------------
@@ -50,7 +62,11 @@ function MarketplaceTileList(props) {
                     <img className="card-img-top" src={imgSrc} alt={`${item.name}-${getImageAlt(item.imageLandscape)}`} />
                     <div className="body-content p-4 pb-0" >
                         <span className="card-title font-weight-bold mb-3 d-block bitter">{renderDisplayName(item)}</span>
-                        <div className="card-text mb-0" dangerouslySetInnerHTML={{ __html: item.abstract }} ></div>
+                        {(item.type?.code === AppSettings.itemTypeCode.smProfile) ?
+                            <div className="card-text mb-0" >{renderProfileAbstract(item)}</div>
+                            :
+                            <div className="card-text mb-0" dangerouslySetInnerHTML={{ __html: item.abstract }} ></div>
+                         }
                     </div>
             </Card.Body>
             </Card>
@@ -129,7 +145,7 @@ function MarketplaceTileList(props) {
             else {
                 tile = renderCardThumbnail(itm, isFirst, isLast);
             }
-            const url = itm.type?.code === AppSettings.itemTypeCode.smProfile ? `/profile/${itm.id}` :
+            const url = itm.type?.code === AppSettings.itemTypeCode.smProfile ? `/profile/${itm.id != null ? itm.id : itm.relatedId}` :
                     `/library/${itm.name}`;
 
             return (

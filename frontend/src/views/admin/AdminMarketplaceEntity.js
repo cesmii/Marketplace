@@ -927,7 +927,7 @@ function AdminMarketplaceEntity() {
                 <div className="row mt-2">
                     <div className="col-12">
                         <AdminRelatedItemList caption="Related Marketplace Items" captionAdd="Add Related Marketplace Item"
-                            items={item.relatedItems} itemsLookup={_itemsLookup?.lookupItems}
+                            items={item.relatedItems} itemsLookup={_itemsLookup?.lookupItems?.filter(x => x.id !== item.id)}
                             type={AppSettings.itemTypeCode.smApp} onChangeItem={onChangeRelatedItem}
                             onAdd={onAddRelatedItem} onDelete={onDeleteRelatedItem} />
                     </div>
@@ -1165,7 +1165,7 @@ function AdminMarketplaceEntity() {
         return (
             <>
                 <h1 className="m-0 mr-2">
-                    {caption}
+                    Marketplace Item
                 </h1>
                 <div className="ml-auto d-flex align-items-center" >
                     {renderButtons()}
