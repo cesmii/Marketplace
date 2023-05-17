@@ -267,8 +267,8 @@
                 };
                 if (verbose)
                 {
-                    result.RelatedItems = MapToModelRelatedItemsSelectable(entity.RelatedItems, _marketplaceItemsAll);
-                    result.RelatedProfiles = MapToModelRelatedProfilesSelectable(entity.RelatedProfiles, _profilesAll);
+                    result.RelatedItems = MapToModelRelatedItems(entity.RelatedItems, _marketplaceItemsAll);
+                    result.RelatedProfiles = MapToModelRelatedProfiles(entity.RelatedProfiles, _profilesAll);
                 }
                 return result;
             }
@@ -288,7 +288,7 @@
         /// <param name="items"></param>
         /// <param name="allItems"></param>
         /// <returns></returns>
-        private List<MarketplaceItemFilterModel> MapToModelRelatedItemsSelectable(List<RelatedItem> items, 
+        private List<MarketplaceItemRelatedModel> MapToModelRelatedItems(List<RelatedItem> items, 
             List<MarketplaceItem> allItems)
         {
             //get the supplemental information that is associated with the related items
@@ -296,10 +296,10 @@
                 items.Any(y => y.MarketplaceItemId.Equals(
                 new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))))).ToList();
 
-            return !matches.Any() ? new List<MarketplaceItemFilterModel>() :
-                matches.Select(x => new MarketplaceItemFilterModel
+            return !matches.Any() ? new List<MarketplaceItemRelatedModel>() :
+                matches.Select(x => new MarketplaceItemRelatedModel
                 {
-                    ID = MapToModelRelatedItemsKey(items, x.ID),
+                    //ID = MapToModelRelatedItemsKey(items, x.ID),
                     RelatedId = x.ID,
                     Abstract = x.Abstract,
                     DisplayName = x.DisplayName,
@@ -313,28 +313,11 @@
                     //assumes only one related item per type
                     RelatedType = MapToModelRelatedItemsRelatedType(items, x.ID),
                     //Selected = items.Find(y => y.MarketplaceItemId.ToString().Equals(x.ID.ToString())) != null
-                }).ToList();
-
-            /*
-            return !allItems.Any() ? new List<MarketplaceItemFilterModel>() :
-                allItems.Select(x => new MarketplaceItemFilterModel
-                {
-                    ID = MapToModelRelatedItemsKey(items, x.ID),
-                    RelatedId = x.ID,
-                    Abstract = x.Abstract,
-                    DisplayName = x.DisplayName,
-                    //Description = x.Description,
-                    Name = x.Name,
-                    //Type = MapToModelLookupItem(x.ItemTypeId ?? _smItemTypeIdDefault,
-                    //        _lookupItemsAll.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.SmItemType)).ToList()),
-                    Version = x.Version,
-                    //ImagePortrait = x.ImagePortraitId == null ? null : MapToModelImageSimple(z => z.ID.Equals(x.ImagePortraitId.ToString()), _imagesAll),
-                    //ImageLandscape = x.ImageLandscapeId == null ? null : MapToModelImageSimple(z => z.ID.Equals(x.ImageLandscapeId.ToString()), _imagesAll),
-                    //assumes only one related item per type
-                    RelatedType = MapToModelRelatedItemsRelatedType(items,x.ID),
-                    //Selected = items.Find(y => y.MarketplaceItemId.ToString().Equals(x.ID.ToString())) != null
-                }).ToList();
-            */
+                })
+                .OrderBy(x => x.RelatedType.DisplayOrder)
+                .ThenBy(x => x.RelatedType.Name)
+                .ThenBy(x => x.DisplayName)
+                .ToList();
         }
 
         /// <summary>
@@ -343,21 +326,21 @@
         /// for this entity.
         /// The idea is we return the entire lookup list and mark selected those items appearing selected. 
         /// </summary>
-        protected List<ProfileItemFilterModel> MapToModelRelatedProfilesSelectable(List<RelatedProfileItem> items,
+        protected List<ProfileItemRelatedModel> MapToModelRelatedProfiles(List<RelatedProfileItem> items,
             List<MarketplaceItemModel> allItems)
         {
             if (items == null)
             {
-                return new List<ProfileItemFilterModel>();
+                return new List<ProfileItemRelatedModel>();
             }
 
             //get the supplemental information that is associated with the related items
             var matches = _cloudLibDAL.GetManyById(items.Select(x => x.ProfileId).ToList()).Result;
 
-            return !matches.Any() ? new List<ProfileItemFilterModel>() :
-                matches.Select(x => new ProfileItemFilterModel
+            return !matches.Any() ? new List<ProfileItemRelatedModel>() :
+                matches.Select(x => new ProfileItemRelatedModel
                 {
-                    ID = MapToModelRelatedProfilesKey(items, x.ID),
+                    //ID = MapToModelRelatedProfilesKey(items, x.ID),
                     RelatedId = x.ID,
                     Description = x.Description,
                     DisplayName = x.DisplayName,
@@ -365,17 +348,12 @@
                     Namespace = x.Namespace,
                     Version = x.Version,
                     //assumes only one related item per type
-                    RelatedType = MapToModelRelatedProfilesRelatedType(items, x.ID),
-                    Selected = items.Find(y => y.ProfileId.ToString().Equals(x.ID.ToString())) != null
-                }).ToList();
-        }
-
-        private string MapToModelRelatedItemsKey(
-            List<RelatedItem> relatedItems, string id)
-        {
-            if (relatedItems == null) return null;
-            if (relatedItems.Find(x => x.MarketplaceItemId.ToString().Equals(id)) == null) return null;
-            return relatedItems.Find(x => x.MarketplaceItemId.ToString().Equals(id)).ID;
+                    RelatedType = MapToModelRelatedProfilesRelatedType(items, x.ID)
+                })
+                .OrderBy(x => x.RelatedType.DisplayOrder)
+                .ThenBy(x => x.RelatedType.Name)
+                .ThenBy(x => x.DisplayName)
+                .ToList();
         }
 
         private LookupItemModel MapToModelRelatedItemsRelatedType(
@@ -387,16 +365,6 @@
             return MapToModelLookupItem(
                 relatedItems.Find(x => x.MarketplaceItemId.ToString().Equals(id)).RelatedTypeId,
                 _lookupItemsAll.Where(x => x.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList());
-
-            //return (RelatedTypeEnum)relatedItems.Find(x => x.MarketplaceItemId.ToString().Equals(id)).RelatedTypeId;
-        }
-
-        private string MapToModelRelatedProfilesKey(
-            List<RelatedProfileItem> relatedItems, string id)
-        {
-            if (relatedItems == null) return null;
-            if (relatedItems.Find(x => x.ProfileId.Equals(id)) == null) return null;
-            return relatedItems.Find(x => x.ProfileId.Equals(id)).ID;
         }
 
         private LookupItemModel MapToModelRelatedProfilesRelatedType(
@@ -445,8 +413,7 @@
             //replace child collection of items - ids are preserved
             entity.RelatedItems = model.RelatedItems
                 .Where(x => x.RelatedType != null) //only include selected rows
-                .Select(x => new RelatedItem() { 
-                    ID = x.ID,
+                .Select(x => new RelatedItem() {
                     MarketplaceItemId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedId)),
                     RelatedTypeId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedType.ID)),
                 }).ToList();
@@ -455,7 +422,7 @@
                 .Where(x => x.RelatedType != null) //only include selected rows
                 .Select(x => new RelatedProfileItem()
                 {
-                    ID = x.ID,
+                    //ID = x.ID,
                     ProfileId = x.RelatedId,
                     RelatedTypeId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedType.ID)),
                 }).ToList();

@@ -1,0 +1,37 @@
+@import "../../components/styles/constants";
+
+.tab-container {
+    .nav-item .nav-link {
+        background-color: color("silver");
+        border: 1px solid color("carrera");
+        transition: all 200ms ease-in-out;
+        color: color("link");
+
+        a {
+            color: inherit;
+        }
+
+        &:not(.active):hover {
+            @include globalShadow;
+        }
+
+        &.active {
+            //transform: translateY(8px);
+            background-color: color("cornflower");
+            color: color("white");
+            border-bottom: none;
+        }
+    }
+
+    .nav-pills {
+        flex-wrap: nowrap;
+
+        .nav-item .nav-link.active,
+        .nav-item.show > .nav-link {
+            color: color("white");
+            background: color("cornflower") !important;
+            background-color: color("cornflower");
+            @include globalShadow;
+        }
+    }
+}

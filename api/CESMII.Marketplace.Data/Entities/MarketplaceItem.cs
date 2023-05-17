@@ -124,7 +124,8 @@
     /// This contains the structure to use for related items to a marketplace item. 
     /// It is the marketplaceItem id and the related type (recommended, required, related)
     /// </summary>
-    public class RelatedItem : AbstractEntity
+    [BsonIgnoreExtraElements]
+    public class RelatedItem
     {
         public BsonObjectId MarketplaceItemId { get; set; }
         /// <summary>
@@ -137,7 +138,8 @@
     /// This contains the structure to use for related profile items to a marketplace item. 
     /// It is the profile id and the related type (recommended, required, related)
     /// </summary>
-    public class RelatedProfileItem : AbstractEntity
+    [BsonIgnoreExtraElements]
+    public class RelatedProfileItem
     {
         /// <summary>
         /// This is the id from the CloudLib

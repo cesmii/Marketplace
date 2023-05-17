@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { Helmet } from "react-helmet"
-import axiosInstance from "../../services/AxiosService";
 
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import Dropdown from 'react-bootstrap/Dropdown'
+import Card from 'react-bootstrap/Card'
+import Tab from 'react-bootstrap/Tab'
+import Nav from 'react-bootstrap/Nav'
+
+import axiosInstance from "../../services/AxiosService";
 
 import { AppSettings } from '../../utils/appsettings';
 import { generateLogMessageString, prepDateVal, validate_NoSpecialCharacters } from '../../utils/UtilityService'
@@ -19,6 +23,8 @@ import { WysiwygEditor } from '../../components/WysiwygEditor';
 import AdminImageList from './shared/AdminImageList';
 import AdminRelatedItemList from './shared/AdminRelatedItemList';
 import { clearSearchCriteria } from '../../services/MarketplaceService';
+
+import '../../components/styles/TabContainer.scss';
 
 const CLASS_NAME = "AdminMarketplaceEntity";
 
@@ -167,7 +173,7 @@ function AdminMarketplaceEntity() {
             var url = `image/all`;
             console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
 
-            await axiosInstance.post(url, {id: id}).then(result => {
+            await axiosInstance.post(url, { id: id }).then(result => {
                 if (result.status === 200) {
                     setImageRows(result.data);
                 } else {
@@ -672,8 +678,8 @@ function AdminMarketplaceEntity() {
             return g.lookupType.enumValue === AppSettings.LookupTypeEnum.MarketplaceStatus //
         });
         const options = items.map((item) => {
-                return (<option key={item.id} value={item.id} >{item.name}</option>)
-            });
+            return (<option key={item.id} value={item.id} >{item.name}</option>)
+        });
 
         return (
             <Form.Group>
@@ -916,10 +922,33 @@ function AdminMarketplaceEntity() {
         );
     };
 
-    const renderForm = () => {
-        //console.log(item);
+    const renderRelatedItems = () => {
         return (
-                <>
+            <>
+                <div className="row mt-2">
+                    <div className="col-12">
+                        <AdminRelatedItemList caption="Related Marketplace Items" captionAdd="Add Related Marketplace Item"
+                            items={item.relatedItems} itemsLookup={_itemsLookup?.lookupItems}
+                            type={AppSettings.itemTypeCode.smApp} onChangeItem={onChangeRelatedItem}
+                            onAdd={onAddRelatedItem} onDelete={onDeleteRelatedItem} />
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-12">
+                        <hr className="my-3" />
+                        <AdminRelatedItemList caption="Related SM Profiles" captionAdd="Add Related SM Profile"
+                            items={item.relatedProfiles} itemsLookup={_itemsLookup?.lookupProfiles}
+                            type={AppSettings.itemTypeCode.smProfile} onChangeItem={onChangeRelatedProfile}
+                            onAdd={onAddRelatedProfile} onDelete={onDeleteRelatedProfile} />
+                    </div>
+                </div>
+            </>
+        );
+    };
+
+    const renderCommonInfo = () => {
+        return (
+            <>
                 <div className="row">
                     <div className="col-md-8">
                         <Form.Group>
@@ -943,22 +972,6 @@ function AdminMarketplaceEntity() {
                         {renderMarketplaceStatus()}
                     </div>
                 </div>
-                <div className="row mt-2">
-                    <div className="col-12 pt-2">
-                        <AdminRelatedItemList caption="Related Marketplace Items" items={item.relatedItems}
-                            itemsLookup={_itemsLookup?.lookupItems}
-                            type={AppSettings.itemTypeCode.smApp} onChangeItem={onChangeRelatedItem}
-                            onAdd={onAddRelatedItem} onDelete={onDeleteRelatedItem} />
-                    </div>
-                </div>
-                <div className="row mt-2">
-                    <div className="col-12 pt-2">
-                        <AdminRelatedItemList caption="Related SM Profiles" items={item.relatedProfiles}
-                            itemsLookup={_itemsLookup?.lookupProfiles}
-                            type={AppSettings.itemTypeCode.smProfile} onChangeItem={onChangeRelatedProfile}
-                            onAdd={onAddRelatedProfile} onDelete={onDeleteRelatedProfile} />
-                    </div>
-                </div>
                 <div className="row">
                     <div className="col-md-8">
                         <Form.Group>
@@ -977,6 +990,14 @@ function AdminMarketplaceEntity() {
                         {renderItemType()}
                     </div>
                 </div>
+            </>
+        );
+    };
+
+    const renderGeneralTab = () => {
+        //console.log(item);
+        return (
+            <>
                 <div className="row mt-2">
                     <div className="col-sm-6 col-lg-4">
                         <Form.Group>
@@ -1073,7 +1094,14 @@ function AdminMarketplaceEntity() {
                     <div className="col-md-4">
                     </div>
                 </div>
-                <div className="row mt-2 pt-2 border-top">
+            </>
+        );
+    }
+
+    const renderImagesInfo = () => {
+        return (
+            <>
+                <div className="row mt-2">
                     <div className="col-12">
                         <h3 className="mb-4">Image Selection</h3>
                     </div>
@@ -1093,8 +1121,8 @@ function AdminMarketplaceEntity() {
                     </div>
                 </div>
             </>
-        )
-    }
+        );
+    };
 
     const renderMultiSelectAreas = () => {
         if (item == null) return;
@@ -1148,6 +1176,68 @@ function AdminMarketplaceEntity() {
         )
     }
 
+    const tabListener = (eventKey) => {
+    }
+
+    const renderTabbedForm = () => {
+        /*
+        return (
+            <>
+                {renderGeneralTab()}
+                {renderImagesInfo()}
+            {renderRelatedItems()}
+            </>
+        );
+        */
+        return (
+            <Tab.Container id="admin-marketplace-entity" defaultActiveKey="general" onSelect={tabListener} >
+                <Nav variant="pills" className="row mt-1 px-2 pr-md-3">
+                    <Nav.Item className="col-sm-4 rounded p-0 pl-2" >
+                        <Nav.Link eventKey="general" className="text-center text-md-left p-1 px-2 h-100" >
+                            <span className="headline-3">General</span>
+                        </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item className="col-sm-4 rounded p-0 px-md-0" >
+                        <Nav.Link eventKey="images" className="text-center text-md-left p-1 px-2 h-100" >
+                            <span className="headline-3">Images</span>
+                            {/*<span className="d-none d-md-inline"><br />Type Definitions that depend on 'me'</span>*/}
+                        </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item className="col-sm-4 rounded p-0 pr-2">
+                        <Nav.Link eventKey="relatedItems" className="text-center text-md-left p-1 px-2 h-100" >
+                            <span className="headline-3">Related Items</span>
+                            {/*<span className="d-none d-md-inline"><br />Optional and advanced settings</span>*/}
+                        </Nav.Link>
+                    </Nav.Item>
+                </Nav>
+
+                <Tab.Content>
+                    <Tab.Pane eventKey="general">
+                        <Card className="">
+                            <Card.Body className="pt-3">
+                                { renderGeneralTab()}
+                            </Card.Body>
+                        </Card>
+                    </Tab.Pane>
+                    <Tab.Pane eventKey="images">
+                        <Card className="">
+                            <Card.Body className="pt-3">
+                                { renderImagesInfo()}
+                            </Card.Body>
+                        </Card>
+                    </Tab.Pane>
+                    <Tab.Pane eventKey="relatedItems">
+                        <Card className="">
+                            <Card.Body className="pt-3">
+                                {renderRelatedItems()}
+                            </Card.Body>
+                        </Card>
+                    </Tab.Pane>
+                </Tab.Content>
+            </Tab.Container>
+        );
+    };
+
     const renderSubTitle = () => {
         if (mode === "new" || mode === "copy") return;
         return (
@@ -1172,9 +1262,10 @@ function AdminMarketplaceEntity() {
                 <div className="col-sm-3" >
                     {renderMultiSelectAreas()}
                 </div>
-                <div className="col-sm-9 mb-4" >
+                <div className="col-sm-9 mb-4 tab-container" >
                     {renderValidationSummary()}
-                    {renderForm()}
+                    {renderCommonInfo()}
+                    {renderTabbedForm()}
                 </div>
             </div>
             </Form>

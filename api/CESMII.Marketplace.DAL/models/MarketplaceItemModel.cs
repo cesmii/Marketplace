@@ -133,12 +133,12 @@
         /// <summary>
         /// List of items that are related to this item.
         /// </summary>
-        public virtual List<MarketplaceItemFilterModel> RelatedItems { get; set; }
+        public virtual List<MarketplaceItemRelatedModel> RelatedItems { get; set; }
 
         /// <summary>
         /// List of items that are related to this item.
         /// </summary>
-        public virtual List<ProfileItemFilterModel> RelatedProfiles { get; set; }
+        public virtual List<ProfileItemRelatedModel> RelatedProfiles { get; set; }
     }
 
     /// <summary>
@@ -155,8 +155,16 @@
     /// A model with abbreviated marketplace item data used for related data 
     /// where keeping data small is helpful
     /// </summary>
-    public class MarketplaceItemRelatedModel : MarketplaceItemSimpleModel
+    public class MarketplaceItemRelatedModel //: MarketplaceItemSimpleModel
     {
+        /// <summary>
+        /// This represents the related Marketplace item id.
+        /// </summary>
+        public string RelatedId { get; set; }
+
+        public string Name { get; set; }
+        public string DisplayName { get; set; }
+
         public string Version { get; set; }
 
         /// <summary>
@@ -180,15 +188,6 @@
         public LookupItemModel RelatedType { get; set; }
     }
 
-
-    public class MarketplaceItemFilterModel : MarketplaceItemRelatedModel
-    {
-        /// <summary>
-        /// This represents the Marketplace item id.
-        /// </summary>
-        public string RelatedId { get; set; }
-        public bool Selected { get; set; }
-    }
 
     public class RelatedItemsGroupBy
     {
