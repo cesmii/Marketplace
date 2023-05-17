@@ -15,7 +15,7 @@ function AdminRelatedItemRow(props) { //props are item, showActions
     const { loadingProps } = useLoadingContext();
     const [_isValid, setIsValid] = useState({
         relatedId: true,
-        relatedTypeId: true
+        relatedType: true
     });
 
     //-------------------------------------------------------------------
@@ -25,7 +25,7 @@ function AdminRelatedItemRow(props) { //props are item, showActions
     const onChangeRelatedType = (e) => {
         console.log(generateLogMessageString(`onChangeRelatedType||${e.target.options[e.target.selectedIndex].text}`, CLASS_NAME));
 
-        setIsValid({ ..._isValid, relatedTypeId: e.target.value.toString() !== "-1" });
+        validateForm_relatedType(e);
 
         //update state for other components to see
         if (props.onChangeItem != null) {
@@ -37,7 +37,7 @@ function AdminRelatedItemRow(props) { //props are item, showActions
     const onChangeRelatedId = (e) => {
         console.log(generateLogMessageString(`onChangeRelatedId||${e.target.options[e.target.selectedIndex].text}`, CLASS_NAME));
 
-        setIsValid({ ..._isValid, relatedId: e.target.value.toString() !== "-1" });
+        validateForm_relatedId(e);
 
         //update state for other components to see
         if (props.onChangeItem != null) {
@@ -52,7 +52,7 @@ function AdminRelatedItemRow(props) { //props are item, showActions
 
         //update state for other components to see
         if (props.onDelete != null) {
-            props.onDelete(e, props.item.relatedId);
+            props.onDelete(props.item.relatedId);
         }
     }
 
@@ -61,22 +61,20 @@ function AdminRelatedItemRow(props) { //props are item, showActions
     //-------------------------------------------------------------------
     const validateForm_relatedId = (e) => {
         const isValid = e.target.value.toString() !== "-1";
-        setIsValid({ ..._isValid, relatedId: isValid });
+        setIsValid({
+            relatedId: isValid,
+            relatedType: props.item.relatedType != null && props.item.relatedType.id.toString() !== "-1"
+        });
     };
 
-    const validateForm_relatedTypeId = (e) => {
+    const validateForm_relatedType = (e) => {
         const isValid = e.target.value.toString() !== "-1";
-        setIsValid({ ..._isValid, relatedTypeId: isValid });
+        const isValidRelatedId = props.item.relatedId != null && (isNaN(props.item.relatedId) || parseFloat(props.item.relatedId) > 0);
+        setIsValid({
+            relatedId: isValidRelatedId,
+            relatedType: isValid
+        });
     };
-
-    //validate all
-    const validateForm = () => {
-        console.log(generateLogMessageString(`validateForm`, CLASS_NAME));
-        _isValid.relatedId = props.item.relatedId.toString() !== "-1";
-        _isValid.relatedTypeId = props.item.relatedTypeId != null && props.item.relatedTypeId.toString() !== "-1";
-        setIsValid(JSON.parse(JSON.stringify(_isValid)));
-        return (_isValid.relatedId && _isValid.relatedTypeId);
-    }
 
     //-------------------------------------------------------------------
     // Region: Render helpers
@@ -93,44 +91,54 @@ function AdminRelatedItemRow(props) { //props are item, showActions
         });
 
         return (
-            <Form.Group>
+            <Form.Group className="mb-0">
                 <Form.Control id="relatedTypeId" as="select" value={props.item.relatedType == null ? "-1" : props.item.relatedType.id}
-                    className={`minimal pr-5 ${!_isValid.relatedTypeId ? 'invalid-field' : ''}`}
-                    onChange={onChangeRelatedType} onBlur={validateForm_relatedTypeId} >
+                    className={`minimal pr-5 ${!_isValid.relatedType ? 'invalid-field' : ''}`}
+                    onChange={onChangeRelatedType} onBlur={validateForm_relatedType} >
                     <option key="-1|Select One" value="-1" >--Select One--</option>
                     {options}
                 </Form.Control>
-                {!_isValid.relatedTypeId &&
-                    <span className="invalid-field-message inline">
-                        Required
-                    </span>
-                }
 
             </Form.Group>
         )
     };
 
     const renderRelatedId = () => {
+        //until lookup data arrives, show label
         if (props.itemsLookup == null) return (`${props.item.displayName}`);
 
+        //if relatedId has a real value, then don't permit the user to change the value
+        //they can always delete and re-add to change. 
+        //A real value will be a Mongo id - combo of num and char OR a long positive int
+        if (isNaN(props.item.relatedId) || parseFloat(props.item.relatedId) > 0) {
+            return (
+                <>
+                    {props.item.displayName}
+                    {(props.item.namespace != null && props.item.namespace !== '') &&
+                        <>
+                        <br/>
+                        <span style={{ wordBreak: "break-word" }} >{props.item.namespace} (v. {props.item.version})</span>
+                        </>
+                    }
+                </>
+                );
+        }
+
         //show drop down list
-        const options = props.itemsLookup.map((item) => {
-            return (<option key={item.id} value={item.id} >{item.displayName}</option>)
+        const options = props.itemsLookup.map((itm) => {
+            const displayName = `${itm.displayName}` +
+                `${(itm.namespace != null && itm.namespace !== '') ? ' (' + itm.namespace + ' v.' + itm.version + ')' : ''}`;
+            return (<option key={itm.id} value={itm.id} >{displayName}</option>)
         });
 
         return (
-            <Form.Group>
+            <Form.Group className="mb-0">
                 <Form.Control id="relatedId" as="select" value={props.item.relatedId == null ? "-1" : props.item.relatedId}
                     className={`minimal pr-5 ${!_isValid.relatedId ? 'invalid-field' : ''}`}
                     onChange={onChangeRelatedId} onBlur={validateForm_relatedId} >
                     <option key="-1|Select One" value="-1" >--Select One--</option>
                     {options}
                 </Form.Control>
-                {!_isValid.relatedId &&
-                    <span className="invalid-field-message inline">
-                        Required
-                    </span>
-                }
             </Form.Group>
         )
     };
@@ -139,7 +147,8 @@ function AdminRelatedItemRow(props) { //props are item, showActions
     //-------------------------------------------------------------------
     // Region: Render final output
     //-------------------------------------------------------------------
-    var cssClass = props.cssClass + (props.isHeader ? " bottom header" : " center border-top");
+    let cssClass = props.cssClass + (props.isHeader ? " bottom header" : " center border-top");
+    if (!_isValid.relatedId || !_isValid.relatedType) cssClass += ' alert alert-danger';
 
     if (props.isHeader) {
         return (
@@ -164,7 +173,7 @@ function AdminRelatedItemRow(props) { //props are item, showActions
     return (
         <>
             <tr className={`mx-0 my-1 p-0 py-1 ${cssClass}`}>
-                <td className="py-2 align-text-top" >
+                <td className="py-2" >
                     {renderRelatedId()}
                 </td>
                 <td className="py-2 pr-2" >

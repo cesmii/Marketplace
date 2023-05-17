@@ -11,6 +11,7 @@ function AdminRelatedItemList(props) {
     // Region: Initialization
     //-------------------------------------------------------------------
     const [_items, setItems] = useState([]);
+    const [_itemsLookup, setItemsLookup] = useState([]);  //marketplace items 
 
     //-------------------------------------------------------------------
     // Region: Get data 
@@ -23,6 +24,26 @@ function AdminRelatedItemList(props) {
             //console.log(generateLogMessageString('useEffect||props.items||Cleanup', CLASS_NAME));
         };
     }, [props.items]);
+
+    //-------------------------------------------------------------------
+    // filter related items lookup to remove already selected items
+    //-------------------------------------------------------------------
+    useEffect(() => {
+        if (props.itemsLookup == null) {
+            setItemsLookup([]);
+        }
+        else {
+            setItemsLookup(props.itemsLookup.filter(f => {
+                return (props.items == null || props.items.findIndex(x => x.relatedId === f.id) < 0);
+            })
+            );
+        }
+
+        //this will execute on unmount
+        return () => {
+            //console.log(generateLogMessageString('useEffect||props.items||Cleanup', CLASS_NAME));
+        };
+    }, [props.items, props.itemsLookup]);
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
@@ -80,7 +101,7 @@ function AdminRelatedItemList(props) {
         const mainBody = props.items.map((item) => {
             const key = `${item.relatedId}-${item.id}`;
             return (
-                <AdminRelatedItemRow key={key} item={item} cssClass={`admin-item-row`} itemsLookup={props.itemsLookup}
+                <AdminRelatedItemRow key={key} item={item} cssClass={`admin-item-row`} itemsLookup={_itemsLookup}
                     type={props.type} onChangeItem={props.onChangeItem} onDelete={props.onDelete} />
             );
         });
@@ -103,13 +124,15 @@ function AdminRelatedItemList(props) {
             <table className="flex-grid w-100 grid-select" >
                 {renderItemsGridHeader()}
                 {renderItemsGrid()}
-                <tfoot>
-                    <tr>
-                        <td>
-                            <button className="btn btn-icon-outline circle primary" onClick={onAdd} ><i className="material-icons">add</i></button>
-                        </td>
-                    </tr>
-                </tfoot>
+                {(_itemsLookup != null && _itemsLookup.length > 0) &&
+                    <tfoot>
+                        <tr>
+                            <td>
+                                <button className="btn btn-icon-outline circle primary" onClick={onAdd} ><i className="material-icons">add</i></button>
+                            </td>
+                        </tr>
+                    </tfoot>
+                }
             </table>
         </>
     )
