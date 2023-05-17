@@ -78,9 +78,7 @@ function AdminRelatedItemList(props) {
     const renderItemsGridHeader = () => {
         if ((props.items == null || props.items.length === 0)) return;
         return (
-            <thead>
-                <AdminRelatedItemRow key="header" item={null} isHeader={true} cssClass="admin-item-row" />
-            </thead>
+            <AdminRelatedItemRow key="header" item={null} isHeader={true} cssClass="admin-item-row" />
         )
     }
 
@@ -88,29 +86,21 @@ function AdminRelatedItemList(props) {
     const renderItemsGrid = () => {
         if (props.items == null || props.items.length === 0) {
             return (
-                <tbody>
-                    <tr>
-                        <td className="no-data">
-                            {renderNoDataRow()}
-                        </td>
-                    </tr>
-                </tbody>
+                <div className={`row my-1 p-0 py-1`}>
+                    <div className="col-sm-12 bg-info py-1" >
+                        {renderNoDataRow()}
+                    </div>
+                </div>
             )
         }
 
-        const mainBody = props.items.map((item) => {
+        return props.items.map((item) => {
             const key = `${item.relatedId}-${item.id}`;
             return (
                 <AdminRelatedItemRow key={key} item={item} cssClass={`admin-item-row`} itemsLookup={_itemsLookup}
                     type={props.type} onChangeItem={props.onChangeItem} onDelete={props.onDelete} />
             );
         });
-
-        return (
-            <tbody>
-                {mainBody}
-            </tbody>
-        )
     }
 
     //-------------------------------------------------------------------
@@ -119,21 +109,21 @@ function AdminRelatedItemList(props) {
     return (
         <>
             {(props.caption != null) &&
-                <h2>{props.caption}</h2>
+                <h3>{props.caption}</h3>
             }
-            <table className="flex-grid w-100 grid-select" >
-                {renderItemsGridHeader()}
-                {renderItemsGrid()}
-                {(_itemsLookup != null && _itemsLookup.length > 0) &&
-                    <tfoot>
-                        <tr>
-                            <td>
-                                <button className="btn btn-icon-outline circle primary" onClick={onAdd} ><i className="material-icons">add</i></button>
-                            </td>
-                        </tr>
-                    </tfoot>
-                }
-            </table>
+            {renderItemsGridHeader()}
+            {renderItemsGrid()}
+            {(_itemsLookup != null && _itemsLookup.length > 0) &&
+                <div className={`row my-1 p-0 py-1`}>
+                    <div className="col-sm-12 border-top bg-light py-1" >
+                        <button className="btn btn-icon-outline circle primary d-inline " onClick={onAdd} ><i className="material-icons">add</i>
+                        </button>
+                        {(props.captionAdd != null) &&
+                            <span className="pl-2" >{props.captionAdd}</span>
+                        }
+                    </div>
+                </div>
+            }
         </>
     )
 }

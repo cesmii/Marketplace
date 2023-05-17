@@ -298,7 +298,7 @@
             return !matches.Any() ? new List<MarketplaceItemRelatedModel>() :
                 matches.Select(x => new MarketplaceItemRelatedModel()
                 {
-                    ID = x.ID,
+                    RelatedId = x.ID,
                     Abstract = x.Abstract,
                     DisplayName = x.DisplayName,
                     Description = x.Description,
@@ -330,7 +330,7 @@
             return !matches.Any() ? new List<MarketplaceItemRelatedModel>() :
                 matches.Select(x => new MarketplaceItemRelatedModel()
                 {
-                    ID = x.ID,
+                    RelatedId = x.ID,
                     Abstract = x.Abstract,
                     DisplayName = x.DisplayName,
                     Description = x.Description,

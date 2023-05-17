@@ -15,7 +15,7 @@
     /// A profile related marketplace item. Used in the admin tool to make selections
     /// where keeping data small is helpful
     /// </summary>
-    public class ProfileItemRelatedModel : AbstractModel
+    public class ProfileItemRelatedModel
     {
         /// <summary>
         /// This represents the ProfileId.
@@ -27,11 +27,6 @@
         public string Namespace { get; set; }
         public string Description { get; set; }
         public LookupItemModel RelatedType { get; set; }
-    }
-
-    public class ProfileItemFilterModel : ProfileItemRelatedModel
-    {
-        public bool Selected { get; set; }
     }
 
 }

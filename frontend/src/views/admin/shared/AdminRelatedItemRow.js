@@ -152,18 +152,16 @@ function AdminRelatedItemRow(props) { //props are item, showActions
 
     if (props.isHeader) {
         return (
-            <>
-                <tr className={`mx-0 my-1 p-0 py-1 ${cssClass}`}>
-                    <th className="" >
-                        Name
-                    </th>
-                    <th className="pr-2" >
-                        Related Type
-                    </th>
-                    <th className="pr-2 text-right" >
-                    </th>
-                </tr>
-            </>
+            <div className={`row my-1 p-0 py-1 d-flex align-items-center ${cssClass}`}>
+                <div className="col-sm-6 font-weight-bold" >
+                    Name
+                </div>
+                <div className="col-sm-4 font-weight-bold" >
+                    Related Type
+                </div>
+                <div className="col-sm-2 text-right font-weight-bold" >
+                </div>
+            </div>
         );
     }
 
@@ -171,19 +169,17 @@ function AdminRelatedItemRow(props) { //props are item, showActions
     if (props.item === null || props.item === {}) return null;
 
     return (
-        <>
-            <tr className={`mx-0 my-1 p-0 py-1 ${cssClass}`}>
-                <td className="py-2" >
-                    {renderRelatedId()}
-                </td>
-                <td className="py-2 pr-2" >
-                    {renderRelatedType()}
-                </td>
-                <td className="py-2 pr-2 text-right" >
-                    <button className="btn btn-icon-outline circle ml-auto" title="Delete Item" onClick={onDelete} ><i className="material-icons">close</i></button>
-                </td>
-            </tr>
-        </>
+        <div className={`row my-1 p-0 py-1 d-flex align-items-center ${cssClass}`}>
+            <div className="col-sm-6" >
+                {renderRelatedId()}
+            </div>
+            <div className="col-sm-4" >
+                {renderRelatedType()}
+            </div>
+            <div className="col-sm-2 text-right" >
+                <button className="btn btn-icon-outline circle ml-auto" title="Delete Item" onClick={onDelete} ><i className="material-icons">close</i></button>
+            </div>
+        </div>
     );
 }
 

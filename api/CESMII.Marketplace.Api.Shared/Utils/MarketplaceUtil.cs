@@ -99,13 +99,14 @@
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName }).Data;
             //filter out any items already represented in related items collection
-            var relatedItems = item.RelatedItemsGrouped.SelectMany(x => x.Items).Select(y => y.ID);
+            var relatedItems = item.RelatedItemsGrouped.SelectMany(x => x.Items).Select(y => y.RelatedId);
 
             //convert to a simplified version of the marketplace item object
             var autoMatches = result
                 .Where(x => !relatedItems.Contains(x.ID)) //filter out items already represented
                 .Select(x => new MarketplaceItemRelatedModel() {
-                ID = x.ID,
+                //ID = x.ID,
+                RelatedId = x.ID,
                 Abstract = x.Abstract,
                 DisplayName = x.DisplayName,
                 Description = x.Description,
