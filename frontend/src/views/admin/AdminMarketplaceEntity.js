@@ -40,7 +40,8 @@ function AdminMarketplaceEntity() {
     const [_isValid, setIsValid] = useState({
         name: true, nameFormat: true, displayName: true, abstract: true, description: true,
         status: true, type: true, publisher: true, publishDate: true,
-        images: { imagePortrait: true, imageSquare: true, imageLandscape: true}
+        images: { imagePortrait: true, imageSquare: true, imageLandscape: true },
+        relatedItems: true, relatedProfiles: true
     });
     const [_deleteModal, setDeleteModal] = useState({ show: false, items: null });
     const [_error, setError] = useState({ show: false, message: null, caption: null });
@@ -287,7 +288,6 @@ function AdminMarketplaceEntity() {
         return 'view';
     }
 
-
     //-------------------------------------------------------------------
     // Region: Validation
     //-------------------------------------------------------------------
@@ -339,6 +339,16 @@ function AdminMarketplaceEntity() {
         });
     };
 
+    const validateForm_relatedItems = () => {
+        return item.relatedItems == null ||
+            item.relatedItems.filter(x => x.relatedId === "-1" || x.relatedType?.id === "-1").length === 0;
+    };
+
+    const validateForm_relatedProfiles = () => {
+        return item.relatedProfiles == null ||
+            item.relatedProfiles.filter(x => x.relatedId === "-1" || x.relatedType?.id === "-1").length === 0;
+    };
+
     ////update state for when search click happens
     const validateForm = () => {
         console.log(generateLogMessageString(`validateForm`, CLASS_NAME));
@@ -354,12 +364,14 @@ function AdminMarketplaceEntity() {
         _isValid.images.imagePortrait = item.imagePortrait != null && item.imagePortrait.id.toString() !== "-1";
         _isValid.images.imageSquare = true; //item.imageSquare != null && item.imageSquare.id.toString() !== "-1";
         _isValid.images.imageLandscape = item.imageLandscape != null && item.imageLandscape.id.toString() !== "-1";
+        _isValid.relatedItems = validateForm_relatedItems();
+        _isValid.relatedProfiles = validateForm_relatedProfiles();
 
         setIsValid(JSON.parse(JSON.stringify(_isValid)));
         return (_isValid.name && _isValid.nameFormat && _isValid.displayName && _isValid.abstract && _isValid.description &&
             _isValid.status && _isValid.publisher && _isValid.publishDate &&
             _isValid.images.imagePortrait && _isValid.images.imageSquare && _isValid.images.imageLandscape &&
-            _isValid.type);
+            _isValid.relatedItems && _isValid.relatedProfiles && _isValid.type);
     }
 
     //-------------------------------------------------------------------
@@ -626,13 +638,15 @@ function AdminMarketplaceEntity() {
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
-    const onDeleteRelatedItem = (e, id) => {
+    const onDeleteRelatedItem = (id) => {
         console.log(generateLogMessageString('onDeleteRelatedItem', CLASS_NAME));
+        //make a copy of the array 
         item.relatedItems = item.relatedItems.filter(x => x.relatedId !== id);
+        //item.relatedItems = item.relatedItems.map(x => { return (x.relatedId !== id ? x : null); }).filter(x => x != null);
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
-    const onDeleteRelatedProfile = (e, id) => {
+    const onDeleteRelatedProfile = (id) => {
         console.log(generateLogMessageString('onDeleteRelatedProfile', CLASS_NAME));
         item.relatedProfiles = item.relatedProfiles.filter(x => x.relatedId !== id);
         setItem(JSON.parse(JSON.stringify(item)));
@@ -869,6 +883,36 @@ function AdminMarketplaceEntity() {
                         buttonVariant: 'danger'
                     }} />
             </>
+        );
+    };
+
+    const renderValidationSummary = () => {
+
+        let summary = [];
+        if (!_isValid.name) summary.push('Name is required.');
+        if (!_isValid.nameFormat) summary.push('Name format is invalid.');
+        if (!_isValid.displayName) summary.push('Display name is required.');
+        if (!_isValid.abstract) summary.push('Abstract is required.');
+        if (!_isValid.description) summary.push('Description is required.');
+        if (!_isValid.abstract) summary.push('Abstract is required.');
+        if (!_isValid.status) summary.push('Status is required.');
+        if (!_isValid.type) summary.push('Type is required.');
+        if (!_isValid.publisher) summary.push('Publisher is required.');
+        if (!_isValid.publishDate) summary.push('Publish Date is required.');
+        if (!_isValid.images.imagePortrait) summary.push('Portrait image is required.');
+        if (!_isValid.images.imageLandscape) summary.push('Landscape image is required.');
+        if (!validateForm_relatedItems()) summary.push('Related Items - Select item and set related type.');
+        if (!validateForm_relatedProfiles()) summary.push('Related Profiles - Select item and set related type.');
+        if (summary.length == 0) return null;
+
+        let content = summary.map(function (x, i) {
+            return i > 0 ? (<span key={i} ><br />{x}</span>) : (<span key={i} >{x}</span>);
+        });
+
+        return (
+            <div className="alert alert-danger w-100">
+                {content}
+            </div>
         );
     };
 
@@ -1129,6 +1173,7 @@ function AdminMarketplaceEntity() {
                     {renderMultiSelectAreas()}
                 </div>
                 <div className="col-sm-9 mb-4" >
+                    {renderValidationSummary()}
                     {renderForm()}
                 </div>
             </div>
