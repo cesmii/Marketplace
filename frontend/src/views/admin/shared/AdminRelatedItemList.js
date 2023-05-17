@@ -70,7 +70,7 @@ function AdminRelatedItemList(props) {
     const renderNoDataRow = () => {
         return (
             <div className="alert alert-info-custom mt-2 mb-2">
-                <div className="text-center" >There are no items.</div>
+                <div className="text-center" >There are no related items.</div>
             </div>
         );
     }
@@ -87,7 +87,7 @@ function AdminRelatedItemList(props) {
         if (props.items == null || props.items.length === 0) {
             return (
                 <div className={`row my-1 p-0 py-1`}>
-                    <div className="col-sm-12 bg-info py-1" >
+                    <div className="col-sm-12 py-1" >
                         {renderNoDataRow()}
                     </div>
                 </div>

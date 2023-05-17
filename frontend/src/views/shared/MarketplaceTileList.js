@@ -18,6 +18,28 @@ function MarketplaceTileList(props) {
     //-------------------------------------------------------------------
     // Region: Render different layout styles
     //-------------------------------------------------------------------
+    const renderDisplayName = (item) =>
+    {
+        if (item.type?.code === AppSettings.itemTypeCode.smProfile) {
+            return (
+                <>
+                    {item.displayName}
+                    {(item.namespace != null && item.namespace !== '') &&
+                        <>
+                            <br />
+                            <span className="font-weight-normal" style={{ wordBreak: "break-word" }} >{item.namespace} (v. {item.version})</span>
+                        </>
+                    }
+                </>
+            );
+        }
+
+        return (item.displayName);
+    };
+
+    //-------------------------------------------------------------------
+    // Region: Render different layout styles
+    //-------------------------------------------------------------------
     const renderCardImageBanner = (item, isfirst, isLast) => {
         const imgSrc = item.imageLandscape == null ? stockTilePhoto : getImageUrl(item.imageLandscape);
 
@@ -27,7 +49,7 @@ function MarketplaceTileList(props) {
                 <Card.Body className="h-100 p-0 tile-body">
                     <img className="card-img-top" src={imgSrc} alt={`${item.name}-${getImageAlt(item.imageLandscape)}`} />
                     <div className="body-content p-4 pb-0" >
-                        <span className="card-title font-weight-bold mb-3 d-block bitter">{item.displayName}</span>
+                        <span className="card-title font-weight-bold mb-3 d-block bitter">{renderDisplayName(item)}</span>
                         <div className="card-text mb-0" dangerouslySetInnerHTML={{ __html: item.abstract }} ></div>
                     </div>
             </Card.Body>
@@ -44,7 +66,7 @@ function MarketplaceTileList(props) {
                 <Card.Body className="h-100 p-0 tile-body">
                     <img className="card-img-top" src={imgSrc} alt={`${item.name}-${getImageAlt(item.imageLandscape)}`} />
                     <div className="body-content p-2 px-4" >
-                        <span className="card-title font-weight-bold d-block bitter">{item.displayName}</span>
+                        <span className="card-title font-weight-bold d-block bitter text-center">{renderDisplayName(item)}</span>
                     </div>
                 </Card.Body>
             </Card>
@@ -61,7 +83,7 @@ function MarketplaceTileList(props) {
                         {renderImageBg(item)}
                     </div>
                     <div className="col-md-12 col-lg-7 p-4" >
-                        <span className="card-title font-weight-bold mb-3 d-block bitter">{item.displayName}</span>
+                        <span className="card-title font-weight-bold mb-3 d-block bitter">{renderDisplayName(item)}</span>
                         <div className="card-text mb-0" dangerouslySetInnerHTML={{ __html: item.abstract }} ></div>
                     </div>
                 </Card.Body>

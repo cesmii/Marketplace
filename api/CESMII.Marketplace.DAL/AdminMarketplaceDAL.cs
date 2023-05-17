@@ -291,6 +291,8 @@
         private List<MarketplaceItemRelatedModel> MapToModelRelatedItems(List<RelatedItem> items, 
             List<MarketplaceItem> allItems)
         {
+            if (items == null) return new List<MarketplaceItemRelatedModel>();
+
             //get the supplemental information that is associated with the related items
             var matches = _repo.FindByCondition(x =>
                 items.Any(y => y.MarketplaceItemId.Equals(
@@ -329,10 +331,7 @@
         protected List<ProfileItemRelatedModel> MapToModelRelatedProfiles(List<RelatedProfileItem> items,
             List<MarketplaceItemModel> allItems)
         {
-            if (items == null)
-            {
-                return new List<ProfileItemRelatedModel>();
-            }
+            if (items == null) return new List<ProfileItemRelatedModel>();
 
             //get the supplemental information that is associated with the related items
             var matches = _cloudLibDAL.GetManyById(items.Select(x => x.ProfileId).ToList()).Result;
