@@ -61,106 +61,53 @@ export function toggleSearchFilterSelected(criteria, id) {
 }
 
 //-------------------------------------------------------------------
-// hasRelatedItems - does this marketplace item have a specific kind of related item
+// Web part - Render Related Items - used by marketplace entity or profile entity
 //-------------------------------------------------------------------
-export function hasRelatedItems(item, code) {
-
-    if (item.relatedItemsGrouped == null || item.relatedItemsGrouped.length === 0) return false;
-
-    //split specific groups into something front end will display
-    const grp = item.relatedItemsGrouped.find(x => x.relatedType.code.toLowerCase() === code.toLowerCase());
-
-    //true if there are items in the group
-    return (grp?.items != null && grp?.items.length > 0);
-}
-
 export function MarketplaceRelatedItems(props) {
     //-------------------------------------------------------------------
     // Common render helpers
     //-------------------------------------------------------------------
     //-------------------------------------------------------------------
-    // Render Specifications for a profile or marketplace item
-    //-------------------------------------------------------------------
-    const renderSpecifications = (item) => {
-
-        if (item.relatedItemsGrouped == null || item.relatedItemsGrouped.length === 0) return null;
-
-        //split specific groups into something front end will display
-        const grpRequired = item.relatedItemsGrouped.find(x => x.relatedType.code.toLowerCase() === "required");
-        const grpRecommended = item.relatedItemsGrouped.find(x => x.relatedType.code.toLowerCase() === "recommended");
-
-        if ((grpRequired?.items == null || grpRequired?.items.length === 0) &&
-            (grpRecommended?.items == null || grpRecommended?.items.length === 0)) return null;
-
-        return (
-            <>
-                {(grpRequired?.items != null && grpRequired?.items.length > 0) &&
-                    <>
-                        <div className="row" >
-                            <div className="col-sm-12 mb-3" >
-                                <h3 className="m-0 small">
-                                    Required SM Apps, SM Hardware & SM Profiles
-                                </h3>
-                            </div>
-                        </div>
-                        <div className="row" >
-                            <div className="col-sm-12">
-                                <MarketplaceTileList items={grpRequired?.items} layout="banner-abbreviated" colCount={3} />
-                            </div>
-                        </div>
-                    </>
-                }
-                {(grpRecommended?.items != null && grpRecommended?.items.length > 0) &&
-                    <>
-                        <div className="row" >
-                            <div className="col-sm-12 my-3 pt-3 border-top" >
-                                <h3 className="m-0 small">
-                                    Recommended SM Apps, SM Hardware & SM Profiles
-                                </h3>
-                            </div>
-                        </div>
-                        <div className="row" >
-                            <div className="col-sm-12">
-                                <MarketplaceTileList items={grpRecommended?.items} layout="banner-abbreviated" colCount={3} />
-                            </div>
-                        </div>
-                    </>
-                }
-            </>
-        );
-    }
-
-    //-------------------------------------------------------------------
     // Render Similar Items for a profile or marketplace item
     //-------------------------------------------------------------------
-    const renderSimilarItems = (item) => {
-
-        if (item.relatedItemsGrouped == null || item.relatedItemsGrouped.length === 0) return null;
-
-        //split specific groups into something front end will display
-        const grpSimilar = item.relatedItemsGrouped.find(x => x.relatedType.code.toLowerCase() === "similar");
-
-        if ((grpSimilar?.items == null || grpSimilar?.items.length === 0)) return null;
-
-        return (
-            <>
-                <div className="row" >
-                    <div className="col-sm-12">
-                        <MarketplaceTileList items={grpSimilar?.items} layout="banner" colCount={3} />
+    const renderSections = (items) => {
+        return items.map((itm, i) => {
+            const key = `${itm.relatedType?.code}-${i}`;
+            const collapseTargetId = `collapse-${key}`;
+            return (
+                <div key={key} className="card mb-0">
+                    <div className="card-header bg-transparent p-0 border-bottom-0" id={`heading-${i}-${itm.relatedType?.code}`} >
+                        <button className="btn btn-content-accordion p-3 py-2 text-left d-block w-100" type="button" data-toggle="collapse" data-target={`#${collapseTargetId}`} aria-expanded="false" aria-controls={`${collapseTargetId}`} >
+                            <h3 className="mb-0">
+                                {itm.relatedType?.name}
+                            </h3>
+                        </button>
+                    </div>
+                    <div id={`${collapseTargetId}`} className="collapse mb-0" aria-labelledby={`heading-${i}-${itm.relatedType?.code}`} >
+                        <div className="card-body">
+                            <div className="row" >
+                                <div className="col-sm-12">
+                                    <MarketplaceTileList items={itm.items} layout="banner-abbreviated" colCount={4} />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </>
-        );
+            );
+        });
     }
 
     //-------------------------------------------------------------------
     // Render
     //-------------------------------------------------------------------
-    if (props.displayMode === "similarItems") {
-        return (renderSimilarItems(props.item))
-    }
-    if (props.displayMode === "specifications") {
-        return (renderSpecifications(props.item))
-    }
-    return null;
+    //props.items == relatedItemsGrouped
+
+    if (props.items == null || props.items.length === 0) return;
+
+    return (
+        <div className="accordion" >
+            {renderSections(props.items)}
+        </div>
+    );
+
 }

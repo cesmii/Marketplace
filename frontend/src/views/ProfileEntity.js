@@ -9,9 +9,9 @@ import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
 import { cleanFileName, generateLogMessageString, getImageUrl, getMarketplaceIconName, scrollTopScreen } from '../utils/UtilityService'
 import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
+import { MarketplaceRelatedItems} from '../services/MarketplaceService';
 
 import './styles/MarketplaceEntity.scss';
-import { hasRelatedItems, MarketplaceRelatedItems} from '../services/MarketplaceService';
 
 const CLASS_NAME = "ProfileEntity";
 
@@ -185,13 +185,13 @@ function ProfileEntity() {
         );
     }
 
-    const renderAccordion = () => {
+    const renderMainContent = () => {
         if (loadingProps.isLoading) return;
 
         return (
             <>
-                <div className="accordion" id="accordionExample">
-                    <div className="card mb-0">
+                <div className="marketplace-list-item border" >
+                    <div className="card mb-0 border-0">
                         <div className="card-header bg-transparent p-2 pt-3 border-bottom-0" id="headingOne">
                             <div className="col-sm-12 d-flex align-items-center">
                                 <h2 className="m-0 mr-2">
@@ -206,39 +206,14 @@ function ProfileEntity() {
                             </div>
                         </div>
                     </div>
-                    {(hasRelatedItems(item, "required") || hasRelatedItems(item, "recommended")) &&
-                        <div className="card mb-0">
-                            <div ref={_scrollToSpecs} className="card-header bg-transparent p-0 border-bottom-0" id="headingTwo">
-                                <button className="btn btn-content-accordion p-3 py-2 text-left d-block w-100" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                    <h2 className="mb-0">
-                                        Specifications
-                                    </h2>
-                                </button>
-                            </div>
-                            <div id="collapseTwo" className="collapse mb-3" aria-labelledby="headingTwo" >
-                                <div className="card-body">
-                                    <MarketplaceRelatedItems item={item} displayMode="specifications" />
-                                </div>
-                            </div>
-                        </div>
-                    }
-                    {hasRelatedItems(item, "similar") &&
-                        <div className="card mb-0">
-                            <div ref={_scrollToRelated} className="card-header bg-transparent p-0 border-bottom-0" id="headingThree">
-                                <button className="btn btn-content-accordion p-3 py-2 text-left d-block w-100" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                                    <h2 className="mb-0">
-                                        Similar Items
-                                    </h2>
-                                </button>
-                            </div>
-                            <div id="collapseThree" className="collapse mb-3" aria-labelledby="headingThree">
-                                <div className="card-body">
-                                    <MarketplaceRelatedItems item={item} displayMode="similarItems" />
-                                </div>
-                            </div>
-                        </div>
-                    }
                 </div>
+
+                {(item.relatedItemsGrouped != null && item.relatedItemsGrouped.length > 0) &&
+                    <>
+                        <h2 ref={_scrollToSpecs} className="m-3 mt-4" >Specifications</h2>
+                        <MarketplaceRelatedItems items={item.relatedItemsGrouped} />
+                    </>
+                }
             </>
         );
     }
@@ -277,7 +252,7 @@ function ProfileEntity() {
                             {(!loadingProps.isLoading && !isLoading) &&
                                 <div className="marketplace-entity">
                                     {renderItemRow()}
-                                    {renderAccordion()}
+                                    {renderMainContent()}
                                 </div>
                             }
                         </div>

@@ -13,7 +13,7 @@ import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
 import MarketplaceEntitySidebar from './shared/MarketplaceEntitySidebar';
 
 import { convertHtmlToString, generateLogMessageString, getImageUrl, getMarketplaceIconName } from '../utils/UtilityService'
-import { clearSearchCriteria, hasRelatedItems, MarketplaceRelatedItems, renderSimilarItems, renderSpecifications, toggleSearchFilterSelected } from '../services/MarketplaceService';
+import { clearSearchCriteria, MarketplaceRelatedItems, toggleSearchFilterSelected } from '../services/MarketplaceService';
 import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
 import { SvgVisibilityIcon } from '../components/SVGIcon';
 
@@ -135,11 +135,6 @@ function MarketplaceEntity() {
         window.scrollTo({ top: (_scrollToSpecs.current.getBoundingClientRect().y - 80), behavior: 'smooth' });
     }
 
-    const onViewRelatedItems = (e) => {
-        e.preventDefault();
-        window.scrollTo({ top: (_scrollToRelated.current.getBoundingClientRect().y - 80), behavior: 'smooth' });
-    }
-
     //-------------------------------------------------------------------
     // Region: Render Helpers
     //-------------------------------------------------------------------
@@ -202,10 +197,10 @@ function MarketplaceEntity() {
                         <span className="m-0 mr-2 my-2 mb-md-0 d-flex align-items-center">
                             <SvgVisibilityIcon fill={color.link} />
                             <button className="btn btn-link" onClick={filterByPublisher} >
-                            View all by this publisher</button>
+                                View all by this publisher</button>
                         </span>
                     </div>
-                    {(item.publisher.socialMediaLinks != null && item.publisher.socialMediaLinks.length > 0) && 
+                    {(item.publisher.socialMediaLinks != null && item.publisher.socialMediaLinks.length > 0) &&
                         <div className="col-sm-4 d-flex justify-content-md-end mb-2 mb-md-0 align-items-center">
                             <SocialMedia items={item.publisher.socialMediaLinks} />
                         </div>
@@ -221,7 +216,7 @@ function MarketplaceEntity() {
             return;
         }
         return (<MarketplaceItemEntityHeader key={item.id} item={item} isAuthenticated={isAuthenticated} isAuthorized={isAuthorized}
-            showActions={true} cssClass="marketplace-list-item" onViewSpecifications={onViewSpecifications} onViewRelatedItems={onViewRelatedItems} />)
+            showActions={true} cssClass="marketplace-list-item" onViewSpecifications={onViewSpecifications} />)
     }
 
     //
@@ -231,14 +226,13 @@ function MarketplaceEntity() {
         );
     }
 
-    const renderAccordion = () => {
+    const renderMainContent = () => {
         if (loadingProps.isLoading) return;
 
         return (
             <>
-
-                <div className="accordion" id="accordionExample">
-                    <div className="card mb-0">
+                <div className="marketplace-list-item border" >
+                    <div className="card mb-0 border-0">
                         <div className="card-header bg-transparent p-2 pt-3 border-bottom-0" id="headingOne">
                             <div className="col-sm-12 d-flex align-items-center">
                                 <h2 className="m-0 mr-2">
@@ -256,39 +250,14 @@ function MarketplaceEntity() {
                             </div>
                         </div>
                     </div>
-                    {(hasRelatedItems(item, "required") || hasRelatedItems(item, "recommended")) &&
-                        <div className="card mb-0">
-                            <div ref={_scrollToSpecs} className="card-header bg-transparent p-0 border-bottom-0" id="headingTwo">
-                                <button className="btn btn-content-accordion p-3 py-2 text-left d-block w-100" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                    <h2 className="mb-0">
-                                        Specifications
-                                    </h2>
-                                </button>
-                            </div>
-                            <div id="collapseTwo" className="collapse mb-3" aria-labelledby="headingTwo" >
-                                <div className="card-body">
-                                    <MarketplaceRelatedItems item={item} displayMode="specifications" />
-                                </div>
-                            </div>
-                        </div>
-                    }
-                    {hasRelatedItems(item, "similar") &&
-                        <div className="card mb-0">
-                            <div className="card-header bg-transparent p-0 border-bottom-0" id="headingThree">
-                                <button ref={_scrollToRelated} className="btn btn-content-accordion p-3 py-2 text-left d-block w-100" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                                    <h2 className="mb-0">
-                                        Similar Items
-                                    </h2>
-                                </button>
-                            </div>
-                            <div id="collapseThree" className="collapse mb-3" aria-labelledby="headingThree">
-                                <div className="card-body">
-                                    <MarketplaceRelatedItems item={item} displayMode="similarItems" />
-                                </div>
-                            </div>
-                        </div>
-                    }
                 </div>
+
+                {(item.relatedItemsGrouped != null && item.relatedItemsGrouped.length > 0) &&
+                    <>
+                    <h2 ref={_scrollToSpecs} className="m-3 mt-4" >Specifications</h2>
+                    <MarketplaceRelatedItems items={item.relatedItemsGrouped} />
+                    </>
+                }
             </>
         );
     }
@@ -329,7 +298,7 @@ function MarketplaceEntity() {
                             {(!loadingProps.isLoading && !isLoading) &&
                                 <div className="marketplace-entity">
                                     {renderItemRow()}
-                                    {renderAccordion()}
+                                    {renderMainContent()}
                                 </div>
                             }
                         </div>

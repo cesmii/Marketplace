@@ -523,12 +523,12 @@ option.selected {
     }
 
     &:hover {
-        h2 {
+        h2, h3 {
             color: color("cornflower");
         }
     }
 
-    h2 {
+    h2, h3 {
         display: flex;
 
         &:after {
@@ -544,7 +544,7 @@ option.selected {
 
     &[aria-expanded="false"], 
     &.collapsed {
-        h2 {
+        h2, h3 {
             &:after {
                 content: "expand_more";
             }
@@ -693,6 +693,16 @@ select.minimal:focus {
             padding-right: 16px;
         }
     }
+}
+
+.accordion > .card:first-child {
+    border-top-left-radius: $tile-radius;
+    border-top-right-radius: $tile-radius;
+}
+
+.accordion > .card:last-child {
+    border-bottom-left-radius: $tile-radius;
+    border-bottom-right-radius: $tile-radius;
 }
 
 .elevated {
