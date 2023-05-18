@@ -400,12 +400,12 @@
             //convert group to return type
             if (items?.Count > 0)
             {
-                var grpItems = items.GroupBy(x => new { ID = x.RelatedType.ID, RelatedType = x.RelatedType });
+                var grpItems = items.GroupBy(x => new { ID = x.RelatedType.ID });
                 foreach (var item in grpItems)
                 {
                     result.Add(new RelatedItemsGroupBy()
                     {
-                        RelatedType = item.Key.RelatedType,
+                        RelatedType = items.Where(x => x.RelatedType.ID.Equals(item.Key.ID)).FirstOrDefault()?.RelatedType,
                         Items = items.Where(x => x.RelatedType.ID.Equals(item.Key.ID)).ToList() // item.ToList()
                     });
                 }
@@ -414,8 +414,7 @@
             //append profiles group to existing group (if present)
             if (itemsProfile?.Count > 0)
             {
-                //var grpProfile = itemsProfile.GroupBy(x => x.RelatedType);
-                var grpProfile = itemsProfile.GroupBy(x => new { ID = x.RelatedType.ID, RelatedType = x.RelatedType });
+                var grpProfile = itemsProfile.GroupBy(x => new { ID = x.RelatedType.ID });
                 foreach (var item in grpProfile)
                 {
                     var matches = itemsProfile.Where(x => x.RelatedType.ID.Equals(item.Key.ID)).ToList();
@@ -425,7 +424,7 @@
                     {
                         result.Add(new RelatedItemsGroupBy()
                         {
-                            RelatedType = item.Key.RelatedType,
+                            RelatedType = matches.FirstOrDefault()?.RelatedType,
                             Items = matches
                         });
                     }
@@ -437,6 +436,9 @@
             }
 
             //do some ordering
+            result = result
+                .OrderBy(x => x.RelatedType.DisplayOrder)
+                .ThenBy(x => x.RelatedType.Name).ToList();
             foreach (var g in result)
             {
                 g.Items = g.Items

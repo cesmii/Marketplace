@@ -4,7 +4,6 @@ import color from '../../components/Constants';
 
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
 import DownloadNodesetModal from '../../components/DownloadNodesetModal';
-import { hasRelatedItems } from '../../services/MarketplaceService';
 import { AppSettings } from '../../utils/appsettings';
 import { formatDate, generateLogMessageString, getImageUrl, renderMenuColorIcon } from '../../utils/UtilityService';
 import { MarketplaceItemJobLauncher } from './MarketplaceItemJobLauncher';
@@ -72,7 +71,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
     const renderMarketplaceHeader = () => {
         return (
             <>
-                <div className={`row mx-0 p-0 ${props.cssClass} mb-4`}>
+                <div className={`row mx-0 p-0 ${props.cssClass} mb-4 border`}>
                     <div className="col-sm-6 col-md-5 p-0 d-none d-sm-block" >
                         {renderImageBg()}
                     </div>
@@ -85,16 +84,10 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         {/*<div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderCategoryItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderMetaTagItem(props.item)}</div>*/}
-                        {(hasRelatedItems(props.item, "required") || hasRelatedItems(props.item, "recommended")) &&
+                        {(props.item.relatedItemsGrouped != null && props.item.relatedItemsGrouped.length > 0) &&
                             <p className="mt-3 mb-0" >
                                 <Button variant="link" type="button" className="px-0" onClick={props.onViewSpecifications} >
                                     {renderMenuColorIcon('view', null, color.cornflower, 'mr-1')}View Specifications</Button>
-                            </p>
-                        }
-                        {hasRelatedItems(props.item, "similar") &&
-                            <p className="mt-3 mb-0" >
-                                <Button variant="link" type="button" className="px-0" onClick={props.onViewRelatedItems} >
-                                {renderMenuColorIcon('group', null, color.cornflower, 'mr-1')}View Similar Items</Button>
                             </p>
                         }
                         {renderJobDefinitions()}
@@ -107,7 +100,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
     const renderProfileHeader = () => {
         return (
             <>
-                <div className={`row mx-0 p-0 ${props.cssClass} mb-4`}>
+                <div className={`row mx-0 p-0 ${props.cssClass} mb-4 border`}>
                     <div className="col-sm-6 col-md-5 p-0 d-none d-sm-block" >
                         {renderImageBg()}
                     </div>
@@ -134,16 +127,10 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                                     {renderMenuColorIcon('profile', null, color.cornflower, 'mr-1')}View in SM Profile Designer</Button>
                             </p>
                         }
-                        {(hasRelatedItems(props.item, "required") || hasRelatedItems(props.item, "recommended")) &&
+                        {(props.item.relatedItemsGrouped != null && props.item.relatedItemsGrouped.length > 0) &&
                             <p className="mt-3 mb-0" >
                                 <Button variant="link" type="button" className="px-0" onClick={props.onViewSpecifications} >
                                     {renderMenuColorIcon('view', null, color.cornflower, 'mr-1')}View Specifications</Button>
-                            </p>
-                        }
-                        {hasRelatedItems(props.item, "similar") &&
-                            <p className="mt-3 mb-0" >
-                                <Button variant="link" type="button" className="px-0" onClick={props.onViewRelatedItems} >
-                                {renderMenuColorIcon('group', null, color.cornflower, 'mr-1')}View Similar Items</Button>
                             </p>
                         }
                     </div>
