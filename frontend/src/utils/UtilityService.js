@@ -137,6 +137,39 @@ export function formatDate(val) {
     //return d.getFullYear() + '/' + d.getMonth() + '/' + d.getDate();
     return d.getMonth()+1 + '/' + d.getDate() + '/' + d.getFullYear();
 }
+
+export function formatItemPublishDate(item) {
+    if (item == null || item === '') return null;
+    if (item.publishDate != null && item.type?.code === AppSettings.itemTypeCode.smProfile) {
+        // It's a nodeset / profile: treat and render the date as UTC
+        return prepDateValUtc(item.publishDate);
+    }
+    return formatDate(item.publishDate);
+}
+
+
+// From ProfileDesigner\frontend\src\views\shared\ProfileEntity.js:
+//Dates will come in two formats:
+//  a. W/ Timezone info (typically from server): 2021-09-24T00:00:00
+//  b. No timezone info (after editing in control): 2021-09-24
+const prepDateValUtc = (val) => {
+    if (val == null || val === '') return '';
+    //check and append timezone so we get consistent conversion
+    //if (val.indexOf('T00:00:00') === -1) val += `T00:00:00`;
+    //DB changed to support date and time timestamp so T:00:00:00 no longer reliable, just check for T
+    if (val.indexOf('T') === -1) val += `T00:00:00`;
+
+    var dt = new Date(val);
+    var mm = dt.getUTCMonth() + 1;
+    mm = mm < 10 ? `0${mm.toString()}` : mm.toString();
+    var dd = dt.getUTCDate();
+    dd = dd < 10 ? `0${dd.toString()}` : dd.toString();
+    var result = `${dt.getUTCFullYear()}-${mm}-${dd}`;
+    console.log(generateLogMessageString(`prepDateVal||inbound:${val}||outbound:${result}`, CLASS_NAME));
+    return result;
+}
+
+
   ///#endregion: Logging Helper Methods
 
 ///--------------------------------------------------------------------------
