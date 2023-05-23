@@ -575,3 +575,24 @@ export function renderMenuColorIcon(iconName, alt, colorFill, className='mr-3') 
     );
 }
 
+///--------------------------------------------------------------------------
+/// trim a long string to length to keep it manageable in display.
+/// don't trim until we encounter a space
+//--------------------------------------------------------------------------
+export function trimString(val, length = 256) {
+    if (val == null || val.length < 256) return val;
+    let result = val;
+    let lengthAdjusted = length;
+    //keep decreasing the string length till we hit a space.
+    do {
+        lengthAdjusted--;
+    }
+    while (result.indexOf(" ", lengthAdjusted) === -1);
+
+    //protect this against a scenario where it is just one massive long string with no breaks. 
+    if (lengthAdjusted < 50) lengthAdjusted = length;
+
+    //now trim the string and return
+    return val.substring(0, lengthAdjusted) + '...';
+}
+

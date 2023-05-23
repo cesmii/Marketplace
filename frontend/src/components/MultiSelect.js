@@ -81,7 +81,7 @@ function MultiSelect(props) {
         )
     }
 
-    if (_items == null) return;
+    if (_items == null) return null;
 
     return (
         <div className={`multi-select info-panel ${props.className == null ? '' : props.className}`} >

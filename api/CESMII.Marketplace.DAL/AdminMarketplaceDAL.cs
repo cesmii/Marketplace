@@ -29,8 +29,6 @@
         protected IMongoRepository<ImageItemSimple> _repoImages;
         protected List<ImageItemSimple> _imagesAll;
         protected readonly ICloudLibDAL<MarketplaceItemModel> _cloudLibDAL;
-        protected List<MarketplaceItemModel> _profilesAll;
-        protected List<MarketplaceItem> _marketplaceItemsAll;
 
         //default type - use if none assigned yet.
         private readonly MongoDB.Bson.BsonObjectId _smItemTypeIdDefault;
@@ -267,8 +265,8 @@
                 };
                 if (verbose)
                 {
-                    result.RelatedItems = MapToModelRelatedItems(entity.RelatedItems, _marketplaceItemsAll);
-                    result.RelatedProfiles = MapToModelRelatedProfiles(entity.RelatedProfiles, _profilesAll);
+                    result.RelatedItems = MapToModelRelatedItems(entity.RelatedItems);
+                    result.RelatedProfiles = MapToModelRelatedProfiles(entity.RelatedProfiles);
                 }
                 return result;
             }
@@ -288,8 +286,7 @@
         /// <param name="items"></param>
         /// <param name="allItems"></param>
         /// <returns></returns>
-        private List<MarketplaceItemRelatedModel> MapToModelRelatedItems(List<RelatedItem> items, 
-            List<MarketplaceItem> allItems)
+        private List<MarketplaceItemRelatedModel> MapToModelRelatedItems(List<RelatedItem> items)
         {
             if (items == null) return new List<MarketplaceItemRelatedModel>();
 
@@ -328,8 +325,7 @@
         /// for this entity.
         /// The idea is we return the entire lookup list and mark selected those items appearing selected. 
         /// </summary>
-        protected List<ProfileItemRelatedModel> MapToModelRelatedProfiles(List<RelatedProfileItem> items,
-            List<MarketplaceItemModel> allItems)
+        protected List<ProfileItemRelatedModel> MapToModelRelatedProfiles(List<RelatedProfileItem> items)
         {
             if (items == null) return new List<ProfileItemRelatedModel>();
 
@@ -446,10 +442,6 @@
             _imagesAll = _repoImages.FindByCondition(x => 
                         marketplaceIds.Any(y => y.Equals(x.MarketplaceItemId.ToString())) ||
                         x.MarketplaceItemId.ToString().Equals(Common.Constants.BSON_OBJECTID_EMPTY));
-
-            //for related items and related profiles selection, get all items
-            _profilesAll = _cloudLibDAL.GetAll().Result;
-            _marketplaceItemsAll = _repo.GetAll();
         }
 
     }
