@@ -4,7 +4,7 @@ import { Button } from 'react-bootstrap';
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
 import DownloadNodesetModal from '../../components/DownloadNodesetModal';
 import { AppSettings } from '../../utils/appsettings';
-import { formatDate, generateLogMessageString, getImageUrl } from '../../utils/UtilityService';
+import { formatDate, formatItemPublishDate, generateLogMessageString, getImageUrl } from '../../utils/UtilityService';
 import { MarketplaceItemJobLauncher } from './MarketplaceItemJobLauncher';
 
 const CLASS_NAME = "MarketplaceItemEntityHeader";
@@ -79,7 +79,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         {props.item.abstract != null &&
                             <div className="mb-2" dangerouslySetInnerHTML={{ __html: props.item.abstract }} ></div>
                         }
-                        <p className="mb-0" ><b className="mr-2" >Published:</b>{formatDate(props.item.publishDate)}</p>
+                        <p className="mb-0" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
                         {/*<div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderCategoryItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderMetaTagItem(props.item)}</div>*/}
@@ -106,7 +106,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                                 <span style={{ wordBreak: "break-word" }} >{props.item.namespace}</span>
                             </p>
                         }
-                        <p className="mb-2" ><b className="mr-2" >Published:</b>{formatDate(props.item.publishDate)}</p>
+                        <p className="mb-2" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
                         <p className="mb-2" ><b className="mr-2" >Version:</b>{props.item.version}</p>
                         {props.onDownload &&
                             <p className="my-4" ><Button variant="secondary" type="button" className="px-4" onClick={onDownloadStart} >Download Nodeset XML</Button></p>
