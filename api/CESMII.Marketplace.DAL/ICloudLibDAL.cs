@@ -77,12 +77,20 @@
 
         Task<string> Add(TModel model, string userId);
         /// <summary>
-        /// Update an entity asynchronously
+        /// Add/Update an entity asynchronously
         /// </summary>
         /// <param name="model"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        Task<int> Update(TModel model, string userId);
+        Task<int> Upsert(TModel model, string userId);
+
+        /// <summary>
+        /// Remove all relationships for this item.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        Task<int> Delete(string id, string userId);
     }
 
 }

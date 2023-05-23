@@ -30,10 +30,7 @@ function AdminProfileRow(props) { //props are item, showActions
                         Display Name
                     </th>
                     <th className="py-2 d-none d-sm-table-cell align-text-top" >
-                        Namespace / Version
-                    </th>
-                    <th className="pr-2 text-right" >
-                        Publication Date
+                        Namespace / Version / Publish Date
                     </th>
                 </tr>
             </>
@@ -62,9 +59,12 @@ function AdminProfileRow(props) { //props are item, showActions
                         Version: {props.item.version}
                         </>
                     }
-                </td>
-                <td className="py-2 pr-2 text-right" >
-                    {formatDate(props.item.publishDate)}
+                    {props.item.publishDate != null &&
+                        <>
+                            <br />
+                            Publish Date: {props.item.publishDate}
+                        </>
+                    }
                 </td>
             </tr>
         </>

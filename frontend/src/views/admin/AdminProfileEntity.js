@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet"
 
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
-//import Dropdown from 'react-bootstrap/Dropdown'
+import Dropdown from 'react-bootstrap/Dropdown'
 import Card from 'react-bootstrap/Card'
 import Tab from 'react-bootstrap/Tab'
 import Nav from 'react-bootstrap/Nav'
@@ -12,9 +12,10 @@ import Nav from 'react-bootstrap/Nav'
 import axiosInstance from "../../services/AxiosService";
 
 import { AppSettings } from '../../utils/appsettings';
-import { generateLogMessageString, prepDateVal, validate_NoSpecialCharacters } from '../../utils/UtilityService'
+import { generateLogMessageString, prepDateVal } from '../../utils/UtilityService'
 import { useLoadingContext } from "../../components/contexts/LoadingContext";
 
+import { SVGIcon } from "../../components/SVGIcon";
 import color from "../../components/Constants";
 import MultiSelect from '../../components/MultiSelect';
 import ConfirmationModal from '../../components/ConfirmationModal';
@@ -45,6 +46,7 @@ function AdminProfileEntity() {
     const [_isValid, setIsValid] = useState({
         profileId: true, relatedItems: true, relatedProfiles: true, relatedItemsMinCount: true
     });
+    const [_deleteModal, setDeleteModal] = useState({ show: false, items: null });
     const [_error, setError] = useState({ show: false, message: null, caption: null });
     const [_refreshItem, setRefreshItem] = useState(null);  //trigger a retrieval of data on select of profile id - new mode.
 
@@ -408,7 +410,6 @@ function AdminProfileEntity() {
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
-    /*
     const onRemoveRelationships = () => {
         console.log(generateLogMessageString('onRemoveRelationships', CLASS_NAME));
         setDeleteModal({ show: true, item: item });
@@ -423,7 +424,7 @@ function AdminProfileEntity() {
         //perform call - this will only remove relationships in the marketplace db. 
         //this does not impact the Cloud Lib in any way.
         var data = { id: item.id };
-        var url = `admin/profile/remove`;
+        var url = `admin/profile/delete`;
         axiosInstance.post(url, data)  //api allows one or many
             .then(result => {
 
@@ -432,7 +433,7 @@ function AdminProfileEntity() {
                     setLoadingProps({
                         isLoading: false, message: null, inlineMessages: [
                             {
-                                id: new Date().getTime(), severity: "success", body: `Relationships were removed`, isTimed: true
+                                id: new Date().getTime(), severity: "success", body: `Related items and related profiles were removed`, isTimed: true
                             }
                         ],
                         refreshLookupData: true
@@ -440,14 +441,14 @@ function AdminProfileEntity() {
                 }
                 else {
                     //update spinner, messages
-                    setError({ show: true, caption: 'Remove Relationships Error', message: `An error occurred removing relationships: ${result.data.message}` });
+                    setError({ show: true, caption: 'Remove Related Error', message: `An error occurred removing relationships: ${result.data.message}` });
                     setLoadingProps({ isLoading: false, message: null });
                 }
-                history.push('/library');
+                history.push('/admin/profile/list');
             })
             .catch(error => {
                 //hide a spinner, show a message
-                setError({ show: true, caption: 'Remove Relationships Error', message: `An error occurred removing relationships.` });
+                setError({ show: true, caption: 'Remove Related Error', message: `An error occurred removing relationships.` });
                 setLoadingProps({ isLoading: false, message: null });
 
                 console.log(generateLogMessageString('deleteItem||error||' + JSON.stringify(error), CLASS_NAME, 'error'));
@@ -460,7 +461,6 @@ function AdminProfileEntity() {
                 });
             });
     };
-    */
 
     const onSave = () => {
         //raised from header nav
@@ -482,15 +482,14 @@ function AdminProfileEntity() {
 
         //perform insert call
         console.log(generateLogMessageString(`handleOnSave||${mode}`, CLASS_NAME));
-        var url = mode.toLowerCase() === "copy" || mode.toLowerCase() === "new" ?
-            `admin/profile/add` : `admin/profile/update`;
+        var url = `admin/profile/upsert`;
         axiosInstance.post(url, item)
             .then(resp => {
                 if (resp.data.isSuccess) {
                     //hide a spinner, show a message
                     setLoadingProps({
                         isLoading: false, message: null, inlineMessages: [
-                            { id: new Date().getTime(), severity: "success", body: `profile item was saved`, isTimed: true }
+                            { id: new Date().getTime(), severity: "success", body: `Profile item was saved`, isTimed: true }
                         ]
                     });
 
@@ -734,7 +733,6 @@ function AdminProfileEntity() {
         )
     };
 
-    /*
     const renderMoreDropDown = () => {
         if (item == null || (mode.toLowerCase() === "copy" || mode.toLowerCase() === "new")) return;
 
@@ -745,12 +743,11 @@ function AdminProfileEntity() {
                     <SVGIcon name="more-vert" size="24" fill={color.shark} />
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                    <Dropdown.Item onClick={onRemoveRelationships} >Remove all relationships'{item.name}'</Dropdown.Item>
+                    <Dropdown.Item onClick={onRemoveRelationships} >Remove All Related Items & Profiles</Dropdown.Item>
                 </Dropdown.Menu>
             </Dropdown>
         );
     }
-    */
 
     const renderProfileSelect = () => {
 
@@ -829,26 +826,28 @@ function AdminProfileEntity() {
                 <>
                     <Button variant="text-solo" className="ml-1" href="/admin/profile/list" >Cancel</Button>
                     <Button variant="secondary" type="button" className="ml-2" onClick={onSave} >Save</Button>
+                    {id !== "new" &&
+                        renderMoreDropDown()
+                    }
                 </>
             );
         }
     }
 
-    /*
     //render the delete modal when show flag is set to true
     //callbacks are tied to each button click to proceed or cancel
     const renderDeleteConfirmation = () => {
 
         if (!_deleteModal.show) return;
 
-        var message = `You are about to delete '${_deleteModal.item.name}'. This action cannot be undone. Are you sure?`;
-        var caption = `Remove Relationships`;
+        var message = `You are about to remove all related items and related profiles from '${_deleteModal.item.displayName}'. This action cannot be undone. Are you sure?`;
+        var caption = `Remove Related`;
 
         return (
             <>
                 <ConfirmationModal showModal={_deleteModal.show} caption={caption} message={message}
                     icon={{ name: "warning", color: color.trinidad }}
-                    confirm={{ caption: "Delete", callback: onRemoveRelationshipsConfirm, buttonVariant: "danger" }}
+                    confirm={{ caption: "Proceed", callback: onRemoveRelationshipsConfirm, buttonVariant: "danger" }}
                     cancel={{
                         caption: "Cancel",
                         callback: () => {
@@ -860,7 +859,6 @@ function AdminProfileEntity() {
             </>
         );
     };
-    */
 
     //render error message as a modal to force user to say ok.
     const renderErrorMessage = () => {
@@ -1106,7 +1104,7 @@ function AdminProfileEntity() {
 
     const renderTabbedForm = () => {
         return (
-            <Tab.Container id="admin-marketplace-entity" defaultActiveKey="general" onSelect={tabListener} >
+            <Tab.Container id="admin-marketplace-entity" defaultActiveKey="relatedItems" onSelect={tabListener} >
                 <Nav variant="pills" className="row mt-1 px-2 pr-md-3">
                     <Nav.Item className="col-sm-4 rounded p-0 pl-2" >
                         <Nav.Link eventKey="general" className="text-center text-md-left p-1 px-2 h-100" >
@@ -1172,6 +1170,7 @@ function AdminProfileEntity() {
                 </div>
             </div>
             </Form>
+            {renderDeleteConfirmation()}
             {renderErrorMessage()}
         </>
     )
