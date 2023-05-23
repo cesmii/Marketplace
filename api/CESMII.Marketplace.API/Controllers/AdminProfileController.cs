@@ -99,9 +99,9 @@ namespace CESMII.Marketplace.Api.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        [HttpPost, Route("Update")]
+        [HttpPost, Route("Upsert")]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
-        public async Task<IActionResult> Update([FromBody] AdminMarketplaceItemModel model)
+        public async Task<IActionResult> Upsert([FromBody] AdminMarketplaceItemModel model)
         {
             if (model == null)
             {
@@ -116,7 +116,7 @@ namespace CESMII.Marketplace.Api.Controllers
             }
             else
             {
-                var result = await _dal.Update(model, UserID);
+                var result = await _dal.Upsert(model, UserID);
                 if (result < 0)
                 {
                     _logger.LogWarning($"AdminProfileController|Update|Could not update marketplaceItem. Invalid id:{model.ID}.");
@@ -134,6 +134,28 @@ namespace CESMII.Marketplace.Api.Controllers
 
         }
 
+        /// <summary>
+        /// Delete an existing profile. 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost, Route("Delete")]
+        [ProducesResponseType(200, Type = typeof(ResultMessageModel))]
+        public async Task<IActionResult> Delete([FromBody] IdStringModel model)
+        {
+            var result = await _dal.Delete(model.ID.ToString(), UserID);
+            if (result < 0)
+            {
+                _logger.LogWarning($"AdminProfileController|Delete|Could not remove relationships. Invalid id:{model.ID}.");
+                return BadRequest("Could not remove relationships. Invalid id.");
+            }
+            _logger.LogInformation($"AdminProfileController|Delete|Removed relationships. Id:{model.ID}.");
+
+            //return success message object
+            return Ok(new ResultMessageModel() { IsSuccess = true, Message = "Relationships were removed." });
+        }
+
+        /*
         /// <summary>
         /// Add an item.
         /// </summary>
@@ -167,6 +189,7 @@ namespace CESMII.Marketplace.Api.Controllers
             }
 
         }
+        */
 
         /// <summary>
         /// Admin Search for marketplace items matching criteria passed in. This is an advanced search and the front end

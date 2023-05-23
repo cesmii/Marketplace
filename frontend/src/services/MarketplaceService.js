@@ -24,16 +24,17 @@ export function setMarketplacePageSize(val) {
 export function clearSearchCriteria(criteria) {
 
     var result = JSON.parse(JSON.stringify(criteria));
+    if (result == null) result = {};
 
     //loop over parents then over children and set selected to false
-    result.filters.forEach(parent => {
+    result?.filters?.forEach(parent => {
         parent.items.forEach(item => {
             item.selected = false;
         });
     });
 
     //loop over item types and set selected to false
-    result.itemTypes?.forEach(item => {
+    result?.itemTypes?.forEach(item => {
         item.selected = false;
     });
 

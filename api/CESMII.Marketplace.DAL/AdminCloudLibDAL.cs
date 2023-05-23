@@ -89,24 +89,29 @@
         /// <param name="userId"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task<int> Update(AdminMarketplaceItemModel model, string userId)
+        public async Task<int> Upsert(AdminMarketplaceItemModel model, string userId)
         {
             ProfileItem entity = _repo.FindByCondition(x => x.ProfileId == model.ID).FirstOrDefault();
+            bool isAdd = entity == null;
             if (entity == null)
             {
-                entity = new ProfileItem() { 
+                entity = new ProfileItem() {
+                    ID = "",
                     ProfileId = model.ID,
-                    IsActive = true
+                    IsActive = true,
+                    Created = DateTime.UtcNow,
+                    CreatedById = MongoDB.Bson.ObjectId.Parse(userId)
                 };
             }
             this.MapToEntity(ref entity, model);
             entity.Updated = DateTime.UtcNow;
             entity.UpdatedById = MongoDB.Bson.ObjectId.Parse(userId);
 
-            await _repo.UpdateAsync(entity);
+            if (isAdd)
+                await _repo.AddAsync(entity);
+            else
+                await _repo.UpdateAsync(entity);
             return 1;
-
-            throw new NotImplementedException("TODO");
         }
 
         public async Task<AdminMarketplaceItemModel> GetById(string id) {
@@ -179,6 +184,14 @@
             if (matches == null || matches.Edges == null) return new List<AdminMarketplaceItemModel>();
 
             return MapToModelsNodesetResult(matches.Edges);
+        }
+
+        public async Task<int> Delete(string id, string userId)
+        {
+            ProfileItem entity = _repo.FindByCondition(x => x.ProfileId == id).FirstOrDefault();
+            if (entity == null) return 0;
+            await _repo.Delete(entity);
+            return 1;
         }
 
         protected List<AdminMarketplaceItemModel> MapToModelsNodesetResult(List<GraphQlNodeAndCursor<Nodeset>> entities)
@@ -348,7 +361,11 @@
             }
 
             //get list of profile items associated with this list of ids, call CloudLib to get the supporting info for these
-            var matches = this.GetManyById(items.Select(x => x.ProfileId).ToList()).Result;
+            var profiles = _cloudLib.GetManyAsync(items.Select(x => x.ProfileId).ToList()).Result;
+            var matches = (profiles == null || profiles.Edges == null) ? 
+                new List<AdminMarketplaceItemModel>() :
+                MapToModelsNodesetResult(profiles.Edges);
+
             return !matches.Any() ? new List<ProfileItemRelatedModel>() :
                 matches.Select(x => new ProfileItemRelatedModel()
                 {
