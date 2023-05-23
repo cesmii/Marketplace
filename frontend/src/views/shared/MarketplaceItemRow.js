@@ -2,7 +2,7 @@ import React from 'react'
 import { useHistory } from 'react-router-dom'
 import { Button } from 'react-bootstrap'
 
-import { formatDate, generateLogMessageString, getImageUrl, getRandomArrayIndexes } from '../../utils/UtilityService';
+import { formatItemPublishDate, generateLogMessageString, getImageUrl, getRandomArrayIndexes } from '../../utils/UtilityService';
 import { clearSearchCriteria, toggleSearchFilterSelected } from '../../services/MarketplaceService'
 import { useLoadingContext } from '../../components/contexts/LoadingContext'
 import { SvgVisibilityIcon } from '../../components/SVGIcon'
@@ -184,7 +184,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
                         <button className="btn btn-link" onClick={filterByPublisher} >
                             View all by this publisher</button>
                     </p>
-                    <p className="mb-3" ><b className="mr-2" >Published:</b>{formatDate(props.item.publishDate)}</p>
+                    <p className="mb-3" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
                     <div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>
                     <div className="d-none d-lg-inline" >{renderCategoryItem(props.item)}</div>
                     <div className="d-none d-lg-inline" >{renderMetaTagItem(props.item)}</div>
