@@ -5,8 +5,8 @@
     using System.Linq;
     using System.Threading.Tasks;
 
-    using Microsoft.Extensions.Configuration;
     using NLog;
+    using Opc.Ua.Cloud.Library.Client;
 
     using CESMII.Marketplace.Common;
     using CESMII.Marketplace.Common.Enums;
@@ -14,31 +14,30 @@
     using CESMII.Marketplace.DAL.Models;
     using CESMII.Marketplace.Data.Entities;
     using CESMII.Common.CloudLibClient;
-
-    using Opc.Ua.Cloud.Library.Client;
     using CESMII.Marketplace.Data.Repositories;
 
     /// <summary>
-    /// Most lookup data is contained in this single entity and differntiated by a lookup type. 
+    /// This is a hybrid DAL. It gets data from the local Mongo DB for the related items and related profiles. Then gets 
+    /// the profile info from the cloud library
     /// </summary>
-    public class CloudLibDAL : ICloudLibDAL<MarketplaceItemModel>
+    public class AdminCloudLibDAL : IAdminCloudLibDAL<AdminMarketplaceItemModel>
     {
         protected bool _disposed = false;
         protected static readonly Logger _logger = LogManager.GetCurrentClassLogger();
         private readonly ICloudLibWrapper _cloudLib;
-        protected readonly IMongoRepository<ProfileItem> _repoProfile;
+        protected readonly IMongoRepository<ProfileItem> _repo;
         protected readonly IMongoRepository<MarketplaceItem> _repoMarketplace;
         protected readonly IDal<ImageItem, ImageItemModel> _dalImages;
         private readonly MarketplaceItemConfig _config;
         private readonly LookupItemModel _smItemType;
-        private readonly List<LookupItemModel> _lookupItemsRelatedType;
         //protected readonly IDal<MarketplaceItem, MarketplaceItemModel> _dalMarkteplace;
 
         //supporting data
-        protected List<ImageItemModel> _images;
+        protected readonly List<LookupItemModel> _lookupItemsRelatedType;
+        protected readonly List<ImageItemModel> _images;
 
-        public CloudLibDAL(ICloudLibWrapper cloudLib,
-            IMongoRepository<ProfileItem> repoProfile,
+        public AdminCloudLibDAL(ICloudLibWrapper cloudLib,
+            IMongoRepository<ProfileItem> repo,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IDal<ImageItem, ImageItemModel> dalImages,
             IMongoRepository<MarketplaceItem> repoMarketplace,
@@ -48,7 +47,7 @@
             _cloudLib = cloudLib;
 
             //init objects to use for related items
-            _repoProfile = repoProfile;
+            _repo = repo;
             _repoMarketplace = repoMarketplace;
             _dalImages = dalImages;
             //_dalMarkteplace = dalMarkteplace;
@@ -76,49 +75,79 @@
 
         }
 
-        public async Task<MarketplaceItemModel> GetById(string id) {
+        public async Task<string> Add(AdminMarketplaceItemModel model, string userId)
+        {
+            throw new NotImplementedException("Use Update method instead");
+        }
+
+        /// <summary>
+        /// This is only updating or adding data into the local Mongo DB. The bulk of the profile data is 
+        /// read only and comes from the Cloud Lib. The only data being udpated is related marketplace items
+        /// and related profile items.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<int> Upsert(AdminMarketplaceItemModel model, string userId)
+        {
+            ProfileItem entity = _repo.FindByCondition(x => x.ProfileId == model.ID).FirstOrDefault();
+            bool isAdd = entity == null;
+            if (entity == null)
+            {
+                entity = new ProfileItem() {
+                    ID = "",
+                    ProfileId = model.ID,
+                    IsActive = true,
+                    Created = DateTime.UtcNow,
+                    CreatedById = MongoDB.Bson.ObjectId.Parse(userId)
+                };
+            }
+            this.MapToEntity(ref entity, model);
+            entity.Updated = DateTime.UtcNow;
+            entity.UpdatedById = MongoDB.Bson.ObjectId.Parse(userId);
+
+            if (isAdd)
+                await _repo.AddAsync(entity);
+            else
+                await _repo.UpdateAsync(entity);
+            return 1;
+        }
+
+        public async Task<AdminMarketplaceItemModel> GetById(string id) {
             var entity = await _cloudLib.DownloadAsync(id);
             //var entity = await _cloudLib.GetById(id);
             if (entity == null) return null;
             //get related items from local db
-            var entityLocal = _repoProfile.FindByCondition(x => x.ProfileId.Equals(id)).FirstOrDefault();
+            var entityLocal = _repo.FindByCondition(x => x.ProfileId.Equals(id)).FirstOrDefault();
 
             return MapToModelNamespace(entity, entityLocal);
         }
 
-        public async Task<ProfileItemExportModel> Export(string id)
-        {
-            var entity = await _cloudLib.DownloadAsync(id);
-            if (entity == null) return null;
-
-            //return the whole thing because we also email some info to request info and use
-            //other data in this entity.
-            var result = new ProfileItemExportModel()
-            {
-                Item = MapToModelNamespace(entity, null),
-                NodesetXml = entity.Nodeset?.NodesetXml
-            };
-            return result;
-        }
-
-        public async Task<List<MarketplaceItemModel>> GetAll() {
+        public async Task<List<AdminMarketplaceItemModel>> GetAll() {
             var result = await this.Where(null);
             return result;
         }
 
-        public async Task<List<MarketplaceItemModel>> Where(string query,
+        public async Task<List<AdminMarketplaceItemModel>> Where(string query,
             List<string> ids = null, List<string> processes = null, List<string> verticals = null, List<string> exclude = null)
         {
+            //get the list of profiles in the local db with related items. If the item isn't in there, then we won't 
+            //return the profile even from Cloud Lib. The admin ui is meant to only show the profile list items that have related data.  
+            var idsLocal = _repo.FindByCondition(x => 
+                ids == null || ids.Any(y => y.Equals(x.ProfileId))).Select(x => x.ProfileId).ToList();
+            if (idsLocal == null || idsLocal.Count == 0) return new List<AdminMarketplaceItemModel>();
+
             //Note - splitting out each word in query into a separate string in the list
             //Per team, don't split out query into multiple keyword items
             //var keywords = string.IsNullOrEmpty(query) ? new List<string>() : query.Split(" ").ToList();
             var keywords = new List<string>();
 
             //append list of ids, processes, verticals
-            if (ids != null)
-            {
-                keywords = keywords.Union(ids).ToList();
-            }
+            //if (idsLocal != null)
+            //{
+            //    keywords = keywords.Union(idsLocal).ToList();
+            //}
             if (processes != null)
             {
                 keywords = keywords.Union(processes).ToList();
@@ -133,25 +162,41 @@
             if (!string.IsNullOrEmpty(query)) keywords.Add(query);
 
             var matches = await _cloudLib.SearchAsync(null, null, false, keywords, exclude, true);
-            if (matches == null || matches.Edges == null) return new List<MarketplaceItemModel>();
+            if (matches == null || matches.Edges == null) return new List<AdminMarketplaceItemModel>();
 
             //TBD - exclude some nodesets which are core nodesets - list defined in appSettings
 
-
-            return MapToModelsNodesetResult(matches.Edges);
+            //only get items who have a local id represented
+            var matchesFiltered = matches.Edges.Where(x =>
+                idsLocal.Any(y => x.Node != null && y.Equals(x.Node.Identifier.ToString()))).ToList();
+            return MapToModelsNodesetResult(matchesFiltered);
         }
 
-        public async Task<List<MarketplaceItemModel>> GetManyById(List<string> ids)
+        public async Task<List<AdminMarketplaceItemModel>> GetManyById(List<string> ids)
         {
+            //get the list of profiles in the local db with related items. If the item isn't in there, then we won't 
+            //return the profile even from Cloud Lib. The admin ui is meant to only show the profile list items that have related data.  
+            var idsLocal = _repo.FindByCondition(x =>
+                ids == null || ids.Any(y => y.Equals(x.ProfileId))).Select(x => x.ProfileId).ToList();
+            if (idsLocal == null || idsLocal.Count == 0) return new List<AdminMarketplaceItemModel>();
+
             var matches = await _cloudLib.GetManyAsync(ids);
-            if (matches == null || matches.Edges == null) return new List<MarketplaceItemModel>();
+            if (matches == null || matches.Edges == null) return new List<AdminMarketplaceItemModel>();
 
             return MapToModelsNodesetResult(matches.Edges);
         }
 
-        protected List<MarketplaceItemModel> MapToModelsNodesetResult(List<GraphQlNodeAndCursor<Nodeset>> entities)
+        public async Task<int> Delete(string id, string userId)
         {
-            var result = new List<MarketplaceItemModel>();
+            ProfileItem entity = _repo.FindByCondition(x => x.ProfileId == id).FirstOrDefault();
+            if (entity == null) return 0;
+            await _repo.Delete(entity);
+            return 1;
+        }
+
+        protected List<AdminMarketplaceItemModel> MapToModelsNodesetResult(List<GraphQlNodeAndCursor<Nodeset>> entities)
+        {
+            var result = new List<AdminMarketplaceItemModel>();
 
             foreach (var item in entities)
             {
@@ -165,12 +210,12 @@
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        protected MarketplaceItemModel MapToModelNodesetResult(GraphQlNodeAndCursor<Nodeset> entity)
+        protected AdminMarketplaceItemModel MapToModelNodesetResult(GraphQlNodeAndCursor<Nodeset> entity)
         {
             if (entity != null && entity.Node != null)
             {
                 //map results to a format that is common with marketplace items
-                return new MarketplaceItemModel()
+                return new AdminMarketplaceItemModel()
                 {
                     ID = entity.Node.Identifier.ToString(),
                     Name = entity.Node.Identifier.ToString(),  //in marketplace items, name is used for navigation in friendly url
@@ -185,7 +230,6 @@
                     Version = entity.Node.Version,
                     IsFeatured = false,
                     ImagePortrait = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdPortrait)),
-                    //ImageSquare = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdSquare)),
                     ImageLandscape = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdLandscape))
                 };
             }
@@ -193,7 +237,6 @@
             {
                 return null;
             }
-
         }
 
         /// <summary>
@@ -202,7 +245,7 @@
         /// <param name="entity"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        protected MarketplaceItemModel MapToModelNamespace(UANameSpace entity, ProfileItem entityLocal)
+        protected AdminMarketplaceItemModel MapToModelNamespace(UANameSpace entity, ProfileItem entityLocal)
         {
             if (entity != null)
             {
@@ -211,7 +254,7 @@
                 //if (entity.Category != null) metatags.Add(entity.Category.Name);
 
                 //map results to a format that is common with marketplace items
-                var result = new MarketplaceItemModel()
+                var result = new AdminMarketplaceItemModel()
                 {
                     ID = entity.Nodeset.Identifier.ToString(),
                     Name = entity.Nodeset.Identifier.ToString(),  //in marketplace items, name is used for navigation in friendly url
@@ -250,18 +293,10 @@
                 };
 
                 //get related data - if any
-                if (entityLocal != null)
-                {
-                    //go get related items if any
-                    //get list of marketplace items associated with this list of ids, map to return object
-                    var relatedItems = MapToModelRelatedItems(entityLocal?.RelatedItems);
+                //get list of marketplace items associated with this list of ids, map to return object
+                result.RelatedItems = MapToModelRelatedItems(entityLocal?.RelatedItems);
+                result.RelatedProfiles = MapToModelRelatedProfiles(entityLocal?.RelatedProfiles);
 
-                    //get related profiles from CloudLib
-                    var relatedProfiles = MapToModelRelatedProfiles(entityLocal?.RelatedProfiles);
-
-                    //map related items into specific buckets - required, recommended
-                    result.RelatedItemsGrouped = GroupAndMergeRelatedItems(relatedItems, relatedProfiles);
-                }
                 return result;
             }
             else
@@ -318,108 +353,40 @@
         /// Get related items from DB, filter out each group based on required/recommended/related flag
         /// assume all related items in same collection and a type id distinguishes between the types. 
         /// </summary>
-        protected List<MarketplaceItemRelatedModel> MapToModelRelatedProfiles(List<RelatedProfileItem> items)
+        protected List<ProfileItemRelatedModel> MapToModelRelatedProfiles(List<RelatedProfileItem> items)
         {
             if (items == null)
             { 
-                return new List<MarketplaceItemRelatedModel>();
+                return new List<ProfileItemRelatedModel>();
             }
 
             //get list of profile items associated with this list of ids, call CloudLib to get the supporting info for these
-            var matches = this.GetManyById(items.Select(x => x.ProfileId).ToList()).Result;
-            return !matches.Any() ? new List<MarketplaceItemRelatedModel>() :
-                matches.Select(x => new MarketplaceItemRelatedModel()
+            var profiles = _cloudLib.GetManyAsync(items.Select(x => x.ProfileId).ToList()).Result;
+            var matches = (profiles == null || profiles.Edges == null) ? 
+                new List<AdminMarketplaceItemModel>() :
+                MapToModelsNodesetResult(profiles.Edges);
+
+            return !matches.Any() ? new List<ProfileItemRelatedModel>() :
+                matches.Select(x => new ProfileItemRelatedModel()
                 {
                     RelatedId = x.ID,
-                    Abstract = x.Abstract,
-                    DisplayName = x.DisplayName,
                     Description = x.Description,
+                    DisplayName = x.DisplayName,
                     Name = x.Name,
                     Namespace = x.Namespace,
-                    Type = x.Type,
                     Version = x.Version,
-                    ImagePortrait = x.ImagePortrait,
-                    ImageLandscape = x.ImageLandscape,
                     //assumes only one related item per type
-                    RelatedType = //items.Find(x => x.ProfileId.Equals(x.ID)) == null ? null :
-                        MapToModelLookupItem(
-                        items.Find(z => z.ProfileId.Equals(x.ID)).RelatedTypeId,
+                    RelatedType = MapToModelLookupItem(
+                        items.Find(z => z.ProfileId.ToString().Equals(x.ID))?.RelatedTypeId,
                         _lookupItemsRelatedType.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList())
-                }).ToList();
-        }
-
-        /// <summary>
-        /// Take two related sets, group them by type and union them, filter them by related type and order them
-        /// </summary>
-        /// <param name="items"></param>
-        /// <param name="itemsProfile"></param>
-        /// <param name="relatedType"></param>
-        /// <returns></returns>
-        protected List<RelatedItemsGroupBy> GroupAndMergeRelatedItems(
-            List<MarketplaceItemRelatedModel> items,
-            List<MarketplaceItemRelatedModel> itemsProfile)
-        {
-            if (items == null && itemsProfile == null)
-            {
-                return new List<RelatedItemsGroupBy>();
-            }
-            //group by both sets and then merge
-            var result = new List<RelatedItemsGroupBy>();
-
-            //convert group to return type
-            if (items?.Count > 0)
-            {
-                var grpItems = items.GroupBy(x => new { ID = x.RelatedType.ID });
-                foreach (var item in grpItems)
-                {
-                    result.Add(new RelatedItemsGroupBy()
-                    {
-                        RelatedType = items.Where(x => x.RelatedType.ID.Equals(item.Key.ID)).FirstOrDefault()?.RelatedType,
-                        Items = items.Where(x => x.RelatedType.ID.Equals(item.Key.ID)).ToList() // item.ToList()
-                    });
-                }
-            }
-
-            //append profiles group to existing group (if present)
-            if (itemsProfile?.Count > 0)
-            {
-                var grpProfile = itemsProfile.GroupBy(x => new { ID = x.RelatedType.ID });
-                foreach (var item in grpProfile)
-                {
-                    var matches = itemsProfile.Where(x => x.RelatedType.ID.Equals(item.Key.ID)).ToList();
-
-                    var existingGroup = result.Find(x => x.RelatedType.ID.Equals(item.Key.ID));
-                    if (existingGroup == null)
-                    {
-                        result.Add(new RelatedItemsGroupBy()
-                        {
-                            RelatedType = matches.FirstOrDefault()?.RelatedType,
-                            Items = matches
-                        });
-                    }
-                    else
-                    {
-                        existingGroup.Items = existingGroup.Items.Union(matches).ToList();
-                    }
-                }
-            }
-
-            //do some ordering
-            result = result
+                })
                 .OrderBy(x => x.RelatedType.DisplayOrder)
-                .ThenBy(x => x.RelatedType.Name).ToList();
-            foreach (var g in result)
-            {
-                g.Items = g.Items
-                    .OrderBy(x => x.DisplayName)
-                    .ThenBy(x => x.Name)
-                    .ThenBy(x => x.Namespace)
-                    .ThenBy(x => x.Version)
-                    .ToList();
-            }
-
-            return result;
+                .ThenBy(x => x.RelatedType.Name)
+                .ThenBy(x => x.DisplayName)
+                .ToList();
         }
+
+
 
         protected ImageItemSimpleModel MapToModelImageSimple(MongoDB.Bson.BsonObjectId id, List<ImageItemModel> images)
         {
@@ -450,6 +417,27 @@
             };
         }
 
+        protected void MapToEntity(ref ProfileItem entity, AdminMarketplaceItemModel model)
+        {
+            //ensure this value is always without spaces and is lowercase. 
+            //replace child collection of items - ids are preserved
+            entity.RelatedItems = model.RelatedItems
+                .Where(x => x.RelatedType != null) //only include selected rows
+                .Select(x => new RelatedItem()
+                {
+                    MarketplaceItemId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedId)),
+                    RelatedTypeId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedType.ID)),
+                }).ToList();
+            //replace child collection of items - ids are preserved
+            entity.RelatedProfiles = model.RelatedProfiles
+                .Where(x => x.RelatedType != null) //only include selected rows
+                .Select(x => new RelatedProfileItem()
+                {
+                    //ID = x.ID,
+                    ProfileId = x.RelatedId,
+                    RelatedTypeId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedType.ID)),
+                }).ToList();
+        }
 
         public virtual void Dispose()
         {

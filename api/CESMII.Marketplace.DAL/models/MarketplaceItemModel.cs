@@ -1,5 +1,6 @@
 ﻿namespace CESMII.Marketplace.DAL.Models
 {
+    using CESMII.Marketplace.Common.Enums;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -86,10 +87,17 @@
         public bool IsVerified { get; set; }
 
         /// <summary>
-        /// This is only used by controller to find and set 
-        /// similar items related to this item.
+        /// List of items that have been marked as related for this marketplace item by admin. Could be
+        /// apps, hardware, profiles.
         /// </summary>
-        public List<MarketplaceItemModel> SimilarItems { get; set; }
+        /// <remarks>This will get merged in with util.SimilarItems set in controller based on common processes, industry verts, etc. </remarks>
+        public List<MarketplaceItemRelatedModel> SimilarItems { get; set; }
+
+        /// <summary>
+        /// Groups of related items. 
+        /// </summary>
+        /// <remarks>Doing it this way allows for additional groups to be added w/o additional back end coding</remarks>
+        public List<RelatedItemsGroupBy> RelatedItemsGrouped { get; set; }
 
         public ImageItemSimpleModel ImagePortrait { get; set; }
         
@@ -113,6 +121,7 @@
         public virtual List<LookupItemModel> IndustryVerticals { get; set; }
 
         public virtual MarketplaceItemAnalyticsModel Analytics { get; set; }
+
     }
 
     public class AdminMarketplaceItemModel : MarketplaceItemModelBase
@@ -121,15 +130,15 @@
 
         public List<LookupItemFilterModel> IndustryVerticals { get; set; }
 
-    }
+        /// <summary>
+        /// List of items that are related to this item.
+        /// </summary>
+        public virtual List<MarketplaceItemRelatedModel> RelatedItems { get; set; }
 
-    /// <summary>
-    /// Extend marketplaceitemmodel for the export scenario.
-    /// </summary>
-    public class ProfileItemExportModel
-    {
-        public MarketplaceItemModel Item { get; set; }
-        public string NodesetXml { get; set; }
+        /// <summary>
+        /// List of items that are related to this item.
+        /// </summary>
+        public virtual List<ProfileItemRelatedModel> RelatedProfiles { get; set; }
     }
 
     /// <summary>
@@ -142,5 +151,47 @@
         public string DisplayName { get; set; }
     }
 
+    /// <summary>
+    /// A model with abbreviated marketplace item data used for related data 
+    /// where keeping data small is helpful
+    /// </summary>
+    public class MarketplaceItemRelatedModel //: MarketplaceItemSimpleModel
+    {
+        /// <summary>
+        /// This represents the related Marketplace item id.
+        /// </summary>
+        public string RelatedId { get; set; }
 
+        public string Name { get; set; }
+        public string DisplayName { get; set; }
+
+        public string Version { get; set; }
+
+        /// <summary>
+        /// Namespace URI. Only applies to profiles pulled from CloudLib
+        /// </summary>
+        public string Namespace { get; set; }
+
+        public string Abstract { get; set; }
+
+        public string Description { get; set; }
+
+        /// <summary>
+        /// Type of marketplace item: profile, app
+        /// </summary>
+        public virtual LookupItemModel Type { get; set; }
+
+        public ImageItemSimpleModel ImagePortrait { get; set; }
+
+        public ImageItemSimpleModel ImageLandscape { get; set; }
+
+        public LookupItemModel RelatedType { get; set; }
+    }
+
+
+    public class RelatedItemsGroupBy
+    {
+        public LookupItemModel RelatedType { get; set; }
+        public List<MarketplaceItemRelatedModel> Items { get; set; }
+    }
 }

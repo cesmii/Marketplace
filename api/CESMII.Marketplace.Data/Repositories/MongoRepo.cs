@@ -90,19 +90,19 @@
             return result.Skip(skip).Limit(take).ToList();
         }
 
-        public List<TEntity> AggregateMatch(FilterDefinition<TEntity> filter, List<string> fieldList = null)
+        public async Task<List<TEntity>> AggregateMatchAsync(FilterDefinition<TEntity> filter, List<string> fieldList = null)
         {
             //calling it this way so that the repo will accept .Any syntax. The find syntax commented out operates 
             //slightly different in how it forms the query
             if (fieldList == null)
             {
-                return _collection.Aggregate().Match(filter).ToList();
+                return await _collection.Aggregate().Match(filter).ToListAsync();
             }
             else
             {
                 //performance improvement - limit columns being queried
                 string fieldListString = BuildProjectionFieldList(fieldList);
-                return _collection.Aggregate().Match(filter).Project<TEntity>(fieldListString).ToList();
+                return await _collection.Aggregate().Match(filter).Project<TEntity>(fieldListString).ToListAsync();
             }
 
         }
