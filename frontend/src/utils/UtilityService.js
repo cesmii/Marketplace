@@ -580,3 +580,52 @@ export const isInRole = (account, roleName) => {
     //check if role name has a match in array
     return roles.findIndex(x => x.toLowerCase() === roleName.toLowerCase() ) > -1;
 }
+
+///--------------------------------------------------------------------------
+/// useQueryString - extract query string parameter from url
+//--------------------------------------------------------------------------
+export function useQueryString(key) {
+    return new URLSearchParams(window.location.search).get(key);
+}
+
+///--------------------------------------------------------------------------
+/// menu icon convenience code
+//--------------------------------------------------------------------------
+export function renderMenuIcon(iconName, alt, className='mr-3') {
+    if (iconName == null || iconName === '') return null;
+    return (
+        <span className={className} alt={`${alt == null ? iconName : alt}`}><SVGIcon name={iconName} size={24} /></span>
+    );
+}
+
+///--------------------------------------------------------------------------
+/// menu icon convenience code
+//--------------------------------------------------------------------------
+export function renderMenuColorIcon(iconName, alt, colorFill, className='mr-3') {
+    if (iconName == null || iconName === '') return null;
+    return (
+        <span className={className} alt={`${alt == null ? iconName : alt}`}><SVGIcon name={iconName} fill={colorFill} size={24} /></span>
+    );
+}
+
+///--------------------------------------------------------------------------
+/// trim a long string to length to keep it manageable in display.
+/// don't trim until we encounter a space
+//--------------------------------------------------------------------------
+export function trimString(val, length = 256) {
+    if (val == null || val.length < 256) return val;
+    let result = val;
+    let lengthAdjusted = length;
+    //keep decreasing the string length till we hit a space.
+    do {
+        lengthAdjusted--;
+    }
+    while (result.indexOf(" ", lengthAdjusted) === -1);
+
+    //protect this against a scenario where it is just one massive long string with no breaks. 
+    if (lengthAdjusted < 50) lengthAdjusted = length;
+
+    //now trim the string and return
+    return val.substring(0, lengthAdjusted) + '...';
+}
+

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 import axiosInstance from "../services/AxiosService";
@@ -8,8 +8,8 @@ import { useLoginStatus } from '../components/OnLoginHandler';
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
 import { cleanFileName, generateLogMessageString, getImageUrl, getMarketplaceIconName, scrollTopScreen } from '../utils/UtilityService'
-import MarketplaceTileList from './shared/MarketplaceTileList';
 import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
+import { MarketplaceRelatedItems} from '../services/MarketplaceService';
 
 import './styles/MarketplaceEntity.scss';
 
@@ -21,6 +21,9 @@ function ProfileEntity() {
     // Region: Initialization
     //-------------------------------------------------------------------
     const history = useHistory();
+    const _scrollToSpecs = useRef(null);
+    const _scrollToRelated = useRef(null);
+
     const { id } = useParams();
     const [item, setItem] = useState({});
     const [isLoading, setIsLoading] = useState(true);
@@ -102,6 +105,16 @@ function ProfileEntity() {
         scrollTopScreen();
     }
 
+    const onViewSpecifications = (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: (_scrollToSpecs.current.getBoundingClientRect().y - 80), behavior: 'smooth' });
+    }
+
+    const onViewRelatedItems = (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: (_scrollToRelated.current.getBoundingClientRect().y - 80), behavior: 'smooth' });
+    }
+
     //-------------------------------------------------------------------
     // Region: Render Helpers
     //-------------------------------------------------------------------
@@ -132,14 +145,6 @@ function ProfileEntity() {
 
         return (
             <>
-                <div className="row mb-2 mb-md-3" >
-                    <div className="col-sm-12 d-flex align-items-center">
-                        <h2 className="m-0 mr-2">
-                            <span className="d-none d-md-inline">Smart Manufacturing Profile </span> Details
-                        </h2>
-                        <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/profile/${item.id}`} >Request More Info</a>
-                    </div>
-                </div>
                 <div className="row" >
                     <div className="col-sm-12">
                         <div className="mb-3" dangerouslySetInnerHTML={{ __html: item.description }} ></div>
@@ -166,8 +171,10 @@ function ProfileEntity() {
             return;
         }
         return (
-            <MarketplaceItemEntityHeader key={item.id} item={item} isAuthenticated={isAuthenticated} isAuthorized={isAuthorized} showActions={true} cssClass="marketplace-list-item"
-                onDownload={downloadProfile} showProfileDesignerLink={true} />
+            <MarketplaceItemEntityHeader key={item.id} item={item} isAuthenticated={isAuthenticated}
+                isAuthorized={isAuthorized} showActions={true} cssClass="marketplace-list-item"
+                onDownload={downloadProfile} showProfileDesignerLink={true}
+                onViewSpecifications={onViewSpecifications} onViewRelatedItems={onViewRelatedItems} />
         )
     }
 
@@ -178,30 +185,38 @@ function ProfileEntity() {
         );
     }
 
-    //render new
-    const renderSimilarItems = () => {
+    const renderMainContent = () => {
         if (loadingProps.isLoading) return;
-
-        if (item.similarItems == null || item.similarItems.length === 0) return;
 
         return (
             <>
-                <div className="row" >
-                    <div className="col-sm-12 mt-5 mb-3" >
-                        <h3 className="m-0">
-                            Related
-                        </h3>
+                <div className="marketplace-list-item border" >
+                    <div className="card mb-0 border-0">
+                        <div className="card-header bg-transparent p-2 pt-3 border-bottom-0" id="headingOne">
+                            <div className="col-sm-12 d-flex align-items-center">
+                                <h2 className="m-0 mr-2">
+                                    Smart Manufacturing Profile Details
+                                </h2>
+                                <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/profile/${item.id}`} >Request More Info</a>
+                            </div>
+                        </div>
+                        <div id="collapseOne" className="collapse show mb-3" aria-labelledby="headingOne" >
+                            <div className="card-body">
+                                {renderSolutionDetails()}
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div className="row" >
-                    <div className="col-sm-12">
-                        <MarketplaceTileList items={item.similarItems} layout="banner" colCount={3} />
-                    </div>
-                </div>
+
+                {(item.relatedItemsGrouped != null && item.relatedItemsGrouped.length > 0) &&
+                    <>
+                        <h2 ref={_scrollToSpecs} className="m-3 mt-4" >Specifications</h2>
+                        <MarketplaceRelatedItems items={item.relatedItemsGrouped} />
+                    </>
+                }
             </>
         );
     }
-
 
     //-------------------------------------------------------------------
     // Region: Render
@@ -237,8 +252,7 @@ function ProfileEntity() {
                             {(!loadingProps.isLoading && !isLoading) &&
                                 <div className="marketplace-entity">
                                     {renderItemRow()}
-                                    {renderSolutionDetails()}
-                                    {renderSimilarItems()}
+                                    {renderMainContent()}
                                 </div>
                             }
                         </div>

@@ -111,9 +111,15 @@ function AdminImageList(props) {
     //-------------------------------------------------------------------
     const renderNoDataRow = () => {
         return (
-            <div className="alert alert-info-custom mt-2 mb-2">
-                <div className="text-center" >There are no images for this item.</div>
-            </div>
+            <tbody>
+                <tr>
+                    <td>
+                        <div className="alert alert-info-custom mt-2 mb-2">
+                        <div className="text-center" >There are no images for this item.</div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
         );
     }
 
