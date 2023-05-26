@@ -12,6 +12,7 @@ import ConfirmationModal from '../../components/ConfirmationModal';
 import { clearSearchCriteria, getMarketplacePreferences, setMarketplacePageSize } from '../../services/MarketplaceService';
 import AdminProfileRow from './shared/AdminProfileRow';
 import color from '../../components/Constants';
+import OnDeleteConfirm from '../../components/OnDeleteConfirm';
 
 const CLASS_NAME = "AdminProfileList";
 
@@ -27,8 +28,8 @@ function AdminProfileList() {
     const _marketplacePreferences = getMarketplacePreferences();
     const [_pager, setPager] = useState({ currentPage: 1, pageSize: _marketplacePreferences.pageSize, searchVal: null });
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const [_deleteModal, setDeleteModal] = useState({ show: false, items: null });
     const [_error, setError] = useState({ show: false, message: null, caption: null });
+    const [_itemDelete, setItemDelete] = useState(null);
 
     const caption = 'Admin';
 
@@ -120,68 +121,27 @@ function AdminProfileList() {
     //-------------------------------------------------------------------
     // Region: Event Handling - delete item
     //-------------------------------------------------------------------
-    /*
-    const onDeleteItem = (img) => {
+    const onDeleteItem = (itm) => {
         console.log(generateLogMessageString('onDeleteItem', CLASS_NAME));
-        setDeleteModal({ show: true, item: img });
+        setItemDelete(itm);
     };
 
-    const onDeleteConfirm = () => {
-        console.log(generateLogMessageString('onDeleteConfirm', CLASS_NAME));
+    const onDeleteComplete = (isSuccess, itm) => {
+        console.log(generateLogMessageString('onDeleteComplete', CLASS_NAME));
 
-        //show a spinner
-        setLoadingProps({ isLoading: true, message: "" });
+        setItemDelete(null);
 
-        //perform delete call
-        var data = { id: _deleteModal.item.id };
-        var url = `admin/marketplace/delete`;
-        axiosInstance.post(url, data)  //api allows one or many
-            .then(result => {
+        if (!isSuccess) return;
 
-                if (result.data.isSuccess) {
-                    //hide a spinner, show a message
-                    setLoadingProps({
-                        isLoading: false, message: null, inlineMessages: [
-                            {
-                                id: new Date().getTime(), severity: "success", body: `Item was deleted`, isTimed: true
-                            }
-                        ],
-                    });
-                    //remove the item from view. 
-                    var i = _dataRows.all.findIndex(x => x.id === _deleteModal.item.id);
-                    if (i >= 0) {
-                        _dataRows.all.splice(i, 1)
-                        setDataRows({
-                            ..._dataRows, all: _dataRows.all, itemCount: _dataRows.itemCount - 1
-                        });
-                    }
-
-                    setDeleteModal({ show: false, item: null });
-                }
-                else {
-                    //update spinner, messages
-                    setError({ show: true, caption: 'Delete Item Error', message: `An error occurred deleting this item: ${result.data.message}` });
-                    setLoadingProps({ isLoading: false, message: null });
-                    setDeleteModal({ show: false, item: null });
-                }
-            })
-            .catch(error => {
-                //hide a spinner, show a message
-                setError({ show: true, caption: 'Delete Item Error', message: `An error occurred deleting this item.` });
-                setLoadingProps({ isLoading: false, message: null });
-
-                console.log(generateLogMessageString('deleteItem||error||' + JSON.stringify(error), CLASS_NAME, 'error'));
-                console.log(error);
-                //scroll back to top
-                window.scroll({
-                    top: 0,
-                    left: 0,
-                    behavior: 'smooth',
-                });
-                setDeleteModal({ show: false, item: null });
+        //remove the item from view. 
+        var i = _dataRows.all.findIndex(x => x.id === itm.id);
+        if (i >= 0) {
+            _dataRows.all.splice(i, 1)
+            setDataRows({
+                ..._dataRows, all: _dataRows.all, itemCount: _dataRows.itemCount - 1
             });
+        }
     };
-    */
 
     //-------------------------------------------------------------------
     // Region: Render helpers
@@ -227,7 +187,7 @@ function AdminProfileList() {
 
         const mainBody = _dataRows.all.map((item) => {
             return (
-                <AdminProfileRow key={item.id} item={item} cssClass={`admin-item-row`} />
+                <AdminProfileRow key={item.id} item={item} cssClass={`admin-item-row`} onDeleteItem={onDeleteItem} />
             );
         });
 
@@ -260,33 +220,6 @@ function AdminProfileList() {
         );
     };
 
-    /*
-    //render the delete modal when show flag is set to true
-    //callbacks are tied to each button click to proceed or cancel
-    const renderDeleteConfirmation = () => {
-
-        if (!_deleteModal.show) return;
-
-        var message = `You are about to delete '${_deleteModal.item.displayName}'. This action cannot be undone. Are you sure?`;
-        var caption = `Delete Item`;
-
-        return (
-            <>
-                <ConfirmationModal showModal={_deleteModal.show} caption={caption} message={message}
-                    icon={{ name: "warning", color: color.trinidad }}
-                    confirm={{ caption: "Delete", callback: onDeleteConfirm, buttonVariant: "danger" }}
-                    cancel={{
-                        caption: "Cancel",
-                        callback: () => {
-                            console.log(generateLogMessageString(`onDeleteCancel`, CLASS_NAME));
-                            setDeleteModal({ show: false, item: null });
-                        },
-                        buttonVariant: null
-                    }} />
-            </>
-        );
-    };
-    */
 
     //-------------------------------------------------------------------
     // Region: Render final output
@@ -327,6 +260,15 @@ function AdminProfileList() {
                     {renderPagination()}
                 </div>
             </div>
+            <OnDeleteConfirm
+                item={_itemDelete}
+                onDeleteComplete={onDeleteComplete}
+                urlDelete={`admin/profile/delete`}
+                caption='Remove Related Items'
+                confirmMessage={`You are about to remove all related items and related profiles from '${_itemDelete?.displayName}'. This action cannot be undone.`}
+                successMessage='Related items and related profiles were removed.'
+                errorMessage='An error occurred removing relationships'
+            />
             {renderErrorMessage()}
         </>
     )

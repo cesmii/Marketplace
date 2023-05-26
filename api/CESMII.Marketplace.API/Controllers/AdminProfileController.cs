@@ -42,6 +42,8 @@ namespace CESMII.Marketplace.Api.Controllers
             var result = new AdminMarketplaceItemModel();
 
             //pre-populate list of look up items for industry verts and categories
+            //TBD - for now, we don't use this. uncomment this if we start capturing profile's verticals, processes
+            /*
             var lookupItems = _dalLookup.Where(x => x.LookupType.EnumValue == LookupTypeEnum.IndustryVertical
                 || x.LookupType.EnumValue == LookupTypeEnum.Process, null, null, false, false).Data;
             result.IndustryVerticals = lookupItems.Where(x => x.LookupType.EnumValue == LookupTypeEnum.IndustryVertical)
@@ -61,6 +63,7 @@ namespace CESMII.Marketplace.Api.Controllers
                     IsActive = itm.IsActive,
                     DisplayOrder = itm.DisplayOrder
                 }).ToList();
+            */
 
             //default some values
             result.Name = "";
