@@ -1,5 +1,5 @@
 import React from 'react'
-import { formatDate } from '../../../utils/UtilityService';
+import { formatItemPublishDate } from '../../../utils/UtilityService';
 
 //const CLASS_NAME = "AdminProfileRow";
 
@@ -8,6 +8,10 @@ function AdminProfileRow(props) { //props are item, showActions
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
+    const onDeleteItem = (e) => {
+        if (props.onDeleteItem) props.onDeleteItem(props.item);
+        e.preventDefault();
+    }
 
     //-------------------------------------------------------------------
     // Region: Render helpers
@@ -31,6 +35,9 @@ function AdminProfileRow(props) { //props are item, showActions
                     </th>
                     <th className="py-2 d-none d-sm-table-cell align-text-top" >
                         Namespace / Version / Publish Date
+                    </th>
+                    <th className="py-2 pr-2 text-right" >
+                        Remove Relationships
                     </th>
                 </tr>
             </>
@@ -61,10 +68,13 @@ function AdminProfileRow(props) { //props are item, showActions
                     }
                     {props.item.publishDate != null &&
                         <>
-                            <br />
-                            Publish Date: {props.item.publishDate}
+                        <br />
+                        Publish Date: {formatItemPublishDate(props.item)}
                         </>
                     }
+                </td>
+                <td className="py-2 pr-2 text-right" >
+                    <button className="btn btn-icon-outline circle ml-auto" title="Remove Related Items & Profiles" onClick={onDeleteItem} ><i className="material-icons">close</i></button>
                 </td>
             </tr>
         </>

@@ -25,6 +25,7 @@ import AdminRelatedItemList from './shared/AdminRelatedItemList';
 import { clearSearchCriteria } from '../../services/MarketplaceService';
 
 import '../../components/styles/TabContainer.scss';
+import OnDeleteConfirm from '../../components/OnDeleteConfirm'
 
 const CLASS_NAME = "AdminProfileEntity";
 
@@ -46,12 +47,12 @@ function AdminProfileEntity() {
     const [_isValid, setIsValid] = useState({
         profileId: true, relatedItems: true, relatedProfiles: true, relatedItemsMinCount: true
     });
-    const [_deleteModal, setDeleteModal] = useState({ show: false, items: null });
     const [_error, setError] = useState({ show: false, message: null, caption: null });
     const [_refreshItem, setRefreshItem] = useState(null);  //trigger a retrieval of data on select of profile id - new mode.
 
     const [_itemsLookup, setItemsLookup] = useState([]);  //profile items 
     const [_loadLookupData, setLoadLookupData] = useState(null);
+    const [_itemDelete, setItemDelete] = useState(null);
 
     //-------------------------------------------------------------------
     // Region: fetch calls
@@ -410,56 +411,20 @@ function AdminProfileEntity() {
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
-    const onRemoveRelationships = () => {
-        console.log(generateLogMessageString('onRemoveRelationships', CLASS_NAME));
-        setDeleteModal({ show: true, item: item });
+    const onDeleteItem = () => {
+        console.log(generateLogMessageString('onDeleteItem', CLASS_NAME));
+        setItemDelete(item);
     };
 
-    const onRemoveRelationshipsConfirm = () => {
-        console.log(generateLogMessageString('onRemoveRelationshipsConfirm', CLASS_NAME));
+    const onDeleteComplete = (isSuccess, itm) => {
+        console.log(generateLogMessageString('onDeleteComplete', CLASS_NAME));
 
-        //show a spinner
-        setLoadingProps({ isLoading: true, message: "" });
+        setItemDelete(null);
 
-        //perform call - this will only remove relationships in the marketplace db. 
-        //this does not impact the Cloud Lib in any way.
-        var data = { id: item.id };
-        var url = `admin/profile/delete`;
-        axiosInstance.post(url, data)  //api allows one or many
-            .then(result => {
+        if (!isSuccess) return;
 
-                if (result.data.isSuccess) {
-                    //hide a spinner, show a message
-                    setLoadingProps({
-                        isLoading: false, message: null, inlineMessages: [
-                            {
-                                id: new Date().getTime(), severity: "success", body: `Related items and related profiles were removed`, isTimed: true
-                            }
-                        ],
-                        refreshLookupData: true
-                    });
-                }
-                else {
-                    //update spinner, messages
-                    setError({ show: true, caption: 'Remove Related Error', message: `An error occurred removing relationships: ${result.data.message}` });
-                    setLoadingProps({ isLoading: false, message: null });
-                }
-                history.push('/admin/profile/list');
-            })
-            .catch(error => {
-                //hide a spinner, show a message
-                setError({ show: true, caption: 'Remove Related Error', message: `An error occurred removing relationships.` });
-                setLoadingProps({ isLoading: false, message: null });
-
-                console.log(generateLogMessageString('deleteItem||error||' + JSON.stringify(error), CLASS_NAME, 'error'));
-                console.log(error);
-                //scroll back to top
-                window.scroll({
-                    top: 0,
-                    left: 0,
-                    behavior: 'smooth',
-                });
-            });
+        //navigate to the list view
+        history.push('/admin/profile/list');
     };
 
     const onSave = () => {
@@ -544,80 +509,6 @@ function AdminProfileEntity() {
         setItem(JSON.parse(JSON.stringify(item)));
         validateForm_profileId(e);
     }
-    /*
-    //on change publish date handler to update state
-    const onChangePublishDate = (e) => {
-
-        //if user types directly into year field, it prematurely does an onChange event fire.
-        //This prevents that:
-        if (e.target.value !== '') {
-            var dt = new Date(e.target.value);
-            if (dt.getFullYear() < 2000) return;
-        }
-
-        //update the state
-        item[e.target.id] = e.target.value === '' ? null : e.target.value;
-        setItem(JSON.parse(JSON.stringify(item)));
-    }
-
-    //on change handler to update state
-    const onChange = (e) => {
-        //console.log(generateLogMessageString(`onEntityChange||e:${e.target}`, CLASS_NAME));
-
-        //note you must update the state value for the input to be read only. It is not enough to simply have the onChange handler.
-        switch (e.target.id) {
-            case "displayName":
-            case "description":
-            case "abstract":
-            case "version":
-            case "metaTagsConcatenated":
-                item[e.target.id] = e.target.value;
-                break;
-            case "name":
-                item[e.target.id] = e.target.value.toLowerCase();
-                break;
-            case "isFeatured":
-            case "isVerified":
-                item[e.target.id] = e.target.checked;
-                break;
-            case "status":
-            case "type":
-            case "publisher":
-                if (e.target.value.toString() === "-1") item[e.target.id] = null;
-                else {
-                    item[e.target.id] = { id: e.target.value, name: e.target.options[e.target.selectedIndex].text };
-                }
-                break;
-            default:
-                return;
-        }
-        //update the state
-        setItem(JSON.parse(JSON.stringify(item)));
-    }
-    */
-
-    /*
-    //on change handler to update state
-    const onChangeImageSelect = (e) => {
-        //console.log(generateLogMessageString(`onEntityChange||e:${e.target}`, CLASS_NAME));
-
-        //note you must update the state value for the input to be read only. It is not enough to simply have the onChange handler.
-        switch (e.target.id) {
-            case "imagePortrait":
-            case "imageSquare":
-            case "imageLandscape":
-                if (e.target.value.toString() === "-1") item[e.target.id] = null;
-                else {
-                    item[e.target.id] = { id: e.target.value, fileName: e.target.options[e.target.selectedIndex].text };
-                }
-                break;
-            default:
-                return;
-        }
-        //update the state
-        setItem(JSON.parse(JSON.stringify(item)));
-    }
-    */
 
     const onItemSelectIndustryVertical = (vert) => {
         console.log(generateLogMessageString('onItemSelectIndustryVertical', CLASS_NAME));
@@ -743,7 +634,7 @@ function AdminProfileEntity() {
                     <SVGIcon name="more-vert" size="24" fill={color.shark} />
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
-                    <Dropdown.Item onClick={onRemoveRelationships} >Remove All Related Items & Profiles</Dropdown.Item>
+                    <Dropdown.Item onClick={onDeleteItem} >Remove All Related Items & Profiles</Dropdown.Item>
                 </Dropdown.Menu>
             </Dropdown>
         );
@@ -776,49 +667,6 @@ function AdminProfileEntity() {
         )
     };
 
-    //-------------------------------------------------------------------
-    // Region: Render Helpers - Immage selection
-    //-------------------------------------------------------------------
-    /*
-    const renderImageSelection = (fieldName, caption, infoText) => {
-        //show readonly input for view mode
-        if (isReadOnly) {
-            return (
-                <Form.Group>
-                    <Form.Label>{caption}</Form.Label>
-                    <Form.Control id={fieldName} type="" value={item[fieldName] != null ? item[fieldName].fileName : ""} readOnly={isReadOnly} />
-                </Form.Group>
-            )
-        }
-        if (_imageRows == null) return;
-
-        //show drop down list for edit, copy mode
-        const options = _imageRows.map((item) => {
-            return (<option key={item.id} value={item.id} >{item.fileName}</option>)
-        });
-
-        return (
-            <Form.Group>
-                <Form.Label>{caption}</Form.Label>
-                {!_isValid.images[fieldName] &&
-                    <span className="invalid-field-message inline">
-                        Required
-                    </span>
-                }
-                <Form.Control id={fieldName} as="select" className={(!_isValid.images[fieldName] ? 'invalid-field minimal pr-5' : 'minimal pr-5')} value={item[fieldName] == null ? "-1" : item[fieldName].id}
-                    onBlur={validateForm_image} onChange={onChangeImageSelect} >
-                    <option key="-1|Select One" value="-1" >--Select One--</option>
-                    {options}
-                </Form.Control>
-                {infoText != null &&
-                    <span className="small text-muted">
-                        {infoText}
-                    </span>
-                }
-            </Form.Group>
-        )
-    };
-    */
 
     const renderButtons = () => {
         if (mode.toLowerCase() !== "view") {
@@ -834,31 +682,6 @@ function AdminProfileEntity() {
         }
     }
 
-    //render the delete modal when show flag is set to true
-    //callbacks are tied to each button click to proceed or cancel
-    const renderDeleteConfirmation = () => {
-
-        if (!_deleteModal.show) return;
-
-        var message = `You are about to remove all related items and related profiles from '${_deleteModal.item.displayName}'. This action cannot be undone. Are you sure?`;
-        var caption = `Remove Related`;
-
-        return (
-            <>
-                <ConfirmationModal showModal={_deleteModal.show} caption={caption} message={message}
-                    icon={{ name: "warning", color: color.trinidad }}
-                    confirm={{ caption: "Proceed", callback: onRemoveRelationshipsConfirm, buttonVariant: "danger" }}
-                    cancel={{
-                        caption: "Cancel",
-                        callback: () => {
-                            console.log(generateLogMessageString(`onRemoveRelationshipsCancel`, CLASS_NAME));
-                            setDeleteModal({ show: false, item: null });
-                        },
-                        buttonVariant: null
-                    }} />
-            </>
-        );
-    };
 
     //render error message as a modal to force user to say ok.
     const renderErrorMessage = () => {
@@ -920,7 +743,7 @@ function AdminProfileEntity() {
                     <div className="col-12">
                         <hr className="my-3" />
                         <AdminRelatedItemList caption="Related SM Profiles" captionAdd="Add Related SM Profile"
-                            items={item.relatedProfiles} itemsLookup={_itemsLookup?.lookupProfiles}
+                            items={item.relatedProfiles} itemsLookup={_itemsLookup?.lookupProfiles?.filter(x => x.id !== item.id)}
                             type={AppSettings.itemTypeCode.smProfile} onChangeItem={onChangeRelatedProfile}
                             onAdd={onAddRelatedProfile} onDelete={onDeleteRelatedProfile} />
                     </div>
@@ -947,33 +770,37 @@ function AdminProfileEntity() {
                         </div>
                     </div>
                 }
-                <div className="row">
-                    <div className="col-md-9">
-                        <Form.Group>
-                            <Form.Label>Namespace</Form.Label>
-                            <Form.Control id="namespace" className="minimal pr-5" value={item.namespace == null ? '' : item.namespace} readOnly={isReadOnly} />
-                        </Form.Group>
-                    </div>
-                    <div className="col-md-3">
-                        {(item.id != null && item.id !== "-1") && 
+                {item?.id != null &&
+                    <>
+                    <div className="row">
+                        <div className="col-md-9">
                             <Form.Group>
-                                <Form.Label>Cloud Lib Id</Form.Label>
-                                <Form.Control id="id" className="minimal pr-5" value={item.id} readOnly={isReadOnly} />
+                                <Form.Label>Namespace</Form.Label>
+                                <Form.Control id="namespace" className="minimal pr-5" value={item.namespace == null ? '' : item.namespace} readOnly={isReadOnly} />
                             </Form.Group>
-                        }
+                        </div>
+                        <div className="col-md-3">
+                            {(item.id != null && item.id !== "-1") && 
+                                <Form.Group>
+                                    <Form.Label>Cloud Lib Id</Form.Label>
+                                    <Form.Control id="id" className="minimal pr-5" value={item.id} readOnly={isReadOnly} />
+                                </Form.Group>
+                            }
+                        </div>
                     </div>
-                </div>
-                <div className="row">
-                    <div className="col-md-9">
-                        <Form.Group>
-                            <Form.Label>Display Name</Form.Label>
-                            <Form.Control id="displayName" className="minimal pr-5" value={item.displayName == null ? '' : item.displayName} readOnly={isReadOnly} />
-                        </Form.Group>
+                    <div className="row">
+                        <div className="col-md-9">
+                            <Form.Group>
+                                <Form.Label>Display Name</Form.Label>
+                                <Form.Control id="displayName" className="minimal pr-5" value={item.displayName == null ? '' : item.displayName} readOnly={isReadOnly} />
+                            </Form.Group>
+                        </div>
+                        <div className="col-md-3">
+                            {renderItemType()}
+                        </div>
                     </div>
-                    <div className="col-md-3">
-                        {renderItemType()}
-                    </div>
-                </div>
+                    </>
+                }
             </>
         );
     };
@@ -1023,33 +850,8 @@ function AdminProfileEntity() {
         );
     }
 
-    /*
-    const renderImagesInfo = () => {
-        return (
-            <>
-                <div className="row mt-2">
-                    <div className="col-12">
-                        <h3 className="mb-4">Image Selection</h3>
-                    </div>
-                    <div className="col-md-6">
-                        {renderImageSelection("imagePortrait", "Portrait Image", "Recommended aspect ratio 3:4. Used by: Home page ('Featured Solution' banner image, 'Popular' items tiles), Library page (result tiles)")}
-                    </div>
-                    <div className="col-md-6">
-                        {renderImageSelection("imageLandscape", "Landscape Image", "Recommended: 320px w by 180px h (16:9) Used by: Home page ('New' items tiles), profile item page (banner image, 'Related' items tiles)")}
-                    </div>
-                </div>
-                <div className="row mt-2">
-                    <div className="col-12 border-top pt-2">
-                        <AdminImageList caption="Uploaded Images" items={_imageRows.filter(x => x.marketplaceItemId === item.id)} onImageUpload={onImageUpload} onDeleteItem={onDeleteImage} marketplaceItemId={item.id} />
-                    </div>
-                </div>
-            </>
-        );
-    };
-    */
-
     const renderMultiSelectAreas = () => {
-        if (item == null) return;
+        if (item?.id == null) return;
         return (
             <>
                 <MultiSelect items={item.industryVerticals} caption="Industry Verticals" onItemSelect={onItemSelectIndustryVertical} className="light" />
@@ -1103,6 +905,8 @@ function AdminProfileEntity() {
     }
 
     const renderTabbedForm = () => {
+        if (item?.id == null) return;
+
         return (
             <Tab.Container id="admin-marketplace-entity" defaultActiveKey="relatedItems" onSelect={tabListener} >
                 <Nav variant="pills" className="row mt-1 px-2 pr-md-3">
@@ -1170,7 +974,15 @@ function AdminProfileEntity() {
                 </div>
             </div>
             </Form>
-            {renderDeleteConfirmation()}
+            <OnDeleteConfirm
+                item={_itemDelete}
+                onDeleteComplete={onDeleteComplete}
+                urlDelete={`admin/profile/delete`}
+                caption='Remove Related Items'
+                confirmMessage={`You are about to remove all related items and related profiles from '${_itemDelete?.displayName}'. This action cannot be undone.`}
+                successMessage='Related items and related profiles were removed.'
+                errorMessage='An error occurred removing relationships'
+            />
             {renderErrorMessage()}
         </>
     )
