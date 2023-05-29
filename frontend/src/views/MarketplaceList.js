@@ -153,7 +153,7 @@ function MarketplaceList() {
         //reload page
         history.push({
             pathname: '/library',
-            search: `?${generateSearchQueryString(criteria)}`
+            search: `?${generateSearchQueryString(_criteria)}`
         })
 
     };
@@ -275,11 +275,11 @@ function MarketplaceList() {
         criteria.query = q;
         criteria.skip = (currentPage - 1) * pageSize; //0-based
         criteria.take = pageSize;
-        //item types - update selected items
+        //item types - update selected items, deselect all others
         if (sm != null) {
-            sm.split(",").forEach((x) => {
-                const match = criteria.itemTypes?.find(y => y.code.toLowerCase() === x);
-                if (match) match.selected = true;
+            const selTypes = sm.split(",");
+            criteria.itemTypes?.forEach((x) => {
+                x.selected = selTypes.find(y => y.toLowerCase() === x.code.toLowerCase()) != null;
             });
         }
         //filters
