@@ -346,7 +346,11 @@
                     RelatedType = MapToModelLookupItem(
                         items.Find(z => z.MarketplaceItemId.ToString().Equals(x.ID))?.RelatedTypeId,
                         _lookupItemsRelatedType.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList())
-                }).ToList();
+                })
+                .OrderBy(x => x.RelatedType.DisplayOrder)
+                .ThenBy(x => x.RelatedType.Name)
+                .ThenBy(x => x.DisplayName)
+                .ToList();
         }
 
         /// <summary>

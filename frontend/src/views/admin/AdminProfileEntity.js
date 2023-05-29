@@ -175,65 +175,6 @@ function AdminProfileEntity() {
     }, [_refreshItem]);
 
     //-------------------------------------------------------------------
-    // Region: hooks
-    // useEffect - get static lookup data
-    //-------------------------------------------------------------------
-    /*
-    useEffect(() => {
-        // Load lookup data upon certain triggers in the background
-        async function fetchImageData() {
-
-            var url = `image/all`;
-            console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
-
-            await axiosInstance.post(url, { id: id }).then(result => {
-                if (result.status === 200) {
-                    setImageRows(result.data);
-                } else {
-                    setImageRows(null);
-                }
-                setRefreshImageData(false);
-            }).catch(e => {
-                if (e.response && e.response.status === 401) {
-                }
-                else {
-                    console.log(generateLogMessageString('useEffect||fetchData||' + JSON.stringify(e), CLASS_NAME, 'error'));
-                    console.log(e);
-                    setRefreshImageData(false);
-                }
-            });
-        };
-
-        if (_refreshImageData) {
-            //console.log(generateLogMessageString('useEffect||refreshLookupData||Trigger fetch', CLASS_NAME));
-            fetchImageData();
-        }
-
-        //this will execute on unmount
-        return () => {
-            //console.log(generateLogMessageString('useEffect||refreshLookupData||Cleanup', CLASS_NAME));
-        };
-    }, [id, _refreshImageData]);
-    */
-
-    //-------------------------------------------------------------------
-    // Trigger get lookup data from server (if necessary)
-    //-------------------------------------------------------------------
-    /*
-    useEffect(() => {
-        //fetch referrer data 
-        if (loadingProps.lookupDataStatic == null) {
-            setLoadingProps({ refreshLookupData: true });
-        }
-
-        //this will execute on unmount
-        return () => {
-            //console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
-        };
-    }, [loadingProps.lookupDataStatic]);
-    */
-
-    //-------------------------------------------------------------------
     // Trigger get related items lookups - all mktplace items, all profiles.
     //-------------------------------------------------------------------
     useEffect(() => {
