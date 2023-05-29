@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { useHistory } from 'react-router-dom'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
+import { useHistory, useLocation } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 import axiosInstance from "../services/AxiosService";
 import ReactGA from 'react-ga4';
+import { isNumeric } from 'jquery';
 
 import { clearSearchCriteria, setMarketplacePageSize } from '../services/MarketplaceService';
 import { useLoginStatus } from '../components/OnLoginHandler';
@@ -33,6 +34,9 @@ function MarketplaceList() {
     // Region: Initialization
     //-------------------------------------------------------------------
     const history = useHistory();
+    const { search } = useLocation();
+    const searchParams = useMemo(() => new URLSearchParams(search), [search]);
+
     const _scrollToRef = useRef(null);
     const [_dataRows, setDataRows] = useState({
         all: [], itemCount: 0, listView: true
@@ -43,7 +47,36 @@ function MarketplaceList() {
     const caption = 'Library';
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_queryLocal, setQueryLocal] = useState(loadingProps.query);
+    const [_criteria, setCriteria] = useState(null);
     const { isAuthenticated, isAuthorized } = useLoginStatus(null, [AppSettings.AADAdminRole]);
+
+    //-------------------------------------------------------------------
+    // Region: Generate a new query string based on the selections
+    //-------------------------------------------------------------------
+    const generateSearchQueryString = (criteria) => {
+        let result = [];
+        //query
+        if (criteria.query != null && criteria.query !== '') {
+            result.push(`q=${criteria.query}`);
+        }
+        //page
+        result.push(`p=${_currentPage == null ? 0 : _currentPage}`);
+        //page size
+        result.push(`t=${criteria.take}`);
+        //sm types
+        if (criteria.itemTypes != null) {
+            const selTypes = criteria.itemTypes.filter(x => x.selected).map(x => x.code);
+            result.push(`sm=${selTypes.join(',')}`);
+        }
+        //verts, cats, etc. 
+        if (criteria.filters != null) {
+            criteria.filters.forEach((x) => {
+                const selFilters = x.items.filter(x => x.selected).map(x => x.id);
+                result.push(`f-${x.enumValue}=${selFilters.join(',')}`);
+            });
+        }
+        return result.join('&');
+    }
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
@@ -54,13 +87,20 @@ function MarketplaceList() {
 
         //this will trigger a fetch from the API to pull the data for the filtered criteria
         setCurrentPage(1);
-        loadingProps.searchCriteria.query = val;
-        loadingProps.searchCriteria.skip = 0;
-        setLoadingProps({ searchCriteria: JSON.parse(JSON.stringify(loadingProps.searchCriteria)) });
+        _criteria.query = val;
+        _criteria.skip = 0;
+        //setCriteria(JSON.parse(JSON.stringify(_criteria)));
+        //reload page
+        history.push({
+            pathname: '/library',
+            search: `?${generateSearchQueryString(_criteria)}`
+        })
     };
 
     const handleOnSearchBlur = (val) => {
         setQueryLocal(val);
+        //_criteria.query = val;
+        //setCriteria(JSON.parse(JSON.stringify(_criteria)));
     };
 
     ///called when a marketplace item type is selected
@@ -70,14 +110,24 @@ function MarketplaceList() {
         //this will trigger a fetch from the API to pull the data for the filtered criteria
         setCurrentPage(1);
         criteria.query = _queryLocal;
-        setLoadingProps({ searchCriteria: JSON.parse(JSON.stringify(criteria)) });
+        //setCriteria(JSON.parse(JSON.stringify(criteria)));
+        //reload page
+        history.push({
+            pathname: '/library',
+            search: `?${generateSearchQueryString(criteria)}`
+        })
     };
 
     //called when an item is selected in the filter panel
     const filterOnItemClick = (criteria) => {
         //filter event handler - set global state and navigate to search page
         criteria.query = _queryLocal;
-        setLoadingProps({ searchCriteria: criteria });
+        //setCriteria(JSON.parse(JSON.stringify(criteria)));
+        //reload page
+        history.push({
+            pathname: '/library',
+            search: `?${generateSearchQueryString(criteria)}`
+        })
     }
 
     const onChangePage = (currentPage, pageSize) => {
@@ -85,29 +135,38 @@ function MarketplaceList() {
 
         //this will trigger a fetch from the API to pull the data for the filtered criteria
         setCurrentPage(currentPage);
-        loadingProps.searchCriteria.query = _queryLocal;
-        loadingProps.searchCriteria.skip = (currentPage - 1) * pageSize; //0-based
-        loadingProps.searchCriteria.take = pageSize;
-        setLoadingProps({ searchCriteria: JSON.parse(JSON.stringify(loadingProps.searchCriteria)) });
+        _criteria.query = _queryLocal;
+        _criteria.skip = (currentPage - 1) * pageSize; //0-based
+        _criteria.take = pageSize;
+        //setCriteria(JSON.parse(JSON.stringify(_criteria)));
 
+        /*
         //scroll screen to top of grid on page change
         ////scroll a bit higher than the top edge so we get some of the header in the view
         window.scrollTo({ top: (_scrollToRef.current.offsetTop - 120), behavior: 'smooth' });
         //scrollToRef.current.scrollIntoView();
+        */
 
         //preserve choice in local storage
         setMarketplacePageSize(pageSize);
+
+        //reload page
+        history.push({
+            pathname: '/library',
+            search: `?${generateSearchQueryString(criteria)}`
+        })
+
     };
 
     const onClearAll = () => {
         console.log(generateLogMessageString('onClearAll', CLASS_NAME));
 
         //clear out the selected, the query val
-        var criteria = clearSearchCriteria(loadingProps.searchCriteria);
+        var criteria = clearSearchCriteria(_criteria);
 
         //this will trigger the API call
         //update state for other components to see
-        setLoadingProps({ searchCriteria: criteria });
+        setCriteria(JSON.parse(JSON.stringify(criteria)));
         setQueryLocal(criteria.query);
         setCurrentPage(1);
     }
@@ -129,62 +188,121 @@ function MarketplaceList() {
     //}
 
     //-------------------------------------------------------------------
-    // Region: Get data 
+    // Region: go get the data
     //-------------------------------------------------------------------
-    useEffect(() => {
-        async function fetchData() {
-            //show a spinner
-            setLoadingProps({ isLoading: true, message: null });
+    async function fetchData(criteria) {
+        //show a spinner
+        setLoadingProps({ isLoading: true, message: null });
 
-            var url = `marketplace/search/advanced`;
-            console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
+        var url = `marketplace/search/advanced`;
+        console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
 
-            //analytics - capture search criteria 
-            ReactGA.event({
-                category: "Marketplace|Search",
-                action: "marketplace_search"
-            });
+        //analytics - capture search criteria 
+        ReactGA.event({
+            category: "Marketplace|Search",
+            action: "marketplace_search"
+        });
 
-            await axiosInstance.post(url, loadingProps.searchCriteria).then(result => {
-                if (result.status === 200) {
+        await axiosInstance.post(url, criteria).then(result => {
+            if (result.status === 200) {
 
-                    //set state on fetch of data
-                    setDataRows({
-                        ..._dataRows,
-                        all: result.data.data, itemCount: result.data.count
-                    });
+                //set state on fetch of data
+                setDataRows({
+                    ..._dataRows,
+                    all: result.data.data, itemCount: result.data.count
+                });
 
-                    //hide a spinner
-                    setLoadingProps({ isLoading: false, message: null });
-
-                    //add to recently visited page list
-                    var revisedList = UpdateRecentFileList(loadingProps.recentFileList, { url: history.location.pathname, caption: caption, iconName: "folder-setMarketplacePageSize" });
-                    setLoadingProps({ recentFileList: revisedList });
-                } else {
-                    setLoadingProps({
-                        isLoading: false, message: null, inlineMessages: [
-                            { id: new Date().getTime(), severity: "danger", body: 'An error occurred retrieving these marketplace items.', isTimed: true }]
-                    });
-                }
                 //hide a spinner
                 setLoadingProps({ isLoading: false, message: null });
 
-            }).catch(e => {
-                if ((e.response && e.response.status === 401) || e.toString().indexOf('Network Error') > -1) {
-                    //do nothing, this is handled in routes.js using common interceptor
-                    //setAuthTicket(null); //the call of this will clear the current user and the token
-                }
-                else {
-                    setLoadingProps({
-                        isLoading: false, message: null, inlineMessages: [
-                            { id: new Date().getTime(), severity: "danger", body: 'An error occurred retrieving these marketplace items.', isTimed: true }]
-                    });
-                }
-            });
+                //add to recently visited page list
+                var revisedList = UpdateRecentFileList(loadingProps.recentFileList, { url: history.location.pathname, caption: caption, iconName: "folder-setMarketplacePageSize" });
+                setLoadingProps({ recentFileList: revisedList });
+            } else {
+                setLoadingProps({
+                    isLoading: false, message: null, inlineMessages: [
+                        { id: new Date().getTime(), severity: "danger", body: 'An error occurred retrieving these marketplace items.', isTimed: true }]
+                });
+            }
+            //hide a spinner
+            setLoadingProps({ isLoading: false, message: null });
+
+        }).catch(e => {
+            if ((e.response && e.response.status === 401) || e.toString().indexOf('Network Error') > -1) {
+                //do nothing, this is handled in routes.js using common interceptor
+                //setAuthTicket(null); //the call of this will clear the current user and the token
+            }
+            else {
+                setLoadingProps({
+                    isLoading: false, message: null, inlineMessages: [
+                        { id: new Date().getTime(), severity: "danger", body: 'An error occurred retrieving these marketplace items.', isTimed: true }]
+                });
+            }
+        });
+    }
+
+    //-------------------------------------------------------------------
+    // Region: Extract query string info
+    //-------------------------------------------------------------------
+    useEffect(() => {
+
+        //if (searchParams == null) return;
+        //set up the search criteria based on query string params
+        //q = query
+        const q = searchParams.get("q");
+        //p = page
+        const p = searchParams.get("p");
+        //t = page size
+        const t = searchParams.get("t");
+        //sm = sm type(s)
+        const sm = searchParams.get("sm");
+
+        //no query strings, just get the default list
+        if (q == p == t == sm == null)
+        {
+            setCriteria(clearSearchCriteria(loadingProps.searchCriteria));
+            return;
         }
 
-        if (loadingProps.searchCriteria != null && loadingProps.searchCriteria.filters != null) {
-            fetchData();
+        //this will trigger a fetch from the API to pull the data for the filtered criteria
+        let criteria = (_criteria == null) ? JSON.parse(JSON.stringify(loadingProps.searchCriteria)) :
+            JSON.parse(JSON.stringify(_criteria));
+        //apply query string params
+        const currentPage = p == null || !isNumeric(p) ? 0 : parseInt(p);
+        const pageSize = t == null || !isNumeric(t) ? criteria.take : parseInt(t);
+        setCurrentPage(currentPage);
+        setQueryLocal(q);
+        criteria.query = q;
+        criteria.skip = (currentPage - 1) * pageSize; //0-based
+        criteria.take = pageSize;
+        //item types - update selected items
+        if (sm != null) {
+            sm.split(",").forEach((x) => {
+                const match = criteria.itemTypes?.find(y => y.code.toLowerCase() === x);
+                if (match) match.selected = true;
+            });
+        }
+        //filters
+        //TBD
+        //update state
+        setCriteria(JSON.parse(JSON.stringify(criteria)));
+
+        //this will execute on unmount
+        return () => {
+            console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
+            //setFilterValOnChild('');
+        };
+        //type passed so that any change to this triggers useEffect to be called again
+        //_setMarketplacePageSizePreferences.pageSize - needs to be passed so that useEffects dependency warning is avoided.
+    }, [searchParams]);
+
+    //-------------------------------------------------------------------
+    // Region: Get data 
+    //-------------------------------------------------------------------
+    useEffect(() => {
+
+        if (_criteria != null && _criteria.filters != null) {
+            fetchData(_criteria);
         }
 
         //this will execute on unmount
@@ -194,7 +312,7 @@ function MarketplaceList() {
         };
         //type passed so that any change to this triggers useEffect to be called again
         //_setMarketplacePageSizePreferences.pageSize - needs to be passed so that useEffects dependency warning is avoided.
-    }, [loadingProps.searchCriteria]);
+    }, [_criteria]);
 
     //-------------------------------------------------------------------
     // Region: Render helpers
@@ -206,10 +324,10 @@ function MarketplaceList() {
                     {renderTitleBlock("Library", null, null)}
                 </div>
                 <div className="col-lg-4">
-                    <HeaderSearch filterVal={loadingProps.searchCriteria == null ? null : loadingProps.searchCriteria.query} onSearch={handleOnSearchChange} onSearchBlur={handleOnSearchBlur} searchMode="standard" />
+                    <HeaderSearch filterVal={_criteria == null ? null : _criteria.query} onSearch={handleOnSearchChange} onSearchBlur={handleOnSearchBlur} searchMode="standard" />
                 </div>
                 <div className="col-lg-5 pl-0">
-                    <MarketplaceItemTypeFilter onSearchCriteriaChanged={onTypeSelectionChange} searchCriteria={loadingProps.searchCriteria} />
+                    <MarketplaceItemTypeFilter onSearchCriteriaChanged={onTypeSelectionChange} searchCriteria={_criteria} />
                 </div>
             </div>
         );
@@ -226,7 +344,7 @@ function MarketplaceList() {
     //render pagination ui
     const renderPagination = () => {
         if (_dataRows == null || _dataRows.all.length === 0) return;
-        return <GridPager currentPage={_currentPage} pageSize={loadingProps.searchCriteria.take} itemCount={_dataRows.itemCount} onChangePage={onChangePage} />
+        return <GridPager currentPage={_currentPage} pageSize={_criteria.take} itemCount={_dataRows.itemCount} onChangePage={onChangePage} />
     }
 
     //render the main grid
@@ -302,7 +420,7 @@ function MarketplaceList() {
 
             <div className="row" >
                 <div className={`col-sm-3 d-sm-block ${_filterToggle ? "" : "d-none"}`} >
-                    <MarketplaceFilter searchCriteria={loadingProps.searchCriteria} selectMode="selectable" onItemClick={filterOnItemClick} showLimited={true} />
+                    <MarketplaceFilter searchCriteria={_criteria} selectMode="selectable" onItemClick={filterOnItemClick} showLimited={true} />
                 </div>
                 <div ref={_scrollToRef} className="col-sm-9 mb-4" >
                     {/*<MarketplaceFilterSelected />*/}
