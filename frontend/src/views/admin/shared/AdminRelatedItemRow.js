@@ -30,7 +30,7 @@ function AdminRelatedItemRow(props) { //props are item, showActions
         //update state for other components to see
         if (props.onChangeItem != null) {
             props.onChangeItem(props.item.relatedId,
-                { relatedId: props.item.relatedId, displayName: props.item.displayName, relatedType: { id: e.target.value, name: e.target.options[e.target.selectedIndex].text }});
+                { relatedId: props.item.relatedId, displayName: props.item.displayName, relatedType: { id: e.target.value, name: e.target.options[e.target.selectedIndex].text } });
         }
     }
 
@@ -41,7 +41,7 @@ function AdminRelatedItemRow(props) { //props are item, showActions
 
         //update state for other components to see
         if (props.onChangeItem != null) {
-            props.onChangeItem(props.item.relatedId, 
+            props.onChangeItem(props.item.relatedId,
                 { relatedId: e.target.value, displayName: e.target.options[e.target.selectedIndex].text, relatedType: props.item.relatedType });
         }
     }
@@ -116,12 +116,12 @@ function AdminRelatedItemRow(props) { //props are item, showActions
                     {props.item.displayName}
                     {(props.item.namespace != null && props.item.namespace !== '') &&
                         <>
-                        <br/>
-                        <span style={{ wordBreak: "break-word" }} >{props.item.namespace} (v. {props.item.version})</span>
+                            <br />
+                            <span style={{ wordBreak: "break-word" }} >{props.item.namespace} (v. {props.item.version})</span>
                         </>
                     }
                 </>
-                );
+            );
         }
 
         //show drop down list
@@ -148,7 +148,9 @@ function AdminRelatedItemRow(props) { //props are item, showActions
     // Region: Render final output
     //-------------------------------------------------------------------
     let cssClass = props.cssClass + (props.isHeader ? " bottom header" : " center border-top");
-    if (!_isValid.relatedId || !_isValid.relatedType) cssClass += ' alert alert-danger';
+    if (!_isValid.relatedId || !_isValid.relatedType) {
+        cssClass += ' alert alert-danger';
+    }
 
     if (props.isHeader) {
         return (
