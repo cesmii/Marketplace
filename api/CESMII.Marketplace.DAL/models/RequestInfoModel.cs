@@ -66,6 +66,11 @@ namespace CESMII.Marketplace.DAL.Models
         /// open items.
         /// </summary>
         public LookupItemModel Status { get; set; }
+
+        public string ccName1 { get; set; }
+        public string ccEmail1 { get; set; }
+        public string ccName2 { get; set; }
+        public string ccEmail2 { get; set; }
     }
 
 

@@ -215,7 +215,11 @@
                     Created = entity.Created,
                     Updated = entity.Updated,
                     Status = MapToModelLookupItem(entity.StatusId, _lookupItemsAll),
-                    IsActive = entity.IsActive
+                    IsActive = entity.IsActive,
+                    ccEmail1 = entity.ccEmail1,
+                    ccEmail2 = entity.ccEmail2,
+                    ccName1 = entity.ccName1,
+                    ccName2 = entity.ccName2,
                 };
                 
                 if (result.RequestType != null)
@@ -300,6 +304,10 @@
                 new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY)) : 
                 new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.MembershipStatus.ID));
             entity.StatusId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.Status.ID));
+            entity.ccEmail1 = model.ccEmail1;
+            entity.ccEmail2 = model.ccEmail2;
+            entity.ccName1 = model.ccName1;
+            entity.ccName2 = model.ccName2;
         }
 
         private void IncrementMarketplaceAnalytics(MongoDB.Bson.BsonObjectId marketplaceItemId)
