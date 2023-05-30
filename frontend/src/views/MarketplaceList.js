@@ -53,28 +53,36 @@ function MarketplaceList() {
     //-------------------------------------------------------------------
     // Region: Generate a new query string based on the selections
     //-------------------------------------------------------------------
-    const generateSearchQueryString = (criteria) => {
+    const generateSearchQueryString = (criteria, currentPage) => {
         let result = [];
         //query
         if (criteria.query != null && criteria.query !== '') {
             result.push(`q=${criteria.query}`);
         }
-        //page
-        result.push(`p=${_currentPage == null ? 0 : _currentPage}`);
-        //page size
-        result.push(`t=${criteria.take}`);
         //sm types
         if (criteria.itemTypes != null) {
             const selTypes = criteria.itemTypes.filter(x => x.selected).map(x => x.code);
-            result.push(`sm=${selTypes.join(',')}`);
+            if (selTypes != null && selTypes.length > 0) {
+                result.push(`sm=${selTypes.join(',')}`);
+            }
         }
-        //verts, cats, etc. 
+        //verts, processes, etc. 
         if (criteria.filters != null) {
+            let resultFilters = [];
             criteria.filters.forEach((x) => {
                 const selFilters = x.items.filter(x => x.selected).map(x => x.id);
-                result.push(`f-${x.enumValue}=${selFilters.join(',')}`);
+                if (selFilters != null && selFilters.length > 0) {
+                    resultFilters.push(`${x.enumValue}::${selFilters.join(',')}`);
+                }
             });
+            if (resultFilters.length > 0) {
+                result.push(`f=${resultFilters.join('|')}`);
+            }
         }
+        //page
+        result.push(`p=${currentPage == null ? 0 : currentPage}`);
+        //page size
+        result.push(`t=${criteria.take}`);
         return result.join('&');
     }
 
@@ -93,8 +101,8 @@ function MarketplaceList() {
         //reload page
         history.push({
             pathname: '/library',
-            search: `?${generateSearchQueryString(_criteria)}`
-        })
+            search: `?${generateSearchQueryString(_criteria, _currentPage)}`
+        });
     };
 
     const handleOnSearchBlur = (val) => {
@@ -114,8 +122,8 @@ function MarketplaceList() {
         //reload page
         history.push({
             pathname: '/library',
-            search: `?${generateSearchQueryString(criteria)}`
-        })
+            search: `?${generateSearchQueryString(criteria, _currentPage)}`
+        });
     };
 
     //called when an item is selected in the filter panel
@@ -126,8 +134,8 @@ function MarketplaceList() {
         //reload page
         history.push({
             pathname: '/library',
-            search: `?${generateSearchQueryString(criteria)}`
-        })
+            search: `?${generateSearchQueryString(criteria, _currentPage)}`
+        });
     }
 
     const onChangePage = (currentPage, pageSize) => {
@@ -140,12 +148,10 @@ function MarketplaceList() {
         _criteria.take = pageSize;
         //setCriteria(JSON.parse(JSON.stringify(_criteria)));
 
-        /*
         //scroll screen to top of grid on page change
         ////scroll a bit higher than the top edge so we get some of the header in the view
         window.scrollTo({ top: (_scrollToRef.current.offsetTop - 120), behavior: 'smooth' });
         //scrollToRef.current.scrollIntoView();
-        */
 
         //preserve choice in local storage
         setMarketplacePageSize(pageSize);
@@ -153,22 +159,16 @@ function MarketplaceList() {
         //reload page
         history.push({
             pathname: '/library',
-            search: `?${generateSearchQueryString(_criteria)}`
-        })
+            search: `?${generateSearchQueryString(_criteria, currentPage)}`
+        });
 
     };
 
     const onClearAll = () => {
         console.log(generateLogMessageString('onClearAll', CLASS_NAME));
 
-        //clear out the selected, the query val
-        var criteria = clearSearchCriteria(_criteria);
-
-        //this will trigger the API call
-        //update state for other components to see
-        setCriteria(JSON.parse(JSON.stringify(criteria)));
-        setQueryLocal(criteria.query);
-        setCurrentPage(1);
+        //reload page
+        history.push('/library');
     }
 
     const onToggleFilters = () => {
@@ -242,12 +242,14 @@ function MarketplaceList() {
     }
 
     //-------------------------------------------------------------------
-    // Region: Extract query string info
+    // Region: Extract query string info. Build up search criteria then
+    //          set state which will trigger an API call to get data. 
     //-------------------------------------------------------------------
     useEffect(() => {
 
         //if (searchParams == null) return;
         //set up the search criteria based on query string params
+        //sample: /library?q=lit&p=0&t=25&sm=sm-app,sm-hardware&f=2::624c6de6a649292c49921f0d,629a6b34605dda89466cf5b8|1::618aa924557c7b88d5fb487b
         //q = query
         const q = searchParams.get("q");
         //p = page
@@ -256,26 +258,31 @@ function MarketplaceList() {
         const t = searchParams.get("t");
         //sm = sm type(s)
         const sm = searchParams.get("sm");
+        //f = filters - verts, processes
+        const f = searchParams.get("f");
 
-        //no query strings, just get the default list
-        if (q == p == t == sm == null)
-        {
-            setCriteria(clearSearchCriteria(loadingProps.searchCriteria));
+        //build up the criteria values based on query string
+        let criteria = (_criteria == null) ? JSON.parse(JSON.stringify(loadingProps.searchCriteria)) :
+            JSON.parse(JSON.stringify(_criteria));
+        const currentPage = p == null || !isNumeric(p) ? 1 : parseInt(p);
+        const pageSize = t == null || !isNumeric(t) ? criteria.take : parseInt(t);
+        setCurrentPage(currentPage);
+        criteria.skip = (currentPage - 1) * pageSize; //0-based
+        criteria.take = pageSize;
+
+        //no filterable query strings, just get the default list
+        if (!q && !sm && !f) {
+            //this will trigger a fetch from the API to pull the data for the filtered criteria
+            setCriteria(clearSearchCriteria(criteria));
             return;
         }
 
-        //this will trigger a fetch from the API to pull the data for the filtered criteria
-        let criteria = (_criteria == null) ? JSON.parse(JSON.stringify(loadingProps.searchCriteria)) :
-            JSON.parse(JSON.stringify(_criteria));
+        //if we get here, then we build out filterable values (if present)
         //apply query string params
-        const currentPage = p == null || !isNumeric(p) ? 0 : parseInt(p);
-        const pageSize = t == null || !isNumeric(t) ? criteria.take : parseInt(t);
-        setCurrentPage(currentPage);
         setQueryLocal(q);
         criteria.query = q;
-        criteria.skip = (currentPage - 1) * pageSize; //0-based
-        criteria.take = pageSize;
         //item types - update selected items, deselect all others
+        //sample: sm=sm-app,sm-hardware
         if (sm != null) {
             const selTypes = sm.split(",");
             criteria.itemTypes?.forEach((x) => {
@@ -283,17 +290,30 @@ function MarketplaceList() {
             });
         }
         //filters
-        //TBD
-        //update state
+        //for each filter type (verts, processes, etc.), figure out if the query string 
+        //contains the enum value which indicates this filter is being applied. If so, then 
+        //apply selected to any child item that is present in the query string. Presence is indicated by the id value.
+        //sample: f=2::624c6de6a649292c49921f0d,629a6b34605dda89466cf5b8|1::618aa924557c7b88d5fb487b
+        if (f != null) {
+            const filterEnums = f.split("|");
+            criteria.filters?.forEach((x) => {
+                //const selFilters = filterEnums.split("::");
+                const filterQS = filterEnums.find(z => z.indexOf(`${x.enumValue}::`) === 0);
+                const selFilters = filterQS == null ? [] : filterQS.replace(`${x.enumValue}::`, '').split(",");
+                x.items?.forEach((y) => {
+                    y.selected = selFilters.find(z => z.toLowerCase() === y.id.toLowerCase()) != null;
+                });
+            });
+        }
+
+        //this will trigger a fetch from the API to pull the data for the filtered criteria
         setCriteria(JSON.parse(JSON.stringify(criteria)));
 
         //this will execute on unmount
         return () => {
-            console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
+            //console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
             //setFilterValOnChild('');
         };
-        //type passed so that any change to this triggers useEffect to be called again
-        //_setMarketplacePageSizePreferences.pageSize - needs to be passed so that useEffects dependency warning is avoided.
     }, [searchParams]);
 
     //-------------------------------------------------------------------
