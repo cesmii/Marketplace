@@ -128,6 +128,12 @@ function MarketplaceList() {
 
     //called when an item is selected in the filter panel
     const filterOnItemClick = (criteria) => {
+
+        //scroll screen to top of grid on page change
+        ////scroll a bit higher than the top edge so we get some of the header in the view
+        window.scrollTo({ top: (_scrollToRef.current.offsetTop - 120), behavior: 'smooth' });
+        //scrollToRef.current.scrollIntoView();
+
         //filter event handler - set global state and navigate to search page
         criteria.query = _queryLocal;
         //setCriteria(JSON.parse(JSON.stringify(criteria)));
