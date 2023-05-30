@@ -83,7 +83,14 @@ h3 {
     font-size: 1.15rem;
     font-weight: 700;
     line-height: 1.25rem;
+
+    &.small {
+        font-size: 0.9rem;
+        font-weight: bold;
+        line-height: 1.25rem;
+    }
 }
+
 
 p {
     line-height: 24px;
@@ -505,6 +512,46 @@ option.selected {
     }
 }
 
+.btn-content-accordion {
+    min-width: unset;
+    text-decoration: none;
+    color: inherit;
+    background-color: transparent;
+
+    &:focus {
+        box-shadow: none;
+    }
+
+    &:hover {
+        h2, h3 {
+            color: color("cornflower");
+        }
+    }
+
+    h2, h3 {
+        display: flex;
+
+        &:after {
+            font-size: 1.9rem;
+            font-weight: normal;
+            align-content: flex-end;
+            margin-left: auto;
+            font-family: 'Material Icons';
+            content: "expand_less";
+            -webkit-font-feature-settings: 'liga';
+        }
+    }
+
+    &[aria-expanded="false"], 
+    &.collapsed {
+        h2, h3 {
+            &:after {
+                content: "expand_more";
+            }
+        }
+    }
+}
+
 .btn-nofocusborder:focus {
     box-shadow: none;
 }
@@ -646,6 +693,16 @@ select.minimal:focus {
             padding-right: 16px;
         }
     }
+}
+
+.accordion > .card:first-child {
+    border-top-left-radius: $tile-radius;
+    border-top-right-radius: $tile-radius;
+}
+
+.accordion > .card:last-child {
+    border-bottom-left-radius: $tile-radius;
+    border-bottom-right-radius: $tile-radius;
 }
 
 .elevated {

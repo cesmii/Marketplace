@@ -79,7 +79,7 @@
                 .FirstOrDefault();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetRelatedData(new List<MongoDB.Bson.BsonObjectId>() { entity.MarketplaceItemId });
+            GetDependentData(new List<MongoDB.Bson.BsonObjectId>() { entity.MarketplaceItemId }).Wait();
 
             return MapToModel(entity, true);
         }
@@ -106,7 +106,7 @@
                 x => x.Name);  
             var count = returnCount ? _repo.Count(x => x.IsActive) : 0;
 
-            GetRelatedData(data.Select(x => x.MarketplaceItemId).Distinct().ToList());
+            GetDependentData(data.Select(x => x.MarketplaceItemId).Distinct().ToList()).Wait();
 
             //map the data to the final result
             var result = new DALResult<JobDefinitionModel>
@@ -133,7 +133,7 @@
                 x => x.Name);
             var count = returnCount ? _repo.Count(predicate) : 0;
 
-            GetRelatedData(data.Select(x => x.MarketplaceItemId).Distinct().ToList());
+            GetDependentData(data.Select(x => x.MarketplaceItemId).Distinct().ToList()).Wait();
 
             //map the data to the final result
             var result = new DALResult<JobDefinitionModel>
@@ -198,12 +198,12 @@
         ///get list of marketplace items
         /// </summary>
         /// <param name="marketplaceIds"></param>
-        protected void GetRelatedData(List<MongoDB.Bson.BsonObjectId> marketplaceIds)
+        protected async Task GetDependentData(List<MongoDB.Bson.BsonObjectId> marketplaceIds)
         {
             var filterMarketplaceItems = MongoDB.Driver.Builders<MarketplaceItem>.Filter.In(x => x.ID, marketplaceIds.Select(y => y.ToString()));
             var fieldList = new List<string>()
                 { nameof(MarketplaceItemSimple.ID), nameof(MarketplaceItemSimple.DisplayName), nameof(MarketplaceItemSimple.Name)};
-            _marketplaceItemAll = _repoMarketplaceItem.AggregateMatch(filterMarketplaceItems, fieldList);
+            _marketplaceItemAll = await _repoMarketplaceItem.AggregateMatchAsync(filterMarketplaceItems, fieldList);
         }
 
 

@@ -351,3 +351,5 @@ MigrationBackup/
 /images
 /frontend/package-lock.json
 /frontend/mpfe.bat
+/frontend/.env.development
+/api/CESMII.Marketplace.API/appsettings.Development.json

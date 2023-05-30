@@ -81,6 +81,7 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IMongoRepository<ImageItem>, MongoRepository<ImageItem>>();
             services.AddScoped<IMongoRepository<ImageItemSimple>, MongoRepository<ImageItemSimple>>();
             services.AddScoped<IMongoRepository<SearchKeyword>, MongoRepository<SearchKeyword>>();
+            services.AddScoped<IMongoRepository<ProfileItem>, MongoRepository<ProfileItem>>();
 
             //stock tables
             services.AddScoped<IMongoRepository<Organization>, MongoRepository<Organization>>();
@@ -118,6 +119,7 @@ namespace CESMII.Marketplace.Api
             services.AddSingleton<Opc.Ua.Cloud.Library.Client.UACloudLibClient>();
             services.AddSingleton<ICloudLibWrapper, CloudLibWrapper>();
             services.AddScoped<ICloudLibDAL<MarketplaceItemModel>, CloudLibDAL>();
+            services.AddScoped<IAdminCloudLibDAL<AdminMarketplaceItemModel>, AdminCloudLibDAL>();
 
             //AAD - no longer need this
             // Add token builder.

@@ -1,4 +1,5 @@
 import { generateLogMessageString, getUserPreferences, setUserPreferences } from '../utils/UtilityService';
+import MarketplaceTileList from '../views/shared/MarketplaceTileList';
 
 const CLASS_NAME = "MarketplaceService";
 
@@ -23,16 +24,17 @@ export function setMarketplacePageSize(val) {
 export function clearSearchCriteria(criteria) {
 
     var result = JSON.parse(JSON.stringify(criteria));
+    if (result == null) result = {};
 
     //loop over parents then over children and set selected to false
-    result.filters.forEach(parent => {
+    result?.filters?.forEach(parent => {
         parent.items.forEach(item => {
             item.selected = false;
         });
     });
 
     //loop over item types and set selected to false
-    result.itemTypes?.forEach(item => {
+    result?.itemTypes?.forEach(item => {
         item.selected = false;
     });
 
@@ -59,3 +61,54 @@ export function toggleSearchFilterSelected(criteria, id) {
     item.selected = !item.selected;
 }
 
+//-------------------------------------------------------------------
+// Web part - Render Related Items - used by marketplace entity or profile entity
+//-------------------------------------------------------------------
+export function MarketplaceRelatedItems(props) {
+    //-------------------------------------------------------------------
+    // Common render helpers
+    //-------------------------------------------------------------------
+    //-------------------------------------------------------------------
+    // Render Similar Items for a profile or marketplace item
+    //-------------------------------------------------------------------
+    const renderSections = (items) => {
+        return items.map((itm, i) => {
+            const key = `${itm.relatedType?.code}-${i}`;
+            const collapseTargetId = `collapse-${key}`;
+            return (
+                <div key={key} className="card mb-0">
+                    <div className="card-header bg-transparent p-0 border-bottom-0" id={`heading-${i}-${itm.relatedType?.code}`} >
+                        <button className="btn btn-content-accordion p-3 py-2 text-left d-block w-100" type="button" data-toggle="collapse" data-target={`#${collapseTargetId}`} aria-expanded="false" aria-controls={`${collapseTargetId}`} >
+                            <h3 className="mb-0">
+                                {itm.relatedType?.name}
+                            </h3>
+                        </button>
+                    </div>
+                    <div id={`${collapseTargetId}`} className="collapse mb-0" aria-labelledby={`heading-${i}-${itm.relatedType?.code}`} >
+                        <div className="card-body">
+                            <div className="row" >
+                                <div className="col-sm-12">
+                                    <MarketplaceTileList items={itm.items} layout="banner-abbreviated" colCount={4} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        });
+    }
+
+    //-------------------------------------------------------------------
+    // Render
+    //-------------------------------------------------------------------
+    //props.items == relatedItemsGrouped
+
+    if (props.items == null || props.items.length === 0) return;
+
+    return (
+        <div className="accordion" >
+            {renderSections(props.items)}
+        </div>
+    );
+
+}

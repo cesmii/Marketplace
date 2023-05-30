@@ -28,6 +28,8 @@
         protected List<Publisher> _publishersAll;
         protected IMongoRepository<ImageItemSimple> _repoImages;
         protected List<ImageItemSimple> _imagesAll;
+        protected readonly ICloudLibDAL<MarketplaceItemModel> _cloudLibDAL;
+
         //default type - use if none assigned yet.
         private readonly MongoDB.Bson.BsonObjectId _smItemTypeIdDefault;
 
@@ -35,12 +37,14 @@
             IMongoRepository<LookupItem> repoLookup, 
             IMongoRepository<Publisher> repoPublisher, 
             IMongoRepository<ImageItemSimple> repoImages,
+            ICloudLibDAL<MarketplaceItemModel> cloudLibDAL,
             ConfigUtil configUtil
             ) : base(repo)
         {
             _repoLookup = repoLookup;
             _repoPublisher = repoPublisher;
             _repoImages = repoImages;
+            _cloudLibDAL = cloudLibDAL;
 
             //init some stuff we will use during the mapping methods
             _smItemTypeIdDefault = new MongoDB.Bson.BsonObjectId(
@@ -261,7 +265,8 @@
                 };
                 if (verbose)
                 {
-                    //result.Images = MapToModelImages(_imagesAll.Where(x => x.MarketplaceItemId.ToString().Equals(entity.ID)).ToList());
+                    result.RelatedItems = MapToModelRelatedItems(entity.RelatedItems);
+                    result.RelatedProfiles = MapToModelRelatedProfiles(entity.RelatedProfiles);
                 }
                 return result;
             }
@@ -271,6 +276,103 @@
             }
 
         }
+
+        /// <summary>
+        /// Take a list of all marketplace items and then a list of related items for one item.
+        /// With that info, mark the items in the full list as selected if they are a related item
+        /// for this entity.
+        /// The idea is we return the entire lookup list and mark selected those items appearing selected. 
+        /// </summary>
+        /// <param name="items"></param>
+        /// <param name="allItems"></param>
+        /// <returns></returns>
+        private List<MarketplaceItemRelatedModel> MapToModelRelatedItems(List<RelatedItem> items)
+        {
+            if (items == null) return new List<MarketplaceItemRelatedModel>();
+
+            //get the supplemental information that is associated with the related items
+            var matches = _repo.FindByCondition(x =>
+                items.Any(y => y.MarketplaceItemId.Equals(
+                new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))))).ToList();
+
+            return !matches.Any() ? new List<MarketplaceItemRelatedModel>() :
+                matches.Select(x => new MarketplaceItemRelatedModel
+                {
+                    //ID = MapToModelRelatedItemsKey(items, x.ID),
+                    RelatedId = x.ID,
+                    Abstract = x.Abstract,
+                    DisplayName = x.DisplayName,
+                    //Description = x.Description,
+                    Name = x.Name,
+                    //Type = MapToModelLookupItem(x.ItemTypeId ?? _smItemTypeIdDefault,
+                    //        _lookupItemsAll.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.SmItemType)).ToList()),
+                    Version = x.Version,
+                    //ImagePortrait = x.ImagePortraitId == null ? null : MapToModelImageSimple(z => z.ID.Equals(x.ImagePortraitId.ToString()), _imagesAll),
+                    //ImageLandscape = x.ImageLandscapeId == null ? null : MapToModelImageSimple(z => z.ID.Equals(x.ImageLandscapeId.ToString()), _imagesAll),
+                    //assumes only one related item per type
+                    RelatedType = MapToModelRelatedItemsRelatedType(items, x.ID),
+                    //Selected = items.Find(y => y.MarketplaceItemId.ToString().Equals(x.ID.ToString())) != null
+                })
+                .OrderBy(x => x.RelatedType.DisplayOrder)
+                .ThenBy(x => x.RelatedType.Name)
+                .ThenBy(x => x.DisplayName)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Take a list of all profiles from CloudLib and then a list of profiles for one item.
+        /// With that info, mark the items in the full list as selected if they are a related item
+        /// for this entity.
+        /// The idea is we return the entire lookup list and mark selected those items appearing selected. 
+        /// </summary>
+        protected List<ProfileItemRelatedModel> MapToModelRelatedProfiles(List<RelatedProfileItem> items)
+        {
+            if (items == null) return new List<ProfileItemRelatedModel>();
+
+            //get the supplemental information that is associated with the related items
+            var matches = _cloudLibDAL.GetManyById(items.Select(x => x.ProfileId).ToList()).Result;
+
+            return !matches.Any() ? new List<ProfileItemRelatedModel>() :
+                matches.Select(x => new ProfileItemRelatedModel
+                {
+                    //ID = MapToModelRelatedProfilesKey(items, x.ID),
+                    RelatedId = x.ID,
+                    Description = x.Description,
+                    DisplayName = x.DisplayName,
+                    Name = x.Name,
+                    Namespace = x.Namespace,
+                    Version = x.Version,
+                    //assumes only one related item per type
+                    RelatedType = MapToModelRelatedProfilesRelatedType(items, x.ID)
+                })
+                .OrderBy(x => x.RelatedType.DisplayOrder)
+                .ThenBy(x => x.RelatedType.Name)
+                .ThenBy(x => x.DisplayName)
+                .ToList();
+        }
+
+        private LookupItemModel MapToModelRelatedItemsRelatedType(
+            List<RelatedItem> relatedItems, string id)
+        {
+            if (relatedItems == null) return null;
+            if (relatedItems.Find(x => x.MarketplaceItemId.ToString().Equals(id)) == null) return null;
+
+            return MapToModelLookupItem(
+                relatedItems.Find(x => x.MarketplaceItemId.ToString().Equals(id)).RelatedTypeId,
+                _lookupItemsAll.Where(x => x.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList());
+        }
+
+        private LookupItemModel MapToModelRelatedProfilesRelatedType(
+            List<RelatedProfileItem> relatedItems, string id)
+        {
+            if (relatedItems == null) return null;
+            if (relatedItems.Find(x => x.ProfileId.Equals(id)) == null) return null;
+
+            return MapToModelLookupItem(
+                relatedItems.Find(x => x.ProfileId.Equals(id)).RelatedTypeId,
+                _lookupItemsAll.Where(x => x.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList());
+        }
+
 
         protected override void MapToEntity(ref MarketplaceItem entity, AdminMarketplaceItemModel model)
         {
@@ -301,7 +403,24 @@
                 MongoDB.Bson.ObjectId.Parse(model.ImagePortrait.ID);
             entity.ImageLandscapeId = model.ImageLandscape == null ?
                 MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY) :
-                MongoDB.Bson.ObjectId.Parse(model.ImageLandscape.ID); 
+                MongoDB.Bson.ObjectId.Parse(model.ImageLandscape.ID);
+
+            //replace child collection of items - ids are preserved
+            entity.RelatedItems = model.RelatedItems
+                .Where(x => x.RelatedType != null) //only include selected rows
+                .Select(x => new RelatedItem() {
+                    MarketplaceItemId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedId)),
+                    RelatedTypeId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedType.ID)),
+                }).ToList();
+            //replace child collection of items - ids are preserved
+            entity.RelatedProfiles = model.RelatedProfiles
+                .Where(x => x.RelatedType != null) //only include selected rows
+                .Select(x => new RelatedProfileItem()
+                {
+                    //ID = x.ID,
+                    ProfileId = x.RelatedId,
+                    RelatedTypeId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedType.ID)),
+                }).ToList();
 
             entity._ccName1 = model.ccName1;
             entity._ccEmail1 = model.ccEmail1;
