@@ -107,6 +107,9 @@ namespace CESMII.Marketplace.Api.Controllers
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         public async Task<IActionResult> Add([FromBody] RequestInfoModel model)
         {
+            bool bUpdateNeeded = false;
+            RequestInfoModel modelNew = null;
+
             if (model == null)
             {
                 _logger.LogWarning("RequestInfoController|Add|Invalid model");
@@ -128,7 +131,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 {
 
                     //populate some fields that may not be present on the add model. (request type code, created date). 
-                    var modelNew = _dal.GetById(result);
+                    modelNew = _dal.GetById(result);
 
                     //if we are adding a request info of smprofile type, then also get the associated sm profile.
                     if (modelNew.SmProfileId.HasValue)
@@ -159,6 +162,13 @@ namespace CESMII.Marketplace.Api.Controllers
                         astrName[1] = modelNew.MarketplaceItem.ccName1;
                         astrName[2] = modelNew.MarketplaceItem.ccName2;
 
+                        // Add target email addresses to the support request.
+                        modelNew.ccEmail1 = modelNew.MarketplaceItem.ccEmail1;
+                        modelNew.ccEmail2 = modelNew.MarketplaceItem.ccEmail2;
+                        modelNew.ccName1 = modelNew.MarketplaceItem.ccName1;
+                        modelNew.ccName2 = modelNew.MarketplaceItem.ccName2;
+                        bUpdateNeeded = true;
+
                         bEmailSuccess = await EmailRequestInfo(subject, body, _mailRelayService, astrEmail, astrName, abSendTo);
                     }
                     else
@@ -176,11 +186,17 @@ namespace CESMII.Marketplace.Api.Controllers
                     _logger.LogCritical($"RequestInfoController|Add|RequestInfo Item added (good)|Error: Email send error: {e.Message}.");
                 }
 
+                if (bUpdateNeeded)
+                {
+                    _ = await _dal.Update(modelNew, null);
+                }
+
                 return Ok(new ResultMessageWithDataModel()
                 {
                     IsSuccess = true,
                     Message = "Item was added.",
                     Data = model.ID
+
                 });
             }
         }
