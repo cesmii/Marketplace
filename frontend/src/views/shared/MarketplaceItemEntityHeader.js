@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import { Button } from 'react-bootstrap';
+import color from '../../components/Constants';
 
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
 import DownloadNodesetModal from '../../components/DownloadNodesetModal';
 import { AppSettings } from '../../utils/appsettings';
-import { formatDate, generateLogMessageString, getImageUrl } from '../../utils/UtilityService';
+import { formatDate, formatItemPublishDate, generateLogMessageString, getImageUrl, renderMenuColorIcon } from '../../utils/UtilityService';
 import { MarketplaceItemJobLauncher } from './MarketplaceItemJobLauncher';
 
 const CLASS_NAME = "MarketplaceItemEntityHeader";
@@ -70,7 +71,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
     const renderMarketplaceHeader = () => {
         return (
             <>
-                <div className={`row mx-0 p-0 ${props.cssClass} mb-4`}>
+                <div className={`row mx-0 p-0 ${props.cssClass} mb-4 border`}>
                     <div className="col-sm-6 col-md-5 p-0 d-none d-sm-block" >
                         {renderImageBg()}
                     </div>
@@ -79,10 +80,16 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         {props.item.abstract != null &&
                             <div className="mb-2" dangerouslySetInnerHTML={{ __html: props.item.abstract }} ></div>
                         }
-                        <p className="mb-0" ><b className="mr-2" >Published:</b>{formatDate(props.item.publishDate)}</p>
+                        <p className="mb-0" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
                         {/*<div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderCategoryItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderMetaTagItem(props.item)}</div>*/}
+                        {(props.item.relatedItemsGrouped != null && props.item.relatedItemsGrouped.length > 0) &&
+                            <p className="mt-3 mb-0" >
+                                <Button variant="link" type="button" className="px-0" onClick={props.onViewSpecifications} >
+                                    {renderMenuColorIcon('view', null, color.cornflower, 'mr-1')}View Specifications</Button>
+                            </p>
+                        }
                         {renderJobDefinitions()}
                     </div>
                 </div>
@@ -93,7 +100,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
     const renderProfileHeader = () => {
         return (
             <>
-                <div className={`row mx-0 p-0 ${props.cssClass} mb-4`}>
+                <div className={`row mx-0 p-0 ${props.cssClass} mb-4 border`}>
                     <div className="col-sm-6 col-md-5 p-0 d-none d-sm-block" >
                         {renderImageBg()}
                     </div>
@@ -106,14 +113,25 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                                 <span style={{ wordBreak: "break-word" }} >{props.item.namespace}</span>
                             </p>
                         }
-                        <p className="mb-2" ><b className="mr-2" >Published:</b>{formatDate(props.item.publishDate)}</p>
+                        <p className="mb-2" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
                         <p className="mb-2" ><b className="mr-2" >Version:</b>{props.item.version}</p>
                         {props.onDownload &&
-                            <p className="my-4" ><Button variant="secondary" type="button" className="px-4" onClick={onDownloadStart} >Download Nodeset XML</Button></p>
+                            <p className="mt-3 mb-0" >
+                                <Button variant="link" type="button" className="px-0" onClick={onDownloadStart} >
+                                    {renderMenuColorIcon('download', null, color.cornflower, 'mr-1')}Download Nodeset XML</Button>
+                            </p>
                         }
                         {props.showProfileDesignerLink &&
-                            <p className="mb-2" ><Button variant="secondary" type="link" target="_blank" className="px-4" href={`${AppSettings.ProfileDesignerUrl}cloudlibrary/viewer/${props.item.id}`} >
-                                View in SM Profile Designer</Button></p>
+                            <p className="mt-3 mb-0" >
+                                <Button variant="link" type="button" target="_blank" className="px-0" href={`${AppSettings.ProfileDesignerUrl}cloudlibrary/viewer/${props.item.id}`} >
+                                    {renderMenuColorIcon('profile', null, color.cornflower, 'mr-1')}View in SM Profile Designer</Button>
+                            </p>
+                        }
+                        {(props.item.relatedItemsGrouped != null && props.item.relatedItemsGrouped.length > 0) &&
+                            <p className="mt-3 mb-0" >
+                                <Button variant="link" type="button" className="px-0" onClick={props.onViewSpecifications} >
+                                    {renderMenuColorIcon('view', null, color.cornflower, 'mr-1')}View Specifications</Button>
+                            </p>
                         }
                     </div>
                 </div>

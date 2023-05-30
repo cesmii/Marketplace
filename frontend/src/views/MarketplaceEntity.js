@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 
@@ -12,9 +12,8 @@ import SocialMedia from "../components/SocialMedia";
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
 import MarketplaceEntitySidebar from './shared/MarketplaceEntitySidebar';
 
-import { convertHtmlToString, generateLogMessageString, getImageUrl, getMarketplaceIconName, isInRole } from '../utils/UtilityService'
-import { clearSearchCriteria, toggleSearchFilterSelected } from '../services/MarketplaceService';
-import MarketplaceTileList from './shared/MarketplaceTileList';
+import { convertHtmlToString, generateLogMessageString, getImageUrl, getMarketplaceIconName } from '../utils/UtilityService'
+import { clearSearchCriteria, MarketplaceRelatedItems, toggleSearchFilterSelected } from '../services/MarketplaceService';
 import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
 import { SvgVisibilityIcon } from '../components/SVGIcon';
 
@@ -29,6 +28,8 @@ function MarketplaceEntity() {
     // Region: Initialization
     //-------------------------------------------------------------------
     const history = useHistory();
+    const _scrollToSpecs = useRef(null);
+    const _scrollToRelated = useRef(null);
 
     const { id } = useParams();
     const [item, setItem] = useState({});
@@ -129,7 +130,11 @@ function MarketplaceEntity() {
         history.push({ pathname: `/library` });
     };
 
- 
+    const onViewSpecifications = (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: (_scrollToSpecs.current.getBoundingClientRect().y - 80), behavior: 'smooth' });
+    }
+
     //-------------------------------------------------------------------
     // Region: Render Helpers
     //-------------------------------------------------------------------
@@ -176,20 +181,8 @@ function MarketplaceEntity() {
 
     const renderSolutionDetails = () => {
 
-        //show heading based on type
-        const subHeading = item.type == null || item.type.name === null ? 'Smart Manufacturing App'
-            : item.type.name.replace('SM ', 'Smart Manufacturing ');
-
         return (
             <>
-                <div className="row mb-2 mb-md-3" >
-                    <div className="col-sm-12 d-flex align-items-center">
-                        <h2 className="m-0 mr-2">
-                            <span className="d-none d-md-inline">{subHeading} </span> Details
-                        </h2>
-                        <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/app/${item.id}`} >Request More Info</a>
-                    </div>
-                </div>
                 <div className="row" >
                     <div className="col-sm-12">
                         <div className="mb-3 entity-description" dangerouslySetInnerHTML={{ __html: item.description }} ></div>
@@ -204,10 +197,10 @@ function MarketplaceEntity() {
                         <span className="m-0 mr-2 my-2 mb-md-0 d-flex align-items-center">
                             <SvgVisibilityIcon fill={color.link} />
                             <button className="btn btn-link" onClick={filterByPublisher} >
-                            View all by this publisher</button>
+                                View all by this publisher</button>
                         </span>
                     </div>
-                    {(item.publisher.socialMediaLinks != null && item.publisher.socialMediaLinks.length > 0) && 
+                    {(item.publisher.socialMediaLinks != null && item.publisher.socialMediaLinks.length > 0) &&
                         <div className="col-sm-4 d-flex justify-content-md-end mb-2 mb-md-0 align-items-center">
                             <SocialMedia items={item.publisher.socialMediaLinks} />
                         </div>
@@ -222,7 +215,8 @@ function MarketplaceEntity() {
         if (!loadingProps.isLoading && (item == null)) {
             return;
         }
-        return (<MarketplaceItemEntityHeader key={item.id} item={item} isAuthenticated={isAuthenticated} isAuthorized={isAuthorized} showActions={true} cssClass="marketplace-list-item" />)
+        return (<MarketplaceItemEntityHeader key={item.id} item={item} isAuthenticated={isAuthenticated} isAuthorized={isAuthorized}
+            showActions={true} cssClass="marketplace-list-item" onViewSpecifications={onViewSpecifications} />)
     }
 
     //
@@ -232,26 +226,38 @@ function MarketplaceEntity() {
         );
     }
 
-    //render new
-    const renderSimilarItems = () => {
+    const renderMainContent = () => {
         if (loadingProps.isLoading) return;
-
-        if (item.similarItems == null || item.similarItems.length === 0) return;
 
         return (
             <>
-                <div className="row" >
-                    <div className="col-sm-12 mt-5 mb-3" >
-                        <h3 className="m-0">
-                            Related
-                        </h3>
+                <div className="marketplace-list-item border" >
+                    <div className="card mb-0 border-0">
+                        <div className="card-header bg-transparent p-2 pt-3 border-bottom-0" id="headingOne">
+                            <div className="col-sm-12 d-flex align-items-center">
+                                <h2 className="m-0 mr-2">
+                                    {(item.type == null || item.type.name === null) ?
+                                        'Smart Manufacturing App Details'
+                                        : `${item.type.name.replace('SM ', 'Smart Manufacturing ')} Details`
+                                    }
+                                </h2>
+                                <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/app/${item.id}`} >Request More Info</a>
+                            </div>
+                        </div>
+                        <div id="collapseOne" className="collapse show mb-3" aria-labelledby="headingOne" >
+                            <div className="card-body">
+                                {renderSolutionDetails()}
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div className="row" >
-                    <div className="col-sm-12">
-                        <MarketplaceTileList items={item.similarItems} layout="banner" colCount={3} />
-                    </div>
-                </div>
+
+                {(item.relatedItemsGrouped != null && item.relatedItemsGrouped.length > 0) &&
+                    <>
+                    <h2 ref={_scrollToSpecs} className="m-3 mt-4" >Specifications</h2>
+                    <MarketplaceRelatedItems items={item.relatedItemsGrouped} />
+                    </>
+                }
             </>
         );
     }
@@ -292,8 +298,7 @@ function MarketplaceEntity() {
                             {(!loadingProps.isLoading && !isLoading) &&
                                 <div className="marketplace-entity">
                                     {renderItemRow()}
-                                    {renderSolutionDetails()}
-                                    {renderSimilarItems()}
+                                    {renderMainContent()}
                                 </div>
                             }
                         </div>

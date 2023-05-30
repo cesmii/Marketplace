@@ -1361,4 +1361,40 @@
   },
   "DisplayOrder": 0,
   "IsActive": true
+},{
+  "_id": {
+    "$oid": "646294cf0aa912210a296539"
+  },
+  "Name": "Required",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 11,
+    "Name": "Related Type"
+  },
+  "DisplayOrder": 1,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "646294cf0aa912210a296540"
+  },
+  "Name": "Recommended",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 11,
+    "Name": "Related Type"
+  },
+  "DisplayOrder": 2,
+  "IsActive": true
+},{
+  "_id": {
+    "$oid": "646294cf0aa912210a296541"
+  },
+  "Name": "Similar",
+  "Code": null,
+  "LookupType": {
+    "EnumValue": 11,
+    "Name": "Related Type"
+  },
+  "DisplayOrder": 3,
+  "IsActive": true
 }]

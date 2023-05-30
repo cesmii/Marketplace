@@ -7,7 +7,7 @@ import axiosInstance from "../services/AxiosService";
 import Button from 'react-bootstrap/Button'
 
 import { AppSettings, LookupData } from '../utils/appsettings';
-import { generateLogMessageString, formatDate, validate_Email, scrollTopScreen } from '../utils/UtilityService'
+import { generateLogMessageString, validate_Email, scrollTopScreen, formatItemPublishDate } from '../utils/UtilityService'
 import { useLoadingContext } from "../components/contexts/LoadingContext";
 
 import PublisherSidebar from './shared/PublisherSidebar';
@@ -412,7 +412,7 @@ function RequestInfo() {
                             {_referrerItem.displayName}
                         </p>
                         <div className="mb-2" dangerouslySetInnerHTML={{ __html: _referrerItem.abstract }} ></div>
-                        <p className="mb-0">Published: {formatDate(_referrerItem.publishDate)}</p>
+                        <p className="mb-0">Published: {formatItemPublishDate(_referrerItem.publishDate)}</p>
                     </div>
                 </div>
                 {itemType !== "profile" && 

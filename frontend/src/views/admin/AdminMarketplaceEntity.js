@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { Helmet } from "react-helmet"
-import axiosInstance from "../../services/AxiosService";
 
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import Dropdown from 'react-bootstrap/Dropdown'
+import Card from 'react-bootstrap/Card'
+import Tab from 'react-bootstrap/Tab'
+import Nav from 'react-bootstrap/Nav'
+
+import axiosInstance from "../../services/AxiosService";
 
 import { AppSettings } from '../../utils/appsettings';
 import { generateLogMessageString, prepDateVal, validate_NoSpecialCharacters } from '../../utils/UtilityService'
@@ -17,6 +21,10 @@ import MultiSelect from '../../components/MultiSelect';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { WysiwygEditor } from '../../components/WysiwygEditor';
 import AdminImageList from './shared/AdminImageList';
+import AdminRelatedItemList from './shared/AdminRelatedItemList';
+import { clearSearchCriteria } from '../../services/MarketplaceService';
+
+import '../../components/styles/TabContainer.scss';
 
 const CLASS_NAME = "AdminMarketplaceEntity";
 
@@ -38,13 +46,16 @@ function AdminMarketplaceEntity() {
     const [_isValid, setIsValid] = useState({
         name: true, nameFormat: true, displayName: true, abstract: true, description: true,
         status: true, type: true, publisher: true, publishDate: true,
-        images: { imagePortrait: true, imageSquare: true, imageLandscape: true}
+        images: { imagePortrait: true, imageSquare: true, imageLandscape: true },
+        relatedItems: true, relatedProfiles: true
     });
     const [_deleteModal, setDeleteModal] = useState({ show: false, items: null });
     const [_error, setError] = useState({ show: false, message: null, caption: null });
     const [_refreshImageData, setRefreshImageData] = useState(true);
     const [_imageRows, setImageRows] = useState([]);
-    var caption = 'Marketplace Item';
+
+    const [_itemsLookup, setItemsLookup] = useState([]);  //marketplace items 
+    const [_loadLookupData, setLoadLookupData] = useState(null);
 
     //-------------------------------------------------------------------
     // Region: Hooks
@@ -161,7 +172,7 @@ function AdminMarketplaceEntity() {
             var url = `image/all`;
             console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
 
-            await axiosInstance.post(url, {id: id}).then(result => {
+            await axiosInstance.post(url, { id: id }).then(result => {
                 if (result.status === 200) {
                     setImageRows(result.data);
                 } else {
@@ -205,6 +216,65 @@ function AdminMarketplaceEntity() {
         };
     }, [loadingProps.lookupDataStatic]);
 
+    //-------------------------------------------------------------------
+    // Trigger get related items lookups - all mktplace items, all profiles.
+    //-------------------------------------------------------------------
+    useEffect(() => {
+        // Load lookup data upon certain triggers in the background
+        async function fetchData(url) {
+            //show a spinner
+            setLoadingProps({ isLoading: true, message: null });
+
+            console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
+
+            //get copy of search criteria structure from session storage
+            var criteria = JSON.parse(JSON.stringify(loadingProps.searchCriteria));
+            criteria = clearSearchCriteria(criteria);
+            criteria = { ...criteria, Query: null, Skip: 0, Take: 999 };
+            await axiosInstance.post(url, criteria).then(result => {
+                if (result.status === 200) {
+
+                    //set state on fetch of data
+                    setItemsLookup(result.data);
+                    setLoadLookupData(false);
+
+                    //hide a spinner
+                    setLoadingProps({ isLoading: false, message: null });
+                } else {
+                    setLoadingProps({
+                        isLoading: false, message: null, inlineMessages: [
+                            { id: new Date().getTime(), severity: "danger", body: 'An error occurred retrieving these items.', isTimed: true }]
+                    });
+                }
+                //hide a spinner
+                setLoadingProps({ isLoading: false, message: null });
+                setLoadLookupData(false);
+
+            }).catch(e => {
+                if ((e.response && e.response.status === 401) || e.toString().indexOf('Network Error') > -1) {
+                    //do nothing, this is handled in routes.js using common interceptor
+                    //setAuthTicket(null); //the call of this will clear the current user and the token
+                }
+                else {
+                    setLoadingProps({
+                        isLoading: false, message: null, inlineMessages: [
+                            { id: new Date().getTime(), severity: "danger", body: 'An error occurred retrieving the related items.', isTimed: true }]
+                    });
+                }
+                setLoadLookupData(false);
+            });
+        }
+
+        //go get the data.
+        if (_loadLookupData == null || _loadLookupData === true) {
+            fetchData(`marketplace/admin/lookup/related`);
+        }
+
+        //this will execute on unmount
+        return () => {
+            //
+        };
+    }, [_loadLookupData]);
 
     //-------------------------------------------------------------------
     // Region: 
@@ -222,7 +292,6 @@ function AdminMarketplaceEntity() {
         //if path contains id, then default to view mode and determine in fetch whether user is owner or not.
         return 'view';
     }
-
 
     //-------------------------------------------------------------------
     // Region: Validation
@@ -275,6 +344,16 @@ function AdminMarketplaceEntity() {
         });
     };
 
+    const validateForm_relatedItems = () => {
+        return item.relatedItems == null ||
+            item.relatedItems.filter(x => x.relatedId === "-1" || x.relatedType?.id === "-1").length === 0;
+    };
+
+    const validateForm_relatedProfiles = () => {
+        return item.relatedProfiles == null ||
+            item.relatedProfiles.filter(x => x.relatedId === "-1" || x.relatedType?.id === "-1").length === 0;
+    };
+
     ////update state for when search click happens
     const validateForm = () => {
         console.log(generateLogMessageString(`validateForm`, CLASS_NAME));
@@ -290,12 +369,14 @@ function AdminMarketplaceEntity() {
         _isValid.images.imagePortrait = item.imagePortrait != null && item.imagePortrait.id.toString() !== "-1";
         _isValid.images.imageSquare = true; //item.imageSquare != null && item.imageSquare.id.toString() !== "-1";
         _isValid.images.imageLandscape = item.imageLandscape != null && item.imageLandscape.id.toString() !== "-1";
+        _isValid.relatedItems = validateForm_relatedItems();
+        _isValid.relatedProfiles = validateForm_relatedProfiles();
 
         setIsValid(JSON.parse(JSON.stringify(_isValid)));
         return (_isValid.name && _isValid.nameFormat && _isValid.displayName && _isValid.abstract && _isValid.description &&
             _isValid.status && _isValid.publisher && _isValid.publishDate &&
             _isValid.images.imagePortrait && _isValid.images.imageSquare && _isValid.images.imageLandscape &&
-            _isValid.type);
+            _isValid.relatedItems && _isValid.relatedProfiles && _isValid.type);
     }
 
     //-------------------------------------------------------------------
@@ -519,6 +600,64 @@ function AdminMarketplaceEntity() {
     }
 
     //-------------------------------------------------------------------
+    // Region: Event handler - related items, related profiles
+    //-------------------------------------------------------------------
+    const onChangeRelatedItem = (currentId, arg) => {
+        console.log(generateLogMessageString('onChangeRelatedItem', CLASS_NAME));
+        var match = item.relatedItems.find(x => x.relatedId === currentId);
+        match.relatedId = arg.relatedId;
+        match.displayName = arg.displayName;
+        match.relatedType = arg.relatedType;
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    const onChangeRelatedProfile = (currentId, arg) => {
+        console.log(generateLogMessageString('onChangeRelatedProfile', CLASS_NAME));
+        var match = item.relatedProfiles.find(x => x.relatedId === currentId);
+        match.relatedId = arg.relatedId;
+        match.displayName = arg.displayName;
+        match.relatedType = arg.relatedType;
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    const onAddRelatedItem = () => {
+        console.log(generateLogMessageString('onAddRelatedItem', CLASS_NAME));
+        //we need to be aware of newly added rows and those will be signified by a negative -id. 
+        //Once saved server side, these will be issued ids from db.
+        //Depending on how we are adding (single row or multiple rows), the id generation will be different. Both need 
+        //a starting point negative id
+        var id = (-1) * (item.relatedItems == null ? 1 : item.relatedItems.length + 1);
+
+        item.relatedItems.push({ relatedId: id, relatedType: { id: "-1" } });
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    const onAddRelatedProfile = () => {
+        console.log(generateLogMessageString('onAddRelatedProfile', CLASS_NAME));
+        //we need to be aware of newly added rows and those will be signified by a negative -id. 
+        //Once saved server side, these will be issued ids from db.
+        //Depending on how we are adding (single row or multiple rows), the id generation will be different. Both need 
+        //a starting point negative id
+        var id = (-1) * (item.relatedProfiles == null ? 1 : item.relatedProfiles.length + 1);
+        item.relatedProfiles.push({ relatedId: id, relatedType: { id: "-1" } });
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    const onDeleteRelatedItem = (id) => {
+        console.log(generateLogMessageString('onDeleteRelatedItem', CLASS_NAME));
+        //make a copy of the array 
+        item.relatedItems = item.relatedItems.filter(x => x.relatedId !== id);
+        //item.relatedItems = item.relatedItems.map(x => { return (x.relatedId !== id ? x : null); }).filter(x => x != null);
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    const onDeleteRelatedProfile = (id) => {
+        console.log(generateLogMessageString('onDeleteRelatedProfile', CLASS_NAME));
+        item.relatedProfiles = item.relatedProfiles.filter(x => x.relatedId !== id);
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    //-------------------------------------------------------------------
     // Region: Render Helpers
     //-------------------------------------------------------------------
     const renderMarketplaceStatus = () => {
@@ -538,8 +677,8 @@ function AdminMarketplaceEntity() {
             return g.lookupType.enumValue === AppSettings.LookupTypeEnum.MarketplaceStatus //
         });
         const options = items.map((item) => {
-                return (<option key={item.id} value={item.id} >{item.name}</option>)
-            });
+            return (<option key={item.id} value={item.id} >{item.name}</option>)
+        });
 
         return (
             <Form.Group>
@@ -752,10 +891,63 @@ function AdminMarketplaceEntity() {
         );
     };
 
-    const renderForm = () => {
-        //console.log(item);
+    const renderValidationSummary = () => {
+
+        let summary = [];
+        if (!_isValid.name) summary.push('Name is required.');
+        if (!_isValid.nameFormat) summary.push('Name format is invalid.');
+        if (!_isValid.displayName) summary.push('Display name is required.');
+        if (!_isValid.abstract) summary.push('Abstract is required.');
+        if (!_isValid.description) summary.push('Description is required.');
+        if (!_isValid.abstract) summary.push('Abstract is required.');
+        if (!_isValid.status) summary.push('Status is required.');
+        if (!_isValid.type) summary.push('Type is required.');
+        if (!_isValid.publisher) summary.push('Publisher is required.');
+        if (!_isValid.publishDate) summary.push('Publish Date is required.');
+        if (!_isValid.images.imagePortrait) summary.push('Portrait image is required.');
+        if (!_isValid.images.imageLandscape) summary.push('Landscape image is required.');
+        if (!validateForm_relatedItems()) summary.push('Related Items - Select item and set related type.');
+        if (!validateForm_relatedProfiles()) summary.push('Related Profiles - Select item and set related type.');
+        if (summary.length == 0) return null;
+
+        let content = summary.map(function (x, i) {
+            return i > 0 ? (<span key={i} ><br />{x}</span>) : (<span key={i} >{x}</span>);
+        });
+
         return (
-                <>
+            <div className="alert alert-danger w-100">
+                {content}
+            </div>
+        );
+    };
+
+    const renderRelatedItems = () => {
+        return (
+            <>
+                <div className="row mt-2">
+                    <div className="col-12">
+                        <AdminRelatedItemList caption="Related Marketplace Items" captionAdd="Add Related Marketplace Item"
+                            items={item.relatedItems} itemsLookup={_itemsLookup?.lookupItems?.filter(x => x.id !== item.id)}
+                            type={AppSettings.itemTypeCode.smApp} onChangeItem={onChangeRelatedItem}
+                            onAdd={onAddRelatedItem} onDelete={onDeleteRelatedItem} />
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-12">
+                        <hr className="my-3" />
+                        <AdminRelatedItemList caption="Related SM Profiles" captionAdd="Add Related SM Profile"
+                            items={item.relatedProfiles} itemsLookup={_itemsLookup?.lookupProfiles}
+                            type={AppSettings.itemTypeCode.smProfile} onChangeItem={onChangeRelatedProfile}
+                            onAdd={onAddRelatedProfile} onDelete={onDeleteRelatedProfile} />
+                    </div>
+                </div>
+            </>
+        );
+    };
+
+    const renderCommonInfo = () => {
+        return (
+            <>
                 <div className="row">
                     <div className="col-md-8">
                         <Form.Group>
@@ -797,6 +989,14 @@ function AdminMarketplaceEntity() {
                         {renderItemType()}
                     </div>
                 </div>
+            </>
+        );
+    };
+
+    const renderGeneralTab = () => {
+        //console.log(item);
+        return (
+            <>
                 <div className="row mt-2">
                     <div className="col-sm-6 col-lg-4">
                         <Form.Group>
@@ -869,7 +1069,11 @@ function AdminMarketplaceEntity() {
                                     Required
                                 </span>
                             }
-                            <WysiwygEditor id="abstract" value={item.abstract} onChange={onChange} onValidate={validateForm_abstract} className={(!_isValid.abstract ? 'short invalid-field' : 'short')} />
+                            {!isReadOnly ?
+                                <WysiwygEditor id="abstract" value={item.abstract} onChange={onChange} onValidate={validateForm_abstract} className={(!_isValid.abstract ? 'short invalid-field' : 'short')} />
+                                :
+                                <div className="border p-2 px-3 rounded form-control h-auto" readOnly={true} dangerouslySetInnerHTML={{ __html: item.abstract }}></div>
+                            }
                         </Form.Group>
                     </div>
                     <div className="col-md-12">
@@ -880,7 +1084,11 @@ function AdminMarketplaceEntity() {
                                     Required
                                 </span>
                             }
-                            <WysiwygEditor id="description" value={item.description} onChange={onChange} onValidate={validateForm_description} className={(!_isValid.description ? 'invalid-field' : '')} />
+                            {!isReadOnly ?
+                                <WysiwygEditor id="description" value={item.description} onChange={onChange} onValidate={validateForm_description} className={(!_isValid.description ? 'invalid-field' : '')} />
+                                :
+                                <div className="border p-2 px-3 rounded form-control h-auto" readOnly={true} dangerouslySetInnerHTML={{ __html: item.description }}></div>
+                            }
                         </Form.Group>
                     </div>
                 </div>
@@ -893,7 +1101,14 @@ function AdminMarketplaceEntity() {
                     <div className="col-md-4">
                     </div>
                 </div>
-                <div className="row mt-2 pt-2 border-top">
+            </>
+        );
+    }
+
+    const renderImagesInfo = () => {
+        return (
+            <>
+                <div className="row mt-2">
                     <div className="col-12">
                         <h3 className="mb-4">Image Selection</h3>
                     </div>
@@ -913,8 +1128,8 @@ function AdminMarketplaceEntity() {
                     </div>
                 </div>
             </>
-        )
-    }
+        );
+    };
 
     const renderMultiSelectAreas = () => {
         if (item == null) return;
@@ -958,7 +1173,7 @@ function AdminMarketplaceEntity() {
         return (
             <>
                 <h1 className="m-0 mr-2">
-                    {caption}
+                    Marketplace Item
                 </h1>
                 <div className="ml-auto d-flex align-items-center" >
                     {renderButtons()}
@@ -967,6 +1182,68 @@ function AdminMarketplaceEntity() {
             </>
         )
     }
+
+    const tabListener = (eventKey) => {
+    }
+
+    const renderTabbedForm = () => {
+        /*
+        return (
+            <>
+                {renderGeneralTab()}
+                {renderImagesInfo()}
+            {renderRelatedItems()}
+            </>
+        );
+        */
+        return (
+            <Tab.Container id="admin-marketplace-entity" defaultActiveKey="general" onSelect={tabListener} >
+                <Nav variant="pills" className="row mt-1 px-2 pr-md-3">
+                    <Nav.Item className="col-sm-4 rounded p-0 pl-2" >
+                        <Nav.Link eventKey="general" className="text-center text-md-left p-1 px-2 h-100" >
+                            <span className="headline-3">General</span>
+                        </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item className="col-sm-4 rounded p-0 px-md-0" >
+                        <Nav.Link eventKey="images" className="text-center text-md-left p-1 px-2 h-100" >
+                            <span className="headline-3">Images</span>
+                            {/*<span className="d-none d-md-inline"><br />Type Definitions that depend on 'me'</span>*/}
+                        </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item className="col-sm-4 rounded p-0 pr-2">
+                        <Nav.Link eventKey="relatedItems" className="text-center text-md-left p-1 px-2 h-100" >
+                            <span className="headline-3">Related Items</span>
+                            {/*<span className="d-none d-md-inline"><br />Optional and advanced settings</span>*/}
+                        </Nav.Link>
+                    </Nav.Item>
+                </Nav>
+
+                <Tab.Content>
+                    <Tab.Pane eventKey="general">
+                        <Card className="">
+                            <Card.Body className="pt-3">
+                                { renderGeneralTab()}
+                            </Card.Body>
+                        </Card>
+                    </Tab.Pane>
+                    <Tab.Pane eventKey="images">
+                        <Card className="">
+                            <Card.Body className="pt-3">
+                                { renderImagesInfo()}
+                            </Card.Body>
+                        </Card>
+                    </Tab.Pane>
+                    <Tab.Pane eventKey="relatedItems">
+                        <Card className="">
+                            <Card.Body className="pt-3">
+                                {renderRelatedItems()}
+                            </Card.Body>
+                        </Card>
+                    </Tab.Pane>
+                </Tab.Content>
+            </Tab.Container>
+        );
+    };
 
     const renderSubTitle = () => {
         if (mode === "new" || mode === "copy") return;
@@ -984,7 +1261,7 @@ function AdminMarketplaceEntity() {
     return (
         <>
             <Helmet>
-                <title>{`${caption} | Admin | ${AppSettings.Titles.Main}`}</title>
+                <title>{`${item?.displayName != null ? item?.displayName + ' | ' : '' } Admin | ${AppSettings.Titles.Main}`}</title>
             </Helmet>
             <Form noValidate>
             {renderHeaderRow()}
@@ -992,8 +1269,10 @@ function AdminMarketplaceEntity() {
                 <div className="col-sm-3" >
                     {renderMultiSelectAreas()}
                 </div>
-                <div className="col-sm-9 mb-4" >
-                    {renderForm()}
+                <div className="col-sm-9 mb-4 tab-container" >
+                    {renderValidationSummary()}
+                    {renderCommonInfo()}
+                    {renderTabbedForm()}
                 </div>
             </div>
             </Form>
