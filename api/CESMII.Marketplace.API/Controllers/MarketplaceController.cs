@@ -406,6 +406,15 @@ namespace CESMII.Marketplace.Api.Controllers
             {
                 long swMarketPlaceStarted = timer.ElapsedMilliseconds;
                 result = await AdvancedSearchMarketplace(model, types, cats, verts, pubs, useSpecialTypeSelection, liveOnly);
+                //because we wait to page, sort till after in the combined (Cloud and marketplace) scenario, we need to do same here. 
+                //now page the data. 
+                result.Data = result.Data?
+                    .OrderBy(x => x.IsFeatured)
+                    .ThenBy(x => x.IsFeatured)
+                    .Skip(model.Skip)
+                    .Take(model.Take)
+                    .ToList();
+
                 long swMarketPlaceFinished = timer.ElapsedMilliseconds;
                 _logger.LogWarning($"MarketplaceController|AdvancedSearch|Duration: {timer.ElapsedMilliseconds}ms. (Marketplace: {swMarketPlaceFinished - swMarketPlaceStarted} ms.");
             }
