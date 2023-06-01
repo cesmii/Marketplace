@@ -292,28 +292,24 @@ function MarketplaceList() {
         criteria.query = q;
         //item types - update selected items, deselect all others
         //sample: sm=sm-app,sm-hardware
-        if (sm != null) {
-            const selTypes = sm.split(",");
-            criteria.itemTypes?.forEach((x) => {
-                x.selected = selTypes.find(y => y.toLowerCase() === x.code.toLowerCase()) != null;
-            });
-        }
+        const selTypes = sm == null ? [] : sm.split(",");
+        criteria.itemTypes?.forEach((x) => {
+            x.selected = selTypes.find(y => y.toLowerCase() === x.code.toLowerCase()) != null;
+        });
         //filters
         //for each filter type (verts, processes, etc.), figure out if the query string 
         //contains the enum value which indicates this filter is being applied. If so, then 
         //apply selected to any child item that is present in the query string. Presence is indicated by the id value.
         //sample: f=2::624c6de6a649292c49921f0d,629a6b34605dda89466cf5b8|1::618aa924557c7b88d5fb487b
-        if (f != null) {
-            const filterEnums = f.split("|");
-            criteria.filters?.forEach((x) => {
-                //const selFilters = filterEnums.split("::");
-                const filterQS = filterEnums.find(z => z.indexOf(`${x.enumValue}::`) === 0);
-                const selFilters = filterQS == null ? [] : filterQS.replace(`${x.enumValue}::`, '').split(",");
-                x.items?.forEach((y) => {
-                    y.selected = selFilters.find(z => z.toLowerCase() === y.id.toLowerCase()) != null;
-                });
+        const filterEnums = f == null ? [] : f.split("|");
+        criteria.filters?.forEach((x) => {
+            //const selFilters = filterEnums.split("::");
+            const filterQS = filterEnums.find(z => z.indexOf(`${x.enumValue}::`) === 0);
+            const selFilters = filterQS == null ? [] : filterQS.replace(`${x.enumValue}::`, '').split(",");
+            x.items?.forEach((y) => {
+                y.selected = selFilters.find(z => z.toLowerCase() === y.id.toLowerCase()) != null;
             });
-        }
+        });
 
         //this will trigger a fetch from the API to pull the data for the filtered criteria
         setCriteria(JSON.parse(JSON.stringify(criteria)));
