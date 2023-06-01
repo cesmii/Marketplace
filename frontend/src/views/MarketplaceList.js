@@ -173,6 +173,9 @@ function MarketplaceList() {
     const onClearAll = () => {
         console.log(generateLogMessageString('onClearAll', CLASS_NAME));
 
+        setCriteria(clearSearchCriteria(_criteria));
+        setQueryLocal(null);
+
         //reload page
         history.push('/library');
     }
