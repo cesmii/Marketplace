@@ -16,6 +16,7 @@ using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Marketplace.Api.Shared.Utils;
+using System.Text;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
@@ -27,17 +28,19 @@ namespace CESMII.Marketplace.Api.Controllers
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
         private readonly ICloudLibDAL<MarketplaceItemModel> _dalCloudLib;
         private readonly IDal<SearchKeyword, SearchKeywordModel> _dalSearchKeyword;
-
+        private readonly IDal<Publisher, PublisherModel> _dalPublisher;
         public MarketplaceController(IDal<MarketplaceItem, MarketplaceItemModel> dal,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
             ICloudLibDAL<MarketplaceItemModel> dalCloudLib,
             IDal<SearchKeyword, SearchKeywordModel> dalSearchKeyword,
+            IDal<Publisher, PublisherModel> dalPublisher,
             UserDAL dalUser,
             ConfigUtil config, ILogger<MarketplaceController> logger)
             : base(config, logger, dalUser)
         {
             _dal = dal;
+            _dalPublisher = dalPublisher;
             _dalLookup = dalLookup;
             _dalAnalytics = dalAnalytics;
             _dalCloudLib = dalCloudLib;
@@ -347,12 +350,44 @@ namespace CESMII.Marketplace.Api.Controllers
             var pubs = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.FirstOrDefault(x => x.EnumValue == LookupTypeEnum.Publisher).Items.Where(x => x.Selected).ToList();
             var types = model.ItemTypes.Count == 0 ? new List<LookupItemFilterModel>() : model.ItemTypes.Where(x => x.Selected).ToList();
 
-            //SM Apps, Hardware, etc. - anything other than sm profile types
-            //User driven flag to select only a certain type. Determine if none are selected or if item type of sm app is selected.
+            // Check for publishers in the query string
+            if (!string.IsNullOrEmpty(model.Query))
+            {
+                bool bAnyAdded = false;
+                StringBuilder sbNewQuery = new StringBuilder();
+                List<PublisherModel> pubAll = _dalPublisher.GetAll(false);
+                var astrWords = model.Query.Split(new char[] { ' ',',','.','\t' }, StringSplitOptions.RemoveEmptyEntries);
+                if (astrWords.Length > 0)
+                {
+                    foreach (string strItem in astrWords)
+                    {
+                        bool bItemFound = false;
+                        foreach (PublisherModel pm in pubAll)
+                        {
+                            if (pm.DisplayName.Contains(strItem))
+                            {
+                                pubs.Add(new LookupItemFilterModel() { Code = null, DisplayOrder = 999, ID = pm.ID.ToString(), IsActive = pm.IsActive, Name = pm.DisplayName, Selected = true });
+                                bAnyAdded = true;
+                                bItemFound = true;
+                            }
+                        }
+
+                        if (!bItemFound)
+                            sbNewQuery.Append($"{strItem} ");
+                    }
+
+                    // If we found any publishers, update the query minus the publisher name.
+                    if (bAnyAdded)
+                        model.Query = sbNewQuery.ToString().Trim();
+                }
+            }
+
+            // Any type (Apps or Hardware) but not Profiles
+            // User driven flag to select only a certain type. Determine if none are selected or if item type of sm app is selected.
             DALResult<MarketplaceItemModel> result;
 
-            //SM Profiles
-            //User driven flag to select only a certain type. Determine if none are selected or if item type of sm profile is selected.
+            // SM Profiles
+            // User driven flag to select only a certain type. Determine if none are selected or if item type of sm profile is selected.
             var includeSmProfileTypes = !types.Any(x => x.Selected) ||
                 types.Any(x => x.Selected && x.Code.ToLower().Equals(_configUtil.MarketplaceSettings.SmProfile.Code.ToLower()));
             //Skip over this in certain scenarios. ie. admin section
