@@ -25,12 +25,14 @@ namespace CESMII.Marketplace.Api.Controllers
     {
         private readonly IDal<MarketplaceItem, MarketplaceItemModel> _dal;
         private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
+        private readonly IDal<Publisher, PublisherModel> _dalPublisher;
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
         private readonly ICloudLibDAL<MarketplaceItemModel> _dalCloudLib;
         private readonly IDal<SearchKeyword, SearchKeywordModel> _dalSearchKeyword;
         private readonly IDal<Publisher, PublisherModel> _dalPublisher;
         public MarketplaceController(IDal<MarketplaceItem, MarketplaceItemModel> dal,
             IDal<LookupItem, LookupItemModel> dalLookup,
+            IDal<Publisher, PublisherModel> dalPublisher,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
             ICloudLibDAL<MarketplaceItemModel> dalCloudLib,
             IDal<SearchKeyword, SearchKeywordModel> dalSearchKeyword,
@@ -42,6 +44,7 @@ namespace CESMII.Marketplace.Api.Controllers
             _dal = dal;
             _dalPublisher = dalPublisher;
             _dalLookup = dalLookup;
+            _dalPublisher = dalPublisher;
             _dalAnalytics = dalAnalytics;
             _dalCloudLib = dalCloudLib;
             _dalSearchKeyword = dalSearchKeyword;
@@ -441,6 +444,15 @@ namespace CESMII.Marketplace.Api.Controllers
             {
                 long swMarketPlaceStarted = timer.ElapsedMilliseconds;
                 result = await AdvancedSearchMarketplace(model, types, cats, verts, pubs, useSpecialTypeSelection, liveOnly);
+                //because we wait to page, sort till after in the combined (Cloud and marketplace) scenario, we need to do same here. 
+                //now page the data. 
+                result.Data = result.Data?
+                    .OrderBy(x => x.IsFeatured)
+                    .ThenBy(x => x.IsFeatured)
+                    .Skip(model.Skip)
+                    .Take(model.Take)
+                    .ToList();
+
                 long swMarketPlaceFinished = timer.ElapsedMilliseconds;
                 _logger.LogWarning($"MarketplaceController|AdvancedSearch|Duration: {timer.ElapsedMilliseconds}ms. (Marketplace: {swMarketPlaceFinished - swMarketPlaceStarted} ms.");
             }
@@ -491,7 +503,10 @@ namespace CESMII.Marketplace.Api.Controllers
         /// </summary>
         /// <remarks>model.Filters selected items could be altered in this method</remarks>
         /// <param name="model"></param>
-        private List<MarketplaceItemModel> PrepareAdvancedSearchFiltersSelections(MarketplaceSearchModel model, LookupTypeEnum enumVal)
+/*
+        [Obsolete()]
+        private List<MarketplaceItemModel> PrepareAdvancedSearchFiltersSelections(
+            MarketplaceSearchModel model, LookupTypeEnum enumVal, Func<MarketplaceItem, bool> predLiveOnly)
         {
             // We are looking for something typed into the search box. If empty, we return an empty list.
             if (string.IsNullOrEmpty(model.Query)) return new List<MarketplaceItemModel>();
@@ -503,30 +518,136 @@ namespace CESMII.Marketplace.Api.Controllers
                                 , null, null, false, false).Data.ToList();
 
             // Add items when all or part of an industry vertical (academia, aerospace, agriculture, etc) is typed into the search box.
+            var predicates = new List<Func<MarketplaceItem, bool>>
+            {
+                x => x.IsActive
+            };
+            if (predLiveOnly != null)
+            {
+                predicates.Add(predLiveOnly);
+            }
+
             if (enumVal == LookupTypeEnum.IndustryVertical)
             {
-                return _dal.Where(x => matches.Any(y => x.IndustryVerticals.Contains(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y.ID))))
-                                && x.IsActive
-                                , null, null, false, false).Data.ToList();
+                predicates.Add(x => matches.Any(y => x.IndustryVerticals.Contains(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y.ID)))));
             }
             // Add items where all or part of a defined processes (air compressing, analytics, blowing, chilling, etc) is typed into the search box.
             else if (enumVal == LookupTypeEnum.Process)
             {
-                return _dal.Where(x => matches.Any(y => x.Categories.Contains(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y.ID))))
-                                && x.IsActive
-                                , null, null, false, false).Data.ToList();
+                predicates.Add(x => matches.Any(y => x.Categories.Contains(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y.ID)))));
             }
             // Add items where all or part of a publisher name is typed into the search box.
             else if (enumVal == LookupTypeEnum.Publisher)
             {
-                return _dal.Where(x => matches.Any(y => x.PublisherId.Equals(new MongoDB.Bson.ObjectId(y.ID)))
-                                && x.IsActive
-                                , null, null, false, false).Data.ToList();
+                predicates.Add(x => matches.Any(y => x.PublisherId.Equals(new MongoDB.Bson.ObjectId(y.ID))));
             }
             else
             {
                 return new List<MarketplaceItemModel>();
             }
+            return _dal.Where(predicates, null, null, false, false).Data.ToList();
+        }
+*/
+
+        /// <summary>
+        /// If user enters a word in the search box whose value is contained in any of the following:
+        /// (a) An Industry Vertical, 
+        /// (b) Processes, or
+        /// (c) The name of a publisher.
+        /// We return the associated category that contains that word
+        /// </summary>
+        /// <remarks>model.Filters selected items could be altered in this method</remarks>
+        /// <param name="model"></param>
+        /// <returns>list of ids of lookup items matching the word</returns>
+        private List<string> PrepareSearchFiltersSelections(string query, LookupTypeEnum enumVal)
+        {
+            // We are looking for something typed into the search box. If empty, we return an empty list.
+            if (string.IsNullOrEmpty(query)) return new List<string>();
+
+            query = query.ToLower();
+
+            if (enumVal == LookupTypeEnum.Publisher)
+            {
+                return _dalPublisher.Where(x =>
+                                x.IsActive
+                                && (x.Name.ToLower().Contains(query) 
+                                || x.DisplayName.ToLower().Contains(query))
+                                , null, null, false, false).Data
+                                .ToList()
+                                .Select(x => x.ID).ToList();
+            }
+            else
+            {
+                // Only include active items (table field "IsActive" = true).
+                return _dalLookup.Where(x => x.LookupType.EnumValue == enumVal
+                                    && x.IsActive
+                                    && x.Name.ToLower().Contains(query.ToLower())
+                                    , null, null, false, false).Data
+                                    .ToList()
+                                    .Select(x => x.ID).ToList();
+            }
+        }
+
+        /// <summary>
+        /// If user enters a word in the search box whose value is contained in any of the following:
+        /// (a) An Industry Vertical, 
+        /// (b) Processes, or
+        /// (c) The name of a publisher.
+        /// We return the associated category that contains that word
+        /// </summary>
+        /// <remarks>model.Filters selected items could be altered in this method</remarks>
+        /// <param name="model"></param>
+        /// <returns>list of ids of lookup items matching the word</returns>
+        private Func<MarketplaceItem, bool> BuildQueryPredicate(string query, List<LookupItemFilterModel> types, bool useSpecialTypeSelection)
+        {
+            // We are looking for something typed into the search box. If empty, we return an empty list.
+            if (string.IsNullOrEmpty(query)) return null;
+
+            //get list of cats, verts, pubs containing the query term
+            var cats = PrepareSearchFiltersSelections(query, LookupTypeEnum.Process);
+            var verts = PrepareSearchFiltersSelections(query, LookupTypeEnum.IndustryVertical);
+            var pubs = PrepareSearchFiltersSelections(query, LookupTypeEnum.Publisher);
+
+            //add where clause for the search terms - check against more fields
+            query = query.ToLower();
+            Func<MarketplaceItem, bool> result = x =>
+                x.Name.ToLower().Contains(query)
+                //or search on additional fields
+                || x.DisplayName.ToLower().Contains(query)
+                || x.Description.ToLower().Contains(query)
+                || x.Abstract.ToLower().Contains(query)
+                || (x.MetaTags != null && x.MetaTags.Contains(query))
+                || (useSpecialTypeSelection && x.ItemTypeId != null && types.Any(y => y.ID.Equals(x.ItemTypeId.ToString())))
+                || cats.Any(y => x.Categories.Contains(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y))))
+                || verts.Any(y => x.IndustryVerticals.Contains(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y))))
+                || pubs.Any(y => x.PublisherId.Equals(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y))))
+            ;
+            /*
+            Func<MarketplaceItem, bool> result = x => x.Name.ToLower().Contains(query);
+            //or search on additional fields
+            result.Or(x => x.DisplayName.ToLower().Contains(query));
+            result.Or(x => x.Description.ToLower().Contains(query));
+            result.Or(x => x.Abstract.ToLower().Contains(query));
+            result.Or(x => x.MetaTags != null && x.MetaTags.Contains(query));
+
+            //if we are using special type, it means user entered special word for query like "profile". In this case,
+            //we want to get all types of sm-profile >>OR<< any item containing the word profile
+            if (useSpecialTypeSelection)
+            {
+                result.Or(x => x.ItemTypeId != null && types.Any(y => y.ID.Equals(x.ItemTypeId.ToString())));
+            }
+            
+            //if we have a query value which has a category, vert or pub match, then we don't require match
+            //on one of the freeform text fields. 
+            if (cats.Any())
+                result.Or(x => cats.Any(y => x.Categories.Contains(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y)))));
+            if (verts.Any())
+                result.Or(x => verts.Any(y => x.IndustryVerticals.Contains(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y)))));
+            if (pubs.Any())
+                result.Or(x => pubs.Any(y => x.PublisherId.Equals(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y)))));
+                //result.Or(x => pubs.Any(p => p == x.PublisherId.ToString()));
+            */
+            return result;
         }
 
         /// <summary>
@@ -544,7 +665,7 @@ namespace CESMII.Marketplace.Api.Controllers
             , bool liveOnly = true)
         {
             _logger.LogInformation($"MarketplaceController|AdvancedSearchMarketplace|Starting...");
-            var timer = Stopwatch.StartNew();    
+            var timer = Stopwatch.StartNew();
             var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
 
             //lowercase model.query
@@ -612,9 +733,12 @@ namespace CESMII.Marketplace.Api.Controllers
             }
 
             //add where clause for the search terms - check against more fields
-            Func<MarketplaceItem, bool> predicateQuery = null;
             if (!string.IsNullOrEmpty(model.Query))
             {
+                Func<MarketplaceItem, bool> predicateQuery = BuildQueryPredicate(model.Query, types, useSpecialTypeSelection);
+                if (predicateQuery != null) predicates.Add(predicateQuery);
+
+                /*
                 //TBD - Academia - no longer returning value because not in name but is in category. Have to figure out 
                 //how to weave that into the mix.
                 //TBD - check that we can update appsettings values from Azure in Configuraiton area.
@@ -643,23 +767,7 @@ namespace CESMII.Marketplace.Api.Controllers
                         || (x.MetaTags != null && x.MetaTags.Contains(model.Query))
                         ;
                 }
-
-                /*
-                predicateQuery = x => x.Name.ToLower().Contains(model.Query);
-                //or search on additional fields
-                predicateQuery.Or(x => x.DisplayName.ToLower().Contains(model.Query));
-                predicateQuery.Or(x => x.Description.ToLower().Contains(model.Query));
-                predicateQuery.Or(x => x.Abstract.ToLower().Contains(model.Query));
-                predicateQuery.Or(x => (x.MetaTags != null && x.MetaTags.Contains(model.Query)));
-
-                //if we are using special type, it means user entered special word for query like "profile". In this case,
-                //we want to get all types of sm-profile >>OR<< any item containing the word profile
-                if (useSpecialTypeSelection)
-                {
-                    predicateQuery.Or(x => x.ItemTypeId != null && types.Any(y => y.ID.Equals(x.ItemTypeId.ToString())));
-                }
                 */
-
                 predicates.Add(predicateQuery);
             }
 
@@ -695,20 +803,20 @@ namespace CESMII.Marketplace.Api.Controllers
             // and complexity and it was not working to add in additional logic.
 
             // First -- run the searches.
+            /*
             var matchesProcesses = Task.Run(() =>
             {
-                return PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Process);
+                return PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Process, liveOnly ? util.BuildStatusFilterPredicate() : null);
             });
             var matchesVerts = Task.Run(() =>
             {
-                return PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.IndustryVertical);
+                return PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.IndustryVertical, liveOnly ? util.BuildStatusFilterPredicate() : null);
             });
 
             var matchesPublishers = Task.Run(() =>
             {
-                return PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Publisher);
+                return PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Publisher, liveOnly ? util.BuildStatusFilterPredicate() : null);
             });
-
 
 
             // Second - grab the results.
@@ -717,9 +825,10 @@ namespace CESMII.Marketplace.Api.Controllers
             var itemsPublishers = await matchesPublishers;
 
             // Third - Join the results together.
-            if (itemsProcesses.Any()) result.Data = result.Data.Union(itemsProcesses).ToList();
-            if (itemsVerts.Any()) result.Data = result.Data.Union(itemsVerts).ToList();
-            if (itemsPublishers.Any()) result.Data = result.Data.Union(itemsPublishers).ToList();
+            //if (itemsProcesses.Any()) result.Data = result.Data.UnionBy(itemsProcesses, x=> x.ID).ToList();
+            //if (itemsVerts.Any()) result.Data = result.Data.UnionBy(itemsVerts, x => x.ID).ToList();
+            //if (itemsPublishers.Any()) result.Data = result.Data.UnionBy(itemsPublishers, x => x.ID).ToList();
+            */
             result.Count = result.Data.Count;
 
             _logger.LogWarning($"MarketplaceController|AdvancedSearchMarketplace|Duration: { timer.ElapsedMilliseconds}ms.");
