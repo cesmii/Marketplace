@@ -15,7 +15,7 @@ function GridPager(props) {
     const previousCaption = "<";
     const nextCaption = ">";
     const minimuPageSize = 10;
-    const maxPageDisplay = 16;
+    const maxPageDisplay = 8;
 
     const raiseOnChangePage = props.onChangePage;
 
