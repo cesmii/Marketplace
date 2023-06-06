@@ -29,14 +29,12 @@ namespace CESMII.Marketplace.Api.Controllers
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
         private readonly ICloudLibDAL<MarketplaceItemModel> _dalCloudLib;
         private readonly IDal<SearchKeyword, SearchKeywordModel> _dalSearchKeyword;
-        private readonly IDal<Publisher, PublisherModel> _dalPublisher;
         public MarketplaceController(IDal<MarketplaceItem, MarketplaceItemModel> dal,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IDal<Publisher, PublisherModel> dalPublisher,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
             ICloudLibDAL<MarketplaceItemModel> dalCloudLib,
             IDal<SearchKeyword, SearchKeywordModel> dalSearchKeyword,
-            IDal<Publisher, PublisherModel> dalPublisher,
             UserDAL dalUser,
             ConfigUtil config, ILogger<MarketplaceController> logger)
             : base(config, logger, dalUser)
@@ -44,7 +42,6 @@ namespace CESMII.Marketplace.Api.Controllers
             _dal = dal;
             _dalPublisher = dalPublisher;
             _dalLookup = dalLookup;
-            _dalPublisher = dalPublisher;
             _dalAnalytics = dalAnalytics;
             _dalCloudLib = dalCloudLib;
             _dalSearchKeyword = dalSearchKeyword;
