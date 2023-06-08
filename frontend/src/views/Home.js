@@ -13,7 +13,7 @@ import { useLoadingContext } from "../components/contexts/LoadingContext";
 import MarketplaceFilter from './shared/MarketplaceFilter';
 import HeaderSearch from '../components/HeaderSearch';
 import MarketplaceTileList from './shared/MarketplaceTileList';
-import { clearSearchCriteria } from '../services/MarketplaceService';
+import { clearSearchCriteria, generateSearchQueryString } from '../services/MarketplaceService';
 import { renderSchemaOrgContentHome } from '../utils/schemaOrgUtil';
 
 //slider / carousel - https://github.com/akiran/react-slick
@@ -92,14 +92,20 @@ function Home() {
         criteria.query = val;
         criteria.skip = 0;
         setLoadingProps({ searchCriteria: criteria });
-        history.push('/library');
+        history.push({
+            pathname: '/library',
+            search: `?${generateSearchQueryString(criteria, 0)}`
+        });
     };
 
     //called when an item is selected in the filter panel
     const filterOnItemClick = (criteria) => {
         //filter event handler - set global state and navigate to search page
         setLoadingProps({ searchCriteria: criteria });
-        history.push('/library');
+        history.push({
+            pathname: '/library',
+            search: `?${generateSearchQueryString(criteria, 0)}`
+        });
     }
 
     //-------------------------------------------------------------------

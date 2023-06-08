@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom'
 
 import SocialMedia from '../../components/SocialMedia';
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
-import { clearSearchCriteria, toggleSearchFilterSelected } from '../../services/MarketplaceService';
+import { clearSearchCriteria, generateSearchQueryString, toggleSearchFilterSelected } from '../../services/MarketplaceService';
 import { generateLogMessageString } from '../../utils/UtilityService';
 
 import { SvgVisibilityIcon } from '../../components/SVGIcon';
@@ -37,7 +37,10 @@ function PublisherSidebar(props) {
         setLoadingProps({ searchCriteria: criteria });
 
         //navigate to marketplace list
-        history.push({ pathname: `/library` });
+        history.push({
+            pathname: '/library',
+            search: `?${generateSearchQueryString(criteria, 0)}`
+        });
     };
 
     //-------------------------------------------------------------------

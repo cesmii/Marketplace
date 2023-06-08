@@ -12,7 +12,7 @@ import { MarketplaceBreadcrumbs } from './shared/MarketplaceBreadcrumbs';
 import { SvgVisibilityIcon } from "../components/SVGIcon";
 import color from "../components/Constants";
 import SocialMedia from "../components/SocialMedia";
-import { clearSearchCriteria, toggleSearchFilterSelected } from '../services/MarketplaceService';
+import { clearSearchCriteria, generateSearchQueryString, toggleSearchFilterSelected } from '../services/MarketplaceService';
 import MarketplaceTileList from './shared/MarketplaceTileList';
 import PublisherEntitySidebar from './shared/PublisherEntitySidebar';
 import { renderSchemaOrgContentPublisher } from '../utils/schemaOrgUtil';
@@ -110,7 +110,10 @@ function PublisherEntity() {
         setLoadingProps({ searchCriteria: criteria });
 
         //navigate to marketplace list
-        history.push({ pathname: `/library` });
+        history.push({
+            pathname: '/library',
+            search: `?${generateSearchQueryString(criteria, 0)}`
+        });
     };
 
 

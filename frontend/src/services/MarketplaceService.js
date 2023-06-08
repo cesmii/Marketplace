@@ -62,6 +62,42 @@ export function toggleSearchFilterSelected(criteria, id) {
 }
 
 //-------------------------------------------------------------------
+// Region: Generate a new query string based on the selections
+//-------------------------------------------------------------------
+export function generateSearchQueryString (criteria, currentPage) {
+    let result = [];
+    //query
+    if (criteria.query != null && criteria.query !== '') {
+        result.push(`q=${criteria.query}`);
+    }
+    //sm types
+    if (criteria.itemTypes != null) {
+        const selTypes = criteria.itemTypes.filter(x => x.selected).map(x => x.code);
+        if (selTypes != null && selTypes.length > 0) {
+            result.push(`sm=${selTypes.join(',')}`);
+        }
+    }
+    //verts, processes, etc. 
+    if (criteria.filters != null) {
+        let resultFilters = [];
+        criteria.filters.forEach((x) => {
+            const selFilters = x.items.filter(x => x.selected).map(x => x.id);
+            if (selFilters != null && selFilters.length > 0) {
+                resultFilters.push(`${x.enumValue}::${selFilters.join(',')}`);
+            }
+        });
+        if (resultFilters.length > 0) {
+            result.push(`f=${resultFilters.join('|')}`);
+        }
+    }
+    //page
+    result.push(`p=${currentPage == null ? 0 : currentPage}`);
+    //page size
+    result.push(`t=${criteria.take}`);
+    return result.join('&');
+}
+
+//-------------------------------------------------------------------
 // Web part - Render Related Items - used by marketplace entity or profile entity
 //-------------------------------------------------------------------
 export function MarketplaceRelatedItems(props) {
