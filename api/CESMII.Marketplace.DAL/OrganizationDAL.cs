@@ -7,6 +7,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Threading.Tasks;
 
     public class OrganizationDAL : BaseDAL<Organization, OrganizationModel>, IDal<Organization, OrganizationModel>
@@ -33,7 +34,7 @@
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        public new List<OrganizationModel> Where(Func<Organization, bool> predicate, int? skip = null, int? take = null,
+        public new List<OrganizationModel> Where(Expression<Func<Organization, bool>> predicate, int? skip = null, int? take = null,
             bool returnCount = false, bool verbose = false)
         {
             var data = _OrgRepo.FindByCondition(predicate);

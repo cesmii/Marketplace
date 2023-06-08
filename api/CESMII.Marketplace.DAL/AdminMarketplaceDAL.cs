@@ -438,10 +438,10 @@
         protected void GetMarketplaceRelatedData(string[] marketplaceIds, string[] publisherIds)
         {
             _lookupItemsAll = _repoLookup.GetAll();
-            _publishersAll = _repoPublisher.FindByCondition(x => publisherIds.Any(y => y.Equals(x.ID)));
+            _publishersAll = _repoPublisher.FindByCondition(x => publisherIds.Any(y => y.Equals(x.ID))).ToList();
             _imagesAll = _repoImages.FindByCondition(x => 
                         marketplaceIds.Any(y => y.Equals(x.MarketplaceItemId.ToString())) ||
-                        x.MarketplaceItemId.ToString().Equals(Common.Constants.BSON_OBJECTID_EMPTY));
+                        x.MarketplaceItemId.ToString().Equals(Common.Constants.BSON_OBJECTID_EMPTY)).ToList();
         }
 
     }

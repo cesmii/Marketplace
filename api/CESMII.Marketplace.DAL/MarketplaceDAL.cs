@@ -138,9 +138,18 @@
             //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
             var query = _repo.FindByCondition(
                 predicates,  //is active is a soft delete indicator. IsActive == false means deleted so we filter out those.
-                skip, take,
+                null, null,
                 orderByExpressions);
-            var count = returnCount ? _repo.Count(predicates) : 0;
+            var count = returnCount ? query.Count() : 0;
+
+            if (skip.HasValue)
+            {
+                query = query.Skip(skip.Value);
+            }
+            if (take.HasValue)
+            {
+                query = query.Take(take.Value);
+            }
 
             //trigger the query to execute then we can limit what related data we query against
             var data = query.ToList();

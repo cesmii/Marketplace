@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
 
@@ -49,7 +50,7 @@
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        List<TEntity> FindByCondition(Func<TEntity, bool> predicate);
+        IQueryable<TEntity> FindByCondition(Expression<Func<TEntity, bool>> predicate);
 
         /// <summary>
         /// Find entities in a given collection matching the criteria passed in the expression. 
@@ -57,9 +58,9 @@
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        List<TEntity> FindByCondition(Func<TEntity, bool> predicate, int? skip, int? take, params Expression<Func<TEntity, object>>[] orderByExpressions);
+        IQueryable<TEntity> FindByCondition(Func<TEntity, bool> predicate, int? skip, int? take, params Expression<Func<TEntity, object>>[] orderByExpressions);
 
-        List<TEntity> FindByCondition(Func<TEntity, bool> predicate, int? skip, int? take,
+        IQueryable<TEntity> FindByCondition(Func<TEntity, bool> predicate, int? skip, int? take,
             params OrderByExpression<TEntity>[] orderByExpressions);
 
         /// <summary>
@@ -68,9 +69,9 @@
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        List<TEntity> FindByCondition(List<Func<TEntity, bool>> predicates, int? skip, int? take, params Expression<Func<TEntity, object>>[] orderByExpressions);
+        IQueryable<TEntity> FindByCondition(List<Func<TEntity, bool>> predicates, int? skip, int? take, params Expression<Func<TEntity, object>>[] orderByExpressions);
 
-        List<TEntity> FindByCondition(List<Func<TEntity, bool>> predicates, int? skip, int? take,
+        IQueryable<TEntity> FindByCondition(List<Func<TEntity, bool>> predicates, int? skip, int? take,
             params OrderByExpression<TEntity>[] orderByExpressions);
 
         /// <summary>
