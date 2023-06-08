@@ -5,7 +5,7 @@ import axiosInstance from "../services/AxiosService";
 import ReactGA from 'react-ga4';
 import { isNumeric } from 'jquery';
 
-import { clearSearchCriteria, setMarketplacePageSize } from '../services/MarketplaceService';
+import { clearSearchCriteria, generateSearchQueryString, setMarketplacePageSize } from '../services/MarketplaceService';
 import { useLoginStatus } from '../components/OnLoginHandler';
 import { AppSettings } from '../utils/appsettings'
 import { generateLogMessageString, renderTitleBlock } from '../utils/UtilityService'
@@ -53,6 +53,7 @@ function MarketplaceList() {
     //-------------------------------------------------------------------
     // Region: Generate a new query string based on the selections
     //-------------------------------------------------------------------
+/*
     const generateSearchQueryString = (criteria, currentPage) => {
         let result = [];
         //query
@@ -85,6 +86,7 @@ function MarketplaceList() {
         result.push(`t=${criteria.take}`);
         return result.join('&');
     }
+*/
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events

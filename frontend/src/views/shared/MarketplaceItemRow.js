@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom'
 import { Button } from 'react-bootstrap'
 
 import { formatItemPublishDate, generateLogMessageString, getImageUrl, getRandomArrayIndexes } from '../../utils/UtilityService';
-import { clearSearchCriteria, toggleSearchFilterSelected } from '../../services/MarketplaceService'
+import { clearSearchCriteria, generateSearchQueryString, toggleSearchFilterSelected } from '../../services/MarketplaceService'
 import { useLoadingContext } from '../../components/contexts/LoadingContext'
 import { SvgVisibilityIcon } from '../../components/SVGIcon'
 import color from '../../components/Constants'
@@ -40,7 +40,10 @@ function MarketplaceItemRow(props) { //props are item, showActions
         setLoadingProps({ searchCriteria: criteria });
 
         //navigate to marketplace list
-        history.push({pathname: `/library`});
+        history.push({
+            pathname: '/library',
+            search: `?${generateSearchQueryString(criteria, 0)}`
+        });
     };
 
     //-------------------------------------------------------------------
