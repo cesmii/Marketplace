@@ -433,7 +433,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 _logger.LogInformation($"MarketplaceController|AdvancedSearch|Unifying results...");
 
                 //unify the results, sort, handle paging
-                result = MergeSortPageSearchedItems(resultSearchMarketplace.Data, resultSearchCloudLib, model);
+                result = MergeSortPageSearchedItems(resultSearchMarketplace, resultSearchCloudLib, model);
                 long mergeFinished = timer.ElapsedMilliseconds;
                 _logger.LogWarning($"MarketplaceController|AdvancedSearch|Duration: {timer.ElapsedMilliseconds}ms. (Marketplace: {swMarketPlaceFinished - swMarketPlaceStarted} ms. CloudLib {swCloudLibFinished - swCloudLibStarted}. MPS: {swMarketPlaceStarted}. ClStart: {swCloudLibStarted}). WaitS/F: {swWaitStarted}/{swWaitFinished}. Merge S/F: {mergeStarted}/{mergeFinished}");
             }
@@ -444,8 +444,9 @@ namespace CESMII.Marketplace.Api.Controllers
                 //because we wait to page, sort till after in the combined (Cloud and marketplace) scenario, we need to do same here. 
                 //now page the data. 
                 result.Data = result.Data?
-                    .OrderBy(x => x.IsFeatured)
-                    .ThenBy(x => x.IsFeatured)
+                    // The sources are ordered and merged in order: no need to re-order
+                    //.OrderBy(x => x.IsFeatured)
+                    //.ThenBy(x => x.DisplayName)
                     .Skip(model.Skip)
                     .Take(model.Take)
                     .ToList();
@@ -787,7 +788,7 @@ namespace CESMII.Marketplace.Api.Controllers
             var result = await Task.Run(() =>
             {
                 return predicates.Count == 0 ? _dal.GetAllPaged(null, null, true, false) :
-                _dal.Where(predicates, null, null, true, false,
+                _dal.Where(predicates, null, model.Skip + model.Take, true, false,
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName });
             });
@@ -826,7 +827,7 @@ namespace CESMII.Marketplace.Api.Controllers
             //if (itemsVerts.Any()) result.Data = result.Data.UnionBy(itemsVerts, x => x.ID).ToList();
             //if (itemsPublishers.Any()) result.Data = result.Data.UnionBy(itemsPublishers, x => x.ID).ToList();
             */
-            result.Count = result.Data.Count;
+            //result.Count = result.Data.Count;
 
             _logger.LogWarning($"MarketplaceController|AdvancedSearchMarketplace|Duration: { timer.ElapsedMilliseconds}ms.");
             return result;
@@ -838,7 +839,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private async Task<List<MarketplaceItemModel>> AdvancedSearchCloudLib([FromBody] MarketplaceSearchModel model
+        private async Task<DALResult<MarketplaceItemModel>> AdvancedSearchCloudLib([FromBody] MarketplaceSearchModel model
             , List<LookupItemFilterModel> cats
             , List<LookupItemFilterModel> verts
             , List<LookupItemFilterModel> pubs
@@ -855,7 +856,7 @@ namespace CESMII.Marketplace.Api.Controllers
             //model.Query value with "" so that we don't filter out profiles by the term profile and yield no/very few matches. 
             if (useSpecialTypeSelection) query = "";
 
-            var result = new List<MarketplaceItemModel>();
+            var result = new DALResult<MarketplaceItemModel>();
             //if publishers is a filter, then we skip CloudLib for now because search is trying to only show 
             //items for that publisher. In future, remove this once we store our own metadata. 
             //only search CloudLib if no publisher filter
@@ -863,20 +864,23 @@ namespace CESMII.Marketplace.Api.Controllers
             {
                 //NEW: now search CloudLib.
                 _logger.LogTrace($"MarketplaceController|AdvancedSearchCloudLib|calling DAL...");
-                result = await _dalCloudLib.Where(query, null,
+                result = await _dalCloudLib.Where(query,
+                    0, // Because we are merging multiple sources and don't preserve individual cursors for each source, we have to always start from the beginning
+                    model.Skip + model.Take,
+                    null,
                     cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
                     verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList(),
                     _configUtil.CloudLibSettings?.ExcludedNodeSets);
 
                 //check to see if the CloudLib returned data. 
                 if (cats.Count == 0 && verts.Count == 0 && string.IsNullOrEmpty(query)
-                    && result.Count == 0)
+                    && result.Data.Count == 0)
                 {
                     _logger.LogWarning($"MarketplaceController|AdvancedSearchCloudLib|No CloudLib records found yet search criteria was wildcard.");
                 }
             }
 
-            _logger.LogInformation($"MarketplaceController|AdvancedSearchCloudLib|Duration: { timer.ElapsedMilliseconds}ms.");
+            _logger.LogInformation($"MarketplaceController|AdvancedSearchCloudLib|Duration: {timer.ElapsedMilliseconds}ms.");
             return result;
         }
 
@@ -890,7 +894,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="set2"></param>
         /// <param name="model"></param>
         /// <returns></returns>
-        private static DALResult<MarketplaceItemModel> MergeSortPageSearchedItems(List<MarketplaceItemModel> set1, List<MarketplaceItemModel> set2,
+        private static DALResult<MarketplaceItemModel> MergeSortPageSearchedItems(DALResult<MarketplaceItemModel> set1, DALResult<MarketplaceItemModel> set2,
             MarketplaceSearchModel model)
         {
             //get count before paging
@@ -898,23 +902,55 @@ namespace CESMII.Marketplace.Api.Controllers
             //sort 2nd set but always put it after the regular marketplace items.  
             //set2 = set2.OrderByDescending(x => x.IsFeatured).ThenBy(x => x.DisplayName).ToList();
             //combine the data, get the total count
-            var combined = set1.Union(set2);
+
+            // Assume both inputs are ordered: merge while preserving order
+
+            int i1 = 0, i2 = 0;
+            List<MarketplaceItemModel> combined = new List<MarketplaceItemModel>();
+            do
+            {
+                if (i2 >= set2.Data.Count || (i1 < set1.Data.Count && Compare(set1.Data[i1], set2.Data[i2]) <= 0))
+                {
+                    combined.Add(set1.Data[i1]);
+                    i1++;
+                }
+                else
+                {
+                    combined.Add(set2.Data[i2]);
+                    i2++;
+                }
+            } while (i1 < set1.Data.Count || i2 < set2.Data.Count);
+
+            //var combined = set1.Data.Union(set2.Data);
             //TBD - order by the unified result - order by type, then by featured then by name
             //combined = combined
             //    .OrderBy(x => x.Type?.DisplayOrder)
             //    .ThenBy(x => x.Type?.Name)
             //    .ThenByDescending(x => x.IsFeatured)
             //    .ThenBy(x => x.DisplayName); //.ToList();
-            combined = combined
-                .OrderByDescending(x => x.IsFeatured)
-                .ThenBy(x => x.DisplayName);
+            //combined = combined
+            //    .OrderByDescending(x => x.IsFeatured)
+            //    .ThenBy(x => x.DisplayName);
 
             //now page the data. 
-            combined = combined.Skip(model.Skip).Take(model.Take);
+            combined = combined.Skip(model.Skip).Take(model.Take).ToList();
             return new DALResult<MarketplaceItemModel>() {
                 Count = count,
-                Data = combined.ToList()
+                Data = combined
             };
+        }
+
+        private static int Compare(MarketplaceItemModel m1, MarketplaceItemModel m2)
+        {
+            if (m1.IsFeatured && !m2.IsFeatured)
+            {
+                return -1;
+            }
+            if (m2.IsFeatured && !m1.IsFeatured)
+            {
+                return 1;
+            }
+            return string.Compare(m1.DisplayName, m2.DisplayName, StringComparison.InvariantCultureIgnoreCase);
         }
 
         #region Analytics endpoints
