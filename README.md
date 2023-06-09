@@ -78,7 +78,7 @@ cesmii.marketplace.jobadmin
 Download all documents to a .\dump folder:
 
 ```ps1
-mongodump /uri:mongodb:/.../?ssl=true /db:marketplace_db
+mongodump /uri:mongodb:... /db:marketplace_db
 ```
 
 Restore into a local database
