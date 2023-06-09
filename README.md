@@ -78,7 +78,7 @@ cesmii.marketplace.jobadmin
 Download all documents to a .\dump folder:
 
 ```ps1
-mongodump /uri:mongodb://marketplace-data:<key>@marketplace-data.mongo.cosmos.azure.com:10255/?ssl=true /db:marketplace_db
+mongodump /uri:mongodb:/.../?ssl=true /db:marketplace_db
 ```
 
 Restore into a local database
