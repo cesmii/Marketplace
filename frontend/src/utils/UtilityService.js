@@ -165,7 +165,7 @@ const prepDateValUtc = (val) => {
     var dd = dt.getUTCDate();
     dd = dd < 10 ? `0${dd.toString()}` : dd.toString();
     var result = `${dt.getUTCFullYear()}-${mm}-${dd}`;
-    console.log(generateLogMessageString(`prepDateVal||inbound:${val}||outbound:${result}`, CLASS_NAME));
+    //console.log(generateLogMessageString(`prepDateVal||inbound:${val}||outbound:${result}`, CLASS_NAME));
     return result;
 }
 
@@ -488,7 +488,7 @@ export function prepDateVal(val) {
     var dd = dt.getDate();
     dd = dd < 10 ? `0${dd.toString()}` : dd.toString();
     var result = `${dt.getFullYear()}-${mm}-${dd}`;
-    console.log(generateLogMessageString(`prepDateVal||inbound:${val}||outbound:${result}`, CLASS_NAME));
+    //console.log(generateLogMessageString(`prepDateVal||inbound:${val}||outbound:${result}`, CLASS_NAME));
     return result;
 }
 
