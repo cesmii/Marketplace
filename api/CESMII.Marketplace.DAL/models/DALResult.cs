@@ -12,5 +12,7 @@
 
         // A list of the summary of the data, but could be average etc. hence list.
         public List<T> SummaryData { get; set; }
+
+        public override string ToString() => $"{Data?.Count} of {Count}";
     }
 }

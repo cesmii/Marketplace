@@ -103,10 +103,10 @@
 
         public async Task<List<MarketplaceItemModel>> GetAll() {
             var result = await this.Where(null);
-            return result;
+            return result.Data;
         }
 
-        public async Task<List<MarketplaceItemModel>> Where(string query,
+        public async Task<DALResult<MarketplaceItemModel>> Where(string query, int? skip = null, int? take = null,
             List<string> ids = null, List<string> processes = null, List<string> verticals = null, List<string> exclude = null)
         {
             //Note - splitting out each word in query into a separate string in the list
@@ -132,14 +132,50 @@
             if (string.IsNullOrEmpty(query) && keywords.Count == 0) keywords.Add("*");
             if (!string.IsNullOrEmpty(query)) keywords.Add(query);
 
-            var matches = await _cloudLib.SearchAsync(null, null, false, keywords, exclude, true);
-            if (matches == null || matches.Edges == null) return new List<MarketplaceItemModel>();
+            DALResult<MarketplaceItemModel> result = new DALResult<MarketplaceItemModel>();
+            result.Data = new List<MarketplaceItemModel>();
+            GraphQlResult<Nodeset> matches;
+            
+            // TODO find a way to preserver the cursor so we don't have to start from the beginning every time
+            string cursor = null;
+            int actualTake = skip + take ?? 100;
+            if (actualTake > 100)
+            {
+                actualTake = 100;
+            }
+            do
+            {
+                matches = await _cloudLib.SearchAsync(actualTake, cursor, false, keywords, exclude, false, 
+                    order: 
+                        new { metadata = new { title = OrderEnum.ASC }, modelUri = OrderEnum.ASC, publicationDate = OrderEnum.DESC }  );// "{metadata: {title: ASC}, modelUri: ASC, publicationDate: DESC}");
+                if (matches == null || matches.Edges == null) return result;
+                result.Data.AddRange(MapToModelsNodesetResult(matches.Edges));
+                result.Count += matches.Edges.Count;
+                if (matches.PageInfo.HasNextPage)
+                {
+                    cursor = matches.PageInfo.EndCursor;
+                }
+            } while (matches.PageInfo.HasNextPage && (take == null || result.Count < skip + take));
 
+            if (matches?.TotalCount > 0)
+            {
+                result.Count = matches.TotalCount;
+            }
             //TBD - exclude some nodesets which are core nodesets - list defined in appSettings
 
-
-            return MapToModelsNodesetResult(matches.Edges);
+            if (skip > 0)
+            {
+                result.Data = result.Data.Skip(skip.Value).ToList();
+            }
+            return result;
         }
+
+        public enum OrderEnum
+        {
+            ASC,
+            DESC,
+        };
+
 
         public async Task<List<MarketplaceItemModel>> GetManyById(List<string> ids)
         {
