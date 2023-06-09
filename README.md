@@ -70,3 +70,19 @@ cesmii.marketplace.jobadmin
 ```
 
 5. Configure the application itself (local config files or in the Azure Portal Settings/Configuration) with the AAD tenant information.
+
+## Local development environment
+
+### Clone a mongo database to a local instance
+
+Download all documents to a .\dump folder:
+
+```ps1
+mongodump /uri:mongodb://marketplace-data:<key>@marketplace-data.mongo.cosmos.azure.com:10255/?ssl=true /db:marketplace_db
+```
+
+Restore into a local database
+
+```ps1
+mongorestore /nsFrom:marketplace_db.* /nsTo:marketplace_db_dev.*
+```
