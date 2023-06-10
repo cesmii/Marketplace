@@ -14,12 +14,12 @@
     public class MarketplaceUtil
     {
         private readonly IDal<MarketplaceItem, MarketplaceItemModel> _dalMarketplace;
-        private readonly ICloudLibDAL<MarketplaceItemModel> _dalCloudLib;
+        private readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _dalCloudLib;
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
         private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
 
         public MarketplaceUtil(IDal<MarketplaceItem, MarketplaceItemModel> dalMarketplace,
-            ICloudLibDAL<MarketplaceItemModel> dalCloudLib,
+            ICloudLibDAL<MarketplaceItemModelWithCursor> dalCloudLib,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
             IDal<LookupItem, LookupItemModel> dalLookup
             )
@@ -173,7 +173,7 @@
             var itemsMarketplace = _dalMarketplace.Where(predicatesMarketplace, null, 4, false, false).Data;
 
             //now get the cloudlib items with popular rankings
-            var itemsCloudLib = await _dalCloudLib.Where(null, 0, 4, popularCloudLib, null, null, null);
+            var itemsCloudLib = await _dalCloudLib.Where(null, 0, 4, null, null, popularCloudLib, null, null, null);
 
             return itemsMarketplace.Union(itemsCloudLib.Data).ToList();
 
@@ -232,13 +232,13 @@
             return Task.FromResult(itemsMarketplace.ToList());
         }
 
-        private async Task<List<MarketplaceItemModel>> PopularItemsCloudLib(List<OrderByExpression<MarketplaceItemAnalytics>> orderBys)
+        private async Task<List<MarketplaceItemModelWithCursor>> PopularItemsCloudLib(List<OrderByExpression<MarketplaceItemAnalytics>> orderBys)
         {
             //run in parallel
             var popularCloudLib = _dalAnalytics.Where(x => !string.IsNullOrEmpty(x.CloudLibId), null, 4, false, false, orderBys.ToArray()).Data
                 .Select(x => x.CloudLibId).ToList();
             //now get the cloudlib items with popular rankings
-            return (await _dalCloudLib.Where(null, null, 4, popularCloudLib, null, null, null)).Data;
+            return (await _dalCloudLib.Where(null, null, 4, null, null,popularCloudLib, null, null, null)).Data;
         }
 
         /// <summary>

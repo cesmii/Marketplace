@@ -42,7 +42,7 @@
         /// <param name="verticals"></param>
         /// <param name="exclude">List of namespace uris to exclude from results</param>
         /// <returns></returns>
-        Task<DALResult<TModel>> Where(string query, int? skip =null, int? take = null, List<string> ids = null, List<string> processes = null, List<string> verticals = null, List<string> exclude = null);
+        Task<DALResult<TModel>> Where(string query, int? skip =null, int? take = null, string startCursor = null, string endCursor = null, List<string> ids = null, List<string> processes = null, List<string> verticals = null, List<string> exclude = null);
 
     }
 

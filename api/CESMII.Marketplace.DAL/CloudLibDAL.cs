@@ -21,7 +21,7 @@
     /// <summary>
     /// Most lookup data is contained in this single entity and differntiated by a lookup type. 
     /// </summary>
-    public class CloudLibDAL : ICloudLibDAL<MarketplaceItemModel>
+    public class CloudLibDAL : ICloudLibDAL<MarketplaceItemModelWithCursor>
     {
         protected bool _disposed = false;
         protected static readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -32,7 +32,7 @@
         private readonly MarketplaceItemConfig _config;
         private readonly LookupItemModel _smItemType;
         private readonly List<LookupItemModel> _lookupItemsRelatedType;
-        //protected readonly IDal<MarketplaceItem, MarketplaceItemModel> _dalMarkteplace;
+        //protected readonly IDal<MarketplaceItem, MarketplaceItemModelWithCursor> _dalMarkteplace;
 
         //supporting data
         protected List<ImageItemModel> _images;
@@ -42,7 +42,7 @@
             IDal<LookupItem, LookupItemModel> dalLookup,
             IDal<ImageItem, ImageItemModel> dalImages,
             IMongoRepository<MarketplaceItem> repoMarketplace,
-            //IDal<MarketplaceItem, MarketplaceItemModel> dalMarkteplace,
+            //IDal<MarketplaceItem, MarketplaceItemModelWithCursor> dalMarkteplace,
             ConfigUtil configUtil)
         {
             _cloudLib = cloudLib;
@@ -76,7 +76,7 @@
 
         }
 
-        public async Task<MarketplaceItemModel> GetById(string id) {
+        public async Task<MarketplaceItemModelWithCursor> GetById(string id) {
             var entity = await _cloudLib.DownloadAsync(id);
             //var entity = await _cloudLib.GetById(id);
             if (entity == null) return null;
@@ -101,12 +101,12 @@
             return result;
         }
 
-        public async Task<List<MarketplaceItemModel>> GetAll() {
+        public async Task<List<MarketplaceItemModelWithCursor>> GetAll() {
             var result = await this.Where(null);
             return result.Data;
         }
 
-        public async Task<DALResult<MarketplaceItemModel>> Where(string query, int? skip = null, int? take = null,
+        public async Task<DALResult<MarketplaceItemModelWithCursor>> Where(string query, int? skip = null, int? take = null, string? startCursor = null, string? endCursor = null,
             List<string> ids = null, List<string> processes = null, List<string> verticals = null, List<string> exclude = null)
         {
             //Note - splitting out each word in query into a separate string in the list
@@ -132,34 +132,54 @@
             if (string.IsNullOrEmpty(query) && keywords.Count == 0) keywords.Add("*");
             if (!string.IsNullOrEmpty(query)) keywords.Add(query);
 
-            DALResult<MarketplaceItemModel> result = new DALResult<MarketplaceItemModel>();
-            result.Data = new List<MarketplaceItemModel>();
+            DALResult<MarketplaceItemModelWithCursor> result = new DALResult<MarketplaceItemModelWithCursor>();
+            result.Data = new List<MarketplaceItemModelWithCursor>();
             GraphQlResult<Nodeset> matches;
-            
+
             // TODO find a way to preserver the cursor so we don't have to start from the beginning every time
-            string cursor = null;
+            string newCursor = startCursor ?? endCursor;
+            bool backwards = endCursor != null;
             int actualTake = skip + take ?? 100;
             if (actualTake > 100)
             {
                 actualTake = 100;
             }
+            bool bMore;
             do
             {
-                matches = await _cloudLib.SearchAsync(actualTake, cursor, false, keywords, exclude, false, 
-                    order: 
-                        new { metadata = new { title = OrderEnum.ASC }, modelUri = OrderEnum.ASC, publicationDate = OrderEnum.DESC }  );// "{metadata: {title: ASC}, modelUri: ASC, publicationDate: DESC}");
+                bMore = false;
+                matches = await _cloudLib.SearchAsync(actualTake, newCursor, backwards, keywords, exclude, false,
+                    order:
+                        new { metadata = new { title = OrderEnum.ASC }, modelUri = OrderEnum.ASC, publicationDate = OrderEnum.DESC });// "{metadata: {title: ASC}, modelUri: ASC, publicationDate: DESC}");
                 if (matches == null || matches.Edges == null) return result;
                 result.Data.AddRange(MapToModelsNodesetResult(matches.Edges));
                 result.Count += matches.Edges.Count;
-                if (matches.PageInfo.HasNextPage)
+                if (!backwards && matches.PageInfo.HasNextPage)
                 {
-                    cursor = matches.PageInfo.EndCursor;
+                    newCursor = matches.PageInfo.EndCursor;
+                    bMore = true;
                 }
-            } while (matches.PageInfo.HasNextPage && (take == null || result.Count < skip + take));
+                if (backwards && matches.PageInfo.HasPreviousPage)
+                {
+                    newCursor = matches.PageInfo.StartCursor;
+                    bMore = true;
+                }
+            } while (bMore && (take == null || result.Count < skip + take));
 
             if (matches?.TotalCount > 0)
             {
                 result.Count = matches.TotalCount;
+            }
+            if (!backwards)
+            {
+                result.StartCursor = startCursor;
+                result.EndCursor = newCursor;
+            }
+            else
+            {
+                result.StartCursor = newCursor;
+                result.EndCursor = endCursor;
+
             }
             //TBD - exclude some nodesets which are core nodesets - list defined in appSettings
 
@@ -177,17 +197,17 @@
         };
 
 
-        public async Task<List<MarketplaceItemModel>> GetManyById(List<string> ids)
+        public async Task<List<MarketplaceItemModelWithCursor>> GetManyById(List<string> ids)
         {
             var matches = await _cloudLib.GetManyAsync(ids);
-            if (matches == null || matches.Edges == null) return new List<MarketplaceItemModel>();
+            if (matches == null || matches.Edges == null) return new List<MarketplaceItemModelWithCursor>();
 
             return MapToModelsNodesetResult(matches.Edges);
         }
 
-        protected List<MarketplaceItemModel> MapToModelsNodesetResult(List<GraphQlNodeAndCursor<Nodeset>> entities)
+        protected List<MarketplaceItemModelWithCursor> MapToModelsNodesetResult(List<GraphQlNodeAndCursor<Nodeset>> entities)
         {
-            var result = new List<MarketplaceItemModel>();
+            var result = new List<MarketplaceItemModelWithCursor>();
 
             foreach (var item in entities)
             {
@@ -201,12 +221,12 @@
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        protected MarketplaceItemModel MapToModelNodesetResult(GraphQlNodeAndCursor<Nodeset> entity)
+        protected MarketplaceItemModelWithCursor MapToModelNodesetResult(GraphQlNodeAndCursor<Nodeset> entity)
         {
             if (entity != null && entity.Node != null)
             {
                 //map results to a format that is common with marketplace items
-                return new MarketplaceItemModel()
+                return new MarketplaceItemModelWithCursor()
                 {
                     ID = entity.Node.Identifier.ToString(),
                     Name = entity.Node.Identifier.ToString(),  //in marketplace items, name is used for navigation in friendly url
@@ -222,7 +242,9 @@
                     IsFeatured = false,
                     ImagePortrait = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdPortrait)),
                     //ImageSquare = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdSquare)),
-                    ImageLandscape = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdLandscape))
+                    ImageLandscape = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdLandscape)),
+                    Cursor = entity.Cursor,
+                    
                 };
             }
             else
@@ -238,7 +260,7 @@
         /// <param name="entity"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        protected MarketplaceItemModel MapToModelNamespace(UANameSpace entity, ProfileItem entityLocal)
+        protected MarketplaceItemModelWithCursor MapToModelNamespace(UANameSpace entity, ProfileItem entityLocal)
         {
             if (entity != null)
             {
@@ -247,7 +269,7 @@
                 //if (entity.Category != null) metatags.Add(entity.Category.Name);
 
                 //map results to a format that is common with marketplace items
-                var result = new MarketplaceItemModel()
+                var result = new MarketplaceItemModelWithCursor()
                 {
                     ID = entity.Nodeset.Identifier.ToString(),
                     Name = entity.Nodeset.Identifier.ToString(),  //in marketplace items, name is used for navigation in friendly url

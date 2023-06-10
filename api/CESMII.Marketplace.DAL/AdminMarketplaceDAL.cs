@@ -28,7 +28,7 @@
         protected List<Publisher> _publishersAll;
         protected IMongoRepository<ImageItemSimple> _repoImages;
         protected List<ImageItemSimple> _imagesAll;
-        protected readonly ICloudLibDAL<MarketplaceItemModel> _cloudLibDAL;
+        protected readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _cloudLibDAL;
 
         //default type - use if none assigned yet.
         private readonly MongoDB.Bson.BsonObjectId _smItemTypeIdDefault;
@@ -37,7 +37,7 @@
             IMongoRepository<LookupItem> repoLookup, 
             IMongoRepository<Publisher> repoPublisher, 
             IMongoRepository<ImageItemSimple> repoImages,
-            ICloudLibDAL<MarketplaceItemModel> cloudLibDAL,
+            ICloudLibDAL<MarketplaceItemModelWithCursor> cloudLibDAL,
             ConfigUtil configUtil
             ) : base(repo)
         {
