@@ -23,12 +23,12 @@ namespace CESMII.Marketplace.Api.Controllers
     {
 
         private readonly IDal<RequestInfo, RequestInfoModel> _dal;
-        private readonly ICloudLibDAL<MarketplaceItemModel> _dalCloudLib;
+        private readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _dalCloudLib;
         private readonly MailRelayService _mailRelayService;
 
         public RequestInfoController(
             IDal<RequestInfo, RequestInfoModel> dal,
-            ICloudLibDAL<MarketplaceItemModel> dalCloudLib,
+            ICloudLibDAL<MarketplaceItemModelWithCursor> dalCloudLib,
             UserDAL dalUser,
             ConfigUtil config, ILogger<RequestInfoController> logger,
             MailRelayService mailRelayService)

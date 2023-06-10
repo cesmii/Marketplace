@@ -112,6 +112,9 @@
         public string ccName2 { get; set; }
         public string ccEmail2 { get; set; }
 
+
+        public override string ToString() => $"{DisplayName} {ID}";
+
     }
 
     public class MarketplaceItemModel : MarketplaceItemModelBase
@@ -122,6 +125,10 @@
 
         public virtual MarketplaceItemAnalyticsModel Analytics { get; set; }
 
+    }
+    public class MarketplaceItemModelWithCursor : MarketplaceItemModel
+    {
+        public string Cursor { get; set; }
     }
 
     public class AdminMarketplaceItemModel : MarketplaceItemModelBase

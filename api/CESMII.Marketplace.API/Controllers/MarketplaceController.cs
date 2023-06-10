@@ -17,6 +17,7 @@ using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Marketplace.Api.Shared.Utils;
 using System.Text;
+using Microsoft.AspNetCore.SignalR;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
@@ -27,13 +28,13 @@ namespace CESMII.Marketplace.Api.Controllers
         private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
         private readonly IDal<Publisher, PublisherModel> _dalPublisher;
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
-        private readonly ICloudLibDAL<MarketplaceItemModel> _dalCloudLib;
+        private readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _dalCloudLib;
         private readonly IDal<SearchKeyword, SearchKeywordModel> _dalSearchKeyword;
         public MarketplaceController(IDal<MarketplaceItem, MarketplaceItemModel> dal,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IDal<Publisher, PublisherModel> dalPublisher,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
-            ICloudLibDAL<MarketplaceItemModel> dalCloudLib,
+            ICloudLibDAL<MarketplaceItemModelWithCursor> dalCloudLib,
             IDal<SearchKeyword, SearchKeywordModel> dalSearchKeyword,
             UserDAL dalUser,
             ConfigUtil config, ILogger<MarketplaceController> logger)
@@ -787,10 +788,30 @@ namespace CESMII.Marketplace.Api.Controllers
             _logger.LogTrace($"MarketplaceController|AdvancedSearchMarketplace|calling DAL...");
             var result = await Task.Run(() =>
             {
-                return predicates.Count == 0 ? _dal.GetAllPaged(null, null, true, false) :
-                _dal.Where(predicates, null, model.Skip + model.Take, true, false,
-                    new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
-                    new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName });
+                var startOffset = GetMarketPlaceOffsetFromCombinedCursor(model.StartCursor);
+                var endOffset = GetMarketPlaceOffsetFromCombinedCursor(model.EndCursor);
+                int? skip;
+                int take;
+                if (startOffset == null && endOffset == null)
+                {
+                    skip = null;
+                    take = model.Skip + model.Take;
+                }
+                else
+                {
+                    take = model.Take;
+                    skip = startOffset != null ? startOffset.Value : endOffset.Value - model.Take;
+                    if (skip < 0)
+                    {
+                        take += skip.Value;
+                        skip = 0;
+                    }
+                }
+                return predicates.Count == 0 && skip == null
+                    ? _dal.GetAllPaged(null, null, true, false) 
+                    : _dal.Where(predicates, skip, take, true, false,
+                            new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
+                            new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName });
             });
 
             // Special handling for processes, industry verticals, and publishers. If the search box contains a
@@ -839,7 +860,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private async Task<DALResult<MarketplaceItemModel>> AdvancedSearchCloudLib([FromBody] MarketplaceSearchModel model
+        private async Task<DALResult<MarketplaceItemModelWithCursor>> AdvancedSearchCloudLib([FromBody] MarketplaceSearchModel model
             , List<LookupItemFilterModel> cats
             , List<LookupItemFilterModel> verts
             , List<LookupItemFilterModel> pubs
@@ -856,17 +877,36 @@ namespace CESMII.Marketplace.Api.Controllers
             //model.Query value with "" so that we don't filter out profiles by the term profile and yield no/very few matches. 
             if (useSpecialTypeSelection) query = "";
 
-            var result = new DALResult<MarketplaceItemModel>();
+            var result = new DALResult<MarketplaceItemModelWithCursor>();
             //if publishers is a filter, then we skip CloudLib for now because search is trying to only show 
             //items for that publisher. In future, remove this once we store our own metadata. 
             //only search CloudLib if no publisher filter
             if (pubs.Count == 0)
             {
+                int skip;
+                int take;
+                string startCursor = GetCloudLibCursorFromCombinedCursor(model.StartCursor);
+                string endCursor = GetCloudLibCursorFromCombinedCursor(model.EndCursor);
+                if (startCursor == null && endCursor == null)
+                {
+                    // Fall back to getting everything
+                    // Because we are merging multiple sources and don't preserve individual cursors for each source, we have to always start from the beginning
+                    skip = 0;
+                    take = model.Skip + model.Take;
+                }
+                else
+                {
+                    // Start from cursor, no need to skip
+                    skip = 0;
+                    take = model.Take;
+                }
                 //NEW: now search CloudLib.
                 _logger.LogTrace($"MarketplaceController|AdvancedSearchCloudLib|calling DAL...");
                 result = await _dalCloudLib.Where(query,
-                    0, // Because we are merging multiple sources and don't preserve individual cursors for each source, we have to always start from the beginning
-                    model.Skip + model.Take,
+                    skip, 
+                    take,
+                    startCursor,
+                    endCursor,
                     null,
                     cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
                     verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList(),
@@ -894,7 +934,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="set2"></param>
         /// <param name="model"></param>
         /// <returns></returns>
-        private static DALResult<MarketplaceItemModel> MergeSortPageSearchedItems(DALResult<MarketplaceItemModel> set1, DALResult<MarketplaceItemModel> set2,
+        private static DALResult<MarketplaceItemModel> MergeSortPageSearchedItems(DALResult<MarketplaceItemModel> set1, DALResult<MarketplaceItemModelWithCursor> set2,
             MarketplaceSearchModel model)
         {
             //get count before paging
@@ -905,39 +945,138 @@ namespace CESMII.Marketplace.Api.Controllers
 
             // Assume both inputs are ordered: merge while preserving order
 
-            int i1 = 0, i2 = 0;
-            List<MarketplaceItemModel> combined = new List<MarketplaceItemModel>();
-            do
+            string firstCloudLibCursor;
+            string lastCloudLibCursor;
+            int firstMarketPlaceOffset;
+            int lastMarketPlaceOffset;
+            List<MarketplaceItemModel> combined;
+            if (model.EndCursor == null)
             {
-                if (i2 >= set2.Data.Count || (i1 < set1.Data.Count && Compare(set1.Data[i1], set2.Data[i2]) <= 0))
+                int i1 = 0, i2 = 0;
+                firstCloudLibCursor = GetCloudLibCursorFromCombinedCursor(model.StartCursor);
+                lastCloudLibCursor = firstCloudLibCursor;
+                firstMarketPlaceOffset = GetMarketPlaceOffsetFromCombinedCursor(model.StartCursor) ?? 0;
+                lastMarketPlaceOffset = firstMarketPlaceOffset;
+                int toSkip = model.StartCursor == null ? model.Skip : 0; // With cursor we already have the right starting point
+                combined = new List<MarketplaceItemModel>();
+                bool bCloudLibAdded = false;
+                while ((i1 < set1.Data.Count || i2 < set2.Data.Count)
+                         && combined.Count < model.Take)
                 {
-                    combined.Add(set1.Data[i1]);
-                    i1++;
-                }
-                else
+                    if (i2 >= set2.Data.Count || (i1 < set1.Data.Count && Compare(set1.Data[i1], set2.Data[i2]) <= 0))
+                    {
+                        if (toSkip <= 0)
+                        {
+                            combined.Add(set1.Data[i1]);
+                        }
+                        else
+                        {
+                            firstMarketPlaceOffset++;
+                        }
+                        lastMarketPlaceOffset++;
+                        i1++;
+                    }
+                    else
+                    {
+                        if (toSkip <= 0)
+                        {
+                            combined.Add(set2.Data[i2]);
+                            lastCloudLibCursor = set2.Data[i2].Cursor;
+                            if (!bCloudLibAdded)
+                            {
+                                firstCloudLibCursor = lastCloudLibCursor;
+                                bCloudLibAdded = true;
+                            }
+                        }
+                        else
+                        {
+                            firstCloudLibCursor = set2.Data[i2].Cursor;
+                        }
+                        i2++;
+                    }
+                    toSkip--;
+                };
+
+                //now page the data. 
+                if (combined.Count > model.Take)
                 {
-                    combined.Add(set2.Data[i2]);
-                    i2++;
+                    // Should not get here
+                    combined = combined.Take(model.Take).ToList();
                 }
-            } while (i1 < set1.Data.Count || i2 < set2.Data.Count);
+            }
+            else
+            {
+                // merge from the end, assuming we fetched the previous <Take> items from marketplace
+                int i1 = (int)set1.Data.Count - 1;
+                int i2 = (int)set2.Data.Count - 1;
+                lastCloudLibCursor = i2 >=0 ? set2.Data[i2].Cursor : GetCloudLibCursorFromCombinedCursor(model.EndCursor);
+                firstCloudLibCursor = lastCloudLibCursor;
+                lastMarketPlaceOffset = GetMarketPlaceOffsetFromCombinedCursor(model.EndCursor).Value;
+                firstMarketPlaceOffset = lastMarketPlaceOffset;
 
-            //var combined = set1.Data.Union(set2.Data);
-            //TBD - order by the unified result - order by type, then by featured then by name
-            //combined = combined
-            //    .OrderBy(x => x.Type?.DisplayOrder)
-            //    .ThenBy(x => x.Type?.Name)
-            //    .ThenByDescending(x => x.IsFeatured)
-            //    .ThenBy(x => x.DisplayName); //.ToList();
-            //combined = combined
-            //    .OrderByDescending(x => x.IsFeatured)
-            //    .ThenBy(x => x.DisplayName);
+                combined = new List<MarketplaceItemModel>();
+                while ((i1 >= 0 || i2 >= 0)
+                        && combined.Count < model.Take)
+                {
+                    if (i2 < 0 || (i1 >= 0 && Compare(set1.Data[i1], set2.Data[i2]) >= 0))
+                    {
+                        combined.Insert(0, set1.Data[i1]);
+                        firstMarketPlaceOffset--;
+                        i1--;
+                    }
+                    else
+                    {
+                        combined.Insert(0, set2.Data[i2]);
+                        firstCloudLibCursor = set2.Data[i2].Cursor;
+                        i2--;
+                    }
+                };
 
-            //now page the data. 
-            combined = combined.Skip(model.Skip).Take(model.Take).ToList();
-            return new DALResult<MarketplaceItemModel>() {
+                //now page the data. 
+                if (combined.Count > model.Take)
+                {
+                    // Should not get here
+                    combined = combined.Take(model.Take).ToList();
+                }
+            }
+            return new DALResult<MarketplaceItemModel>()
+            {
                 Count = count,
+                StartCursor = $"{firstMarketPlaceOffset};{firstCloudLibCursor}",
+                EndCursor = $"{lastMarketPlaceOffset};{lastCloudLibCursor}",
                 Data = combined
             };
+        }
+
+        private static int? GetMarketPlaceOffsetFromCombinedCursor(string cursor)
+        {
+            if (cursor == null)
+            {
+                return null;
+            }
+            if (!int.TryParse(cursor.Split(';')[0], out var marketPlaceOffset))
+            {
+                throw new Exception($"Invalid cursor");
+            }
+            return marketPlaceOffset;
+        }
+        private static string GetCloudLibCursorFromCombinedCursor(string cursor)
+        {
+            string cloudLibCursor;
+            if (cursor == null)
+            {
+                cloudLibCursor = null;
+            }
+            else
+            {
+                var parts = cursor.Split(';');
+                if (parts.Length != 2 || parts[1] == null)
+                {
+                    throw new Exception($"Invalid cursor");
+                }
+                cloudLibCursor = parts[1];
+            }
+            return cloudLibCursor;
         }
 
         private static int Compare(MarketplaceItemModel m1, MarketplaceItemModel m2)
