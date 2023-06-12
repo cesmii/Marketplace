@@ -21,7 +21,7 @@ export function setMarketplacePageSize(val) {
 // Common search criteria helpers
 //-------------------------------------------------------------------
 //Clear out all search criteria values
-export function clearSearchCriteria(criteria) {
+export function clearSearchCriteria(criteria, keepSkip) {
 
     var result = JSON.parse(JSON.stringify(criteria));
     if (result == null) result = {};
@@ -39,7 +39,9 @@ export function clearSearchCriteria(criteria) {
     });
 
     result.query = null;
-    result.skip = 0;
+    if (!keepSkip) {
+        result.skip = 0;
+    }
     return result;
 }
 
