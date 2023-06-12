@@ -309,7 +309,7 @@ function MarketplaceList() {
         //no filterable query strings, just get the default list
         if (!q && !sm && !f) {
             //this will trigger a fetch from the API to pull the data for the filtered criteria
-            setCriteria(clearSearchCriteria(criteria));
+            setCriteria(clearSearchCriteria(criteria, true));
             return;
         }
 

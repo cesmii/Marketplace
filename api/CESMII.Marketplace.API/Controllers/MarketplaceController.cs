@@ -1042,8 +1042,8 @@ namespace CESMII.Marketplace.Api.Controllers
             return new DALResult<MarketplaceItemModel>()
             {
                 Count = count,
-                StartCursor = $"{firstMarketPlaceOffset};{firstCloudLibCursor}",
-                EndCursor = $"{lastMarketPlaceOffset};{lastCloudLibCursor}",
+                StartCursor = $"{model.Skip};{firstMarketPlaceOffset};{firstCloudLibCursor}",
+                EndCursor = $"{model.Skip};{lastMarketPlaceOffset};{lastCloudLibCursor}",
                 Data = combined
             };
         }
@@ -1054,7 +1054,8 @@ namespace CESMII.Marketplace.Api.Controllers
             {
                 return null;
             }
-            if (!int.TryParse(cursor.Split(';')[0], out var marketPlaceOffset))
+            var parts = cursor.Split(';');
+            if (parts.Length != 3 ||  !int.TryParse(cursor.Split(';')[1], out var marketPlaceOffset))
             {
                 throw new Exception($"Invalid cursor");
             }
@@ -1070,11 +1071,11 @@ namespace CESMII.Marketplace.Api.Controllers
             else
             {
                 var parts = cursor.Split(';');
-                if (parts.Length != 2 || parts[1] == null)
+                if (parts.Length != 3 || parts[2] == null)
                 {
                     throw new Exception($"Invalid cursor");
                 }
-                cloudLibCursor = parts[1];
+                cloudLibCursor = parts[2];
             }
             return cloudLibCursor;
         }
