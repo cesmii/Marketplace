@@ -24,7 +24,7 @@ export const AppSettings = {
     , GoogleAnalyticsId: 'G-M6FGMLFKM7' //'G-EPPSP1B05X'
     , TrackAnalytics: process.env.REACT_APP_USE_GOOGLE_ANALYTICS  //false in dev, true in prod
     , PageSize: 10
-    , PageSizeOptions: { FrontEnd: [5, 10, 25, 50], Admin: [10, 25, 50, 1000] }
+    , PageSizeOptions: { FrontEnd: [10, 25, 50], Admin: [10, 25, 50, 1000] }
     , MetaDescription: {
         Default: 'The CESMII Smart Manufacturing (SM) Marketplace is akin to an "App Store" where developers of Operational Technology (OT) applications can make their products available for use with the CESMII Smart Manufacturing Innovation Platform (SMIP) and for use in developing solutions to customer manufacturing use cases. The marketplace also includes SM Profiles representing structured information for devices, machines and processes. Profiles and applications are initially created for the SMIP SM Marketplace through institute funded projects, including Enabling R&D projects and Innovation projects.  And in the future, they will be crowd sourced through industry as a whole.',
         Abbreviated: 'The CESMII Smart Manufacturing (SM) Marketplace helps developers of Operational Technology (OT) applications make their products available for use within the Smart Manufacturing community.'
