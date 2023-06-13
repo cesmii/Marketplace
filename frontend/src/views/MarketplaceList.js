@@ -103,7 +103,7 @@ function MarketplaceList() {
         //reload page
         history.push({
             pathname: '/library',
-            search: `?${generateSearchQueryString(_criteria, _currentPage)}`
+            search: `?${generateSearchQueryString(_criteria, 1)}`
         });
     };
 
@@ -124,7 +124,7 @@ function MarketplaceList() {
         //reload page
         history.push({
             pathname: '/library',
-            search: `?${generateSearchQueryString(criteria, _currentPage)}`
+            search: `?${generateSearchQueryString(criteria, 1)}`
         });
     };
 
@@ -142,7 +142,7 @@ function MarketplaceList() {
         //reload page
         history.push({
             pathname: '/library',
-            search: `?${generateSearchQueryString(criteria, _currentPage)}`
+            search: `?${generateSearchQueryString(criteria, 1)}`
         });
     }
 
@@ -169,7 +169,7 @@ function MarketplaceList() {
             pathname: '/library',
             search: `?${generateSearchQueryString(_criteria, currentPage)}`
         });
-
+        
     };
 
     const onClearAll = () => {
