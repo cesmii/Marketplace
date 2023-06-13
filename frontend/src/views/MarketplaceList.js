@@ -99,16 +99,19 @@ function MarketplaceList() {
 
         //this will trigger a fetch from the API to pull the data for the filtered criteria
         setCurrentPage(1);
-        _criteria.query = val;
-        _criteria.skip = 0;
+        let criteria = JSON.parse(JSON.stringify(_criteria));
+        criteria.query = val;
+        criteria.skip = 0;
+        setCriteria(criteria);
+        //_currentPage = 1
         //setCurrentPageEndCursor(null);
         setCurrentPageCursors(null);
         //setCriteria(JSON.parse(JSON.stringify(_criteria)));
         //reload page
-        history.push({
-            pathname: '/library',
-            search: `?${generateSearchQueryString(_criteria, _currentPage)}`
-        });
+    //    history.push({
+    //        pathname: '/library',
+    //        search: `?${generateSearchQueryString(_criteria, _currentPage)}`
+    //    });
     };
 
     const handleOnSearchBlur = (val) => {
@@ -124,12 +127,12 @@ function MarketplaceList() {
         //this will trigger a fetch from the API to pull the data for the filtered criteria
         setCurrentPage(1);
         criteria.query = _queryLocal;
-        //setCriteria(JSON.parse(JSON.stringify(criteria)));
+        setCriteria(JSON.parse(JSON.stringify(criteria)));
         //reload page
-        history.push({
-            pathname: '/library',
-            search: `?${generateSearchQueryString(criteria, _currentPage)}`
-        });
+    //    history.push({
+    //        pathname: '/library',
+    //        search: `?${generateSearchQueryString(criteria, _currentPage)}`
+    //    });
     };
 
     //called when an item is selected in the filter panel
@@ -142,39 +145,24 @@ function MarketplaceList() {
 
         //filter event handler - set global state and navigate to search page
         criteria.query = _queryLocal;
-        //setCriteria(JSON.parse(JSON.stringify(criteria)));
+        setCriteria(JSON.parse(JSON.stringify(criteria)));
         //reload page
-        history.push({
-            pathname: '/library',
-            search: `?${generateSearchQueryString(criteria, _currentPage)}`
-        });
+    //    history.push({
+    //        pathname: '/library',
+    //        search: `?${generateSearchQueryString(criteria, _currentPage)}`
+    //    });
     }
 
     const onChangePage = (currentPage, pageSize) => {
         console.log(generateLogMessageString(`onChangePage||Current Page: ${currentPage}, Page Size: ${pageSize}`, CLASS_NAME));
 
-        //if (_currentPage && _currentPage + 1 === currentPage) {
-        //    // page forward
-        //    setCurrentPageStartCursor(_currentPageEndCursor);
-        //    setCurrentPageEndCursor(null);
-        //}
-        //else if (_currentPage && _currentPage === currentPage + 1) {
-        //    // page backward
-        //    setCurrentPageStartCursor(null);
-        //    setCurrentPageEndCursor(_currentPageStartCursor);
-        //}
-        //else {
-        //    // Jump: reset cursors
-        //    setCurrentPageStartCursor(null);
-        //    setCurrentPageEndCursor(null);
-        //}
-
         //this will trigger a fetch from the API to pull the data for the filtered criteria
         setCurrentPage(currentPage);
-        _criteria.query = _queryLocal;
-        _criteria.skip = (currentPage - 1) * pageSize; //0-based
-        _criteria.take = pageSize;
-        //setCriteria(JSON.parse(JSON.stringify(_criteria)));
+        let criteria = JSON.parse(JSON.stringify(_criteria));
+        criteria.query = _queryLocal;
+        criteria.skip = (currentPage - 1) * pageSize; //0-based
+        criteria.take = pageSize;
+        setCriteria(criteria);
 
         //scroll screen to top of grid on page change
         ////scroll a bit higher than the top edge so we get some of the header in the view
@@ -185,11 +173,10 @@ function MarketplaceList() {
         setMarketplacePageSize(pageSize);
 
         //reload page
-        history.push({
-            pathname: '/library',
-            search: `?${generateSearchQueryString(_criteria, currentPage)}`
-        });
-
+    //    history.push({
+    //        pathname: '/library',
+    //        search: `?${generateSearchQueryString(_criteria, currentPage)}`
+    //    });
     };
 
     const onClearAll = () => {
@@ -207,6 +194,21 @@ function MarketplaceList() {
 
         setFilterToggle(!_filterToggle);
     }
+
+    useEffect(() => {
+        if (_criteria == null) {
+            // this typically happens when navigating to a page or refreshing: ignore
+            return;
+        }
+        let newLocation = {
+            pathname: '/library',
+            search: `?${generateSearchQueryString(_criteria, _currentPage)}`
+        };
+        if (history.location.pathname !== newLocation.pathname || history.location.search != newLocation.search) {
+            history.push(newLocation);
+        }
+    }, [_criteria, _currentPage]);
+
 
     //const onTileViewToggle = () => {
     //    console.log(generateLogMessageString('onTileViewToggle', CLASS_NAME));
