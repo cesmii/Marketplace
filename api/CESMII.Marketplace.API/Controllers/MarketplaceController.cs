@@ -397,7 +397,7 @@ namespace CESMII.Marketplace.Api.Controllers
 
                 var startCursor = ParseCursor(model?.PageCursors);
                 //int skip = model.Skip;
-                MarketplaceSearchModel adjustedModel = new MarketplaceSearchModel { Skip = model.Skip, Take = model.Take, Filters = model.Filters, ItemTypes = model.ItemTypes, Query = model.Query };
+                MarketplaceSearchModel adjustedModel = new MarketplaceSearchModel { Skip = model.Skip, Take = model.Take, Filters = model.Filters, ItemTypes = model.ItemTypes, Query = model.Query, PageCursors = model.PageCursors };
                 int mergeSkip = model.Skip;
                 if (startCursor != null)
                 {
@@ -948,15 +948,16 @@ namespace CESMII.Marketplace.Api.Controllers
                 }
                 //NEW: now search CloudLib.
                 _logger.LogTrace($"MarketplaceController|AdvancedSearchCloudLib|calling DAL...");
-                result = await _dalCloudLib.Where(query,
-                    skip,
-                    take,
-                    startCursor?.CurrentCursor?.CloudLibCursor,
-                    null,
-                    null,
-                    cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
-                    verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList(),
-                    _configUtil.CloudLibSettings?.ExcludedNodeSets);
+                result = await _dalCloudLib.Where(query: query,
+                    skip: skip,
+                    take: take,
+                    startCursor: startCursor?.CurrentCursor?.CloudLibCursor,
+                    endCursor: null,
+                    noTotalCount: startCursor?.TotalItemCount > 0, // Don't need to request total item count again, improves performance
+                    ids: null,
+                    processes: cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
+                    verticals: verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList(),
+                    exclude: _configUtil.CloudLibSettings?.ExcludedNodeSets);
 
                 //check to see if the CloudLib returned data. 
                 if (cats.Count == 0 && verts.Count == 0 && string.IsNullOrEmpty(query)
@@ -984,7 +985,7 @@ namespace CESMII.Marketplace.Api.Controllers
             MarketplaceSearchModel adjustedModel, MarketplaceSearchModel originalModel, int mergeSkip)
         {
             //get count before paging
-            var count = set1.Count + set2.Count;
+            var totalCount = set1.Count + set2.Count;
             //sort 2nd set but always put it after the regular marketplace items.  
             //set2 = set2.OrderByDescending(x => x.IsFeatured).ThenBy(x => x.DisplayName).ToList();
             //combine the data, get the total count
@@ -998,6 +999,10 @@ namespace CESMII.Marketplace.Api.Controllers
             List<MarketplaceItemModel> combined;
             //Cursor endCursor = null;
             var startCursor = ParseCursor(adjustedModel.PageCursors);
+            if (startCursor?.TotalItemCount > 0)
+            {
+                totalCount = startCursor.TotalItemCount;
+            }
             //if (adjustedModel.EndCursor == null || (endCursor = ParseCursor(adjustedModel.EndCursor)) == null)
             {
                 int i1 = 0, i2 = 0;
@@ -1093,11 +1098,11 @@ namespace CESMII.Marketplace.Api.Controllers
             //    };
             //}
 
-            var cursor = GetCursors(originalModel.Skip, combined.Count, firstMarketPlaceOffset, lastMarketPlaceOffset, firstCloudLibCursor, lastCloudLibCursor, startCursor);
+            var cursor = GetCursors(originalModel.Skip, combined.Count, totalCount, firstMarketPlaceOffset, lastMarketPlaceOffset, firstCloudLibCursor, lastCloudLibCursor, startCursor);
 
             return new DALResult<MarketplaceItemModel>()
             {
-                Count = count,
+                Count = totalCount,
                 PageCursors = JsonConvert.SerializeObject(cursor),
                 Data = combined
             };
@@ -1113,6 +1118,7 @@ namespace CESMII.Marketplace.Api.Controllers
         public class Cursor
         {
             public CursorEntry CurrentCursor { get; set; }
+            public int TotalItemCount { get; set; }
             public List<CursorEntry> OtherCursors { get; set; }
 
             public CursorEntry GetBestCursorForOffset(int offset)
@@ -1126,7 +1132,7 @@ namespace CESMII.Marketplace.Api.Controllers
             }
         }
 
-        private static Cursor GetCursors(int skip, int count, int firstMarketPlaceOffset, int lastMarketPlaceOffset, string firstCloudLibCursor, string lastCloudLibCursor, Cursor previousCursor)
+        private static Cursor GetCursors(int skip, int count, long totalCount, int firstMarketPlaceOffset, int lastMarketPlaceOffset, string firstCloudLibCursor, string lastCloudLibCursor, Cursor previousCursor)
         {
             var cursor = previousCursor ?? new Cursor();
             if (cursor.OtherCursors == null)
@@ -1144,6 +1150,7 @@ namespace CESMII.Marketplace.Api.Controllers
             cursor.CurrentCursor.Offset = skip;
             cursor.CurrentCursor.MarketPlaceOffset = firstMarketPlaceOffset;
             cursor.CurrentCursor.CloudLibCursor = firstCloudLibCursor;
+            cursor.TotalItemCount = (int) totalCount;
             return cursor;
         }
 

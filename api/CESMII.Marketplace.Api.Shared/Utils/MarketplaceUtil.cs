@@ -173,7 +173,8 @@
             var itemsMarketplace = _dalMarketplace.Where(predicatesMarketplace, null, 4, false, false).Data;
 
             //now get the cloudlib items with popular rankings
-            var itemsCloudLib = await _dalCloudLib.Where(null, 0, 4, null, null, popularCloudLib, null, null, null);
+            var itemsCloudLib = await _dalCloudLib.Where(query: null, skip: 0, take: 4, startCursor: null, endCursor: null, noTotalCount: false, 
+                ids: popularCloudLib, processes: null, vertical: null, exclude: null);
 
             return itemsMarketplace.Union(itemsCloudLib.Data).ToList();
 
@@ -238,7 +239,7 @@
             var popularCloudLib = _dalAnalytics.Where(x => !string.IsNullOrEmpty(x.CloudLibId), null, 4, false, false, orderBys.ToArray()).Data
                 .Select(x => x.CloudLibId).ToList();
             //now get the cloudlib items with popular rankings
-            return (await _dalCloudLib.Where(null, null, 4, null, null,popularCloudLib, null, null, null)).Data;
+            return (await _dalCloudLib.Where(null, null, 4, null, null, false, popularCloudLib, null, null, null)).Data;
         }
 
         /// <summary>

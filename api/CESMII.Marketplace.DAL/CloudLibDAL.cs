@@ -106,7 +106,7 @@
             return result.Data;
         }
 
-        public async Task<DALResult<MarketplaceItemModelWithCursor>> Where(string query, int? skip = null, int? take = null, string? startCursor = null, string? endCursor = null,
+        public async Task<DALResult<MarketplaceItemModelWithCursor>> Where(string query, int? skip = null, int? take = null, string? startCursor = null, string? endCursor = null, bool noTotalCount = false,
             List<string> ids = null, List<string> processes = null, List<string> verticals = null, List<string> exclude = null)
         {
             //Note - splitting out each word in query into a separate string in the list
@@ -144,7 +144,7 @@
             {
                 actualTake = Math.Min((skip + take ?? 100) - (int)result.Count, 100);
                 bMore = false;
-                matches = await _cloudLib.SearchAsync(actualTake, currentCursor, backwards, keywords, exclude, false,
+                matches = await _cloudLib.SearchAsync(actualTake, currentCursor, backwards, keywords, exclude, noTotalCount,
                     order:
                         new { metadata = new { title = OrderEnum.ASC }, modelUri = OrderEnum.ASC, publicationDate = OrderEnum.DESC });// "{metadata: {title: ASC}, modelUri: ASC, publicationDate: DESC}");
                 if (matches == null || matches.Edges == null) return result;
