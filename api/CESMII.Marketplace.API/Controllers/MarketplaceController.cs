@@ -471,13 +471,13 @@ namespace CESMII.Marketplace.Api.Controllers
                 }
 
                 long swWaitFinished = timer.ElapsedMilliseconds;
+                swMarketPlaceFinished = swMarketPlaceFinished == 0 ? timer.ElapsedMilliseconds : swMarketPlaceFinished;
+                swCloudLibFinished = swCloudLibFinished == 0 ? timer.ElapsedMilliseconds : swCloudLibFinished;
 
                 //get the tasks results into format we can use
                 _logger.LogInformation($"MarketplaceController|AdvancedSearch|Executing tasks using await...");
                 var resultSearchMarketplace = await searchMarketplaceTask;
-                swMarketPlaceFinished = swMarketPlaceFinished == 0 ? timer.ElapsedMilliseconds : swMarketPlaceFinished;
                 var resultSearchCloudLib = await searchCloudLibTask;
-                swCloudLibFinished = swCloudLibFinished == 0 ? timer.ElapsedMilliseconds: swCloudLibFinished;
 
                 long mergeStarted = timer.ElapsedMilliseconds;
                 _logger.LogInformation($"MarketplaceController|AdvancedSearch|Unifying results...");
