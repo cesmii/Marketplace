@@ -1051,7 +1051,7 @@ namespace CESMII.Marketplace.Api.Controllers
                         i2++;
                     }
                     toSkip--;
-                    if (processed % originalModel.Take == 4)
+                    if (processed % originalModel.Take == originalModel.Take - 1)
                     {
                         // we've reached the end of a page boundary: remember the cursor and offsets for the NEXT page
                         if (startCursor == null)
