@@ -42,8 +42,8 @@ function MarketplaceList() {
         all: [], itemCount: 0, listView: true
     });
     const [_currentPage, setCurrentPage] = useState(1);
-    const [_currentPageStartCursor, setCurrentPageStartCursor] = useState(null);
-    const [_currentPageEndCursor, setCurrentPageEndCursor] = useState(null);
+    const [_currentPageCursors, setCurrentPageCursors] = useState(null);
+    //const [_currentPageEndCursor, setCurrentPageEndCursor] = useState(null);
     const [_filterToggle, setFilterToggle] = useState(false);
     
     const caption = 'Library';
@@ -101,8 +101,8 @@ function MarketplaceList() {
         setCurrentPage(1);
         _criteria.query = val;
         _criteria.skip = 0;
-        setCurrentPageEndCursor(null);
-        setCurrentPageStartCursor(null);
+        //setCurrentPageEndCursor(null);
+        setCurrentPageCursors(null);
         //setCriteria(JSON.parse(JSON.stringify(_criteria)));
         //reload page
         history.push({
@@ -153,21 +153,21 @@ function MarketplaceList() {
     const onChangePage = (currentPage, pageSize) => {
         console.log(generateLogMessageString(`onChangePage||Current Page: ${currentPage}, Page Size: ${pageSize}`, CLASS_NAME));
 
-        if (_currentPage && _currentPage + 1 === currentPage) {
-            // page forward
-            setCurrentPageStartCursor(_currentPageEndCursor);
-            setCurrentPageEndCursor(null);
-        }
-        else if (_currentPage && _currentPage === currentPage + 1) {
-            // page backward
-            setCurrentPageStartCursor(null);
-            setCurrentPageEndCursor(_currentPageStartCursor);
-        }
-        else {
-            // Jump: reset cursors
-            setCurrentPageStartCursor(null);
-            setCurrentPageEndCursor(null);
-        }
+        //if (_currentPage && _currentPage + 1 === currentPage) {
+        //    // page forward
+        //    setCurrentPageStartCursor(_currentPageEndCursor);
+        //    setCurrentPageEndCursor(null);
+        //}
+        //else if (_currentPage && _currentPage === currentPage + 1) {
+        //    // page backward
+        //    setCurrentPageStartCursor(null);
+        //    setCurrentPageEndCursor(_currentPageStartCursor);
+        //}
+        //else {
+        //    // Jump: reset cursors
+        //    setCurrentPageStartCursor(null);
+        //    setCurrentPageEndCursor(null);
+        //}
 
         //this will trigger a fetch from the API to pull the data for the filtered criteria
         setCurrentPage(currentPage);
@@ -197,7 +197,7 @@ function MarketplaceList() {
 
         setCriteria(clearSearchCriteria(_criteria));
         setQueryLocal(null);
-
+        setCurrentPageCursors(null);
         //reload page
         history.push('/library');
     }
@@ -233,8 +233,8 @@ function MarketplaceList() {
             category: "Marketplace|Search",
             action: "marketplace_search"
         });
-        criteria.startCursor = _currentPageStartCursor;
-        criteria.endCursor = _currentPageEndCursor;
+        criteria.pageCursors = _currentPageCursors;
+        //criteria.endCursor = _currentPageEndCursor;
 
         await axiosInstance.post(url, criteria).then(result => {
             if (result.status === 200) {
@@ -245,8 +245,8 @@ function MarketplaceList() {
                     all: result.data.data, itemCount: result.data.count
                 });
 
-                setCurrentPageStartCursor(result.data.startCursor);
-                setCurrentPageEndCursor(result.data.endCursor);
+                setCurrentPageCursors(result.data.pageCursors);
+                //setCurrentPageEndCursor(result.data.endCursor);
 
                 //hide a spinner
                 setLoadingProps({ isLoading: false, message: null });
