@@ -835,8 +835,10 @@ namespace CESMII.Marketplace.Api.Controllers
             _logger.LogTrace($"MarketplaceController|AdvancedSearchMarketplace|calling DAL...");
             var result = await Task.Run(() =>
             {
+                var cursors = ParseCursor(model.PageCursors);
+                bool haveTotalCount = cursors?.TotalItemCount > 0;
 
-                var startOffset = ParseCursor(model.PageCursors)?.CurrentCursor?.MarketPlaceOffset;
+                var startOffset = cursors?.CurrentCursor?.MarketPlaceOffset;
                 int? skip;
                 int take;
                 if (startOffset == null)
@@ -855,8 +857,8 @@ namespace CESMII.Marketplace.Api.Controllers
                     }
                 }
                 return predicates.Count == 0 && skip == null
-                    ? _dal.GetAllPaged(null, null, true, false)
-                    : _dal.Where(predicates, skip, take, true, false,
+                    ? _dal.GetAllPaged(null, null, !haveTotalCount, false)
+                    : _dal.Where(predicates, skip, take, !haveTotalCount, false,
                             new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
                             new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName });
             });

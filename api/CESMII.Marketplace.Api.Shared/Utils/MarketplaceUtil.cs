@@ -174,7 +174,7 @@
 
             //now get the cloudlib items with popular rankings
             var itemsCloudLib = await _dalCloudLib.Where(query: null, skip: 0, take: 4, startCursor: null, endCursor: null, noTotalCount: false, 
-                ids: popularCloudLib, processes: null, vertical: null, exclude: null);
+                ids: popularCloudLib, processes: null, verticals: null, exclude: null);
 
             return itemsMarketplace.Union(itemsCloudLib.Data).ToList();
 
