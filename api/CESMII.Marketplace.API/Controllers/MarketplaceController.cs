@@ -448,12 +448,12 @@ namespace CESMII.Marketplace.Api.Controllers
                     return AdvancedSearchMarketplace(adjustedModel, types, cats, verts, pubs, useSpecialTypeSelection, liveOnly);
                 });
                 long swMarketPlaceFinished = 0;
-                _ = searchMarketplaceTask.ContinueWith(t => swMarketPlaceFinished = timer.ElapsedMilliseconds);
+                _ = searchMarketplaceTask.ContinueWith(t => swMarketPlaceFinished = swMarketPlaceFinished == 0 ? timer.ElapsedMilliseconds : swMarketPlaceFinished);
 
                 long swCloudLibStarted = timer.ElapsedMilliseconds;
                 var searchCloudLibTask = AdvancedSearchCloudLib(adjustedModel, cats, verts, pubs, useSpecialTypeSelection);
                 long swCloudLibFinished = 0;
-                _ = searchCloudLibTask.ContinueWith(t => swCloudLibFinished = timer.ElapsedMilliseconds);
+                _ = searchCloudLibTask.ContinueWith(t => swCloudLibFinished = swCloudLibFinished == 0 ? timer.ElapsedMilliseconds : swCloudLibFinished);
                 //run in parallel
                 long swWaitStarted = timer.ElapsedMilliseconds;
                 var allTasks = Task.WhenAll(searchMarketplaceTask, searchCloudLibTask);
@@ -475,7 +475,9 @@ namespace CESMII.Marketplace.Api.Controllers
                 //get the tasks results into format we can use
                 _logger.LogInformation($"MarketplaceController|AdvancedSearch|Executing tasks using await...");
                 var resultSearchMarketplace = await searchMarketplaceTask;
+                swMarketPlaceFinished = swMarketPlaceFinished == 0 ? timer.ElapsedMilliseconds : swMarketPlaceFinished;
                 var resultSearchCloudLib = await searchCloudLibTask;
+                swCloudLibFinished = swCloudLibFinished == 0 ? timer.ElapsedMilliseconds: swCloudLibFinished;
 
                 long mergeStarted = timer.ElapsedMilliseconds;
                 _logger.LogInformation($"MarketplaceController|AdvancedSearch|Unifying results...");
