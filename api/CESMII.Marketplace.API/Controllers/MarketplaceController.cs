@@ -619,31 +619,6 @@ namespace CESMII.Marketplace.Api.Controllers
                 || verts.Any(y => x.IndustryVerticals.Contains(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y))))
                 || pubs.Any(y => x.PublisherId.Equals(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y))))
             ;
-            /*
-            Func<MarketplaceItem, bool> result = x => x.Name.ToLower().Contains(query);
-            //or search on additional fields
-            result.Or(x => x.DisplayName.ToLower().Contains(query));
-            result.Or(x => x.Description.ToLower().Contains(query));
-            result.Or(x => x.Abstract.ToLower().Contains(query));
-            result.Or(x => x.MetaTags != null && x.MetaTags.Contains(query));
-
-            //if we are using special type, it means user entered special word for query like "profile". In this case,
-            //we want to get all types of sm-profile >>OR<< any item containing the word profile
-            if (useSpecialTypeSelection)
-            {
-                result.Or(x => x.ItemTypeId != null && types.Any(y => y.ID.Equals(x.ItemTypeId.ToString())));
-            }
-            
-            //if we have a query value which has a category, vert or pub match, then we don't require match
-            //on one of the freeform text fields. 
-            if (cats.Any())
-                result.Or(x => cats.Any(y => x.Categories.Contains(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y)))));
-            if (verts.Any())
-                result.Or(x => verts.Any(y => x.IndustryVerticals.Contains(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y)))));
-            if (pubs.Any())
-                result.Or(x => pubs.Any(y => x.PublisherId.Equals(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y)))));
-                //result.Or(x => pubs.Any(p => p == x.PublisherId.ToString()));
-            */
             return result;
         }
 
