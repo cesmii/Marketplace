@@ -212,6 +212,12 @@ function MarketplaceList() {
         }
     }, [_criteria, _currentPage]);
 
+    useEffect(() => {
+        if (_criteria != null || loadingProps?.searchCriteria == null) {
+            return;
+        }
+        setCriteria(loadingProps.searchCriteria);
+    }, [loadingProps.searchCriteria]);
 
     //const onTileViewToggle = () => {
     //    console.log(generateLogMessageString('onTileViewToggle', CLASS_NAME));
@@ -305,6 +311,9 @@ function MarketplaceList() {
         let originalCriteriaJson = JSON.stringify(_criteria);
         let criteria = (_criteria == null) ? JSON.parse(JSON.stringify(loadingProps.searchCriteria)) :
             JSON.parse(originalCriteriaJson);
+        if (criteria == null) {
+            return;
+        }
         const currentPage = p == null || !isNumeric(p) ? 1 : parseInt(p);
         const pageSize = t == null || !isNumeric(t) ? criteria.take : parseInt(t);
         setCurrentPage(currentPage);
@@ -365,7 +374,7 @@ function MarketplaceList() {
             //console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
             //setFilterValOnChild('');
         };
-    }, [searchParams]);
+    }, [searchParams, loadingProps.searchCriteria]);
 
     //-------------------------------------------------------------------
     // Region: Get data 
