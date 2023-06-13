@@ -17,7 +17,7 @@ using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Marketplace.Api.Shared.Utils;
 using System.Text;
-using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
@@ -394,17 +394,64 @@ namespace CESMII.Marketplace.Api.Controllers
             //Skip over this in certain scenarios. ie. admin section
             if (_configUtil.MarketplaceSettings.EnableCloudLibSearch && includeCloudLib && includeSmProfileTypes)
             {
+
+                var startCursor = ParseCursor(model?.PageCursors);
+                //int skip = model.Skip;
+                MarketplaceSearchModel adjustedModel = new MarketplaceSearchModel { Skip = model.Skip, Take = model.Take, Filters = model.Filters, ItemTypes = model.ItemTypes, Query = model.Query };
+                int mergeSkip = model.Skip;
+                if (startCursor != null)
+                {
+                    // Provided start cursor didn't match requested offset: look if we have an alternate one cached
+                    var bestStartCursor = startCursor.GetBestCursorForOffset(model.Skip);
+                    if (bestStartCursor != null)
+                    {
+                        //startCursor.Offset = newStartCursor.Offset;
+                        //startCursor.MarketPlaceOffset = newStartCursor.MarketPlaceOffset;
+                        //startCursor.CloudLibCursor = newStartCursor.CloudLibCursor;
+                        startCursor.CurrentCursor = bestStartCursor;
+                        adjustedModel.PageCursors = JsonConvert.SerializeObject(startCursor);
+                        adjustedModel.Skip = bestStartCursor?.Offset ?? 0;
+                        mergeSkip = model.Skip - bestStartCursor?.Offset ?? 0;
+                        adjustedModel.Take = model.Take + mergeSkip;
+                    }
+                    else
+                    {
+                        // Didn't find one: do a full query from start
+                        adjustedModel.PageCursors = null;
+                    }
+                }
+
+                //var endCursor = ParseCursor(model?.EndCursor);
+                //if (startCursor == null &&  endCursor != null && endCursor.Offset != model.Skip + model.Take)
+                //{
+                //    // Provided end cursor didn't match requested offset: look for an alternate cursor
+                //    adjustedModel.EndCursor = null;
+                //    var newStartCursor = endCursor.GetBestCursorForOffset(model.Skip);
+                //    if (newStartCursor != null)
+                //    {
+                //        endCursor.Offset = newStartCursor.Offset;
+                //        endCursor.MarketPlaceOffset = newStartCursor.MarketPlaceOffset;
+                //        endCursor.CloudLibCursor = newStartCursor.CloudLibCursor;
+
+                //        adjustedModel.StartCursor = JsonConvert.SerializeObject(endCursor);
+                //        adjustedModel.EndCursor = null;
+                //        adjustedModel.Skip = newStartCursor?.Offset ?? 0;
+                //        mergeSkip = model.Skip - newStartCursor?.Offset ?? 0;
+                //        adjustedModel.Take = model.Take + mergeSkip;
+                //    }
+                //}
+
                 _logger.LogInformation($"MarketplaceController|AdvancedSearch|Setting up tasks.");
                 long swMarketPlaceStarted = timer.ElapsedMilliseconds;
                 var searchMarketplaceTask = Task.Run(() =>
                 {
-                    return AdvancedSearchMarketplace(model, types, cats, verts, pubs, useSpecialTypeSelection, liveOnly);
+                    return AdvancedSearchMarketplace(adjustedModel, types, cats, verts, pubs, useSpecialTypeSelection, liveOnly);
                 });
                 long swMarketPlaceFinished = 0;
                 _ = searchMarketplaceTask.ContinueWith(t => swMarketPlaceFinished = timer.ElapsedMilliseconds);
 
                 long swCloudLibStarted = timer.ElapsedMilliseconds;
-                var searchCloudLibTask = AdvancedSearchCloudLib(model, cats, verts, pubs, useSpecialTypeSelection);
+                var searchCloudLibTask = AdvancedSearchCloudLib(adjustedModel, cats, verts, pubs, useSpecialTypeSelection);
                 long swCloudLibFinished = 0;
                 _ = searchCloudLibTask.ContinueWith(t => swCloudLibFinished = timer.ElapsedMilliseconds);
                 //run in parallel
@@ -434,7 +481,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 _logger.LogInformation($"MarketplaceController|AdvancedSearch|Unifying results...");
 
                 //unify the results, sort, handle paging
-                result = MergeSortPageSearchedItems(resultSearchMarketplace, resultSearchCloudLib, model);
+                result = MergeSortPageSearchedItems(resultSearchMarketplace, resultSearchCloudLib, adjustedModel, model, mergeSkip);
                 long mergeFinished = timer.ElapsedMilliseconds;
                 _logger.LogWarning($"MarketplaceController|AdvancedSearch|Duration: {timer.ElapsedMilliseconds}ms. (Marketplace: {swMarketPlaceFinished - swMarketPlaceStarted} ms. CloudLib {swCloudLibFinished - swCloudLibStarted}. MPS: {swMarketPlaceStarted}. ClStart: {swCloudLibStarted}). WaitS/F: {swWaitStarted}/{swWaitFinished}. Merge S/F: {mergeStarted}/{mergeFinished}");
             }
@@ -569,7 +616,7 @@ namespace CESMII.Marketplace.Api.Controllers
             {
                 return _dalPublisher.Where(x =>
                                 x.IsActive
-                                && (x.Name.ToLower().Contains(query) 
+                                && (x.Name.ToLower().Contains(query)
                                 || x.DisplayName.ToLower().Contains(query))
                                 , null, null, false, false).Data
                                 .ToList()
@@ -788,11 +835,11 @@ namespace CESMII.Marketplace.Api.Controllers
             _logger.LogTrace($"MarketplaceController|AdvancedSearchMarketplace|calling DAL...");
             var result = await Task.Run(() =>
             {
-                var startOffset = GetMarketPlaceOffsetFromCombinedCursor(model.StartCursor);
-                var endOffset = GetMarketPlaceOffsetFromCombinedCursor(model.EndCursor);
+
+                var startOffset = ParseCursor(model.PageCursors)?.CurrentCursor?.MarketPlaceOffset;
                 int? skip;
                 int take;
-                if (startOffset == null && endOffset == null)
+                if (startOffset == null)
                 {
                     skip = null;
                     take = model.Skip + model.Take;
@@ -800,7 +847,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 else
                 {
                     take = model.Take;
-                    skip = startOffset != null ? startOffset.Value : endOffset.Value - model.Take;
+                    skip = startOffset.Value;
                     if (skip < 0)
                     {
                         take += skip.Value;
@@ -808,7 +855,7 @@ namespace CESMII.Marketplace.Api.Controllers
                     }
                 }
                 return predicates.Count == 0 && skip == null
-                    ? _dal.GetAllPaged(null, null, true, false) 
+                    ? _dal.GetAllPaged(null, null, true, false)
                     : _dal.Where(predicates, skip, take, true, false,
                             new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
                             new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName });
@@ -885,9 +932,8 @@ namespace CESMII.Marketplace.Api.Controllers
             {
                 int skip;
                 int take;
-                string startCursor = GetCloudLibCursorFromCombinedCursor(model.StartCursor);
-                string endCursor = GetCloudLibCursorFromCombinedCursor(model.EndCursor);
-                if (startCursor == null && endCursor == null)
+                var startCursor = ParseCursor(model.PageCursors);
+                if (startCursor == null)
                 {
                     // Fall back to getting everything
                     // Because we are merging multiple sources and don't preserve individual cursors for each source, we have to always start from the beginning
@@ -903,10 +949,10 @@ namespace CESMII.Marketplace.Api.Controllers
                 //NEW: now search CloudLib.
                 _logger.LogTrace($"MarketplaceController|AdvancedSearchCloudLib|calling DAL...");
                 result = await _dalCloudLib.Where(query,
-                    skip, 
+                    skip,
                     take,
-                    startCursor,
-                    endCursor,
+                    startCursor?.CurrentCursor?.CloudLibCursor,
+                    null,
                     null,
                     cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
                     verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList(),
@@ -935,7 +981,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         private static DALResult<MarketplaceItemModel> MergeSortPageSearchedItems(DALResult<MarketplaceItemModel> set1, DALResult<MarketplaceItemModelWithCursor> set2,
-            MarketplaceSearchModel model)
+            MarketplaceSearchModel adjustedModel, MarketplaceSearchModel originalModel, int mergeSkip)
         {
             //get count before paging
             var count = set1.Count + set2.Count;
@@ -950,18 +996,21 @@ namespace CESMII.Marketplace.Api.Controllers
             int firstMarketPlaceOffset;
             int lastMarketPlaceOffset;
             List<MarketplaceItemModel> combined;
-            if (model.EndCursor == null)
+            //Cursor endCursor = null;
+            var startCursor = ParseCursor(adjustedModel.PageCursors);
+            //if (adjustedModel.EndCursor == null || (endCursor = ParseCursor(adjustedModel.EndCursor)) == null)
             {
                 int i1 = 0, i2 = 0;
-                firstCloudLibCursor = GetCloudLibCursorFromCombinedCursor(model.StartCursor);
+                firstCloudLibCursor = startCursor?.CurrentCursor?.CloudLibCursor;
                 lastCloudLibCursor = firstCloudLibCursor;
-                firstMarketPlaceOffset = GetMarketPlaceOffsetFromCombinedCursor(model.StartCursor) ?? 0;
+                firstMarketPlaceOffset = startCursor?.CurrentCursor?.MarketPlaceOffset ?? 0;
                 lastMarketPlaceOffset = firstMarketPlaceOffset;
-                int toSkip = model.StartCursor == null ? model.Skip : 0; // With cursor we already have the right starting point
+                int toSkip = mergeSkip; // model.Skip; // startCursor == null ? model.Skip : 0; // With cursor we already have the right starting point
                 combined = new List<MarketplaceItemModel>();
                 bool bCloudLibAdded = false;
+                int processed = 0;
                 while ((i1 < set1.Data.Count || i2 < set2.Data.Count)
-                         && combined.Count < model.Take)
+                         && combined.Count < originalModel.Take)
                 {
                     if (i2 >= set2.Data.Count || (i1 < set1.Data.Count && Compare(set1.Data[i1], set2.Data[i2]) <= 0))
                     {
@@ -995,90 +1044,154 @@ namespace CESMII.Marketplace.Api.Controllers
                         i2++;
                     }
                     toSkip--;
-                };
-
-                //now page the data. 
-                if (combined.Count > model.Take)
-                {
-                    // Should not get here
-                    combined = combined.Take(model.Take).ToList();
-                }
-            }
-            else
-            {
-                // merge from the end, assuming we fetched the previous <Take> items from marketplace
-                int i1 = (int)set1.Data.Count - 1;
-                int i2 = (int)set2.Data.Count - 1;
-                lastCloudLibCursor = i2 >=0 ? set2.Data[i2].Cursor : GetCloudLibCursorFromCombinedCursor(model.EndCursor);
-                firstCloudLibCursor = lastCloudLibCursor;
-                lastMarketPlaceOffset = GetMarketPlaceOffsetFromCombinedCursor(model.EndCursor).Value;
-                firstMarketPlaceOffset = lastMarketPlaceOffset;
-
-                combined = new List<MarketplaceItemModel>();
-                while ((i1 >= 0 || i2 >= 0)
-                        && combined.Count < model.Take)
-                {
-                    if (i2 < 0 || (i1 >= 0 && Compare(set1.Data[i1], set2.Data[i2]) >= 0))
+                    if (processed % originalModel.Take == 4)
                     {
-                        combined.Insert(0, set1.Data[i1]);
-                        firstMarketPlaceOffset--;
-                        i1--;
+                        // we've reached the end of a page boundary: remember the cursor and offsets for the NEXT page
+                        if (startCursor == null)
+                        {
+                            startCursor = new Cursor { OtherCursors = new List<CursorEntry>() };
+                        }
+                        var offset = adjustedModel.Skip + /*originalModel.Skip - mergeSkip + */processed + 1;
+                        if (startCursor.OtherCursors == null)
+                        {
+                            startCursor.OtherCursors = new List<CursorEntry>();
+                        }
+                        if (!startCursor.OtherCursors.Any(c => c.Offset == offset))
+                        {
+                            startCursor.OtherCursors.Add(new CursorEntry { Offset = offset, MarketPlaceOffset = lastMarketPlaceOffset, CloudLibCursor = bCloudLibAdded ? lastCloudLibCursor : firstCloudLibCursor });
+                        }
                     }
-                    else
-                    {
-                        combined.Insert(0, set2.Data[i2]);
-                        firstCloudLibCursor = set2.Data[i2].Cursor;
-                        i2--;
-                    }
+                    processed++;
                 };
-
-                //now page the data. 
-                if (combined.Count > model.Take)
-                {
-                    // Should not get here
-                    combined = combined.Take(model.Take).ToList();
-                }
             }
+            //else
+            //{
+            //    // merge from the end, assuming we fetched the previous <Take> items from marketplace
+            //    int i1 = (int)set1.Data.Count - 1;
+            //    int i2 = (int)set2.Data.Count - 1;
+            //    lastCloudLibCursor = i2 >= 0 ? set2.Data[i2].Cursor : endCursor.CurrentCursor.CloudLibCursor;
+            //    firstCloudLibCursor = lastCloudLibCursor;
+            //    lastMarketPlaceOffset = endCursor.CurrentCursor.MarketPlaceOffset;
+            //    firstMarketPlaceOffset = lastMarketPlaceOffset;
+
+            //    combined = new List<MarketplaceItemModel>();
+            //    while ((i1 >= 0 || i2 >= 0)
+            //            && combined.Count < originalModel.Take)
+            //    {
+            //        if (i2 < 0 || (i1 >= 0 && Compare(set1.Data[i1], set2.Data[i2]) >= 0))
+            //        {
+            //            combined.Insert(0, set1.Data[i1]);
+            //            firstMarketPlaceOffset--;
+            //            i1--;
+            //        }
+            //        else
+            //        {
+            //            combined.Insert(0, set2.Data[i2]);
+            //            firstCloudLibCursor = set2.Data[i2].Cursor;
+            //            i2--;
+            //        }
+            //    };
+            //}
+
+            var cursor = GetCursors(originalModel.Skip, combined.Count, firstMarketPlaceOffset, lastMarketPlaceOffset, firstCloudLibCursor, lastCloudLibCursor, startCursor);
+
             return new DALResult<MarketplaceItemModel>()
             {
                 Count = count,
-                StartCursor = $"{model.Skip};{firstMarketPlaceOffset};{firstCloudLibCursor}",
-                EndCursor = $"{model.Skip};{lastMarketPlaceOffset};{lastCloudLibCursor}",
+                StartCursor = JsonConvert.SerializeObject(cursor),
+                //EndCursor = JsonConvert.SerializeObject(cursors.End),
                 Data = combined
             };
         }
 
-        private static int? GetMarketPlaceOffsetFromCombinedCursor(string cursor)
+        public class CursorEntry
         {
-            if (cursor == null)
+            public int Offset { get; set; }
+            public int MarketPlaceOffset { get; set; }
+            public string CloudLibCursor { get; set; }
+            public override string ToString() => $"{Offset} {MarketPlaceOffset} {CloudLibCursor}";
+        }
+        public class Cursor
+        {
+            public CursorEntry CurrentCursor { get; set; }
+            public List<CursorEntry> OtherCursors { get; set; }
+
+            public CursorEntry GetBestCursorForOffset(int offset)
+            {
+                if (CurrentCursor.Offset == offset)
+                {
+                    return CurrentCursor;
+                }
+                var otherCursor = OtherCursors.Where(c => c.Offset <= offset).MaxBy(c => c.Offset);
+                return otherCursor;
+            }
+        }
+
+        private static Cursor GetCursors(int skip, int count, int firstMarketPlaceOffset, int lastMarketPlaceOffset, string firstCloudLibCursor, string lastCloudLibCursor, Cursor previousCursor)
+        {
+            var cursor = previousCursor ?? new Cursor();
+            if (cursor.OtherCursors == null)
+            {
+                cursor.OtherCursors = new List<CursorEntry>();
+            }
+            if (firstCloudLibCursor != lastCloudLibCursor && count > 0 && !cursor.OtherCursors.Any(c => c.Offset == skip + count))
+            {
+                cursor.OtherCursors.Add(new CursorEntry { Offset = skip + count, MarketPlaceOffset = lastMarketPlaceOffset, CloudLibCursor = lastCloudLibCursor });
+            }
+            if (cursor.CurrentCursor == null)
+            {
+                cursor.CurrentCursor = new CursorEntry();
+            }
+            cursor.CurrentCursor.Offset = skip;
+            cursor.CurrentCursor.MarketPlaceOffset = firstMarketPlaceOffset;
+            cursor.CurrentCursor.CloudLibCursor = firstCloudLibCursor;
+            return cursor;
+        }
+
+        private static Cursor ParseCursor(string cursorString)
+        {
+            if (cursorString == null)
             {
                 return null;
             }
-            var parts = cursor.Split(';');
-            if (parts.Length != 3 ||  !int.TryParse(cursor.Split(';')[1], out var marketPlaceOffset))
+            try
             {
-                throw new Exception($"Invalid cursor");
+                var cursor = Newtonsoft.Json.JsonConvert.DeserializeObject<Cursor>(cursorString);
+                return cursor;
             }
-            return marketPlaceOffset;
+            catch (Exception)
+            {
+            }
+            return null;
+            //if (cursor == null)
+            //{
+            //    return null;
+            //}
+            //var parts = cursor.Split(';');
+            //if (parts.Length != 3 ||  !int.TryParse(cursor.Split(';')[1], out var marketPlaceOffset))
+            //{
+            //    throw new Exception($"Invalid cursor");
+            //}
+            //return marketPlaceOffset;
         }
-        private static string GetCloudLibCursorFromCombinedCursor(string cursor)
-        {
-            string cloudLibCursor;
-            if (cursor == null)
-            {
-                cloudLibCursor = null;
-            }
-            else
-            {
-                var parts = cursor.Split(';');
-                if (parts.Length != 3 || parts[2] == null)
-                {
-                    throw new Exception($"Invalid cursor");
-                }
-                cloudLibCursor = parts[2];
-            }
-            return cloudLibCursor;
-        }
+        //private static string GetCloudLibCursorFromCombinedCursor(string cursor)
+        //{
+        //    string cloudLibCursor;
+        //    if (cursor == null)
+        //    {
+        //        cloudLibCursor = null;
+        //    }
+        //    else
+        //    {
+        //        var parts = cursor.Split(';');
+        //        if (parts.Length != 3 || parts[2] == null)
+        //        {
+        //            throw new Exception($"Invalid cursor");
+        //        }
+        //        cloudLibCursor = parts[2];
+        //    }
+        //    return cloudLibCursor;
+        //}
 
         private static int Compare(MarketplaceItemModel m1, MarketplaceItemModel m2)
         {

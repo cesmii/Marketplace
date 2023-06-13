@@ -136,19 +136,15 @@
             result.Data = new List<MarketplaceItemModelWithCursor>();
             GraphQlResult<Nodeset> matches;
 
-            // TODO find a way to preserver the cursor so we don't have to start from the beginning every time
-            string newCursor = startCursor ?? endCursor;
+            string currentCursor = startCursor ?? endCursor;
             bool backwards = endCursor != null;
-            int actualTake = skip + take ?? 100;
-            if (actualTake > 100)
-            {
-                actualTake = 100;
-            }
+            int actualTake;
             bool bMore;
             do
             {
+                actualTake = Math.Min((skip + take ?? 100) - (int)result.Count, 100);
                 bMore = false;
-                matches = await _cloudLib.SearchAsync(actualTake, newCursor, backwards, keywords, exclude, false,
+                matches = await _cloudLib.SearchAsync(actualTake, currentCursor, backwards, keywords, exclude, false,
                     order:
                         new { metadata = new { title = OrderEnum.ASC }, modelUri = OrderEnum.ASC, publicationDate = OrderEnum.DESC });// "{metadata: {title: ASC}, modelUri: ASC, publicationDate: DESC}");
                 if (matches == null || matches.Edges == null) return result;
@@ -156,12 +152,12 @@
                 result.Count += matches.Edges.Count;
                 if (!backwards && matches.PageInfo.HasNextPage)
                 {
-                    newCursor = matches.PageInfo.EndCursor;
+                    currentCursor = matches.PageInfo.EndCursor;
                     bMore = true;
                 }
                 if (backwards && matches.PageInfo.HasPreviousPage)
                 {
-                    newCursor = matches.PageInfo.StartCursor;
+                    currentCursor = matches.PageInfo.StartCursor;
                     bMore = true;
                 }
             } while (bMore && (take == null || result.Count < skip + take));
@@ -173,13 +169,12 @@
             if (!backwards)
             {
                 result.StartCursor = startCursor;
-                result.EndCursor = newCursor;
+                result.EndCursor = currentCursor;
             }
             else
             {
-                result.StartCursor = newCursor;
+                result.StartCursor = currentCursor;
                 result.EndCursor = endCursor;
-
             }
             //TBD - exclude some nodesets which are core nodesets - list defined in appSettings
 
