@@ -38,7 +38,9 @@ export function clearSearchCriteria(criteria, keepSkip) {
         item.selected = false;
     });
 
-    result.query = null;
+    if (result.query != null) {
+        result.query = null;
+    }
     if (!keepSkip) {
         result.skip = 0;
     }
@@ -94,6 +96,7 @@ export function generateSearchQueryString (criteria, currentPage) {
     }
     //page
     result.push(`p=${currentPage == null ? 0 : currentPage}`);
+
     //page size
     if (criteria != null) {
         result.push(`t=${criteria.take}`);

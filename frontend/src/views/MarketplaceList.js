@@ -104,7 +104,6 @@ function MarketplaceList() {
         criteria.skip = 0;
         setCriteria(criteria);
         //_currentPage = 1
-        //setCurrentPageEndCursor(null);
         setCurrentPageCursors(null);
         //setCriteria(JSON.parse(JSON.stringify(_criteria)));
         //reload page
@@ -128,6 +127,7 @@ function MarketplaceList() {
         setCurrentPage(1);
         criteria.query = _queryLocal;
         setCriteria(JSON.parse(JSON.stringify(criteria)));
+        setCurrentPageCursors(null);
         //reload page
     //    history.push({
     //        pathname: '/library',
@@ -146,6 +146,8 @@ function MarketplaceList() {
         //filter event handler - set global state and navigate to search page
         criteria.query = _queryLocal;
         setCriteria(JSON.parse(JSON.stringify(criteria)));
+        setCurrentPage(1);
+        setCurrentPageCursors(null);
         //reload page
     //    history.push({
     //        pathname: '/library',
@@ -183,10 +185,11 @@ function MarketplaceList() {
         console.log(generateLogMessageString('onClearAll', CLASS_NAME));
 
         setCriteria(clearSearchCriteria(_criteria));
+        setCurrentPage(1);
         setQueryLocal(null);
         setCurrentPageCursors(null);
         //reload page
-        history.push('/library');
+        //history.push('/library');
     }
 
     const onToggleFilters = () => {
@@ -236,7 +239,6 @@ function MarketplaceList() {
             action: "marketplace_search"
         });
         criteria.pageCursors = _currentPageCursors;
-        //criteria.endCursor = _currentPageEndCursor;
 
         await axiosInstance.post(url, criteria).then(result => {
             if (result.status === 200) {
@@ -300,8 +302,9 @@ function MarketplaceList() {
         const f = searchParams.get("f");
 
         //build up the criteria values based on query string
+        let originalCriteriaJson = JSON.stringify(_criteria);
         let criteria = (_criteria == null) ? JSON.parse(JSON.stringify(loadingProps.searchCriteria)) :
-            JSON.parse(JSON.stringify(_criteria));
+            JSON.parse(originalCriteriaJson);
         const currentPage = p == null || !isNumeric(p) ? 1 : parseInt(p);
         const pageSize = t == null || !isNumeric(t) ? criteria.take : parseInt(t);
         setCurrentPage(currentPage);
@@ -311,7 +314,15 @@ function MarketplaceList() {
         //no filterable query strings, just get the default list
         if (!q && !sm && !f) {
             //this will trigger a fetch from the API to pull the data for the filtered criteria
-            setCriteria(clearSearchCriteria(criteria, true));
+            let clearedCriteria = clearSearchCriteria(criteria, true);
+            let newCriteriaJson = JSON.stringify(clearedCriteria);
+            if (newCriteriaJson !== originalCriteriaJson) {
+                setCriteria(clearedCriteria);
+            }
+            else {
+                // no change: avoid triggering refetch
+            }
+
             return;
         }
 
@@ -341,7 +352,13 @@ function MarketplaceList() {
         });
 
         //this will trigger a fetch from the API to pull the data for the filtered criteria
-        setCriteria(JSON.parse(JSON.stringify(criteria)));
+        let newCriteriaJson = JSON.stringify(criteria);
+        if (newCriteriaJson !== originalCriteriaJson) {
+            setCriteria(JSON.parse(newCriteriaJson));
+        }
+        else {
+            // no change: avoid triggering refetch
+        }
 
         //this will execute on unmount
         return () => {
