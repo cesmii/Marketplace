@@ -1098,8 +1098,7 @@ namespace CESMII.Marketplace.Api.Controllers
             return new DALResult<MarketplaceItemModel>()
             {
                 Count = count,
-                StartCursor = JsonConvert.SerializeObject(cursor),
-                //EndCursor = JsonConvert.SerializeObject(cursors.End),
+                PageCursors = JsonConvert.SerializeObject(cursor),
                 Data = combined
             };
         }
