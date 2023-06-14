@@ -18,7 +18,12 @@ namespace CESMII.Marketplace.DAL.Models
         public string Name { get; set; }
 
         public string TypeName { get; set; }
-        
+
+        /// <summary>
+        /// A material icon name value. Can be null.
+        /// </summary>
+        public string IconName { get; set; }
+
         /// <summary>
         /// JSON string of customizable data unique to each job. These are settings that apply to any user 
         /// executing this job.
@@ -33,6 +38,7 @@ namespace CESMII.Marketplace.DAL.Models
         /// Job description.
         /// </summary>
         public string Name { get; set; }
+        public string IconName { get; set; }
     }
 
 }

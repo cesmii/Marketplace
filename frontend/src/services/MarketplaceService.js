@@ -21,7 +21,7 @@ export function setMarketplacePageSize(val) {
 // Common search criteria helpers
 //-------------------------------------------------------------------
 //Clear out all search criteria values
-export function clearSearchCriteria(criteria) {
+export function clearSearchCriteria(criteria, keepSkip) {
 
     var result = JSON.parse(JSON.stringify(criteria));
     if (result == null) result = {};
@@ -38,8 +38,12 @@ export function clearSearchCriteria(criteria) {
         item.selected = false;
     });
 
-    result.query = null;
-    result.skip = 0;
+    if (result.query != null) {
+        result.query = null;
+    }
+    if (!keepSkip) {
+        result.skip = 0;
+    }
     return result;
 }
 
@@ -67,18 +71,18 @@ export function toggleSearchFilterSelected(criteria, id) {
 export function generateSearchQueryString (criteria, currentPage) {
     let result = [];
     //query
-    if (criteria.query != null && criteria.query !== '') {
+    if (criteria?.query != null && criteria.query !== '') {
         result.push(`q=${criteria.query}`);
     }
     //sm types
-    if (criteria.itemTypes != null) {
+    if (criteria?.itemTypes != null) {
         const selTypes = criteria.itemTypes.filter(x => x.selected).map(x => x.code);
         if (selTypes != null && selTypes.length > 0) {
             result.push(`sm=${selTypes.join(',')}`);
         }
     }
     //verts, processes, etc. 
-    if (criteria.filters != null) {
+    if (criteria?.filters != null) {
         let resultFilters = [];
         criteria.filters.forEach((x) => {
             const selFilters = x.items.filter(x => x.selected).map(x => x.id);
@@ -92,8 +96,11 @@ export function generateSearchQueryString (criteria, currentPage) {
     }
     //page
     result.push(`p=${currentPage == null ? 0 : currentPage}`);
+
     //page size
-    result.push(`t=${criteria.take}`);
+    if (criteria != null) {
+        result.push(`t=${criteria.take}`);
+    }
     return result.join('&');
 }
 

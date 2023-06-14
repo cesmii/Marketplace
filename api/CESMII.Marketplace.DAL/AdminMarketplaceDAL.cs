@@ -28,7 +28,7 @@
         protected List<Publisher> _publishersAll;
         protected IMongoRepository<ImageItemSimple> _repoImages;
         protected List<ImageItemSimple> _imagesAll;
-        protected readonly ICloudLibDAL<MarketplaceItemModel> _cloudLibDAL;
+        protected readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _cloudLibDAL;
 
         //default type - use if none assigned yet.
         private readonly MongoDB.Bson.BsonObjectId _smItemTypeIdDefault;
@@ -37,7 +37,7 @@
             IMongoRepository<LookupItem> repoLookup, 
             IMongoRepository<Publisher> repoPublisher, 
             IMongoRepository<ImageItemSimple> repoImages,
-            ICloudLibDAL<MarketplaceItemModel> cloudLibDAL,
+            ICloudLibDAL<MarketplaceItemModelWithCursor> cloudLibDAL,
             ConfigUtil configUtil
             ) : base(repo)
         {
@@ -95,9 +95,10 @@
                 .FirstOrDefault();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetMarketplaceRelatedData(
-                new string[] { id },
-                new string[] { entity.PublisherId.ToString() });
+            var ids = new List<MongoDB.Bson.BsonObjectId>() { new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(id)) };
+            GetDependentData(
+                ids,
+                new List<MongoDB.Bson.BsonObjectId>() { entity.PublisherId }).Wait();
 
             return MapToModel(entity, true);
         }
@@ -132,9 +133,9 @@
             var data = query.ToList();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetMarketplaceRelatedData(
-                data.Select(x => x.ID).ToArray(),
-                data.Select(x => x.PublisherId.ToString()).Distinct().ToArray());
+            GetDependentData(
+                data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList(),
+                data.Select(x => x.PublisherId).Distinct().ToList()).Wait();
 
             //map the data to the final result
             var result = new DALResult<AdminMarketplaceItemModel>
@@ -165,9 +166,9 @@
             var data = query.ToList();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetMarketplaceRelatedData(
-                data.Select(x => x.ID).ToArray(),
-                data.Select(x => x.PublisherId.ToString()).Distinct().ToArray());
+            GetDependentData(
+                data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList(),
+                data.Select(x => x.PublisherId).Distinct().ToList()).Wait();
 
             //map the data to the final result
             var result = new DALResult<AdminMarketplaceItemModel>
@@ -201,9 +202,9 @@
             var data = query.ToList();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetMarketplaceRelatedData(
-                data.Select(x => x.ID).ToArray(),
-                data.Select(x => x.PublisherId.ToString()).Distinct().ToArray());
+            GetDependentData(
+                data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList(),
+                data.Select(x => x.PublisherId).Distinct().ToList()).Wait();
 
             //map the data to the final result
             var result = new DALResult<AdminMarketplaceItemModel>
@@ -265,7 +266,7 @@
                 };
                 if (verbose)
                 {
-                    result.RelatedItems = MapToModelRelatedItems(entity.RelatedItems);
+                    result.RelatedItems = MapToModelRelatedItems(entity.RelatedItems).Result;
                     result.RelatedProfiles = MapToModelRelatedProfiles(entity.RelatedProfiles);
                 }
                 return result;
@@ -286,14 +287,13 @@
         /// <param name="items"></param>
         /// <param name="allItems"></param>
         /// <returns></returns>
-        private List<MarketplaceItemRelatedModel> MapToModelRelatedItems(List<RelatedItem> items)
+        private async Task<List<MarketplaceItemRelatedModel>> MapToModelRelatedItems(List<RelatedItem> items)
         {
             if (items == null) return new List<MarketplaceItemRelatedModel>();
 
             //get the supplemental information that is associated with the related items
-            var matches = _repo.FindByCondition(x =>
-                items.Any(y => y.MarketplaceItemId.Equals(
-                new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))))).ToList();
+            var filterRelated = MongoDB.Driver.Builders<MarketplaceItem>.Filter.In(x => x.ID, items.Select(y => y.MarketplaceItemId.ToString()));
+            var matches = await _repo.AggregateMatchAsync(filterRelated);
 
             return !matches.Any() ? new List<MarketplaceItemRelatedModel>() :
                 matches.Select(x => new MarketplaceItemRelatedModel
@@ -435,13 +435,19 @@
         /// </summary>
         /// <param name="marketplaceIds"></param>
         /// <param name="publisherIds"></param>
-        protected void GetMarketplaceRelatedData(string[] marketplaceIds, string[] publisherIds)
+        protected async Task GetDependentData(List<MongoDB.Bson.BsonObjectId> marketplaceIds, List<MongoDB.Bson.BsonObjectId> publisherIds)
         {
             _lookupItemsAll = _repoLookup.GetAll();
-            _publishersAll = _repoPublisher.FindByCondition(x => publisherIds.Any(y => y.Equals(x.ID)));
-            _imagesAll = _repoImages.FindByCondition(x => 
-                        marketplaceIds.Any(y => y.Equals(x.MarketplaceItemId.ToString())) ||
-                        x.MarketplaceItemId.ToString().Equals(Common.Constants.BSON_OBJECTID_EMPTY));
+            //pubs
+            var filterPubs = MongoDB.Driver.Builders<Publisher>.Filter.In(x => x.ID, publisherIds.Select(y => y.ToString()));
+            _publishersAll = await _repoPublisher.AggregateMatchAsync(filterPubs);
+
+            //images
+            //add an empty id to list of marketplace id list
+            var emptyId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(Constants.BSON_OBJECTID_EMPTY));
+            if (!marketplaceIds.Contains(emptyId)) marketplaceIds.Add(emptyId);
+            var filterImages = MongoDB.Driver.Builders<ImageItemSimple>.Filter.In(x => x.MarketplaceItemId, marketplaceIds);
+            _imagesAll = await _repoImages.AggregateMatchAsync(filterImages);
         }
 
     }

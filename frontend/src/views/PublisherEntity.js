@@ -112,7 +112,7 @@ function PublisherEntity() {
         //navigate to marketplace list
         history.push({
             pathname: '/library',
-            search: `?${generateSearchQueryString(criteria, 0)}`
+            search: `?${generateSearchQueryString(criteria, 1)}`
         });
     };
 

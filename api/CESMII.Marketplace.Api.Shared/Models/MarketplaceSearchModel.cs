@@ -5,6 +5,7 @@ namespace CESMII.Marketplace.Api.Shared.Models
 {
     public class MarketplaceSearchModel : PagerFilterSimpleModel
     {
+        public string PageCursors { get; set; }
         public List<LookupGroupByModel> Filters { get; set; }
         
         /// <summary>

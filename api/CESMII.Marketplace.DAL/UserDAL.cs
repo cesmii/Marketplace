@@ -211,7 +211,7 @@
             // existing pw, parse it into parts and encrypt the new pw with the same settings to see if it matches
             var match = _repo.FindByCondition(u =>
                 u.ID.Equals(id) &&
-                u.SmipSettings?.UserName.ToLower() == userName.ToLower())
+                (u.SmipSettings != null && u.SmipSettings.UserName.ToLower() == userName.ToLower()))
                 .FirstOrDefault();
             if (match == null) return false;
 

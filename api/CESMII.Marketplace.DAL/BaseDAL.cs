@@ -192,7 +192,7 @@
             };
         }
 
-        protected PublisherModel MapToModelPublisher(MongoDB.Bson.BsonObjectId publisherId, List<Publisher> allItems)
+        protected PublisherModel MapToModelPublisher(MongoDB.Bson.BsonObjectId publisherId, IEnumerable<Publisher> allItems)
         {
 
             var pubItem = allItems.FirstOrDefault(x => x.ID == publisherId.ToString());

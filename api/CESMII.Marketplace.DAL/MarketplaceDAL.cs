@@ -23,7 +23,7 @@
         protected List<ImageItemSimple> _imagesAll;
         protected IMongoRepository<JobDefinition> _repoJobDefinition; 
         protected List<JobDefinition> _jobDefinitionAll;
-        protected readonly ICloudLibDAL<MarketplaceItemModel> _cloudLibDAL;
+        protected readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _cloudLibDAL;
 
         //default type - use if none assigned yet.
         private readonly MongoDB.Bson.BsonObjectId _smItemTypeIdDefault;
@@ -33,7 +33,7 @@
             IMongoRepository<MarketplaceItemAnalytics> repoAnalytics,
             IMongoRepository<ImageItemSimple> repoImages,
             IMongoRepository<JobDefinition> repoJobDefinition,
-            ICloudLibDAL<MarketplaceItemModel> cloudLibDAL,
+            ICloudLibDAL<MarketplaceItemModelWithCursor> cloudLibDAL,
             ConfigUtil configUtil
             ) : base(repo)
         {
@@ -138,9 +138,18 @@
             //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
             var query = _repo.FindByCondition(
                 predicates,  //is active is a soft delete indicator. IsActive == false means deleted so we filter out those.
-                skip, take,
+                null, null,
                 orderByExpressions);
-            var count = returnCount ? _repo.Count(predicates) : 0;
+            var count = returnCount ? query.Count() : 0;
+
+            if (skip.HasValue)
+            {
+                query = query.Skip(skip.Value);
+            }
+            if (take.HasValue)
+            {
+                query = query.Take(take.Value);
+            }
 
             //trigger the query to execute then we can limit what related data we query against
             var data = query.ToList();
@@ -265,12 +274,12 @@
                     if (_jobDefinitionAll.Any())
                     {
                         result.JobDefinitions = _jobDefinitionAll
-                            .Where(x => x.MarketplaceItemId.ToString().Equals(entity.ID))
-                            .Select(x => new JobDefinitionSimpleModel { ID = x.ID, Name = x.Name }).ToList();
+                            .Where(x => x.MarketplaceItemId.ToString().Equals(entity.ID) && x.IsActive)
+                            .Select(x => new JobDefinitionSimpleModel { ID = x.ID, Name = x.Name, IconName = x.IconName }).ToList();
                     }
 
                     //get list of marketplace items associated with this list of ids, map to return object
-                    var relatedItems = MapToModelRelatedItems(entity.RelatedItems);
+                    var relatedItems = MapToModelRelatedItems(entity.RelatedItems).Result;
 
                     //get related profiles from CloudLib
                     var relatedProfiles = MapToModelRelatedProfiles(entity.RelatedProfiles);
@@ -315,7 +324,7 @@
         /// Get related items from DB, filter out each group based on required/recommended/related flag
         /// assume all related items in same collection and a type id distinguishes between the types. 
         /// </summary>
-        protected List<MarketplaceItemRelatedModel> MapToModelRelatedItems(List<RelatedItem> items)
+        protected async Task<List<MarketplaceItemRelatedModel>> MapToModelRelatedItems(List<RelatedItem> items)
         {
             if (items == null)
             {
@@ -323,9 +332,9 @@
             }
 
             //get list of marketplace items associated with this list of ids, map to return object
-            var matches = _repo.FindByCondition(x => 
-                items.Any(y => y.MarketplaceItemId.Equals(
-                new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))))).ToList();
+            var filterRelated = MongoDB.Driver.Builders<MarketplaceItem>.Filter.In(x => x.ID, items.Select(y => y.MarketplaceItemId.ToString()));
+            var matches = await _repo.AggregateMatchAsync(filterRelated);
+
             return !matches.Any() ? new List<MarketplaceItemRelatedModel>() :
                 matches.Select(x => new MarketplaceItemRelatedModel()
                 {
