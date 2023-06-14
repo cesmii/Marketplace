@@ -599,12 +599,24 @@ export function renderMenuIcon(iconName, alt, className='mr-3') {
 }
 
 ///--------------------------------------------------------------------------
-/// menu icon convenience code
+/// menu icon convenience code - svg
 //--------------------------------------------------------------------------
 export function renderMenuColorIcon(iconName, alt, colorFill, className='mr-3') {
     if (iconName == null || iconName === '') return null;
     return (
         <span className={className} alt={`${alt == null ? iconName : alt}`}><SVGIcon name={iconName} fill={colorFill} size={24} /></span>
+    );
+}
+
+///--------------------------------------------------------------------------
+/// menu icon convenience code - material
+//--------------------------------------------------------------------------
+export function renderMenuColorMaterialIcon(iconName, colorFill, className = 'mr-3') {
+    if (iconName == null || iconName === '') return null;
+    return (
+        <span className={className} alt={iconName}>
+            <i className={`material-icons`} style={{ color: colorFill }}>{iconName}</i>
+        </span>
     );
 }
 
