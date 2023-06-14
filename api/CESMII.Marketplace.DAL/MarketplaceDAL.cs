@@ -274,8 +274,8 @@
                     if (_jobDefinitionAll.Any())
                     {
                         result.JobDefinitions = _jobDefinitionAll
-                            .Where(x => x.MarketplaceItemId.ToString().Equals(entity.ID))
-                            .Select(x => new JobDefinitionSimpleModel { ID = x.ID, Name = x.Name }).ToList();
+                            .Where(x => x.MarketplaceItemId.ToString().Equals(entity.ID) && x.IsActive)
+                            .Select(x => new JobDefinitionSimpleModel { ID = x.ID, Name = x.Name, IconName = x.IconName }).ToList();
                     }
 
                     //get list of marketplace items associated with this list of ids, map to return object

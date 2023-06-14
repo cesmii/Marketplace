@@ -4,6 +4,7 @@ import axiosInstance from '../../services/AxiosService'
 import { useLoadingContext } from "../../components/contexts/LoadingContext";
 import { AppSettings } from '../../utils/appsettings';
 import { generateLogMessageString } from '../../utils/UtilityService';
+import color from '../../components/Constants';
 
 const CLASS_NAME = "MarketplaceItemJobLauncher";
 
@@ -55,7 +56,8 @@ export const MarketplaceItemJobLauncher = (props) => {
                 });
             } else {
                 setLoadingProps({
-                    isLoading: false, message: `An error occurred initializing this job. Please contact a system administrator.`
+                    isLoading: false, message: null, inlineMessages: [
+                        { id: new Date().getTime(), severity: "danger", body: `An error occurred initializing this job. Please contact a system administrator.`, isTimed: true }]
                 });
             }
         }).catch(e => {
@@ -64,6 +66,10 @@ export const MarketplaceItemJobLauncher = (props) => {
             else {
                 console.log(generateLogMessageString('useEffect||executeActivationWorkflow||' + JSON.stringify(e), CLASS_NAME, 'error'));
                 console.log(e);
+                setLoadingProps({
+                    isLoading: false, message: null, inlineMessages: [
+                        { id: new Date().getTime(), severity: "danger", body: `An error occurred initializing this job. Please contact a system administrator.`, isTimed: true }]
+                });
             }
         });
     };
@@ -75,7 +81,14 @@ export const MarketplaceItemJobLauncher = (props) => {
     if (!props.isAuthenticated) return null;
 
     return (
-        <button className={`btn btn-primary d-flex align-items-center ${props.className}`} onClick={onExecuteJob}><i className="material-icons mr-1">system_update</i>{props.jobName}</button>
+        <>
+            <button className={`btn btn-link d-flex align-items-center ${props.className}`} onClick={onExecuteJob}>
+                <span>
+                    <i className="material-icons mr-1" style={{ textDecoration: 'none', color: color.cornflower }}>{props.iconName == null || props.iconName === '' ? 'system_update' : props.iconName}</i>
+                </span>
+                {props.jobName}
+            </button>
+        </>
     )
 
 };
