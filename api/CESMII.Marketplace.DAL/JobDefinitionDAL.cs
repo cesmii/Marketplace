@@ -169,6 +169,7 @@
                         Name = mktplItem?.Name
                     },
                     Name = entity.Name,
+                    IconName = entity.IconName,
                     TypeName = entity.TypeName,
                     Data = !string.IsNullOrEmpty(entity.Data) ? 
                             PasswordUtils.DecryptString(entity.Data, _encryptDecryptKey) : null, 
@@ -188,6 +189,7 @@
         {
             entity.MarketplaceItemId = MongoDB.Bson.ObjectId.Parse(model.MarketplaceItem.ID);
             entity.Name = model.Name;
+            entity.IconName = model.IconName;
             entity.TypeName = model.TypeName;
             entity.Data = PasswordUtils.EncryptString(model.Data, _encryptDecryptKey);
         }

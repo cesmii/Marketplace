@@ -75,6 +75,7 @@ namespace CESMII.Marketplace.Api.Controllers
 
             //default some values
             result.Name = "";
+            result.IconName = "";
             result.TypeName = "";
             return Ok(result);
         }
@@ -121,6 +122,7 @@ namespace CESMII.Marketplace.Api.Controllers
             //clear out key values, then return as a new item
             result.ID = "";
             result.Name = $"{result.Name}-copy";
+            result.IconName = result.IconName;
             result.TypeName = $"{result.TypeName} (Copy)";
 
             return Ok(result);

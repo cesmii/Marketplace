@@ -21,6 +21,11 @@ namespace CESMII.Marketplace.Data.Entities
         public string TypeName { get; set; }
 
         /// <summary>
+        /// A material icon name value. Can be null.
+        /// </summary>
+        public string IconName { get; set; }
+
+        /// <summary>
         /// Field to store settings and structure unique to this job
         /// </summary>
         /// <remarks>This will be encrypted to protect any sensitive data that may be returned.</remarks>
