@@ -47,6 +47,10 @@
 
     }
 
+    /// <summary>
+    /// Admin version of CloudLib DAL
+    /// </summary>
+    /// <typeparam name="TModel"></typeparam>
     public interface IAdminCloudLibDAL<TModel> : IDisposable where TModel : AbstractModel
     {
         Task<TModel> GetById(string id);
@@ -74,7 +78,8 @@
         /// <param name="verticals"></param>
         /// <param name="exclude">List of namespace uris to exclude from results</param>
         /// <returns></returns>
-        Task<List<TModel>> Where(string query, List<string> ids = null, List<string> processes = null, List<string> verticals = null, List<string> exclude = null);
+        Task<List<TModel>> Where(string query, int? skip = null, int? take = null, string startCursor = null, string endCursor = null, bool noTotalCount = false,
+            List<string> ids = null, List<string> processes = null, List<string> verticals = null, List<string> exclude = null);
 
         Task<string> Add(TModel model, string userId);
         /// <summary>

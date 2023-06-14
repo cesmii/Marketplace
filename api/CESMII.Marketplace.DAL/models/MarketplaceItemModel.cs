@@ -148,6 +148,11 @@
         public virtual List<ProfileItemRelatedModel> RelatedProfiles { get; set; }
     }
 
+    public class AdminMarketplaceItemModelWithCursor : AdminMarketplaceItemModel
+    {
+        public string Cursor { get; set; }
+    }
+
     /// <summary>
     /// A very simple marketplace item used for related data and lookup scenarios
     /// where keeping data small is helpful

@@ -20,10 +20,10 @@ namespace CESMII.Marketplace.Api.Controllers
     public class AdminProfileController : BaseController<AdminProfileController>
     {
         //private readonly IDal<MarketplaceItem, AdminMarketplaceItemModel> _dal;
-        private readonly IAdminCloudLibDAL<AdminMarketplaceItemModel> _dal;
+        private readonly IAdminCloudLibDAL<AdminMarketplaceItemModelWithCursor> _dal;
         private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
 
-        public AdminProfileController(IAdminCloudLibDAL<AdminMarketplaceItemModel> dal,
+        public AdminProfileController(IAdminCloudLibDAL<AdminMarketplaceItemModelWithCursor> dal,
             IDal<LookupItem, LookupItemModel> dalLookup,
             UserDAL dalUser,
             ConfigUtil config, ILogger<AdminProfileController> logger)
@@ -35,11 +35,11 @@ namespace CESMII.Marketplace.Api.Controllers
 
         #region Admin UI
         [HttpPost, Route("init")]
-        [ProducesResponseType(200, Type = typeof(AdminMarketplaceItemModel))]
+        [ProducesResponseType(200, Type = typeof(AdminMarketplaceItemModelWithCursor))]
         [ProducesResponseType(400)]
         public IActionResult Init()
         {
-            var result = new AdminMarketplaceItemModel();
+            var result = new AdminMarketplaceItemModelWithCursor();
 
             //pre-populate list of look up items for industry verts and categories
             //TBD - for now, we don't use this. uncomment this if we start capturing profile's verticals, processes
@@ -77,7 +77,7 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("GetByID")]
-        [ProducesResponseType(200, Type = typeof(AdminMarketplaceItemModel))]
+        [ProducesResponseType(200, Type = typeof(AdminMarketplaceItemModelWithCursor))]
         [ProducesResponseType(400)]
         public async Task<IActionResult> GetByID([FromBody] IdStringModel model)
         {
@@ -104,7 +104,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <returns></returns>
         [HttpPost, Route("Upsert")]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
-        public async Task<IActionResult> Upsert([FromBody] AdminMarketplaceItemModel model)
+        public async Task<IActionResult> Upsert([FromBody] AdminMarketplaceItemModelWithCursor model)
         {
             if (model == null)
             {
@@ -217,7 +217,7 @@ namespace CESMII.Marketplace.Api.Controllers
             //DAL gets only the items that have related items in local db. 
             var result = string.IsNullOrEmpty(model.Query) && cats.Count == 0 && verts.Count == 0 ?
                 await _dal.GetAll() :
-                await _dal.Where(model.Query, null, 
+                await _dal.Where(model.Query, model.Skip,model.Take,null, null, false, null,  
                     cats.Select(x => x.Name.ToLower()).ToList(), verts.Select(x => x.Name.ToLower()).ToList());
 
             if (result == null)

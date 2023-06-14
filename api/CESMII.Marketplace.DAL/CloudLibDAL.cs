@@ -186,7 +186,7 @@
             return result;
         }
 
-        public enum OrderEnum
+        internal enum OrderEnum
         {
             ASC,
             DESC,
@@ -308,7 +308,7 @@
                 {
                     //go get related items if any
                     //get list of marketplace items associated with this list of ids, map to return object
-                    var relatedItems = MapToModelRelatedItems(entityLocal?.RelatedItems);
+                    var relatedItems = MapToModelRelatedItems(entityLocal?.RelatedItems).Result;
 
                     //get related profiles from CloudLib
                     var relatedProfiles = MapToModelRelatedProfiles(entityLocal?.RelatedProfiles);
@@ -329,7 +329,7 @@
         /// Get related items from DB, filter out each group based on required/recommended/related flag
         /// assume all related items in same collection and a type id distinguishes between the types. 
         /// </summary>
-        protected List<MarketplaceItemRelatedModel> MapToModelRelatedItems(List<RelatedItem> items)
+        protected async Task<List<MarketplaceItemRelatedModel>> MapToModelRelatedItems(List<RelatedItem> items)
         {
             if (items == null)
             {
@@ -337,9 +337,8 @@
             }
 
             //get list of marketplace items associated with this list of ids, map to return object
-            var matches = _repoMarketplace.FindByCondition(x =>
-                items.Any(y => y.MarketplaceItemId.Equals(
-                new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))))).ToList();
+            var filterRelated = MongoDB.Driver.Builders<MarketplaceItem>.Filter.In(x => x.ID, items.Select(y => y.MarketplaceItemId.ToString()));
+            var matches = await _repoMarketplace.AggregateMatchAsync(filterRelated);
 
             if (!matches.Any()) return new List<MarketplaceItemRelatedModel>();
 
