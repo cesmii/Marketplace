@@ -266,7 +266,7 @@
                 };
                 if (verbose)
                 {
-                    result.RelatedItems = MapToModelRelatedItems(entity.RelatedItems);
+                    result.RelatedItems = MapToModelRelatedItems(entity.RelatedItems).Result;
                     result.RelatedProfiles = MapToModelRelatedProfiles(entity.RelatedProfiles);
                 }
                 return result;
@@ -287,14 +287,13 @@
         /// <param name="items"></param>
         /// <param name="allItems"></param>
         /// <returns></returns>
-        private List<MarketplaceItemRelatedModel> MapToModelRelatedItems(List<RelatedItem> items)
+        private async Task<List<MarketplaceItemRelatedModel>> MapToModelRelatedItems(List<RelatedItem> items)
         {
             if (items == null) return new List<MarketplaceItemRelatedModel>();
 
             //get the supplemental information that is associated with the related items
-            var matches = _repo.FindByCondition(x =>
-                items.Any(y => y.MarketplaceItemId.Equals(
-                new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))))).ToList();
+            var filterRelated = MongoDB.Driver.Builders<MarketplaceItem>.Filter.In(x => x.ID, items.Select(y => y.MarketplaceItemId.ToString()));
+            var matches = await _repo.AggregateMatchAsync(filterRelated);
 
             return !matches.Any() ? new List<MarketplaceItemRelatedModel>() :
                 matches.Select(x => new MarketplaceItemRelatedModel
