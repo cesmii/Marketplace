@@ -45,7 +45,7 @@
             };
 
             //init to not started
-            var matches = _repoLookup.FindByCondition(x => x.LookupType.EnumValue == LookupTypeEnum.TaskStatus);
+            var matches = _repoLookup.FindByCondition(x => x.LookupType.EnumValue == LookupTypeEnum.TaskStatus).ToList();
             var matchesStatus = matches.Where(x => x.Code.ToString().ToLower().Equals("not-started")).ToList();
             if (matchesStatus.Count == 0)
             {
@@ -241,7 +241,7 @@
 
             var matches = _repoPublisher.FindByCondition(x => x.ID == id.ToString());
             if (!matches.Any()) return null;
-            return base.MapToModelPublisher(id, matches);
+            return base.MapToModelPublisher(id, matches.ToList());
         }
 
         protected MarketplaceItemModel MapToModelMarketplaceItemSimple(MongoDB.Bson.BsonObjectId id)
@@ -270,7 +270,7 @@
         protected override void MapToEntity(ref RequestInfo entity, RequestInfoModel model)
         {
             //get request type id based on request type code
-            var matches = _repoLookup.FindByCondition(x => x.LookupType.EnumValue == LookupTypeEnum.RequestInfo);
+            var matches = _repoLookup.FindByCondition(x => x.LookupType.EnumValue == LookupTypeEnum.RequestInfo).ToList();
             var matchesRequestType = matches.Where(x => x.LookupType.EnumValue == LookupTypeEnum.RequestInfo
                     && !string.IsNullOrEmpty(x.Code) && x.Code.ToString().ToLower().Equals(model.RequestTypeCode.ToLower())).ToList();
             if (matchesRequestType.Count == 0)
