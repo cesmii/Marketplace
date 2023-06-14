@@ -119,7 +119,7 @@ namespace CESMII.Marketplace.Api
             services.AddSingleton<Opc.Ua.Cloud.Library.Client.UACloudLibClient>();
             services.AddSingleton<ICloudLibWrapper, CloudLibWrapper>();
             services.AddScoped<ICloudLibDAL<MarketplaceItemModelWithCursor>, CloudLibDAL>();
-            services.AddScoped<IAdminCloudLibDAL<AdminMarketplaceItemModel>, AdminCloudLibDAL>();
+            services.AddScoped<IAdminCloudLibDAL<AdminMarketplaceItemModelWithCursor>, AdminCloudLibDAL>();
 
             //AAD - no longer need this
             // Add token builder.
