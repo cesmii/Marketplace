@@ -53,44 +53,6 @@ function MarketplaceList() {
     const { isAuthenticated, isAuthorized } = useLoginStatus(null, [AppSettings.AADAdminRole]);
 
     //-------------------------------------------------------------------
-    // Region: Generate a new query string based on the selections
-    //-------------------------------------------------------------------
-/*
-    const generateSearchQueryString = (criteria, currentPage) => {
-        let result = [];
-        //query
-        if (criteria.query != null && criteria.query !== '') {
-            result.push(`q=${criteria.query}`);
-        }
-        //sm types
-        if (criteria.itemTypes != null) {
-            const selTypes = criteria.itemTypes.filter(x => x.selected).map(x => x.code);
-            if (selTypes != null && selTypes.length > 0) {
-                result.push(`sm=${selTypes.join(',')}`);
-            }
-        }
-        //verts, processes, etc. 
-        if (criteria.filters != null) {
-            let resultFilters = [];
-            criteria.filters.forEach((x) => {
-                const selFilters = x.items.filter(x => x.selected).map(x => x.id);
-                if (selFilters != null && selFilters.length > 0) {
-                    resultFilters.push(`${x.enumValue}::${selFilters.join(',')}`);
-                }
-            });
-            if (resultFilters.length > 0) {
-                result.push(`f=${resultFilters.join('|')}`);
-            }
-        }
-        //page
-        result.push(`p=${currentPage == null ? 0 : currentPage}`);
-        //page size
-        result.push(`t=${criteria.take}`);
-        return result.join('&');
-    }
-*/
-
-    //-------------------------------------------------------------------
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
     const handleOnSearchChange = (val) => {
@@ -106,11 +68,6 @@ function MarketplaceList() {
         //_currentPage = 1
         setCurrentPageCursors(null);
         //setCriteria(JSON.parse(JSON.stringify(_criteria)));
-        //reload page
-    //    history.push({
-    //        pathname: '/library',
-    //        search: `?${generateSearchQueryString(_criteria, _currentPage)}`
-    //    });
     };
 
     const handleOnSearchBlur = (val) => {
@@ -128,11 +85,6 @@ function MarketplaceList() {
         criteria.query = _queryLocal;
         setCriteria(JSON.parse(JSON.stringify(criteria)));
         setCurrentPageCursors(null);
-        //reload page
-    //    history.push({
-    //        pathname: '/library',
-    //        search: `?${generateSearchQueryString(criteria, _currentPage)}`
-    //    });
     };
 
     //called when an item is selected in the filter panel
@@ -148,11 +100,6 @@ function MarketplaceList() {
         setCriteria(JSON.parse(JSON.stringify(criteria)));
         setCurrentPage(1);
         setCurrentPageCursors(null);
-        //reload page
-    //    history.push({
-    //        pathname: '/library',
-    //        search: `?${generateSearchQueryString(criteria, _currentPage)}`
-    //    });
     }
 
     const onChangePage = (currentPage, pageSize) => {
@@ -173,12 +120,6 @@ function MarketplaceList() {
 
         //preserve choice in local storage
         setMarketplacePageSize(pageSize);
-
-        //reload page
-    //    history.push({
-    //        pathname: '/library',
-    //        search: `?${generateSearchQueryString(_criteria, currentPage)}`
-    //    });
     };
 
     const onClearAll = () => {
@@ -188,8 +129,6 @@ function MarketplaceList() {
         setCurrentPage(1);
         setQueryLocal(null);
         setCurrentPageCursors(null);
-        //reload page
-        //history.push('/library');
     }
 
     const onToggleFilters = () => {
@@ -198,6 +137,9 @@ function MarketplaceList() {
         setFilterToggle(!_filterToggle);
     }
 
+    //-------------------------------------------------------------------
+    // Region: Hook - Triggers reload of page with proper query string parameters
+    //-------------------------------------------------------------------
     useEffect(() => {
         if (_criteria == null) {
             // this typically happens when navigating to a page or refreshing: ignore
@@ -212,6 +154,10 @@ function MarketplaceList() {
         }
     }, [_criteria, _currentPage]);
 
+    //-------------------------------------------------------------------
+    // Region: Hook - When search criteria in localstorage is updated, then update this criteria value
+    //      This will also trigger a new fetch of data 
+    //-------------------------------------------------------------------
     useEffect(() => {
         if (_criteria != null || loadingProps?.searchCriteria == null) {
             return;

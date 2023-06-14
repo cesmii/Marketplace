@@ -13,7 +13,7 @@ import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
 import MarketplaceEntitySidebar from './shared/MarketplaceEntitySidebar';
 
 import { convertHtmlToString, generateLogMessageString, getImageUrl, getMarketplaceIconName } from '../utils/UtilityService'
-import { clearSearchCriteria, MarketplaceRelatedItems, toggleSearchFilterSelected } from '../services/MarketplaceService';
+import { clearSearchCriteria, generateSearchQueryString, MarketplaceRelatedItems, toggleSearchFilterSelected } from '../services/MarketplaceService';
 import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
 import { SvgVisibilityIcon } from '../components/SVGIcon';
 
@@ -127,7 +127,10 @@ function MarketplaceEntity() {
         setLoadingProps({ searchCriteria: criteria });
 
         //navigate to marketplace list
-        history.push({ pathname: `/library` });
+        history.push({
+            pathname: '/library',
+            search: `?${generateSearchQueryString(criteria, 1)}`
+        });
     };
 
     const onViewSpecifications = (e) => {

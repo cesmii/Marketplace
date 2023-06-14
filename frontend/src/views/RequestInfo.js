@@ -411,8 +411,10 @@ function RequestInfo() {
                         <p className="mb-2 headline-3 p-1 px-2 w-100 d-block rounded">
                             {_referrerItem.displayName}
                         </p>
-                        <div className="mb-2" dangerouslySetInnerHTML={{ __html: _referrerItem.abstract }} ></div>
-                        <p className="mb-0">Published: {formatItemPublishDate(_referrerItem.publishDate)}</p>
+                        <div className="px-2 mb-2" dangerouslySetInnerHTML={{ __html: _referrerItem.abstract }} ></div>
+                        {_referrerItem.publishDate != null &&
+                            <p className="px-2 mb-0">Published: {formatItemPublishDate(_referrerItem)}</p>
+                        }
                     </div>
                 </div>
                 {itemType !== "profile" && 
