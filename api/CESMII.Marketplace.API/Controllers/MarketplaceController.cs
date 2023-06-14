@@ -988,6 +988,10 @@ namespace CESMII.Marketplace.Api.Controllers
         private static DALResult<MarketplaceItemModel> MergeSortPageSearchedItems(DALResult<MarketplaceItemModel> set1, DALResult<MarketplaceItemModelWithCursor> set2,
             MarketplaceSearchModel adjustedModel, MarketplaceSearchModel originalModel, int mergeSkip)
         {
+            //add protection for null data set possibility
+            if (set1.Data == null) set1.Data = new List<MarketplaceItemModel>();
+            if (set2.Data == null) set2.Data = new List<MarketplaceItemModelWithCursor>();
+
             //get count before paging
             var totalCount = set1.Count + set2.Count;
             //sort 2nd set but always put it after the regular marketplace items.  
@@ -1018,10 +1022,11 @@ namespace CESMII.Marketplace.Api.Controllers
                 combined = new List<MarketplaceItemModel>();
                 bool bCloudLibAdded = false;
                 int processed = 0;
+
                 while ((i1 < set1.Data.Count || i2 < set2.Data.Count)
                          && combined.Count < originalModel.Take)
                 {
-                    if (i2 >= set2.Data.Count || (i1 < set1.Data.Count && Compare(set1.Data[i1], set2.Data[i2]) <= 0))
+                    if (i2 >= set2.Data?.Count || (i1 < set1.Data.Count && Compare(set1.Data[i1], set2.Data[i2]) <= 0))
                     {
                         if (toSkip <= 0)
                         {

@@ -3,7 +3,7 @@ import { AppSettings } from "./appsettings";
 
 const _logMessageDelimiter = " || ";
 
-const CLASS_NAME = "UtilityService";
+//const CLASS_NAME = "UtilityService";
 
 ///#region: Logging Helper Methods
 ///--------------------------------------------------------------------------

@@ -94,7 +94,7 @@ function Home() {
         setLoadingProps({ searchCriteria: criteria });
         history.push({
             pathname: '/library',
-            search: `?${generateSearchQueryString(criteria, 0)}`
+            search: `?${generateSearchQueryString(criteria, 1)}`
         });
     };
 
@@ -104,7 +104,7 @@ function Home() {
         setLoadingProps({ searchCriteria: criteria });
         history.push({
             pathname: '/library',
-            search: `?${generateSearchQueryString(criteria, 0)}`
+            search: `?${generateSearchQueryString(criteria, 1)}`
         });
     }
 
