@@ -95,9 +95,10 @@
                 .FirstOrDefault();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetMarketplaceRelatedData(
-                new string[] { id },
-                new string[] { entity.PublisherId.ToString() });
+            var ids = new List<MongoDB.Bson.BsonObjectId>() { new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(id)) };
+            GetDependentData(
+                ids,
+                new List<MongoDB.Bson.BsonObjectId>() { entity.PublisherId }).Wait();
 
             return MapToModel(entity, true);
         }
@@ -132,9 +133,9 @@
             var data = query.ToList();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetMarketplaceRelatedData(
-                data.Select(x => x.ID).ToArray(),
-                data.Select(x => x.PublisherId.ToString()).Distinct().ToArray());
+            GetDependentData(
+                data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList(),
+                data.Select(x => x.PublisherId).Distinct().ToList()).Wait();
 
             //map the data to the final result
             var result = new DALResult<AdminMarketplaceItemModel>
@@ -165,9 +166,9 @@
             var data = query.ToList();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetMarketplaceRelatedData(
-                data.Select(x => x.ID).ToArray(),
-                data.Select(x => x.PublisherId.ToString()).Distinct().ToArray());
+            GetDependentData(
+                data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList(),
+                data.Select(x => x.PublisherId).Distinct().ToList()).Wait();
 
             //map the data to the final result
             var result = new DALResult<AdminMarketplaceItemModel>
@@ -201,9 +202,9 @@
             var data = query.ToList();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetMarketplaceRelatedData(
-                data.Select(x => x.ID).ToArray(),
-                data.Select(x => x.PublisherId.ToString()).Distinct().ToArray());
+            GetDependentData(
+                data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList(),
+                data.Select(x => x.PublisherId).Distinct().ToList()).Wait();
 
             //map the data to the final result
             var result = new DALResult<AdminMarketplaceItemModel>
@@ -435,13 +436,19 @@
         /// </summary>
         /// <param name="marketplaceIds"></param>
         /// <param name="publisherIds"></param>
-        protected void GetMarketplaceRelatedData(string[] marketplaceIds, string[] publisherIds)
+        protected async Task GetDependentData(List<MongoDB.Bson.BsonObjectId> marketplaceIds, List<MongoDB.Bson.BsonObjectId> publisherIds)
         {
             _lookupItemsAll = _repoLookup.GetAll();
-            _publishersAll = _repoPublisher.FindByCondition(x => publisherIds.Any(y => y.Equals(x.ID))).ToList();
-            _imagesAll = _repoImages.FindByCondition(x => 
-                        marketplaceIds.Any(y => y.Equals(x.MarketplaceItemId.ToString())) ||
-                        x.MarketplaceItemId.ToString().Equals(Common.Constants.BSON_OBJECTID_EMPTY)).ToList();
+            //pubs
+            var filterPubs = MongoDB.Driver.Builders<Publisher>.Filter.In(x => x.ID, publisherIds.Select(y => y.ToString()));
+            _publishersAll = await _repoPublisher.AggregateMatchAsync(filterPubs);
+
+            //images
+            //add an empty id to list of marketplace id list
+            var emptyId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(Constants.BSON_OBJECTID_EMPTY));
+            if (!marketplaceIds.Contains(emptyId)) marketplaceIds.Add(emptyId);
+            var filterImages = MongoDB.Driver.Builders<ImageItemSimple>.Filter.In(x => x.MarketplaceItemId, marketplaceIds);
+            _imagesAll = await _repoImages.AggregateMatchAsync(filterImages);
         }
 
     }
