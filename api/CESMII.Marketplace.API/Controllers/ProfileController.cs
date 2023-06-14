@@ -13,20 +13,20 @@ using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.Api.Shared.Extensions;
 using CESMII.Marketplace.Api.Shared.Controllers;
 using CESMII.Marketplace.Api.Shared.Models;
-using CESMII.Marketplace.Common.Utils;
+using CESMII.Common.SelfServiceSignUp.Services;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
     [Route("api/[controller]")]
     public class ProfileController : BaseController<ProfileController>
     {
-        private readonly ICloudLibDAL<MarketplaceItemModel> _dalCloudLib;
+        private readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _dalCloudLib;
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
         private readonly IDal<RequestInfo, RequestInfoModel> _dalRequestInfo;
         private readonly MailRelayService _mailRelayService;
 
         public ProfileController(
-            ICloudLibDAL<MarketplaceItemModel> dalCloudLib,
+            ICloudLibDAL<MarketplaceItemModelWithCursor> dalCloudLib,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
             IDal<RequestInfo, RequestInfoModel> dalRequestInfo,
             UserDAL dalUser,

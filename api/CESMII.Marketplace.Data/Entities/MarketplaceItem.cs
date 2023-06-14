@@ -81,6 +81,10 @@
 
         public List<BsonObjectId> IndustryVerticals { get; set; }
 
+        public List<RelatedItem> RelatedItems { get; set; }
+
+        public List<RelatedProfileItem> RelatedProfiles { get; set; }
+
         public BsonObjectId Analytics { get; set; }
 
         public BsonObjectId PublisherId { get; set; }
@@ -98,6 +102,11 @@
         public BsonObjectId ImageSquareId { get; set; }
         public BsonObjectId ImageLandscapeId { get; set; }
 
+        public string _ccName1;
+        public string _ccEmail1;
+        public string _ccName2;
+        public string _ccEmail2;
+
     }
 
     /// <summary>
@@ -108,6 +117,38 @@
     {
         public string Name { get; set; }
         public string DisplayName { get; set; }
+    }
+
+
+    /// <summary>
+    /// This contains the structure to use for related items to a marketplace item. 
+    /// It is the marketplaceItem id and the related type (recommended, required, related)
+    /// </summary>
+    [BsonIgnoreExtraElements]
+    public class RelatedItem
+    {
+        public BsonObjectId MarketplaceItemId { get; set; }
+        /// <summary>
+        /// This will map to an enum we have in the code for RelatedType
+        /// </summary>
+        public BsonObjectId RelatedTypeId { get; set; }
+    }
+
+    /// <summary>
+    /// This contains the structure to use for related profile items to a marketplace item. 
+    /// It is the profile id and the related type (recommended, required, related)
+    /// </summary>
+    [BsonIgnoreExtraElements]
+    public class RelatedProfileItem
+    {
+        /// <summary>
+        /// This is the id from the CloudLib
+        /// </summary>
+        public string ProfileId { get; set; }
+        /// <summary>
+        /// This will map to a lookup record for RelatedType
+        /// </summary>
+        public BsonObjectId RelatedTypeId { get; set; }
     }
 
 

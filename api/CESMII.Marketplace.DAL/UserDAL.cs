@@ -41,7 +41,7 @@
         /// <param name="model"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task<string> Add(UserModel model, string userId)
+        public async Task<string> Add(UserModel model, string userId = "")
         {
             var entity = new User
             {
@@ -55,6 +55,11 @@
             {
                 model.SmipSettings = new SmipSettings();
             }
+
+            // Avoid null reference exception
+            if (model.ObjectIdAAD == null)
+                model.ObjectIdAAD = "";
+
             this.MapToEntity(ref entity, model);
 
             //this will add and call saveChanges
@@ -126,7 +131,7 @@
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        public override DALResult<UserModel> Where(Func<User, bool> predicate, int? skip, int? take,
+        public override DALResult<UserModel> Where(Func<User, bool> predicate, int? skip = null, int? take = null,
             bool returnCount = false, bool verbose = false)
         {
             //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
@@ -206,7 +211,7 @@
             // existing pw, parse it into parts and encrypt the new pw with the same settings to see if it matches
             var match = _repo.FindByCondition(u =>
                 u.ID.Equals(id) &&
-                u.SmipSettings?.UserName.ToLower() == userName.ToLower())
+                (u.SmipSettings != null && u.SmipSettings.UserName.ToLower() == userName.ToLower()))
                 .FirstOrDefault();
             if (match == null) return false;
 
@@ -240,8 +245,11 @@
                     Organization = entity.OrganizationId == null ? null : MapToModelOrganization(entity.OrganizationId.ToString()),
                     LastLogin = entity.LastLogin,
                     Created = entity.Created,
-                    SmipSettings = entity.SmipSettings == null ? new SmipSettings() : entity.SmipSettings
-                };
+                    Email = entity.Email,
+                    SmipSettings = entity.SmipSettings == null ? new SmipSettings() : entity.SmipSettings,
+                    SelfServiceSignUp_IsCesmiiMember = entity.SelfServiceSignUp_IsCesmiiMember,
+                    SelfServiceSignUp_Organization_Name = entity.SelfServiceSignUp_Organization_Name,
+            };
             }
             else
             {
@@ -268,6 +276,9 @@
                 MongoDB.Bson.ObjectId.Parse(model.Organization.ID);
             entity.LastLogin = model.LastLogin;
             entity.DisplayName = model.DisplayName;
+            entity.Email = model.Email;
+            entity.SelfServiceSignUp_IsCesmiiMember = model.SelfServiceSignUp_IsCesmiiMember;
+            entity.SelfServiceSignUp_Organization_Name = model.SelfServiceSignUp_Organization_Name;
 
             //update smip settings - except SMIP password - copy it into mode first to essentially maintain existing value
             model.SmipSettings.Password = entity.SmipSettings.Password;

@@ -9,6 +9,8 @@
     using CESMII.Marketplace.DAL.Models;
     using CESMII.Marketplace.Data.Entities;
     using CESMII.Marketplace.Data.Repositories;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
     /// </summary>
@@ -16,14 +18,23 @@
     {
         protected IMongoRepository<MarketplaceItem> _repoMarketplaceItem;
         protected List<MarketplaceItem> _marketplaceItemAll;
+        protected new ILogger<JobDefinitionDAL> _logger;
+
+        // Put this key in this in the following config setting location: PasswordSettings.EncryptionSettings.EncryptDecryptKey
         protected string _encryptDecryptKey;
 
         public JobDefinitionDAL(IMongoRepository<JobDefinition> repo,
             IMongoRepository<MarketplaceItem> repoMarketplaceItem,
-            ConfigUtil configUtil) : base(repo)
+            ConfigUtil configUtil, ILogger<JobDefinitionDAL> logger) : base(repo)
         {
             _repoMarketplaceItem = repoMarketplaceItem;
             _encryptDecryptKey = configUtil.PasswordConfigSettings.EncryptionSettings.EncryptDecryptKey;
+            _logger = logger;
+            if (string.IsNullOrEmpty(_encryptDecryptKey))
+            {
+                _logger.LogError($"Missing configuration for encryption key: cannot read or write job configuration information.");
+                throw new Exception("Configuration value missing.");
+            }
         }
 
         public async Task<string> Add(JobDefinitionModel model, string userId)
@@ -68,7 +79,7 @@
                 .FirstOrDefault();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetRelatedData(new List<MongoDB.Bson.BsonObjectId>() { entity.MarketplaceItemId });
+            GetDependentData(new List<MongoDB.Bson.BsonObjectId>() { entity.MarketplaceItemId }).Wait();
 
             return MapToModel(entity, true);
         }
@@ -95,7 +106,7 @@
                 x => x.Name);  
             var count = returnCount ? _repo.Count(x => x.IsActive) : 0;
 
-            GetRelatedData(data.Select(x => x.MarketplaceItemId).Distinct().ToList());
+            GetDependentData(data.Select(x => x.MarketplaceItemId).Distinct().ToList()).Wait();
 
             //map the data to the final result
             var result = new DALResult<JobDefinitionModel>
@@ -122,7 +133,7 @@
                 x => x.Name);
             var count = returnCount ? _repo.Count(predicate) : 0;
 
-            GetRelatedData(data.Select(x => x.MarketplaceItemId).Distinct().ToList());
+            GetDependentData(data.Select(x => x.MarketplaceItemId).Distinct().ToList()).Wait();
 
             //map the data to the final result
             var result = new DALResult<JobDefinitionModel>
@@ -158,6 +169,7 @@
                         Name = mktplItem?.Name
                     },
                     Name = entity.Name,
+                    IconName = entity.IconName,
                     TypeName = entity.TypeName,
                     Data = !string.IsNullOrEmpty(entity.Data) ? 
                             PasswordUtils.DecryptString(entity.Data, _encryptDecryptKey) : null, 
@@ -177,6 +189,7 @@
         {
             entity.MarketplaceItemId = MongoDB.Bson.ObjectId.Parse(model.MarketplaceItem.ID);
             entity.Name = model.Name;
+            entity.IconName = model.IconName;
             entity.TypeName = model.TypeName;
             entity.Data = PasswordUtils.EncryptString(model.Data, _encryptDecryptKey);
         }
@@ -187,12 +200,12 @@
         ///get list of marketplace items
         /// </summary>
         /// <param name="marketplaceIds"></param>
-        protected void GetRelatedData(List<MongoDB.Bson.BsonObjectId> marketplaceIds)
+        protected async Task GetDependentData(List<MongoDB.Bson.BsonObjectId> marketplaceIds)
         {
             var filterMarketplaceItems = MongoDB.Driver.Builders<MarketplaceItem>.Filter.In(x => x.ID, marketplaceIds.Select(y => y.ToString()));
             var fieldList = new List<string>()
                 { nameof(MarketplaceItemSimple.ID), nameof(MarketplaceItemSimple.DisplayName), nameof(MarketplaceItemSimple.Name)};
-            _marketplaceItemAll = _repoMarketplaceItem.AggregateMatch(filterMarketplaceItems, fieldList);
+            _marketplaceItemAll = await _repoMarketplaceItem.AggregateMatchAsync(filterMarketplaceItems, fieldList);
         }
 
 

@@ -14,7 +14,7 @@ using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.Api.Shared.Controllers;
 using CESMII.Marketplace.Api.Shared.Extensions;
 using CESMII.Marketplace.Api.Shared.Models;
-using CESMII.Marketplace.Common.Utils;
+using CESMII.Common.SelfServiceSignUp.Services;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
@@ -23,12 +23,12 @@ namespace CESMII.Marketplace.Api.Controllers
     {
 
         private readonly IDal<RequestInfo, RequestInfoModel> _dal;
-        private readonly ICloudLibDAL<MarketplaceItemModel> _dalCloudLib;
+        private readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _dalCloudLib;
         private readonly MailRelayService _mailRelayService;
 
         public RequestInfoController(
             IDal<RequestInfo, RequestInfoModel> dal,
-            ICloudLibDAL<MarketplaceItemModel> dalCloudLib,
+            ICloudLibDAL<MarketplaceItemModelWithCursor> dalCloudLib,
             UserDAL dalUser,
             ConfigUtil config, ILogger<RequestInfoController> logger,
             MailRelayService mailRelayService)
@@ -106,6 +106,9 @@ namespace CESMII.Marketplace.Api.Controllers
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         public async Task<IActionResult> Add([FromBody] RequestInfoModel model)
         {
+            bool bUpdateNeeded = false;
+            RequestInfoModel modelNew = null;
+
             if (model == null)
             {
                 _logger.LogWarning("RequestInfoController|Add|Invalid model");
@@ -127,7 +130,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 {
 
                     //populate some fields that may not be present on the add model. (request type code, created date). 
-                    var modelNew = _dal.GetById(result);
+                    modelNew = _dal.GetById(result);
 
                     //if we are adding a request info of smprofile type, then also get the associated sm profile.
                     if (modelNew.SmProfileId.HasValue)
@@ -137,9 +140,42 @@ namespace CESMII.Marketplace.Api.Controllers
 
                     var subject = GetEmailSubject(modelNew);
                     var body = await this.RenderViewAsync(GetRenderViewUrl(modelNew), modelNew);
-                    var emailResult = await EmailRequestInfo(subject, body, _mailRelayService);
+                    string strRequestType = modelNew.RequestType.Code.ToLower();
 
-                    if (!emailResult)
+                    bool bEmailSuccess = false;
+
+                    if (strRequestType == "marketplaceitem")
+                    {
+                        bool[] abSendTo = new bool[3];
+                        abSendTo[0] = true;
+                        abSendTo[1] = false;
+                        abSendTo[2] = false;
+
+                        string[] astrEmail = new string[3];
+                        astrEmail[0] = modelNew.Email;
+                        astrEmail[1] = modelNew.MarketplaceItem.ccEmail1;
+                        astrEmail[2] = modelNew.MarketplaceItem.ccEmail2;
+
+                        string[] astrName = new string[3];
+                        astrName[0] = $"{modelNew.FirstName} {modelNew.LastName}";
+                        astrName[1] = modelNew.MarketplaceItem.ccName1;
+                        astrName[2] = modelNew.MarketplaceItem.ccName2;
+
+                        // Add target email addresses to the support request.
+                        modelNew.ccEmail1 = modelNew.MarketplaceItem.ccEmail1;
+                        modelNew.ccEmail2 = modelNew.MarketplaceItem.ccEmail2;
+                        modelNew.ccName1 = modelNew.MarketplaceItem.ccName1;
+                        modelNew.ccName2 = modelNew.MarketplaceItem.ccName2;
+                        bUpdateNeeded = true;
+
+                        bEmailSuccess = await EmailRequestInfo(subject, body, _mailRelayService, astrEmail, astrName, abSendTo);
+                    }
+                    else
+                    {
+                        bEmailSuccess = await EmailRequestInfo(subject, body, _mailRelayService);
+                    }
+
+                    if (!bEmailSuccess)
                     {
                         _logger.LogCritical($"RequestInfoController|Add|RequestInfo Item added (good)|Error: send failed.");
                     }
@@ -149,11 +185,17 @@ namespace CESMII.Marketplace.Api.Controllers
                     _logger.LogCritical($"RequestInfoController|Add|RequestInfo Item added (good)|Error: Email send error: {e.Message}.");
                 }
 
+                if (bUpdateNeeded)
+                {
+                    _ = await _dal.Update(modelNew, null);
+                }
+
                 return Ok(new ResultMessageWithDataModel()
                 {
                     IsSuccess = true,
                     Message = "Item was added.",
                     Data = model.ID
+
                 });
             }
         }
@@ -181,9 +223,11 @@ namespace CESMII.Marketplace.Api.Controllers
         {
             switch (item.RequestType.Code.ToLower())
             {
+                case "marketplaceitem":
+                    return "~/Views/Template/MoreInfoRequest.cshtml";
+
                 case "publisher":
                 case "sm-profile":
-                case "marketplaceitem":
                     return "~/Views/Template/RequestInfo.cshtml";
                 default:
                     return "~/Views/Template/ContactUs.cshtml";

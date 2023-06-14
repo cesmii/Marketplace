@@ -23,6 +23,8 @@
         protected List<ImageItemSimple> _imagesAll;
         protected IMongoRepository<JobDefinition> _repoJobDefinition; 
         protected List<JobDefinition> _jobDefinitionAll;
+        protected readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _cloudLibDAL;
+
         //default type - use if none assigned yet.
         private readonly MongoDB.Bson.BsonObjectId _smItemTypeIdDefault;
 
@@ -31,6 +33,7 @@
             IMongoRepository<MarketplaceItemAnalytics> repoAnalytics,
             IMongoRepository<ImageItemSimple> repoImages,
             IMongoRepository<JobDefinition> repoJobDefinition,
+            ICloudLibDAL<MarketplaceItemModelWithCursor> cloudLibDAL,
             ConfigUtil configUtil
             ) : base(repo)
         {
@@ -39,6 +42,7 @@
             _repoAnalytics = repoAnalytics;
             _repoImages = repoImages;
             _repoJobDefinition = repoJobDefinition;
+            _cloudLibDAL = cloudLibDAL;
 
             //init some stuff we will use during the mapping methods
             _smItemTypeIdDefault = new MongoDB.Bson.BsonObjectId(
@@ -69,9 +73,12 @@
                 .FirstOrDefault();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetMarketplaceRelatedData(
-                new List<MongoDB.Bson.BsonObjectId>() { new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(id)) },
-                new List<MongoDB.Bson.BsonObjectId>() { entity.PublisherId });
+            //pass in this id as well as ids from relatedItems
+            var ids = new List<MongoDB.Bson.BsonObjectId>() { new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(id)) };
+            ids = !entity.RelatedItems.Any() ? ids : ids.Union(entity.RelatedItems.Select(x => x.MarketplaceItemId)).ToList();
+            GetDependentData(
+                ids,
+                new List<MongoDB.Bson.BsonObjectId>() { entity.PublisherId }).Wait();
 
             return MapToModel(entity, true);
         }
@@ -106,9 +113,9 @@
             var data = query.ToList();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetMarketplaceRelatedData(
+            GetDependentData(
                 data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList(),
-                data.Select(x => x.PublisherId).Distinct().ToList());
+                data.Select(x => x.PublisherId).Distinct().ToList()).Wait();
 
             //map the data to the final result
             var result = new DALResult<MarketplaceItemModel>
@@ -131,17 +138,26 @@
             //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
             var query = _repo.FindByCondition(
                 predicates,  //is active is a soft delete indicator. IsActive == false means deleted so we filter out those.
-                skip, take,
+                null, null,
                 orderByExpressions);
-            var count = returnCount ? _repo.Count(predicates) : 0;
+            var count = returnCount ? query.Count() : 0;
+
+            if (skip.HasValue)
+            {
+                query = query.Skip(skip.Value);
+            }
+            if (take.HasValue)
+            {
+                query = query.Take(take.Value);
+            }
 
             //trigger the query to execute then we can limit what related data we query against
             var data = query.ToList();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetMarketplaceRelatedData(
+            GetDependentData(
                 data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList(),
-                data.Select(x => x.PublisherId).Distinct().ToList());
+                data.Select(x => x.PublisherId).Distinct().ToList()).Wait();
 
             //map the data to the final result
             var result = new DALResult<MarketplaceItemModel>
@@ -189,9 +205,17 @@
             var data = query.ToList();
 
             //get related data - pass list of item ids and publisher ids. 
-            GetMarketplaceRelatedData(
-                data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList(),
-                data.Select(x => x.PublisherId).Distinct().ToList());
+            var ids = data.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList();
+            //if verbose, then pull in images from relatedItems child collection.
+            if (verbose)
+            {
+                var relatedItemIds = data.SelectMany(x => x.RelatedItems == null || !x.RelatedItems.Any() ?
+                    new List<MongoDB.Bson.BsonObjectId>() :
+                    x.RelatedItems.Select(y => y.MarketplaceItemId)).ToList();
+                ids = ids.Union(relatedItemIds).ToList();
+            }
+            GetDependentData(ids,
+                data.Select(x => x.PublisherId).Distinct().ToList()).Wait();
 
             //map the data to the final result
             var result = new DALResult<MarketplaceItemModel>
@@ -250,9 +274,18 @@
                     if (_jobDefinitionAll.Any())
                     {
                         result.JobDefinitions = _jobDefinitionAll
-                            .Where(x => x.MarketplaceItemId.ToString().Equals(entity.ID))
-                            .Select(x => new JobDefinitionSimpleModel { ID = x.ID, Name = x.Name }).ToList();
+                            .Where(x => x.MarketplaceItemId.ToString().Equals(entity.ID) && x.IsActive)
+                            .Select(x => new JobDefinitionSimpleModel { ID = x.ID, Name = x.Name, IconName = x.IconName }).ToList();
                     }
+
+                    //get list of marketplace items associated with this list of ids, map to return object
+                    var relatedItems = MapToModelRelatedItems(entity.RelatedItems).Result;
+
+                    //get related profiles from CloudLib
+                    var relatedProfiles = MapToModelRelatedProfiles(entity.RelatedProfiles);
+                    
+                    //map related items into specific buckets - required, recommended
+                    result.RelatedItemsGrouped = GroupAndMergeRelatedItems(relatedItems, relatedProfiles);
                 }
                 return result;
             }
@@ -286,6 +319,148 @@
             };
 
         }
+
+        /// <summary>
+        /// Get related items from DB, filter out each group based on required/recommended/related flag
+        /// assume all related items in same collection and a type id distinguishes between the types. 
+        /// </summary>
+        protected async Task<List<MarketplaceItemRelatedModel>> MapToModelRelatedItems(List<RelatedItem> items)
+        {
+            if (items == null)
+            {
+                return new List<MarketplaceItemRelatedModel>();
+            }
+
+            //get list of marketplace items associated with this list of ids, map to return object
+            var filterRelated = MongoDB.Driver.Builders<MarketplaceItem>.Filter.In(x => x.ID, items.Select(y => y.MarketplaceItemId.ToString()));
+            var matches = await _repo.AggregateMatchAsync(filterRelated);
+
+            return !matches.Any() ? new List<MarketplaceItemRelatedModel>() :
+                matches.Select(x => new MarketplaceItemRelatedModel()
+                {
+                    //ID = x.ID,
+                    RelatedId = x.ID,
+                    Abstract = x.Abstract,
+                    DisplayName = x.DisplayName,
+                    Description = x.Description,
+                    Name = x.Name,
+                    Type = MapToModelLookupItem(x.ItemTypeId ?? _smItemTypeIdDefault,
+                            _lookupItemsAll.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.SmItemType)).ToList()),
+                    Version = x.Version,
+                    ImagePortrait = x.ImagePortraitId == null ? null : MapToModelImageSimple(z => z.ID.Equals(x.ImagePortraitId.ToString()), _imagesAll),
+                    ImageLandscape = x.ImageLandscapeId == null ? null : MapToModelImageSimple(z => z.ID.Equals(x.ImageLandscapeId.ToString()), _imagesAll),
+                    //assumes only one related item per type
+                    RelatedType = MapToModelLookupItem(items.Find(z => z.MarketplaceItemId.ToString().Equals(x.ID)).RelatedTypeId,
+                            _lookupItemsAll.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList()),
+                }).ToList();
+        }
+
+        /// <summary>
+        /// Get related items from DB, filter out each group based on required/recommended/related flag
+        /// assume all related items in same collection and a type id distinguishes between the types. 
+        /// </summary>
+        protected List<MarketplaceItemRelatedModel> MapToModelRelatedProfiles(List<RelatedProfileItem> items)
+        {
+            if (items == null)
+            {
+                return new List<MarketplaceItemRelatedModel>();
+            }
+
+            //get list of profile items associated with this list of ids, call CloudLib to get the supporting info for these
+            var matches = _cloudLibDAL.GetManyById(items.Select(x => x.ProfileId).ToList()).Result;
+            return !matches.Any() ? new List<MarketplaceItemRelatedModel>() : 
+                matches.Select(x => new MarketplaceItemRelatedModel()
+                {
+                    //ID = x.ID,
+                    RelatedId = x.ID,
+                    Abstract = x.Abstract,
+                    DisplayName = x.DisplayName,
+                    Description = x.Description,
+                    Name = x.Name,
+                    Namespace = x.Namespace,
+                    Type = x.Type,
+                    Version = x.Version,
+                    ImagePortrait = x.ImagePortrait,
+                    ImageLandscape = x.ImageLandscape,
+                    //assumes only one related item per type
+                    RelatedType = MapToModelLookupItem(items.Find(z => z.ProfileId.ToString().Equals(x.ID)).RelatedTypeId,
+                            _lookupItemsAll.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList()),
+                }).ToList();
+        }
+
+        /// <summary>
+        /// Take two related sets, group them by type and union them, filter them by related type and order them
+        /// </summary>
+        /// <param name="items"></param>
+        /// <param name="itemsProfile"></param>
+        /// <param name="relatedType"></param>
+        /// <returns></returns>
+        protected List<RelatedItemsGroupBy> GroupAndMergeRelatedItems(
+            List<MarketplaceItemRelatedModel> items,
+            List<MarketplaceItemRelatedModel> itemsProfile)
+        {
+            if (items == null && itemsProfile == null)
+            {
+                return new List<RelatedItemsGroupBy>();
+            }
+            //group by both sets and then merge
+            var result = new List<RelatedItemsGroupBy>();
+
+            //convert group to return type
+            if (items?.Count > 0)
+            {
+                var grpItems = items.GroupBy(x => new { ID = x.RelatedType.ID });
+                foreach (var item in grpItems)
+                {
+                    result.Add(new RelatedItemsGroupBy()
+                    {
+                        RelatedType = items.Where(x => x.RelatedType.ID.Equals(item.Key.ID)).FirstOrDefault()?.RelatedType,
+                        Items = items.Where(x => x.RelatedType.ID.Equals(item.Key.ID)).ToList() // item.ToList()
+                    });
+                }
+            }
+
+            //append profiles group to existing group (if present)
+            if (itemsProfile?.Count > 0)
+            {
+                var grpProfile = itemsProfile.GroupBy(x => new { ID = x.RelatedType.ID });
+                foreach (var item in grpProfile)
+                {
+                    var matches = itemsProfile.Where(x => x.RelatedType.ID.Equals(item.Key.ID)).ToList();
+
+                    var existingGroup = result.Find(x => x.RelatedType.ID.Equals(item.Key.ID));
+                    if (existingGroup == null)
+                    {
+                        result.Add(new RelatedItemsGroupBy()
+                        {
+                            RelatedType = matches.FirstOrDefault()?.RelatedType,
+                            Items = matches
+                        });
+                    }
+                    else
+                    {
+                        existingGroup.Items = existingGroup.Items.Union(matches).ToList();
+                    }
+                }
+            }
+
+            //do some ordering
+            result = result
+                .OrderBy(x => x.RelatedType.DisplayOrder)
+                .ThenBy(x => x.RelatedType.Name).ToList();
+            foreach (var g in result)
+            {
+                g.Items = g.Items
+                    .OrderBy(x => x.DisplayName)
+                    .ThenBy(x => x.Name)
+                    .ThenBy(x => x.Namespace)
+                    .ThenBy(x => x.Version)
+                    .ToList();
+            }
+
+            return result;
+        }
+
         protected override void MapToEntity(ref MarketplaceItem entity, MarketplaceItemModel model)
         {
             //ensure this value is always without spaces and is lowercase. 
@@ -312,24 +487,29 @@
         /// </summary>
         /// <param name="marketplaceIds"></param>
         /// <param name="publisherIds"></param>
-        protected void GetMarketplaceRelatedData(List<MongoDB.Bson.BsonObjectId> marketplaceIds, List<MongoDB.Bson.BsonObjectId> publisherIds)
+        protected async Task GetDependentData(List<MongoDB.Bson.BsonObjectId> marketplaceIds, List<MongoDB.Bson.BsonObjectId> publisherIds)
         {
             _lookupItemsAll = _repoLookup.GetAll();
 
             //TBD - revisit and use BSONObject id for both parts. Requires to change ID type.
             var filterPubs = MongoDB.Driver.Builders<Publisher>.Filter.In(x => x.ID, publisherIds.Select(y => y.ToString()));
-            _publishersAll = _repoPublisher.AggregateMatch(filterPubs);
+            _publishersAll = await _repoPublisher.AggregateMatchAsync(filterPubs);
 
             var filterImages = MongoDB.Driver.Builders<ImageItemSimple>.Filter.In(x => x.MarketplaceItemId, marketplaceIds);
             var fieldList = new List<string>() 
                 { nameof(ImageItemSimple.MarketplaceItemId), nameof(ImageItemSimple.FileName), nameof(ImageItemSimple.Type)};
-            _imagesAll = _repoImages.AggregateMatch(filterImages, fieldList);
+            _imagesAll = await _repoImages.AggregateMatchAsync(filterImages, fieldList);
 
             var filterAnalytics = MongoDB.Driver.Builders<MarketplaceItemAnalytics>.Filter.In(x => x.MarketplaceItemId, marketplaceIds);
-            _marketplaceItemAnalyticsAll = _repoAnalytics.AggregateMatch(filterAnalytics);
+            _marketplaceItemAnalyticsAll = await _repoAnalytics.AggregateMatchAsync(filterAnalytics);
 
             var filterJobDef = MongoDB.Driver.Builders<JobDefinition>.Filter.In(x => x.MarketplaceItemId, marketplaceIds);
-            _jobDefinitionAll = _repoJobDefinition.AggregateMatch(filterJobDef);
+            _jobDefinitionAll = await _repoJobDefinition.AggregateMatchAsync(filterJobDef);
+
+            if (_publishersAll.Count() == 0 && publisherIds.Any())
+            {
+                _logger.Warn($"GetDependentData || _publishersAll - item count 0: {string.Join(", ", publisherIds.Any())}.");
+            }
         }
 
     }
