@@ -23,14 +23,14 @@ namespace CESMII.Marketplace.Api.Controllers
     {
         private readonly IDal<MarketplaceItem, MarketplaceItemModel> _dalMarketplace;
         private readonly IDal<Publisher, PublisherModel> _dalPublisher;
-        private readonly ICloudLibDAL<MarketplaceItemModel> _dalCloudLib;
+        private readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _dalCloudLib;
         private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
 
         public SystemController(ConfigUtil config, ILogger<SystemController> logger
             ,UserDAL dalUser
             ,IDal<MarketplaceItem, MarketplaceItemModel> dalMarketplace
             ,IDal<Publisher, PublisherModel> dalPublisher
-            ,ICloudLibDAL<MarketplaceItemModel> dalCloudLib
+            ,ICloudLibDAL<MarketplaceItemModelWithCursor> dalCloudLib
             ,IDal<LookupItem, LookupItemModel> dalLookup
             )
             : base(config, logger, dalUser)

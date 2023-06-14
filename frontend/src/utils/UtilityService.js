@@ -3,7 +3,7 @@ import { AppSettings } from "./appsettings";
 
 const _logMessageDelimiter = " || ";
 
-const CLASS_NAME = "UtilityService";
+//const CLASS_NAME = "UtilityService";
 
 ///#region: Logging Helper Methods
 ///--------------------------------------------------------------------------
@@ -165,7 +165,7 @@ const prepDateValUtc = (val) => {
     var dd = dt.getUTCDate();
     dd = dd < 10 ? `0${dd.toString()}` : dd.toString();
     var result = `${dt.getUTCFullYear()}-${mm}-${dd}`;
-    console.log(generateLogMessageString(`prepDateVal||inbound:${val}||outbound:${result}`, CLASS_NAME));
+    //console.log(generateLogMessageString(`prepDateVal||inbound:${val}||outbound:${result}`, CLASS_NAME));
     return result;
 }
 
@@ -488,7 +488,7 @@ export function prepDateVal(val) {
     var dd = dt.getDate();
     dd = dd < 10 ? `0${dd.toString()}` : dd.toString();
     var result = `${dt.getFullYear()}-${mm}-${dd}`;
-    console.log(generateLogMessageString(`prepDateVal||inbound:${val}||outbound:${result}`, CLASS_NAME));
+    //console.log(generateLogMessageString(`prepDateVal||inbound:${val}||outbound:${result}`, CLASS_NAME));
     return result;
 }
 
@@ -599,12 +599,24 @@ export function renderMenuIcon(iconName, alt, className='mr-3') {
 }
 
 ///--------------------------------------------------------------------------
-/// menu icon convenience code
+/// menu icon convenience code - svg
 //--------------------------------------------------------------------------
 export function renderMenuColorIcon(iconName, alt, colorFill, className='mr-3') {
     if (iconName == null || iconName === '') return null;
     return (
         <span className={className} alt={`${alt == null ? iconName : alt}`}><SVGIcon name={iconName} fill={colorFill} size={24} /></span>
+    );
+}
+
+///--------------------------------------------------------------------------
+/// menu icon convenience code - material
+//--------------------------------------------------------------------------
+export function renderMenuColorMaterialIcon(iconName, colorFill, className = 'mr-3') {
+    if (iconName == null || iconName === '') return null;
+    return (
+        <span className={className} alt={iconName}>
+            <i className={`material-icons`} style={{ color: colorFill }}>{iconName}</i>
+        </span>
     );
 }
 

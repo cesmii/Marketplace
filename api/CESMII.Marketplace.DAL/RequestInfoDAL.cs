@@ -53,7 +53,7 @@
             }
             else
             {
-                model.Status = new LookupItemModel() { ID = matches[0].ID };
+                model.Status = new LookupItemModel() { ID = matches.ToList()[0].ID };
             }
 
             this.MapToEntity(ref entity, model);
@@ -112,7 +112,7 @@
             var entity = _repo.FindByCondition(x => x.ID == id)
                 .FirstOrDefault();
             _lookupItemsAll = _repoLookup.FindByCondition(x => x.LookupType.EnumValue == LookupTypeEnum.RequestInfo ||
-                x.LookupType.EnumValue == LookupTypeEnum.TaskStatus || x.LookupType.EnumValue == LookupTypeEnum.MembershipStatus);
+                x.LookupType.EnumValue == LookupTypeEnum.TaskStatus || x.LookupType.EnumValue == LookupTypeEnum.MembershipStatus).ToList();
 
             return MapToModel(entity, true);
 
@@ -143,7 +143,7 @@
             var count = returnCount ? _repo.Count() : 0;
 
             _lookupItemsAll = _repoLookup.FindByCondition(x => x.LookupType.EnumValue == LookupTypeEnum.RequestInfo ||
-                x.LookupType.EnumValue == LookupTypeEnum.TaskStatus || x.LookupType.EnumValue == LookupTypeEnum.MembershipStatus);
+                x.LookupType.EnumValue == LookupTypeEnum.TaskStatus || x.LookupType.EnumValue == LookupTypeEnum.MembershipStatus).ToList();
 
             //map the data to the final result
             var result = new DALResult<RequestInfoModel>
@@ -174,7 +174,7 @@
             var count = returnCount ? _repo.Count(predicate) : 0;
 
             _lookupItemsAll = _repoLookup.FindByCondition(x => x.LookupType.EnumValue == LookupTypeEnum.RequestInfo ||
-                x.LookupType.EnumValue == LookupTypeEnum.TaskStatus || x.LookupType.EnumValue == LookupTypeEnum.MembershipStatus);
+                x.LookupType.EnumValue == LookupTypeEnum.TaskStatus || x.LookupType.EnumValue == LookupTypeEnum.MembershipStatus).ToList();
 
             //map the data to the final result
             var result = new DALResult<RequestInfoModel>

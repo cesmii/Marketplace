@@ -42,7 +42,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
         //navigate to marketplace list
         history.push({
             pathname: '/library',
-            search: `?${generateSearchQueryString(criteria, 0)}`
+            search: `?${generateSearchQueryString(criteria, 1)}`
         });
     };
 

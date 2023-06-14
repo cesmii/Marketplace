@@ -360,6 +360,7 @@ function AdminJobDefinitionEntity() {
         //note you must update the state value for the input to be read only. It is not enough to simply have the onChange handler.
         switch (e.target.id) {
             case "name":
+            case "iconName":
             case "typeName":
                 _item[e.target.id] = e.target.value;
                 break;
@@ -539,6 +540,18 @@ function AdminJobDefinitionEntity() {
                     </div>
                     <div className="col-md-12 pb-2">
                         <span className="small text-muted" >This text will be displayed on the button to launch this job from the associated marketplace item detail page.</span>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-md-8">
+                        <Form.Group>
+                            <Form.Label>Icon Name</Form.Label>
+                            <Form.Control id="iconName" className='minimal pr-5' type="" placeholder={`Enter Material icon name`}
+                                value={_item.iconName == null ? '' : _item.iconName} onChange={onChange} readOnly={isReadOnly} />
+                        </Form.Group>
+                    </div>
+                    <div className="col-md-12 pb-2">
+                        <span className="small text-muted" >This will be positioned to the left of the action link for this job. This is the name of a Material icon. If left blank, 'system_update' will be used as the icon.</span>
                     </div>
                 </div>
                 <div className="row">

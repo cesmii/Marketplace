@@ -21,7 +21,7 @@
     /// <summary>
     /// Most lookup data is contained in this single entity and differntiated by a lookup type. 
     /// </summary>
-    public class CloudLibDAL : ICloudLibDAL<MarketplaceItemModel>
+    public class CloudLibDAL : ICloudLibDAL<MarketplaceItemModelWithCursor>
     {
         protected bool _disposed = false;
         protected static readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -32,7 +32,7 @@
         private readonly MarketplaceItemConfig _config;
         private readonly LookupItemModel _smItemType;
         private readonly List<LookupItemModel> _lookupItemsRelatedType;
-        //protected readonly IDal<MarketplaceItem, MarketplaceItemModel> _dalMarkteplace;
+        //protected readonly IDal<MarketplaceItem, MarketplaceItemModelWithCursor> _dalMarkteplace;
 
         //supporting data
         protected List<ImageItemModel> _images;
@@ -42,7 +42,7 @@
             IDal<LookupItem, LookupItemModel> dalLookup,
             IDal<ImageItem, ImageItemModel> dalImages,
             IMongoRepository<MarketplaceItem> repoMarketplace,
-            //IDal<MarketplaceItem, MarketplaceItemModel> dalMarkteplace,
+            //IDal<MarketplaceItem, MarketplaceItemModelWithCursor> dalMarkteplace,
             ConfigUtil configUtil)
         {
             _cloudLib = cloudLib;
@@ -76,7 +76,7 @@
 
         }
 
-        public async Task<MarketplaceItemModel> GetById(string id) {
+        public async Task<MarketplaceItemModelWithCursor> GetById(string id) {
             var entity = await _cloudLib.DownloadAsync(id);
             //var entity = await _cloudLib.GetById(id);
             if (entity == null) return null;
@@ -101,12 +101,13 @@
             return result;
         }
 
-        public async Task<List<MarketplaceItemModel>> GetAll() {
-            var result = await this.Where(null);
-            return result;
+        public async Task<List<MarketplaceItemModelWithCursor>> GetAll() {
+            //setting to very high to get all...this is called by admin which needs full list right now for dropdown selection
+            var result = await this.Where(null, 0, 999); 
+            return result.Data;
         }
 
-        public async Task<List<MarketplaceItemModel>> Where(string query,
+        public async Task<DALResult<MarketplaceItemModelWithCursor>> Where(string query, int? skip = null, int? take = null, string? startCursor = null, string? endCursor = null, bool noTotalCount = false,
             List<string> ids = null, List<string> processes = null, List<string> verticals = null, List<string> exclude = null)
         {
             //Note - splitting out each word in query into a separate string in the list
@@ -132,26 +133,77 @@
             if (string.IsNullOrEmpty(query) && keywords.Count == 0) keywords.Add("*");
             if (!string.IsNullOrEmpty(query)) keywords.Add(query);
 
-            var matches = await _cloudLib.SearchAsync(null, null, false, keywords, exclude, true);
-            if (matches == null || matches.Edges == null) return new List<MarketplaceItemModel>();
+            DALResult<MarketplaceItemModelWithCursor> result = new DALResult<MarketplaceItemModelWithCursor>();
+            result.Data = new List<MarketplaceItemModelWithCursor>();
+            GraphQlResult<Nodeset> matches;
 
+            string currentCursor = startCursor ?? endCursor;
+            bool backwards = endCursor != null;
+            int actualTake;
+            bool bMore;
+            do
+            {
+                actualTake = Math.Min((skip + take ?? 100) - (int)result.Count, 100);
+                bMore = false;
+                matches = await _cloudLib.SearchAsync(actualTake, currentCursor, backwards, keywords, exclude, noTotalCount,
+                    order:
+                        new { metadata = new { title = OrderEnum.ASC }, modelUri = OrderEnum.ASC, publicationDate = OrderEnum.DESC });// "{metadata: {title: ASC}, modelUri: ASC, publicationDate: DESC}");
+                if (matches == null || matches.Edges == null) return result;
+                result.Data.AddRange(MapToModelsNodesetResult(matches.Edges));
+                result.Count += matches.Edges.Count;
+                if (!backwards && matches.PageInfo.HasNextPage)
+                {
+                    currentCursor = matches.PageInfo.EndCursor;
+                    bMore = true;
+                }
+                if (backwards && matches.PageInfo.HasPreviousPage)
+                {
+                    currentCursor = matches.PageInfo.StartCursor;
+                    bMore = true;
+                }
+            } while (bMore && (take == null || result.Count < skip + take));
+
+            if (matches?.TotalCount > 0)
+            {
+                result.Count = matches.TotalCount;
+            }
+            if (!backwards)
+            {
+                result.StartCursor = startCursor;
+                result.EndCursor = currentCursor;
+            }
+            else
+            {
+                result.StartCursor = currentCursor;
+                result.EndCursor = endCursor;
+            }
             //TBD - exclude some nodesets which are core nodesets - list defined in appSettings
 
-
-            return MapToModelsNodesetResult(matches.Edges);
+            if (skip > 0)
+            {
+                result.Data = result.Data.Skip(skip.Value).ToList();
+            }
+            return result;
         }
 
-        public async Task<List<MarketplaceItemModel>> GetManyById(List<string> ids)
+        internal enum OrderEnum
+        {
+            ASC,
+            DESC,
+        };
+
+
+        public async Task<List<MarketplaceItemModelWithCursor>> GetManyById(List<string> ids)
         {
             var matches = await _cloudLib.GetManyAsync(ids);
-            if (matches == null || matches.Edges == null) return new List<MarketplaceItemModel>();
+            if (matches == null || matches.Edges == null) return new List<MarketplaceItemModelWithCursor>();
 
             return MapToModelsNodesetResult(matches.Edges);
         }
 
-        protected List<MarketplaceItemModel> MapToModelsNodesetResult(List<GraphQlNodeAndCursor<Nodeset>> entities)
+        protected List<MarketplaceItemModelWithCursor> MapToModelsNodesetResult(List<GraphQlNodeAndCursor<Nodeset>> entities)
         {
-            var result = new List<MarketplaceItemModel>();
+            var result = new List<MarketplaceItemModelWithCursor>();
 
             foreach (var item in entities)
             {
@@ -165,12 +217,12 @@
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        protected MarketplaceItemModel MapToModelNodesetResult(GraphQlNodeAndCursor<Nodeset> entity)
+        protected MarketplaceItemModelWithCursor MapToModelNodesetResult(GraphQlNodeAndCursor<Nodeset> entity)
         {
             if (entity != null && entity.Node != null)
             {
                 //map results to a format that is common with marketplace items
-                return new MarketplaceItemModel()
+                return new MarketplaceItemModelWithCursor()
                 {
                     ID = entity.Node.Identifier.ToString(),
                     Name = entity.Node.Identifier.ToString(),  //in marketplace items, name is used for navigation in friendly url
@@ -186,7 +238,9 @@
                     IsFeatured = false,
                     ImagePortrait = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdPortrait)),
                     //ImageSquare = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdSquare)),
-                    ImageLandscape = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdLandscape))
+                    ImageLandscape = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdLandscape)),
+                    Cursor = entity.Cursor,
+                    
                 };
             }
             else
@@ -202,7 +256,7 @@
         /// <param name="entity"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        protected MarketplaceItemModel MapToModelNamespace(UANameSpace entity, ProfileItem entityLocal)
+        protected MarketplaceItemModelWithCursor MapToModelNamespace(UANameSpace entity, ProfileItem entityLocal)
         {
             if (entity != null)
             {
@@ -211,7 +265,7 @@
                 //if (entity.Category != null) metatags.Add(entity.Category.Name);
 
                 //map results to a format that is common with marketplace items
-                var result = new MarketplaceItemModel()
+                var result = new MarketplaceItemModelWithCursor()
                 {
                     ID = entity.Nodeset.Identifier.ToString(),
                     Name = entity.Nodeset.Identifier.ToString(),  //in marketplace items, name is used for navigation in friendly url
@@ -254,7 +308,7 @@
                 {
                     //go get related items if any
                     //get list of marketplace items associated with this list of ids, map to return object
-                    var relatedItems = MapToModelRelatedItems(entityLocal?.RelatedItems);
+                    var relatedItems = MapToModelRelatedItems(entityLocal?.RelatedItems).Result;
 
                     //get related profiles from CloudLib
                     var relatedProfiles = MapToModelRelatedProfiles(entityLocal?.RelatedProfiles);
@@ -275,7 +329,7 @@
         /// Get related items from DB, filter out each group based on required/recommended/related flag
         /// assume all related items in same collection and a type id distinguishes between the types. 
         /// </summary>
-        protected List<MarketplaceItemRelatedModel> MapToModelRelatedItems(List<RelatedItem> items)
+        protected async Task<List<MarketplaceItemRelatedModel>> MapToModelRelatedItems(List<RelatedItem> items)
         {
             if (items == null)
             {
@@ -283,9 +337,8 @@
             }
 
             //get list of marketplace items associated with this list of ids, map to return object
-            var matches = _repoMarketplace.FindByCondition(x =>
-                items.Any(y => y.MarketplaceItemId.Equals(
-                new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))))).ToList();
+            var filterRelated = MongoDB.Driver.Builders<MarketplaceItem>.Filter.In(x => x.ID, items.Select(y => y.MarketplaceItemId.ToString()));
+            var matches = await _repoMarketplace.AggregateMatchAsync(filterRelated);
 
             if (!matches.Any()) return new List<MarketplaceItemRelatedModel>();
 

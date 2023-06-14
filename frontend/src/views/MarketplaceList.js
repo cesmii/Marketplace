@@ -42,6 +42,8 @@ function MarketplaceList() {
         all: [], itemCount: 0, listView: true
     });
     const [_currentPage, setCurrentPage] = useState(1);
+    const [_currentPageCursors, setCurrentPageCursors] = useState(null);
+    //const [_currentPageEndCursor, setCurrentPageEndCursor] = useState(null);
     const [_filterToggle, setFilterToggle] = useState(false);
     
     const caption = 'Library';
@@ -49,44 +51,6 @@ function MarketplaceList() {
     const [_queryLocal, setQueryLocal] = useState(loadingProps.query);
     const [_criteria, setCriteria] = useState(null);
     const { isAuthenticated, isAuthorized } = useLoginStatus(null, [AppSettings.AADAdminRole]);
-
-    //-------------------------------------------------------------------
-    // Region: Generate a new query string based on the selections
-    //-------------------------------------------------------------------
-/*
-    const generateSearchQueryString = (criteria, currentPage) => {
-        let result = [];
-        //query
-        if (criteria.query != null && criteria.query !== '') {
-            result.push(`q=${criteria.query}`);
-        }
-        //sm types
-        if (criteria.itemTypes != null) {
-            const selTypes = criteria.itemTypes.filter(x => x.selected).map(x => x.code);
-            if (selTypes != null && selTypes.length > 0) {
-                result.push(`sm=${selTypes.join(',')}`);
-            }
-        }
-        //verts, processes, etc. 
-        if (criteria.filters != null) {
-            let resultFilters = [];
-            criteria.filters.forEach((x) => {
-                const selFilters = x.items.filter(x => x.selected).map(x => x.id);
-                if (selFilters != null && selFilters.length > 0) {
-                    resultFilters.push(`${x.enumValue}::${selFilters.join(',')}`);
-                }
-            });
-            if (resultFilters.length > 0) {
-                result.push(`f=${resultFilters.join('|')}`);
-            }
-        }
-        //page
-        result.push(`p=${currentPage == null ? 0 : currentPage}`);
-        //page size
-        result.push(`t=${criteria.take}`);
-        return result.join('&');
-    }
-*/
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
@@ -97,14 +61,13 @@ function MarketplaceList() {
 
         //this will trigger a fetch from the API to pull the data for the filtered criteria
         setCurrentPage(1);
-        _criteria.query = val;
-        _criteria.skip = 0;
+        let criteria = JSON.parse(JSON.stringify(_criteria));
+        criteria.query = val;
+        criteria.skip = 0;
+        setCriteria(criteria);
+        //_currentPage = 1
+        setCurrentPageCursors(null);
         //setCriteria(JSON.parse(JSON.stringify(_criteria)));
-        //reload page
-        history.push({
-            pathname: '/library',
-            search: `?${generateSearchQueryString(_criteria, 1)}`
-        });
     };
 
     const handleOnSearchBlur = (val) => {
@@ -120,12 +83,8 @@ function MarketplaceList() {
         //this will trigger a fetch from the API to pull the data for the filtered criteria
         setCurrentPage(1);
         criteria.query = _queryLocal;
-        //setCriteria(JSON.parse(JSON.stringify(criteria)));
-        //reload page
-        history.push({
-            pathname: '/library',
-            search: `?${generateSearchQueryString(criteria, 1)}`
-        });
+        setCriteria(JSON.parse(JSON.stringify(criteria)));
+        setCurrentPageCursors(null);
     };
 
     //called when an item is selected in the filter panel
@@ -138,12 +97,9 @@ function MarketplaceList() {
 
         //filter event handler - set global state and navigate to search page
         criteria.query = _queryLocal;
-        //setCriteria(JSON.parse(JSON.stringify(criteria)));
-        //reload page
-        history.push({
-            pathname: '/library',
-            search: `?${generateSearchQueryString(criteria, 1)}`
-        });
+        setCriteria(JSON.parse(JSON.stringify(criteria)));
+        setCurrentPage(1);
+        setCurrentPageCursors(null);
     }
 
     const onChangePage = (currentPage, pageSize) => {
@@ -151,10 +107,11 @@ function MarketplaceList() {
 
         //this will trigger a fetch from the API to pull the data for the filtered criteria
         setCurrentPage(currentPage);
-        _criteria.query = _queryLocal;
-        _criteria.skip = (currentPage - 1) * pageSize; //0-based
-        _criteria.take = pageSize;
-        //setCriteria(JSON.parse(JSON.stringify(_criteria)));
+        let criteria = JSON.parse(JSON.stringify(_criteria));
+        criteria.query = _queryLocal;
+        criteria.skip = (currentPage - 1) * pageSize; //0-based
+        criteria.take = pageSize;
+        setCriteria(criteria);
 
         //scroll screen to top of grid on page change
         ////scroll a bit higher than the top edge so we get some of the header in the view
@@ -163,23 +120,15 @@ function MarketplaceList() {
 
         //preserve choice in local storage
         setMarketplacePageSize(pageSize);
-
-        //reload page
-        history.push({
-            pathname: '/library',
-            search: `?${generateSearchQueryString(_criteria, currentPage)}`
-        });
-        
     };
 
     const onClearAll = () => {
         console.log(generateLogMessageString('onClearAll', CLASS_NAME));
 
         setCriteria(clearSearchCriteria(_criteria));
+        setCurrentPage(1);
         setQueryLocal(null);
-
-        //reload page
-        history.push('/library');
+        setCurrentPageCursors(null);
     }
 
     const onToggleFilters = () => {
@@ -187,6 +136,34 @@ function MarketplaceList() {
 
         setFilterToggle(!_filterToggle);
     }
+
+    //-------------------------------------------------------------------
+    // Region: Hook - Triggers reload of page with proper query string parameters
+    //-------------------------------------------------------------------
+    useEffect(() => {
+        if (_criteria == null) {
+            // this typically happens when navigating to a page or refreshing: ignore
+            return;
+        }
+        let newLocation = {
+            pathname: '/library',
+            search: `?${generateSearchQueryString(_criteria, _currentPage)}`
+        };
+        if (history.location.pathname !== newLocation.pathname || history.location.search != newLocation.search) {
+            history.push(newLocation);
+        }
+    }, [_criteria, _currentPage]);
+
+    //-------------------------------------------------------------------
+    // Region: Hook - When search criteria in localstorage is updated, then update this criteria value
+    //      This will also trigger a new fetch of data 
+    //-------------------------------------------------------------------
+    useEffect(() => {
+        if (_criteria != null || loadingProps?.searchCriteria == null) {
+            return;
+        }
+        setCriteria(loadingProps.searchCriteria);
+    }, [loadingProps.searchCriteria]);
 
     //const onTileViewToggle = () => {
     //    console.log(generateLogMessageString('onTileViewToggle', CLASS_NAME));
@@ -213,6 +190,7 @@ function MarketplaceList() {
             category: "Marketplace|Search",
             action: "marketplace_search"
         });
+        criteria.pageCursors = _currentPageCursors;
 
         await axiosInstance.post(url, criteria).then(result => {
             if (result.status === 200) {
@@ -222,6 +200,9 @@ function MarketplaceList() {
                     ..._dataRows,
                     all: result.data.data, itemCount: result.data.count
                 });
+
+                setCurrentPageCursors(result.data.pageCursors);
+                //setCurrentPageEndCursor(result.data.endCursor);
 
                 //hide a spinner
                 setLoadingProps({ isLoading: false, message: null });
@@ -273,8 +254,12 @@ function MarketplaceList() {
         const f = searchParams.get("f");
 
         //build up the criteria values based on query string
+        let originalCriteriaJson = JSON.stringify(_criteria);
         let criteria = (_criteria == null) ? JSON.parse(JSON.stringify(loadingProps.searchCriteria)) :
-            JSON.parse(JSON.stringify(_criteria));
+            JSON.parse(originalCriteriaJson);
+        if (criteria == null) {
+            return;
+        }
         const currentPage = p == null || !isNumeric(p) ? 1 : parseInt(p);
         const pageSize = t == null || !isNumeric(t) ? criteria.take : parseInt(t);
         setCurrentPage(currentPage);
@@ -284,7 +269,15 @@ function MarketplaceList() {
         //no filterable query strings, just get the default list
         if (!q && !sm && !f) {
             //this will trigger a fetch from the API to pull the data for the filtered criteria
-            setCriteria(clearSearchCriteria(criteria));
+            let clearedCriteria = clearSearchCriteria(criteria, true);
+            let newCriteriaJson = JSON.stringify(clearedCriteria);
+            if (newCriteriaJson !== originalCriteriaJson) {
+                setCriteria(clearedCriteria);
+            }
+            else {
+                // no change: avoid triggering refetch
+            }
+
             return;
         }
 
@@ -314,14 +307,20 @@ function MarketplaceList() {
         });
 
         //this will trigger a fetch from the API to pull the data for the filtered criteria
-        setCriteria(JSON.parse(JSON.stringify(criteria)));
+        let newCriteriaJson = JSON.stringify(criteria);
+        if (newCriteriaJson !== originalCriteriaJson) {
+            setCriteria(JSON.parse(newCriteriaJson));
+        }
+        else {
+            // no change: avoid triggering refetch
+        }
 
         //this will execute on unmount
         return () => {
             //console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
             //setFilterValOnChild('');
         };
-    }, [searchParams]);
+    }, [searchParams, loadingProps.searchCriteria]);
 
     //-------------------------------------------------------------------
     // Region: Get data 

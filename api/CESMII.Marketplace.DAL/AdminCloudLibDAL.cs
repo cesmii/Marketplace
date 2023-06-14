@@ -20,7 +20,7 @@
     /// This is a hybrid DAL. It gets data from the local Mongo DB for the related items and related profiles. Then gets 
     /// the profile info from the cloud library
     /// </summary>
-    public class AdminCloudLibDAL : IAdminCloudLibDAL<AdminMarketplaceItemModel>
+    public class AdminCloudLibDAL : IAdminCloudLibDAL<AdminMarketplaceItemModelWithCursor>
     {
         protected bool _disposed = false;
         protected static readonly Logger _logger = LogManager.GetCurrentClassLogger();
@@ -75,7 +75,7 @@
 
         }
 
-        public async Task<string> Add(AdminMarketplaceItemModel model, string userId)
+        public async Task<string> Add(AdminMarketplaceItemModelWithCursor model, string userId)
         {
             throw new NotImplementedException("Use Update method instead");
         }
@@ -89,7 +89,7 @@
         /// <param name="userId"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task<int> Upsert(AdminMarketplaceItemModel model, string userId)
+        public async Task<int> Upsert(AdminMarketplaceItemModelWithCursor model, string userId)
         {
             ProfileItem entity = _repo.FindByCondition(x => x.ProfileId == model.ID).FirstOrDefault();
             bool isAdd = entity == null;
@@ -114,7 +114,7 @@
             return 1;
         }
 
-        public async Task<AdminMarketplaceItemModel> GetById(string id) {
+        public async Task<AdminMarketplaceItemModelWithCursor> GetById(string id) {
             var entity = await _cloudLib.DownloadAsync(id);
             //var entity = await _cloudLib.GetById(id);
             if (entity == null) return null;
@@ -124,19 +124,22 @@
             return MapToModelNamespace(entity, entityLocal);
         }
 
-        public async Task<List<AdminMarketplaceItemModel>> GetAll() {
-            var result = await this.Where(null);
+        public async Task<List<AdminMarketplaceItemModelWithCursor>> GetAll() {
+            //setting to very high to get all...this is called by admin which needs full list right now for dropdown selection
+            var result = await this.Where(null, 0, 999);
             return result;
         }
 
-        public async Task<List<AdminMarketplaceItemModel>> Where(string query,
+        public async Task<List<AdminMarketplaceItemModelWithCursor>> Where(string query, int? skip = null, int? take = null, string? startCursor = null, string? endCursor = null, bool noTotalCount = false,
             List<string> ids = null, List<string> processes = null, List<string> verticals = null, List<string> exclude = null)
         {
             //get the list of profiles in the local db with related items. If the item isn't in there, then we won't 
             //return the profile even from Cloud Lib. The admin ui is meant to only show the profile list items that have related data.  
-            var idsLocal = _repo.FindByCondition(x => 
-                ids == null || ids.Any(y => y.Equals(x.ProfileId))).Select(x => x.ProfileId).ToList();
-            if (idsLocal == null || idsLocal.Count == 0) return new List<AdminMarketplaceItemModel>();
+            var filterIdsLocal = ids == null || ids.Count == 0 ? 
+                null : MongoDB.Driver.Builders<ProfileItem>.Filter.In(x => x.ProfileId, ids.Select(y => y));
+            var idsLocal = ids == null || ids.Count == 0 ? _repo.GetAll() :
+                await _repo.AggregateMatchAsync(filterIdsLocal);
+            if (idsLocal == null || idsLocal.Count == 0) return new List<AdminMarketplaceItemModelWithCursor>();
 
             //Note - splitting out each word in query into a separate string in the list
             //Per team, don't split out query into multiple keyword items
@@ -161,29 +164,86 @@
             if (string.IsNullOrEmpty(query) && keywords.Count == 0) keywords.Add("*");
             if (!string.IsNullOrEmpty(query)) keywords.Add(query);
 
-            var matches = await _cloudLib.SearchAsync(null, null, false, keywords, exclude, true);
-            if (matches == null || matches.Edges == null) return new List<AdminMarketplaceItemModel>();
+            var result = new DALResult<AdminMarketplaceItemModelWithCursor>();
+            result.Data = new List<AdminMarketplaceItemModelWithCursor>();
+            GraphQlResult<Nodeset> matches;
 
+            string currentCursor = startCursor ?? endCursor;
+            bool backwards = endCursor != null;
+            int actualTake;
+            bool bMore;
+            do
+            {
+                actualTake = Math.Min((skip + take ?? 100) - (int)result.Count, 100);
+                bMore = false;
+                matches = await _cloudLib.SearchAsync(actualTake, currentCursor, backwards, keywords, exclude, noTotalCount,
+                    order:
+                        new { metadata = new { title = OrderEnum.ASC }, modelUri = OrderEnum.ASC, publicationDate = OrderEnum.DESC });// "{metadata: {title: ASC}, modelUri: ASC, publicationDate: DESC}");
+                if (matches == null || matches.Edges == null) return result.Data;
+                //TBD - filter out list of local ids. Cloud Lib can't filter on Cloud Lib ids and other filters to create a restricted result
+                //so, we apply the local ids filter after doing the standard search. Local ids represent a Cloud lib item
+                //with locally curated data such as related items. 
+                var matchesFiltered = matches.Edges.Where(x =>
+                    idsLocal.Any(y => x.Node != null && y.ProfileId.Equals(x.Node.Identifier.ToString()))).ToList();
+
+                result.Data.AddRange(MapToModelsNodesetResult(matchesFiltered));
+                result.Count += matchesFiltered.Count;
+                if (!backwards && matches.PageInfo.HasNextPage)
+                {
+                    currentCursor = matches.PageInfo.EndCursor;
+                    bMore = true;
+                }
+                if (backwards && matches.PageInfo.HasPreviousPage)
+                {
+                    currentCursor = matches.PageInfo.StartCursor;
+                    bMore = true;
+                }
+            } while (bMore && (take == null || result.Count < skip + take));
+
+            if (!backwards)
+            {
+                result.StartCursor = startCursor;
+                result.EndCursor = currentCursor;
+            }
+            else
+            {
+                result.StartCursor = currentCursor;
+                result.EndCursor = endCursor;
+            }
             //TBD - exclude some nodesets which are core nodesets - list defined in appSettings
 
-            //only get items who have a local id represented
-            var matchesFiltered = matches.Edges.Where(x =>
-                idsLocal.Any(y => x.Node != null && y.Equals(x.Node.Identifier.ToString()))).ToList();
-            return MapToModelsNodesetResult(matchesFiltered);
+            if (skip > 0)
+            {
+                result.Data = result.Data.Skip(skip.Value).ToList();
+            }
+            return result.Data;
+
         }
 
-        public async Task<List<AdminMarketplaceItemModel>> GetManyById(List<string> ids)
+        internal enum OrderEnum
+        {
+            ASC,
+            DESC,
+        };
+
+        public async Task<List<AdminMarketplaceItemModelWithCursor>> GetManyById(List<string> ids)
         {
             //get the list of profiles in the local db with related items. If the item isn't in there, then we won't 
             //return the profile even from Cloud Lib. The admin ui is meant to only show the profile list items that have related data.  
-            var idsLocal = _repo.FindByCondition(x =>
-                ids == null || ids.Any(y => y.Equals(x.ProfileId))).Select(x => x.ProfileId).ToList();
-            if (idsLocal == null || idsLocal.Count == 0) return new List<AdminMarketplaceItemModel>();
+            var filterIdsLocal = MongoDB.Driver.Builders<ProfileItem>.Filter.In(x => x.ProfileId, ids.Select(y => y));
+            var idsLocal = await _repo.AggregateMatchAsync(filterIdsLocal);
+            if (idsLocal == null || idsLocal.Count == 0) return new List<AdminMarketplaceItemModelWithCursor>();
 
             var matches = await _cloudLib.GetManyAsync(ids);
-            if (matches == null || matches.Edges == null) return new List<AdminMarketplaceItemModel>();
+            if (matches == null || matches.Edges == null) return new List<AdminMarketplaceItemModelWithCursor>();
 
-            return MapToModelsNodesetResult(matches.Edges);
+            //TBD - filter out list of local ids. Cloud Lib can't filter on Cloud Lib ids and other filters to create a restricted result
+            //so, we apply the local ids filter after doing the standard search. Local ids represent a Cloud lib item
+            //with locally curated data such as related items. 
+            var matchesFiltered = matches.Edges.Where(x =>
+                idsLocal.Any(y => x.Node != null && y.ProfileId.Equals(x.Node.Identifier.ToString()))).ToList();
+
+            return MapToModelsNodesetResult(matchesFiltered);
         }
 
         public async Task<int> Delete(string id, string userId)
@@ -194,9 +254,9 @@
             return 1;
         }
 
-        protected List<AdminMarketplaceItemModel> MapToModelsNodesetResult(List<GraphQlNodeAndCursor<Nodeset>> entities)
+        protected List<AdminMarketplaceItemModelWithCursor> MapToModelsNodesetResult(List<GraphQlNodeAndCursor<Nodeset>> entities)
         {
-            var result = new List<AdminMarketplaceItemModel>();
+            var result = new List<AdminMarketplaceItemModelWithCursor>();
 
             foreach (var item in entities)
             {
@@ -210,12 +270,12 @@
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        protected AdminMarketplaceItemModel MapToModelNodesetResult(GraphQlNodeAndCursor<Nodeset> entity)
+        protected AdminMarketplaceItemModelWithCursor MapToModelNodesetResult(GraphQlNodeAndCursor<Nodeset> entity)
         {
             if (entity != null && entity.Node != null)
             {
                 //map results to a format that is common with marketplace items
-                return new AdminMarketplaceItemModel()
+                return new AdminMarketplaceItemModelWithCursor()
                 {
                     ID = entity.Node.Identifier.ToString(),
                     Name = entity.Node.Identifier.ToString(),  //in marketplace items, name is used for navigation in friendly url
@@ -245,7 +305,7 @@
         /// <param name="entity"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        protected AdminMarketplaceItemModel MapToModelNamespace(UANameSpace entity, ProfileItem entityLocal)
+        protected AdminMarketplaceItemModelWithCursor MapToModelNamespace(UANameSpace entity, ProfileItem entityLocal)
         {
             if (entity != null)
             {
@@ -254,7 +314,7 @@
                 //if (entity.Category != null) metatags.Add(entity.Category.Name);
 
                 //map results to a format that is common with marketplace items
-                var result = new AdminMarketplaceItemModel()
+                var result = new AdminMarketplaceItemModelWithCursor()
                 {
                     ID = entity.Nodeset.Identifier.ToString(),
                     Name = entity.Nodeset.Identifier.ToString(),  //in marketplace items, name is used for navigation in friendly url
@@ -294,7 +354,7 @@
 
                 //get related data - if any
                 //get list of marketplace items associated with this list of ids, map to return object
-                result.RelatedItems = MapToModelRelatedItems(entityLocal?.RelatedItems);
+                result.RelatedItems = MapToModelRelatedItems(entityLocal?.RelatedItems).Result;
                 result.RelatedProfiles = MapToModelRelatedProfiles(entityLocal?.RelatedProfiles);
 
                 return result;
@@ -310,7 +370,7 @@
         /// Get related items from DB, filter out each group based on required/recommended/related flag
         /// assume all related items in same collection and a type id distinguishes between the types. 
         /// </summary>
-        protected List<MarketplaceItemRelatedModel> MapToModelRelatedItems(List<RelatedItem> items)
+        protected async Task<List<MarketplaceItemRelatedModel>> MapToModelRelatedItems(List<RelatedItem> items)
         {
             if (items == null)
             {
@@ -318,9 +378,8 @@
             }
 
             //get list of marketplace items associated with this list of ids, map to return object
-            var matches = _repoMarketplace.FindByCondition(x =>
-                items.Any(y => y.MarketplaceItemId.Equals(
-                new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))))).ToList();
+            var filterRelated = MongoDB.Driver.Builders<MarketplaceItem>.Filter.In(x => x.ID, items.Select(y => y.MarketplaceItemId.ToString()));
+            var matches = await _repoMarketplace.AggregateMatchAsync(filterRelated);
 
             if (!matches.Any()) return new List<MarketplaceItemRelatedModel>();
 
@@ -367,7 +426,7 @@
             //get list of profile items associated with this list of ids, call CloudLib to get the supporting info for these
             var profiles = _cloudLib.GetManyAsync(items.Select(x => x.ProfileId).ToList()).Result;
             var matches = (profiles == null || profiles.Edges == null) ? 
-                new List<AdminMarketplaceItemModel>() :
+                new List<AdminMarketplaceItemModelWithCursor>() :
                 MapToModelsNodesetResult(profiles.Edges);
 
             return !matches.Any() ? new List<ProfileItemRelatedModel>() :
@@ -421,7 +480,7 @@
             };
         }
 
-        protected void MapToEntity(ref ProfileItem entity, AdminMarketplaceItemModel model)
+        protected void MapToEntity(ref ProfileItem entity, AdminMarketplaceItemModelWithCursor model)
         {
             //ensure this value is always without spaces and is lowercase. 
             //replace child collection of items - ids are preserved
