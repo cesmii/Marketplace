@@ -102,7 +102,8 @@
         }
 
         public async Task<List<MarketplaceItemModelWithCursor>> GetAll() {
-            var result = await this.Where(null);
+            //setting to very high to get all...this is called by admin which needs full list right now for dropdown selection
+            var result = await this.Where(null, 0, 999); 
             return result.Data;
         }
 
