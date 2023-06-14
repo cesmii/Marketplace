@@ -5,7 +5,7 @@ import color from '../../components/Constants';
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
 import DownloadNodesetModal from '../../components/DownloadNodesetModal';
 import { AppSettings } from '../../utils/appsettings';
-import { formatDate, formatItemPublishDate, generateLogMessageString, getImageUrl, renderMenuColorIcon } from '../../utils/UtilityService';
+import { formatItemPublishDate, generateLogMessageString, getImageUrl, renderMenuColorIcon, renderMenuColorMaterialIcon } from '../../utils/UtilityService';
 import { MarketplaceItemJobLauncher } from './MarketplaceItemJobLauncher';
 
 const CLASS_NAME = "MarketplaceItemEntityHeader";
@@ -86,8 +86,8 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         {/*<div className="d-none d-lg-inline" >{renderMetaTagItem(props.item)}</div>*/}
                         {(props.item.relatedItemsGrouped != null && props.item.relatedItemsGrouped.length > 0) &&
                             <p className="mt-3 mb-0" >
-                                <Button variant="link" type="button" className="px-0" onClick={props.onViewSpecifications} >
-                                    {renderMenuColorIcon('view', null, color.cornflower, 'mr-1')}View Specifications</Button>
+                                <Button variant="link" type="button" className="d-flex align-self-center px-0" onClick={props.onViewSpecifications} >
+                                    {renderMenuColorMaterialIcon('visibility', color.cornflower, 'mr-1')}View Specifications</Button>
                             </p>
                         }
                         {renderJobDefinitions()}
@@ -117,20 +117,20 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         <p className="mb-2" ><b className="mr-2" >Version:</b>{props.item.version}</p>
                         {props.onDownload &&
                             <p className="mt-3 mb-0" >
-                                <Button variant="link" type="button" className="px-0" onClick={onDownloadStart} >
-                                    {renderMenuColorIcon('download', null, color.cornflower, 'mr-1')}Download Nodeset XML</Button>
+                                <Button variant="link" type="button" className="d-flex align-self-center px-0" onClick={onDownloadStart} >
+                                {renderMenuColorMaterialIcon('download', color.cornflower, 'mr-1')}Download Nodeset XML</Button>
                             </p>
                         }
                         {props.showProfileDesignerLink &&
                             <p className="mt-3 mb-0" >
-                                <Button variant="link" type="button" target="_blank" className="px-0" href={`${AppSettings.ProfileDesignerUrl}cloudlibrary/viewer/${props.item.id}`} >
-                                    {renderMenuColorIcon('profile', null, color.cornflower, 'mr-1')}View in SM Profile Designer</Button>
+                            <Button variant="link" type="button" target="_blank" className="d-flex align-self-center px-0" href={`${AppSettings.ProfileDesignerUrl}cloudlibrary/viewer/${props.item.id}`} >
+                                {renderMenuColorIcon('profile', null, color.cornflower, 'mr-1')}View in SM Profile Designer</Button>
                             </p>
                         }
                         {(props.item.relatedItemsGrouped != null && props.item.relatedItemsGrouped.length > 0) &&
                             <p className="mt-3 mb-0" >
-                                <Button variant="link" type="button" className="px-0" onClick={props.onViewSpecifications} >
-                                    {renderMenuColorIcon('view', null, color.cornflower, 'mr-1')}View Specifications</Button>
+                                <Button variant="link" type="button" className="d-flex align-self-center px-0" onClick={props.onViewSpecifications} >
+                                {renderMenuColorMaterialIcon('visibility', color.cornflower, 'mr-1')}View Specifications</Button>
                             </p>
                         }
                     </div>
