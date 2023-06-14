@@ -24,8 +24,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Readme", "Readme", "{9B364B
 		.github\workflows\backend-publish-stage-azure.yml = .github\workflows\backend-publish-stage-azure.yml
 		.github\workflows\frontend--publish-azure.yml = .github\workflows\frontend--publish-azure.yml
 		.github\workflows\frontend--publish-stage-azure.yml = .github\workflows\frontend--publish-stage-azure.yml
-		.github\workflows\tests.yml = .github\workflows\tests.yml
 		README.md = README.md
+		.github\workflows\tests.yml = .github\workflows\tests.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Common.CloudLibClient", "common\CESMII.Common.CloudLibClient\CESMII.Common.CloudLibClient.csproj", "{E7D7D56F-C9E4-4F52-AA69-1E48D071748D}"
@@ -33,6 +33,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Opc.Ua.Cloud.Library.Client", "common\Opc.Ua.Cloud.Library.Client\Opc.Ua.Cloud.Library.Client.csproj", "{15AE09A4-20FB-4BAC-8479-7C5B88207B19}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Common.SelfServiceSignUp", "common\CESMII.Common.SelfServiceSignUp\CESMII.Common.SelfServiceSignUp.csproj", "{A9880748-C4D5-4504-89A2-CA54ACAF0E7B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NLog.Mongo", "api\NLog.Mongo\NLog.Mongo.csproj", "{533A271F-8D53-42A5-84B3-C8623553E93A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -104,6 +106,12 @@ Global
 		{A9880748-C4D5-4504-89A2-CA54ACAF0E7B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A9880748-C4D5-4504-89A2-CA54ACAF0E7B}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
 		{A9880748-C4D5-4504-89A2-CA54ACAF0E7B}.Staging|Any CPU.Build.0 = Debug|Any CPU
+		{533A271F-8D53-42A5-84B3-C8623553E93A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{533A271F-8D53-42A5-84B3-C8623553E93A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{533A271F-8D53-42A5-84B3-C8623553E93A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{533A271F-8D53-42A5-84B3-C8623553E93A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{533A271F-8D53-42A5-84B3-C8623553E93A}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
+		{533A271F-8D53-42A5-84B3-C8623553E93A}.Staging|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

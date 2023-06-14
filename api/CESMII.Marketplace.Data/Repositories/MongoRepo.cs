@@ -90,32 +90,32 @@
             return result.Skip(skip).Limit(take).ToList();
         }
 
-        public List<TEntity> AggregateMatch(FilterDefinition<TEntity> filter, List<string> fieldList = null)
+        public async Task<List<TEntity>> AggregateMatchAsync(FilterDefinition<TEntity> filter, List<string> fieldList = null)
         {
             //calling it this way so that the repo will accept .Any syntax. The find syntax commented out operates 
             //slightly different in how it forms the query
             if (fieldList == null)
             {
-                return _collection.Aggregate().Match(filter).ToList();
+                return await _collection.Aggregate().Match(filter).ToListAsync();
             }
             else
             {
                 //performance improvement - limit columns being queried
                 string fieldListString = BuildProjectionFieldList(fieldList);
-                return _collection.Aggregate().Match(filter).Project<TEntity>(fieldListString).ToList();
+                return await _collection.Aggregate().Match(filter).Project<TEntity>(fieldListString).ToListAsync();
             }
 
         }
 
-        public List<TEntity> FindByCondition(Func<TEntity, bool> predicate)
+        public IQueryable<TEntity> FindByCondition(Expression<Func<TEntity, bool>> predicate)
         {
             //calling it this way so that the repo will accept .Any syntax. The find syntax commented out operates 
             //slightly different in how it forms the query
             IQueryable<TEntity> query = _collection.AsQueryable();
-            return query.Where(predicate).ToList();
+            return query.Where(predicate);
         }
 
-        public List<TEntity> FindByCondition(Func<TEntity, bool> predicate, int? skip, int? take,
+        public IQueryable<TEntity> FindByCondition(Func<TEntity, bool> predicate, int? skip, int? take,
             params Expression<Func<TEntity, object>>[] orderByExpressions)
         {
             var predicates = new List<Func<TEntity, bool>>
@@ -125,7 +125,7 @@
             return FindByCondition(predicates, skip, take, orderByExpressions);
 
         }
-        public List<TEntity> FindByCondition(Func<TEntity, bool> predicate, int? skip, int? take,
+        public IQueryable<TEntity> FindByCondition(Func<TEntity, bool> predicate, int? skip, int? take,
             params OrderByExpression<TEntity>[] orderByExpressions)
         {
             var predicates = new List<Func<TEntity, bool>>
@@ -136,7 +136,7 @@
         }
 
 
-        public List<TEntity> FindByCondition(List<Func<TEntity, bool>> predicates, int? skip, int? take,
+        public IQueryable<TEntity> FindByCondition(List<Func<TEntity, bool>> predicates, int? skip, int? take,
             params Expression<Func<TEntity, object>>[] orderByExpressions)
         {
             var exprs = new List<OrderByExpression<TEntity>>();
@@ -150,7 +150,7 @@
             return FindByCondition(predicates, skip, take, exprs.ToArray());
         }
 
-        public List<TEntity> FindByCondition(List<Func<TEntity, bool>> predicates, int? skip, int? take,
+        public IQueryable<TEntity> FindByCondition(List<Func<TEntity, bool>> predicates, int? skip, int? take,
             params OrderByExpression<TEntity>[] orderByExpressions)
         {
             IQueryable<TEntity> query = _collection.AsQueryable();
@@ -177,7 +177,7 @@
             {
                 query = query.Take(take.Value);
             }
-            return query.ToList();
+            return query;
         }
 
         public TEntity GetByID(string id)

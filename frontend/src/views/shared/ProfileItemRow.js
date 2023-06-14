@@ -2,7 +2,7 @@ import React from 'react'
 import { useHistory } from 'react-router-dom'
 import { Button } from 'react-bootstrap'
 
-import { formatDate, getImageUrl, getRandomArrayIndexes } from '../../utils/UtilityService';
+import { formatItemPublishDate, getImageUrl, getRandomArrayIndexes } from '../../utils/UtilityService';
 
 //const CLASS_NAME = "ProfileItemRow";
 
@@ -122,7 +122,7 @@ function ProfileItemRow(props) { //props are item, showActions
                         </p>
                     }
                     <p className="mb-2" ><b className="mr-2" >Published By:</b>{props.item.publisher.displayName}</p>
-                    <p className="mb-2" ><b className="mr-2" >Published:</b>{formatDate(props.item.publishDate)}</p>
+                    <p className="mb-2" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
                     <p className="mb-2" ><b className="mr-2" >Version:</b>{props.item.version}</p>
                     <div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>
                     <div className="d-none d-lg-inline" >{renderCategoryItem(props.item)}</div>
@@ -151,7 +151,7 @@ function ProfileItemRow(props) { //props are item, showActions
                         }
                         <p className="mb-0" >
                             <b className="mr-2" >Published By:</b>{props.item.publisher.displayName},
-                            <b className="mx-2" >on:</b>{formatDate(props.item.publishDate)}
+                            <b className="mx-2" >on:</b>{formatItemPublishDate(props.item)}
                         </p>
                     </div>
                     <div className="ml-auto" >

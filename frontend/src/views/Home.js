@@ -13,14 +13,14 @@ import { useLoadingContext } from "../components/contexts/LoadingContext";
 import MarketplaceFilter from './shared/MarketplaceFilter';
 import HeaderSearch from '../components/HeaderSearch';
 import MarketplaceTileList from './shared/MarketplaceTileList';
+import { clearSearchCriteria, generateSearchQueryString } from '../services/MarketplaceService';
+import { renderSchemaOrgContentHome } from '../utils/schemaOrgUtil';
 
 //slider / carousel - https://github.com/akiran/react-slick
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import '../components/styles/SlickSlider.scss';
-import { clearSearchCriteria } from '../services/MarketplaceService';
-import { renderSchemaOrgContentHome } from '../utils/schemaOrgUtil';
 import './styles/Home.scss';
 
 
@@ -35,7 +35,7 @@ function Home() {
     const { returnUrl } = useParams();
     const { instance } = useMsal();
     const _activeAccount = instance.getActiveAccount();
-    const { isAuthenticated, isAuthorized } = useLoginStatus(null, null /*[AppSettings.AADUserRole]*/);
+    const { isAuthenticated, isAuthorized } = useLoginStatus(null, [AppSettings.AADAdminRole]);
     const [_refreshData, setRefreshData] = useState(true);
     //const [_dataRows, setDataRows] = useState({
     //    featured: [], new: [], popular: []
@@ -50,7 +50,7 @@ function Home() {
     const [_searchCriteriaLocal, setSearchCriteriaLocal] = useState(null);
 
     //check for logged in status - redirect to home page/return url if already logged in.
-    if (history.location.pathname.indexOf('/admin/returnUrl=') > -1 && returnUrl != null && isAuthenticated && isAuthorized) {
+    if (history.location.pathname.indexOf('/login?returnUrl=') > -1 && returnUrl != null && isAuthenticated) {
         //set this for downstream use post successful silent login
         history.push(returnUrl ? decodeURIComponent(returnUrl) : '/');
     }
@@ -92,14 +92,20 @@ function Home() {
         criteria.query = val;
         criteria.skip = 0;
         setLoadingProps({ searchCriteria: criteria });
-        history.push('/library');
+        history.push({
+            pathname: '/library',
+            search: `?${generateSearchQueryString(criteria, 1)}`
+        });
     };
 
     //called when an item is selected in the filter panel
     const filterOnItemClick = (criteria) => {
         //filter event handler - set global state and navigate to search page
         setLoadingProps({ searchCriteria: criteria });
-        history.push('/library');
+        history.push({
+            pathname: '/library',
+            search: `?${generateSearchQueryString(criteria, 1)}`
+        });
     }
 
     //-------------------------------------------------------------------
@@ -304,7 +310,7 @@ function Home() {
         }
 
         const mainBody = _dataRowsFeatured.map((item) => {
-            return (<MarketplaceItemRow key={item.id} item={item} currentUserId={_activeAccount?.username} showActions={true} cssClass="marketplace-list-item carousel mb-0" />)
+            return (<MarketplaceItemRow key={item.id} item={item} isAuthenticated={isAuthenticated} isAuthorized={isAuthorized} showActions={true} cssClass="marketplace-list-item carousel mb-0" />)
         });
 
         return (

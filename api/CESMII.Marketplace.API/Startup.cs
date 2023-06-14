@@ -23,6 +23,7 @@ using Microsoft.IdentityModel.Logging;
 
 using NLog;
 using NLog.Extensions.Logging;
+using NLog.Fluent;
 
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Utils;
@@ -37,6 +38,9 @@ using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.JobManager;
 using CESMII.Marketplace.Api.Shared.Extensions;
 using CESMII.Common.CloudLibClient;
+using CESMII.Common.SelfServiceSignUp.Services;
+using CESMII.Common.SelfServiceSignUp.Models;
+using System.Security;
 
 namespace CESMII.Marketplace.Api
 {
@@ -58,11 +62,15 @@ namespace CESMII.Marketplace.Api
             //MongoDB approach
             services.Configure<MongoDBConfig>(Configuration);
 
-            //set variables used in nLog.config
-            //TBD - Mongo db - log to DB
-            //NLog.LogManager.Configuration.Variables["connectionString"] = connectionStringProfileDesigner;
-            NLog.LogManager.Configuration.Variables["appName"] = "CESMII-Marketplace";
+            string strConnectionString = Configuration["MongoDBSettings:ConnectionString"];
+            string strDatabase = Configuration["MongoDBSettings:DatabaseName"];
+            string strCollection = Configuration["MongoDBSettings:NLogCollectionName"];
+            NLog.Mongo.MongoTarget.SetNLogMongoOverrides(strConnectionString: strConnectionString,
+                                                         strCollectionName: strCollection,
+                                                         strDatabaseName: strDatabase);
 
+            // Set variable used in nLog.config
+            NLog.LogManager.Configuration.Variables["appName"] = "CESMII-Marketplace";
 
             //marketplace and related data
             services.AddScoped<IMongoRepository<MarketplaceItem>, MongoRepository<MarketplaceItem>>();
@@ -73,6 +81,7 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IMongoRepository<ImageItem>, MongoRepository<ImageItem>>();
             services.AddScoped<IMongoRepository<ImageItemSimple>, MongoRepository<ImageItemSimple>>();
             services.AddScoped<IMongoRepository<SearchKeyword>, MongoRepository<SearchKeyword>>();
+            services.AddScoped<IMongoRepository<ProfileItem>, MongoRepository<ProfileItem>>();
 
             //stock tables
             services.AddScoped<IMongoRepository<Organization>, MongoRepository<Organization>>();
@@ -83,6 +92,8 @@ namespace CESMII.Marketplace.Api
 
             //DAL objects
             services.AddScoped<UserDAL>();  //this one has extra methods outside of the IDal interface
+            services.AddScoped<OrganizationDAL>();
+            services.AddScoped<IUserSignUpData, UserSignUpData>();
             services.AddScoped<IDal<MarketplaceItem, MarketplaceItemModel>, MarketplaceDAL>();
             services.AddScoped<IDal<MarketplaceItem, AdminMarketplaceItemModel>, AdminMarketplaceDAL>();
             services.AddScoped<IDal<LookupItem, LookupItemModel>, LookupDAL>();
@@ -107,7 +118,8 @@ namespace CESMII.Marketplace.Api
             services.Configure<Opc.Ua.Cloud.Library.Client.UACloudLibClient.Options>(Configuration.GetSection("CloudLibrary"));
             services.AddSingleton<Opc.Ua.Cloud.Library.Client.UACloudLibClient>();
             services.AddSingleton<ICloudLibWrapper, CloudLibWrapper>();
-            services.AddScoped<ICloudLibDAL<MarketplaceItemModel>, CloudLibDAL>();
+            services.AddScoped<ICloudLibDAL<MarketplaceItemModelWithCursor>, CloudLibDAL>();
+            services.AddScoped<IAdminCloudLibDAL<AdminMarketplaceItemModelWithCursor>, AdminCloudLibDAL>();
 
             //AAD - no longer need this
             // Add token builder.
@@ -241,9 +253,11 @@ namespace CESMII.Marketplace.Api
                 }
             });
 
+            #pragma warning disable CS1998  // Silence warning: This async method lacks 'await' operators and will run synchronously.
             app.Use(async (context, next) =>
             {
-                context.Response.OnStarting(async o => {
+                context.Response.OnStarting(async o =>
+                {
                     if (o is HttpContext ctx)
                     {
                         ctx.Response.Headers["x-api-version"] = _version;

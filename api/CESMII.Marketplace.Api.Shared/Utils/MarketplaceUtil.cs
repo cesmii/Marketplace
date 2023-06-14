@@ -14,12 +14,12 @@
     public class MarketplaceUtil
     {
         private readonly IDal<MarketplaceItem, MarketplaceItemModel> _dalMarketplace;
-        private readonly ICloudLibDAL<MarketplaceItemModel> _dalCloudLib;
+        private readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _dalCloudLib;
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
         private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
 
         public MarketplaceUtil(IDal<MarketplaceItem, MarketplaceItemModel> dalMarketplace,
-            ICloudLibDAL<MarketplaceItemModel> dalCloudLib,
+            ICloudLibDAL<MarketplaceItemModelWithCursor> dalCloudLib,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
             IDal<LookupItem, LookupItemModel> dalLookup
             )
@@ -35,7 +35,12 @@
             _dalLookup = dalLookup;
         }
 
-        public List<MarketplaceItemModel> SimilarItems(MarketplaceItemModel item)
+        /// <summary>
+        /// Take the existing related group by and append in the automated similar items 
+        /// discovered here.
+        /// </summary>
+        /// <param name="item"></param>
+        public void AppendSimilarItems(ref MarketplaceItemModel item)
         {
             //union passed in list w/ lookup list.
             var cats = item.Categories.Select(x => x.ID).ToArray();
@@ -69,7 +74,8 @@
             }
 
             //build where clause - publisher id 
-            predicates.Add(x => x.PublisherId.ToString().Equals(item.Publisher.ID));
+            var pubId = item.Publisher.ID;
+            predicates.Add(x => x.PublisherId.ToString().Equals(pubId));
 
             //now combine all predicates into one predicate and use the OR extension so that we cast a wider net. 
             Func<MarketplaceItem, bool> predFinal = null;
@@ -82,7 +88,8 @@
             //limit to isActive
             predFinal = predFinal.And(x => x.IsActive);
             //remove self
-            predFinal = predFinal.And(x => !x.ID.Equals(item.ID));
+            var id = item.ID;
+            predFinal = predFinal.And(x => !x.ID.Equals(id));
             //limit to publish status of live
             predFinal = predFinal.And(this.BuildStatusFilterPredicate());
 
@@ -91,7 +98,45 @@
             var result = _dalMarketplace.Where(predFinal, null, 30, false, false, 
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
                     new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName }).Data;
-            return result;
+            //filter out any items already represented in related items collection
+            var relatedItems = item.RelatedItemsGrouped.SelectMany(x => x.Items).Select(y => y.RelatedId);
+
+            //convert to a simplified version of the marketplace item object
+            var autoMatches = result
+                .Where(x => !relatedItems.Contains(x.ID)) //filter out items already represented
+                .Select(x => new MarketplaceItemRelatedModel() {
+                //ID = x.ID,
+                RelatedId = x.ID,
+                Abstract = x.Abstract,
+                DisplayName = x.DisplayName,
+                Description = x.Description,
+                Name = x.Name,
+                Type = x.Type,
+                Version = x.Version,
+                ImagePortrait = x.ImagePortrait,
+                ImageLandscape = x.ImageLandscape
+            }).ToList();
+
+
+            //now combine auto matches with manual matches (if there are any manual matches)
+            var similarGroup = item.RelatedItemsGrouped.Find(x => x.RelatedType.Code.ToLower().Equals("similar"));
+            if (similarGroup != null)
+            {
+                similarGroup.Items = similarGroup.Items == null ? autoMatches : similarGroup.Items.Union(autoMatches).ToList();
+            }
+            else
+            {
+                var similarType = _dalLookup.Where(x => x.LookupType.EnumValue == LookupTypeEnum.RelatedType, null, null, false).Data
+                                        .Find(x => (x.Code == null ? "" : x.Code).ToLower().Equals("similar"));
+                if (similarType != null)
+                {
+                    item.RelatedItemsGrouped.Add(new RelatedItemsGroupBy()
+                    {
+                        RelatedType = similarType,
+                        Items = autoMatches
+                    });
+                }
+            }
         }
 
         public async Task<List<MarketplaceItemModel>> PopularItems()
@@ -128,9 +173,10 @@
             var itemsMarketplace = _dalMarketplace.Where(predicatesMarketplace, null, 4, false, false).Data;
 
             //now get the cloudlib items with popular rankings
-            var itemsCloudLib = await _dalCloudLib.Where(null, popularCloudLib, null, null, null);
+            var itemsCloudLib = await _dalCloudLib.Where(query: null, skip: 0, take: 4, startCursor: null, endCursor: null, noTotalCount: false, 
+                ids: popularCloudLib, processes: null, verticals: null, exclude: null);
 
-            return itemsMarketplace.Union(itemsCloudLib).ToList();
+            return itemsMarketplace.Union(itemsCloudLib.Data).ToList();
 
         }
 
@@ -187,13 +233,13 @@
             return Task.FromResult(itemsMarketplace.ToList());
         }
 
-        private async Task<List<MarketplaceItemModel>> PopularItemsCloudLib(List<OrderByExpression<MarketplaceItemAnalytics>> orderBys)
+        private async Task<List<MarketplaceItemModelWithCursor>> PopularItemsCloudLib(List<OrderByExpression<MarketplaceItemAnalytics>> orderBys)
         {
             //run in parallel
             var popularCloudLib = _dalAnalytics.Where(x => !string.IsNullOrEmpty(x.CloudLibId), null, 4, false, false, orderBys.ToArray()).Data
                 .Select(x => x.CloudLibId).ToList();
             //now get the cloudlib items with popular rankings
-            return await _dalCloudLib.Where(null, popularCloudLib, null, null, null);
+            return (await _dalCloudLib.Where(null, null, 4, null, null, false, popularCloudLib, null, null, null)).Data;
         }
 
         /// <summary>

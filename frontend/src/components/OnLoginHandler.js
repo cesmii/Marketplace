@@ -34,7 +34,7 @@ export const useLoginStatus = (location = null, roles = null) => {
     let redirectUrl = '/';
     if (!isAuthenticated) {
         redirectUrl = location?.pathname && location?.pathname !== '/' ?
-            `/admin/returnUrl=${encodeURIComponent(location?.pathname)}` : '/admin';
+            `/?returnUrl=${encodeURIComponent(location?.pathname)}` : '/';
     }
     else if (!isAuthorized) {
         redirectUrl = '/notpermitted';
@@ -147,7 +147,7 @@ export const onAADLoginComplete = (instance, history, setLoadingProps, statusCod
                 isLoading: false, message: null, modalMessages:
                     [{ id: new Date().getTime(), severity: "danger", body: 'An error occurred processing your login request. Please try again.', isTimed: false }]
             });
-            history.push('/admin');
+            history.push('/');
             break;
     }
 };
@@ -424,7 +424,7 @@ export const useLoginSilent = () => {
         }
 
         //if on the /login page, then don't attempt login silent.
-        if (window.location.href.indexOf('/admin') > -1) return;
+        if (window.location.href.indexOf('/login') > -1) return;
 
         //if not logged in, try silently
         if (!_activeAccount || !_isAuthenticated) {
@@ -491,7 +491,7 @@ export const useOnLoginComplete = () => {
                     loginStatusCode: null, isLoading: false, message: null, modalMessages:
                         [{ id: new Date().getTime(), severity: "danger", body: 'An error occurred processing your login request. Please try again.', isTimed: false }]
                 });
-                //history.push('/admin');
+                //history.push('/');
                 break;
         }
 
@@ -527,8 +527,8 @@ export const useOnLoginComplete = () => {
         case 400:
         case 500:
         default:
-            return (<Redirect to={'/admin'} />);
-        //history.push('/admin');
+            return (<Redirect to={'/'} />);
+        //history.push('/');
         //break;
     }
 
@@ -537,7 +537,7 @@ export const useOnLoginComplete = () => {
 //-------------------------------------------------------------------
 // Region: doLogout
 //-------------------------------------------------------------------
-export const doLogout = (history, instance, redirectUrl = `/admin`, silent = true, logoutLocalOnly = true) => {
+export const doLogout = (history, instance, redirectUrl = `/`, silent = true, logoutLocalOnly = true) => {
     //scenario 1 - logout of everything
     if (!logoutLocalOnly) {
         instance.logoutPopup({

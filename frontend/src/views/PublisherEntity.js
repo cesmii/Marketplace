@@ -2,17 +2,17 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 import axiosInstance from "../services/AxiosService";
-import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 
 import { AppSettings } from '../utils/appsettings';
-import { generateLogMessageString, getMarketplaceIconName, getMarketplaceCaption, isInRole, convertHtmlToString } from '../utils/UtilityService'
-import { MarketplaceBreadcrumbs } from './shared/MarketplaceBreadcrumbs';
+import { useLoginStatus } from '../components/OnLoginHandler';
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
+import { generateLogMessageString, getMarketplaceIconName, convertHtmlToString } from '../utils/UtilityService'
+import { MarketplaceBreadcrumbs } from './shared/MarketplaceBreadcrumbs';
 
 import { SvgVisibilityIcon } from "../components/SVGIcon";
 import color from "../components/Constants";
 import SocialMedia from "../components/SocialMedia";
-import { clearSearchCriteria, toggleSearchFilterSelected } from '../services/MarketplaceService';
+import { clearSearchCriteria, generateSearchQueryString, toggleSearchFilterSelected } from '../services/MarketplaceService';
 import MarketplaceTileList from './shared/MarketplaceTileList';
 import PublisherEntitySidebar from './shared/PublisherEntitySidebar';
 import { renderSchemaOrgContentPublisher } from '../utils/schemaOrgUtil';
@@ -30,11 +30,7 @@ function PublisherEntity() {
     const [item, setItem] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const { instance } = useMsal();
-    const _isAuthenticated = useIsAuthenticated();
-    const _activeAccount = instance.getActiveAccount();
-    //Check for is authenticated. Check individual permissions - ie can manage marketplace items.
-    const _isAuthorized = _isAuthenticated && _activeAccount != null && (isInRole(_activeAccount, "cesmii.marketplace.marketplaceadmin"));
+    const { isAuthenticated, isAuthorized } = useLoginStatus(null, [AppSettings.AADAdminRole]);
 
     useEffect(() => {
         async function fetchData() {
@@ -44,8 +40,8 @@ function PublisherEntity() {
 
             var result = null;
             try {
-                var data = { id: id };
-                var url = `publisher/getbyname`;
+                const data = { id: id };
+                const url = `publisher/getbyname`;
                 result = await axiosInstance.post(url, data);
             }
             catch (err) {
@@ -73,7 +69,7 @@ function PublisherEntity() {
             setLoadingProps({ isLoading: false, message: null });
 
             //add to the recent file list to keep track of where we have been
-            var revisedList = UpdateRecentFileList(loadingProps.recentFileList, {
+            const revisedList = UpdateRecentFileList(loadingProps.recentFileList, {
                 url: history.location.pathname, caption: result.data.displayName, iconName: getMarketplaceIconName(result.data),
                 authorId: result.data.author != null ? result.data.author.id : null
             });
@@ -114,7 +110,10 @@ function PublisherEntity() {
         setLoadingProps({ searchCriteria: criteria });
 
         //navigate to marketplace list
-        history.push({ pathname: `/library` });
+        history.push({
+            pathname: '/library',
+            search: `?${generateSearchQueryString(criteria, 1)}`
+        });
     };
 
 
@@ -126,7 +125,7 @@ function PublisherEntity() {
 
         return (
             <>
-                <MarketplaceBreadcrumbs item={item} isAuthenticated={_isAuthenticated && _activeAccount != null} />
+                <MarketplaceBreadcrumbs item={item} isAuthenticated={isAuthenticated} />
             </>
         );
     };
@@ -155,7 +154,7 @@ function PublisherEntity() {
                     {item.displayName}
                 </h1>
                 <a className="btn btn-secondary ml-2 px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/request-info/publisher/${item.id}`} >Request Info</a>
-                {_isAuthorized &&
+                {isAuthorized &&
                     <a className="btn btn-icon-outline circle ml-2" href={`/admin/publisher/${item.id}`} ><i className="material-icons">edit</i></a>
                 }
             </>

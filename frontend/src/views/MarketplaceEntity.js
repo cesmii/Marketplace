@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useHistory } from 'react-router-dom'
 import { Helmet } from "react-helmet"
-import { useIsAuthenticated, useMsal } from "@azure/msal-react";
 
 import axiosInstance from "../services/AxiosService";
+import { useLoginStatus } from '../components/OnLoginHandler';
 import { AppSettings } from '../utils/appsettings';
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
 
@@ -12,9 +12,8 @@ import SocialMedia from "../components/SocialMedia";
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
 import MarketplaceEntitySidebar from './shared/MarketplaceEntitySidebar';
 
-import { convertHtmlToString, generateLogMessageString, getImageUrl, getMarketplaceIconName, isInRole } from '../utils/UtilityService'
-import { clearSearchCriteria, toggleSearchFilterSelected } from '../services/MarketplaceService';
-import MarketplaceTileList from './shared/MarketplaceTileList';
+import { convertHtmlToString, generateLogMessageString, getImageUrl, getMarketplaceIconName } from '../utils/UtilityService'
+import { clearSearchCriteria, generateSearchQueryString, MarketplaceRelatedItems, toggleSearchFilterSelected } from '../services/MarketplaceService';
 import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
 import { SvgVisibilityIcon } from '../components/SVGIcon';
 
@@ -29,16 +28,15 @@ function MarketplaceEntity() {
     // Region: Initialization
     //-------------------------------------------------------------------
     const history = useHistory();
+    const _scrollToSpecs = useRef(null);
+    const _scrollToRelated = useRef(null);
 
     const { id } = useParams();
     const [item, setItem] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const { instance } = useMsal();
-    const _isAuthenticated = useIsAuthenticated();
-    const _activeAccount = instance.getActiveAccount();
-    //Check for is authenticated. Check individual permissions - ie can manage marketplace items.
-    const _isAuthorized = _isAuthenticated && _activeAccount != null && (isInRole(_activeAccount, "cesmii.marketplace.marketplaceadmin"));
+    const { isAuthenticated, isAuthorized } = useLoginStatus(null, [AppSettings.AADAdminRole]);
+
     ////is favorite calc
     //const [isFavorite, setIsFavorite] = useState((loadingProps.favoritesList != null && loadingProps.favoritesList.findIndex(x => x.url === history.location.pathname) > -1));
 
@@ -50,8 +48,8 @@ function MarketplaceEntity() {
 
             var result = null;
             try {
-                var data = { id: id, isTracking: true };
-                var url = `marketplace/getbyname`;
+                const data = { id: id, isTracking: true };
+                const url = `marketplace/getbyname`;
                 result = await axiosInstance.post(url, data);
             }
             catch (err) {
@@ -79,7 +77,7 @@ function MarketplaceEntity() {
             setLoadingProps({ isLoading: false, message: null });
 
             //add to the recent file list to keep track of where we have been
-            var revisedList = UpdateRecentFileList(loadingProps.recentFileList, {
+            const revisedList = UpdateRecentFileList(loadingProps.recentFileList, {
                 url: history.location.pathname, caption: result.data.displayName, iconName: getMarketplaceIconName(result.data),
                 authorId: result.data.author != null ? result.data.author.id : null
             });
@@ -94,7 +92,7 @@ function MarketplaceEntity() {
         return () => {
             console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
         };
-    }, [id, _isAuthenticated]);
+    }, [id, isAuthenticated]);
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
@@ -129,10 +127,17 @@ function MarketplaceEntity() {
         setLoadingProps({ searchCriteria: criteria });
 
         //navigate to marketplace list
-        history.push({ pathname: `/library` });
+        history.push({
+            pathname: '/library',
+            search: `?${generateSearchQueryString(criteria, 1)}`
+        });
     };
 
- 
+    const onViewSpecifications = (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: (_scrollToSpecs.current.getBoundingClientRect().y - 80), behavior: 'smooth' });
+    }
+
     //-------------------------------------------------------------------
     // Region: Render Helpers
     //-------------------------------------------------------------------
@@ -141,7 +146,7 @@ function MarketplaceEntity() {
 
         return (
             <>
-                <MarketplaceBreadcrumbs item={item} isAuthenticated={_isAuthenticated && _activeAccount != null} />
+                <MarketplaceBreadcrumbs item={item} isAuthenticated={isAuthenticated} />
             </>
         );
     };
@@ -170,7 +175,7 @@ function MarketplaceEntity() {
                     {item.displayName}
                 </h1>
                 {/*<SVGIcon name={isFavorite ? "favorite" : "favorite-border"} size="24" fill={color.forestGreen} onClick={toggleFavoritesList} />*/}
-                {_isAuthorized &&
+                {isAuthorized &&
                     <a className="btn btn-icon-outline circle ml-auto" href={`/admin/library/${item.id}`} ><i className="material-icons">edit</i></a>
                 }
             </>
@@ -179,20 +184,8 @@ function MarketplaceEntity() {
 
     const renderSolutionDetails = () => {
 
-        //show heading based on type
-        var subHeading = item.type == null || item.type.name === null ? 'Smart Manufacturing App'
-            : item.type.name.replace('SM ', 'Smart Manufacturing ');
-
         return (
             <>
-                <div className="row mb-2 mb-md-3" >
-                    <div className="col-sm-12 d-flex align-items-center">
-                        <h2 className="m-0 mr-2">
-                            <span className="d-none d-md-inline">{subHeading} </span> Details
-                        </h2>
-                        <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/app/${item.id}`} >Request More Info</a>
-                    </div>
-                </div>
                 <div className="row" >
                     <div className="col-sm-12">
                         <div className="mb-3 entity-description" dangerouslySetInnerHTML={{ __html: item.description }} ></div>
@@ -207,10 +200,10 @@ function MarketplaceEntity() {
                         <span className="m-0 mr-2 my-2 mb-md-0 d-flex align-items-center">
                             <SvgVisibilityIcon fill={color.link} />
                             <button className="btn btn-link" onClick={filterByPublisher} >
-                            View all by this publisher</button>
+                                View all by this publisher</button>
                         </span>
                     </div>
-                    {(item.publisher.socialMediaLinks != null && item.publisher.socialMediaLinks.length > 0) && 
+                    {(item.publisher.socialMediaLinks != null && item.publisher.socialMediaLinks.length > 0) &&
                         <div className="col-sm-4 d-flex justify-content-md-end mb-2 mb-md-0 align-items-center">
                             <SocialMedia items={item.publisher.socialMediaLinks} />
                         </div>
@@ -225,7 +218,8 @@ function MarketplaceEntity() {
         if (!loadingProps.isLoading && (item == null)) {
             return;
         }
-        return (<MarketplaceItemEntityHeader key={item.id} item={item} isAuthenticated={_isAuthenticated && _activeAccount != null} isAuthorized={_isAuthorized} showActions={true} cssClass="marketplace-list-item" />)
+        return (<MarketplaceItemEntityHeader key={item.id} item={item} isAuthenticated={isAuthenticated} isAuthorized={isAuthorized}
+            showActions={true} cssClass="marketplace-list-item" onViewSpecifications={onViewSpecifications} />)
     }
 
     //
@@ -235,26 +229,38 @@ function MarketplaceEntity() {
         );
     }
 
-    //render new
-    const renderSimilarItems = () => {
+    const renderMainContent = () => {
         if (loadingProps.isLoading) return;
-
-        if (item.similarItems == null || item.similarItems.length === 0) return;
 
         return (
             <>
-                <div className="row" >
-                    <div className="col-sm-12 mt-5 mb-3" >
-                        <h3 className="m-0">
-                            Related
-                        </h3>
+                <div className="marketplace-list-item border" >
+                    <div className="card mb-0 border-0">
+                        <div className="card-header bg-transparent p-2 pt-3 border-bottom-0" id="headingOne">
+                            <div className="col-sm-12 d-flex align-items-center">
+                                <h2 className="m-0 mr-2">
+                                    {(item.type == null || item.type.name === null) ?
+                                        'Smart Manufacturing App Details'
+                                        : `${item.type.name.replace('SM ', 'Smart Manufacturing ')} Details`
+                                    }
+                                </h2>
+                                <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/app/${item.id}`} >Request More Info</a>
+                            </div>
+                        </div>
+                        <div id="collapseOne" className="collapse show mb-3" aria-labelledby="headingOne" >
+                            <div className="card-body">
+                                {renderSolutionDetails()}
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div className="row" >
-                    <div className="col-sm-12">
-                        <MarketplaceTileList items={item.similarItems} layout="banner" colCount={3} />
-                    </div>
-                </div>
+
+                {(item.relatedItemsGrouped != null && item.relatedItemsGrouped.length > 0) &&
+                    <>
+                    <h2 ref={_scrollToSpecs} className="m-3 mt-4" >Specifications</h2>
+                    <MarketplaceRelatedItems items={item.relatedItemsGrouped} />
+                    </>
+                }
             </>
         );
     }
@@ -295,8 +301,7 @@ function MarketplaceEntity() {
                             {(!loadingProps.isLoading && !isLoading) &&
                                 <div className="marketplace-entity">
                                     {renderItemRow()}
-                                    {renderSolutionDetails()}
-                                    {renderSimilarItems()}
+                                    {renderMainContent()}
                                 </div>
                             }
                         </div>

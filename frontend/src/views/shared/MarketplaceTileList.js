@@ -3,6 +3,7 @@ import { Card } from 'react-bootstrap';
 
 import stockTilePhoto from '../../components/img/icon-molecule-landscape.svg'
 import iconMolecule from '../../components/img/icon-molecule-portrait.svg'
+import { AppSettings } from '../../utils/appsettings';
 import { getImageAlt, getImageUrl } from '../../utils/UtilityService';
 import '../styles/MarketplaceTileList.scss';
 
@@ -17,8 +18,42 @@ function MarketplaceTileList(props) {
     //-------------------------------------------------------------------
     // Region: Render different layout styles
     //-------------------------------------------------------------------
+    const renderDisplayName = (item) =>
+    {
+        if (item.type?.code === AppSettings.itemTypeCode.smProfile) {
+            return (
+                <>
+                    {item.displayName}
+                    {(item.version != null && item.version !== '') &&
+                        <>
+                            <br />
+                            <span className="font-weight-normal" >(v. {item.version})</span>
+                        </>
+                    }
+                </>
+            );
+        }
+
+        return (item.displayName);
+    };
+
+    const renderProfileAbstract = (item) => {
+        return (
+            <>
+                {(item.namespace != null && item.namespace !== '') &&
+                    <>
+                        <span style={{ wordBreak: "break-word" }} >{item.namespace}</span>
+                    </>
+                }
+            </>
+        );
+    };
+
+    //-------------------------------------------------------------------
+    // Region: Render different layout styles
+    //-------------------------------------------------------------------
     const renderCardImageBanner = (item, isfirst, isLast) => {
-        var imgSrc = item.imageLandscape == null ? stockTilePhoto : getImageUrl(item.imageLandscape);
+        const imgSrc = item.imageLandscape == null ? stockTilePhoto : getImageUrl(item.imageLandscape);
 
         //some of the css is trying to achieve same height for tiles in a row based on variable content
         return (
@@ -26,35 +61,34 @@ function MarketplaceTileList(props) {
                 <Card.Body className="h-100 p-0 tile-body">
                     <img className="card-img-top" src={imgSrc} alt={`${item.name}-${getImageAlt(item.imageLandscape)}`} />
                     <div className="body-content p-4 pb-0" >
-                        <span className="card-title font-weight-bold mb-3 d-block bitter">{item.displayName}</span>
-                        <div className="card-text mb-0" dangerouslySetInnerHTML={{ __html: item.abstract }} ></div>
+                        <span className="card-title font-weight-bold mb-3 d-block bitter">{renderDisplayName(item)}</span>
+                        {(item.type?.code === AppSettings.itemTypeCode.smProfile) ?
+                            <div className="card-text mb-0" >{renderProfileAbstract(item)}</div>
+                            :
+                            <div className="card-text mb-0" dangerouslySetInnerHTML={{ __html: item.abstract }} ></div>
+                         }
                     </div>
             </Card.Body>
             </Card>
         );
     }
 
-    //square image
-    //const renderCardThumbnail = (item, isfirst, isLast) => {
-    //    var imgSrc = item.imageSquare == null ? iconMolecule : getImageUrl(item.imageSquare);
-    //    return (
-    //        <Card className="h-100 border-0 mb-0 marketplace-tile">
-    //            <Card.Body className="h-100 p-0 tile-body">
-    //                <div className="row body-content p-4 pb-0" >
-    //                    {imgSrc != null &&
-    //                        <div className="col-3 col-sm-4" >
-    //                            <img className={`card-img-thumb p-1 p-lg-2`} src={imgSrc} alt={`${item.name}-${getImageAlt(item.imageSquare)}`} />
-    //                        </div>
-    //                    }
-    //                    <div className={`${imgSrc != null ? "col-9 col-sm-8" : "col-12 p-0"}`} >
-    //                        <span className="card-title font-weight-bold mb-3 d-block bitter">{item.displayName}</span>
-    //                        <div className="card-text mb-0" dangerouslySetInnerHTML={{ __html: item.abstract }} ></div>
-    //                    </div>
-    //                </div>
-    //            </Card.Body>
-    //        </Card>
-    //    );
-    //}
+    const renderCardImageBannerAbbreviated = (item, isfirst, isLast) => {
+        const imgSrc = item.imageLandscape == null ? stockTilePhoto : getImageUrl(item.imageLandscape);
+
+        //some of the css is trying to achieve same height for tiles in a row based on variable content
+        return (
+            <Card className="h-100 border-0 mb-0 marketplace-tile">
+                <Card.Body className="h-100 p-0 tile-body">
+                    <img className="card-img-top" src={imgSrc} alt={`${item.name}-${getImageAlt(item.imageLandscape)}`} />
+                    <div className="body-content p-2 px-4" >
+                        <span className="card-title font-weight-bold d-block bitter text-center">{renderDisplayName(item)}</span>
+                    </div>
+                </Card.Body>
+            </Card>
+        );
+    }
+
 
     //portrait image down left side of tile
     const renderCardThumbnail = (item, isfirst, isLast) => {
@@ -65,7 +99,7 @@ function MarketplaceTileList(props) {
                         {renderImageBg(item)}
                     </div>
                     <div className="col-md-12 col-lg-7 p-4" >
-                        <span className="card-title font-weight-bold mb-3 d-block bitter">{item.displayName}</span>
+                        <span className="card-title font-weight-bold mb-3 d-block bitter">{renderDisplayName(item)}</span>
                         <div className="card-text mb-0" dangerouslySetInnerHTML={{ __html: item.abstract }} ></div>
                     </div>
                 </Card.Body>
@@ -74,8 +108,8 @@ function MarketplaceTileList(props) {
     }
 
     const renderImageBg = (item) => {
-        var imgSrc = item.imagePortrait == null ? iconMolecule : getImageUrl(item.imagePortrait);
-        var bgImageStyle = 
+        const imgSrc = item.imagePortrait == null ? iconMolecule : getImageUrl(item.imagePortrait);
+        const bgImageStyle = 
             {
                 backgroundImage: `url(${imgSrc})`
             };
@@ -96,22 +130,28 @@ function MarketplaceTileList(props) {
             )
         }
 
-        var colCountCss = props.colCount == null ? 'col-sm-4' : `col-sm-${(12 / props.colCount).toString()}`;
+        const colCountCss = props.colCount == null ? 'col-sm-4' : `col-sm-${(12 / props.colCount).toString()}`;
 
         const mainBody = props.items.map((itm, counter) => {
-            var isFirst = counter === 0;
-            var isLast = counter === props.items.length;
-            var mainBody = null;
+            const isFirst = counter === 0;
+            const isLast = counter === props.items.length;
+            var tile = null;
             if (props.layout === "banner") {
-                mainBody = renderCardImageBanner(itm, isFirst, isLast);
+                tile = renderCardImageBanner(itm, isFirst, isLast);
+            }
+            else if (props.layout === "banner-abbreviated") {
+                tile = renderCardImageBannerAbbreviated(itm, isFirst, isLast);
             }
             else {
-                mainBody = renderCardThumbnail(itm, null, isFirst, isLast);
+                tile = renderCardThumbnail(itm, isFirst, isLast);
             }
+            const url = itm.type?.code === AppSettings.itemTypeCode.smProfile ? `/profile/${itm.id != null ? itm.id : itm.relatedId}` :
+                    `/library/${itm.name}`;
+
             return (
                 <div key={itm.id} className={`${colCountCss} pb-4`}>
-                    <a href={`/library/${itm.name}`} className="tile-link" >
-                        {mainBody}
+                    <a href={url} className="tile-link" >
+                        {tile}
                     </a>
                 </div>
             )

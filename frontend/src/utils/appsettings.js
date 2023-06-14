@@ -64,7 +64,8 @@ export const AppSettings = {
         RequestInfo: 7,
         TaskStatus: 8,
         MembershipStatus: 9,
-        SmItemType: 10
+        SmItemType: 10,
+        RelatedType: 11
     },
     requestInfoNew: {
         marketplaceItemId: null,
@@ -132,7 +133,8 @@ export const AppSettings = {
         },
     }
     , MsalScopes: [process.env.REACT_APP_MSAL_SCOPE]  //tied to scope defined in app registration / scope, set in Azure AAD
-    //, AADUserRole: "cesmii.marketplace.user"
+    , AADAdminRole: "cesmii.marketplace.marketplaceadmin"
+    , AADJobAdminRole: "cesmii.marketplace.jobadmin"
     , ProfileDesignerUrl: process.env.REACT_APP_PROFILEDESIGNER_URL
 }
 

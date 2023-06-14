@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Data.Repositories;
 using CESMII.Marketplace.Common.Utils;
+using CESMII.Common.SelfServiceSignUp.Services;
 
 namespace CESMII.Marketplace.JobManager
 {

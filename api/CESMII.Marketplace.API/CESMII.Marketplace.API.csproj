@@ -18,11 +18,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\common\CESMII.Common.CloudLibClient\CESMII.Common.CloudLibClient.csproj" />
+    <ProjectReference Include="..\..\common\CESMII.Common.SelfServiceSignUp\CESMII.Common.SelfServiceSignUp.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Api.Shared\CESMII.Marketplace.Api.Shared.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Common\CESMII.Marketplace.Common.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.DAL\CESMII.Marketplace.DAL.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Data\CESMII.Marketplace.Data.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.JobManager\CESMII.Marketplace.JobManager.csproj" />
+    <ProjectReference Include="..\NLog.Mongo\NLog.Mongo.csproj" />
   </ItemGroup>
 
   <!--<ItemGroup>
@@ -39,7 +41,7 @@
 
 	<ItemGroup>
     <Content Update="NLog.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 

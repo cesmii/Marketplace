@@ -2,8 +2,8 @@ import React from 'react'
 import { useHistory } from 'react-router-dom'
 import { Button } from 'react-bootstrap'
 
-import { formatDate, generateLogMessageString, getImageUrl, getRandomArrayIndexes } from '../../utils/UtilityService';
-import { clearSearchCriteria, toggleSearchFilterSelected } from '../../services/MarketplaceService'
+import { formatItemPublishDate, generateLogMessageString, getImageUrl, getRandomArrayIndexes } from '../../utils/UtilityService';
+import { clearSearchCriteria, generateSearchQueryString, toggleSearchFilterSelected } from '../../services/MarketplaceService'
 import { useLoadingContext } from '../../components/contexts/LoadingContext'
 import { SvgVisibilityIcon } from '../../components/SVGIcon'
 import color from '../../components/Constants'
@@ -40,7 +40,10 @@ function MarketplaceItemRow(props) { //props are item, showActions
         setLoadingProps({ searchCriteria: criteria });
 
         //navigate to marketplace list
-        history.push({pathname: `/library`});
+        history.push({
+            pathname: '/library',
+            search: `?${generateSearchQueryString(criteria, 1)}`
+        });
     };
 
     //-------------------------------------------------------------------
@@ -49,7 +52,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
     const renderMetaTagsRandom = (items, limit) => {
         if (items == null) return;
 
-        var randomIndexes = getRandomArrayIndexes(items, limit);
+        const randomIndexes = getRandomArrayIndexes(items, limit);
         if (randomIndexes == null || randomIndexes.length === 0) return;
         return (
             randomIndexes.map((i) => {
@@ -97,7 +100,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
     const renderCategoryTagsRandom = (items, limit) => {
         if (items == null) return;
 
-        var randomIndexes = getRandomArrayIndexes(items, limit);
+        const randomIndexes = getRandomArrayIndexes(items, limit);
         if (randomIndexes == null || randomIndexes.length === 0) return;
         return (
             randomIndexes.map((i) => {
@@ -139,7 +142,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
             </div>
         );
         */
-        var bgImageStyle = props.item.imagePortrait == null ? {} :
+        const bgImageStyle = props.item.imagePortrait == null ? {} :
             {
                 backgroundImage: `url(${getImageUrl(props.item.imagePortrait)})`
             };
@@ -169,7 +172,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
                     <div className="d-flex align-items-center mb-2" >
                         <h2 className="mb-0" >{props.item.displayName}
                         </h2>
-                        {(props.currentUserId != null) &&
+                        {(props.isAuthorized) &&
                             <a className="btn btn-icon-outline circle ml-auto" href={`/admin/library/${props.item.id}`} ><i className="material-icons">edit</i></a>
                         }
                     </div>
@@ -184,7 +187,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
                         <button className="btn btn-link" onClick={filterByPublisher} >
                             View all by this publisher</button>
                     </p>
-                    <p className="mb-3" ><b className="mr-2" >Published:</b>{formatDate(props.item.publishDate)}</p>
+                    <p className="mb-3" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
                     <div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>
                     <div className="d-none d-lg-inline" >{renderCategoryItem(props.item)}</div>
                     <div className="d-none d-lg-inline" >{renderMetaTagItem(props.item)}</div>
