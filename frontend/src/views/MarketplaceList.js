@@ -262,9 +262,19 @@ function MarketplaceList() {
         }
         const currentPage = p == null || !isNumeric(p) ? 1 : parseInt(p);
         const pageSize = t == null || !isNumeric(t) ? criteria.take : parseInt(t);
-        setCurrentPage(currentPage);
+
+        //this hook is triggered when loadingProps.searchCriteria changes OR params change. 
+        //because page size is persisted in loadingProps.searchCriteria (as take), we cannot update it w/o
+        //causing 2nd fetch. So, if page size passed in causes take to change, then lets update it, return from 
+        //here and then that state change will trigger a 2nd pass through here.  
         criteria.skip = (currentPage - 1) * pageSize; //0-based
         criteria.take = pageSize;
+        if (pageSize !== loadingProps.searchCriteria.take) {
+            setLoadingProps({ searchCriteria: criteria });
+            return;
+        }
+
+        setCurrentPage(currentPage);
 
         //no filterable query strings, just get the default list
         if (!q && !sm && !f) {
