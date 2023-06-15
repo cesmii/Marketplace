@@ -70,6 +70,7 @@ function Routes() {
             <AdminRoute path="/admin/requestinfo/:id" component={AdminRequestInfoEntity} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/images/list" component={AdminStockImageList} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/lookup/list" component={AdminLookupList} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/lookup/copy/:parentId" component={AdminLookupEntity} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/lookup/:id" component={AdminLookupEntity} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/jobDefinition/list" component={AdminJobDefinitionList} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/jobDefinition/:id" component={AdminJobDefinitionEntity} roles={[AppSettings.AADAdminRole]} />
