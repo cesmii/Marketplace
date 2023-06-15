@@ -62,6 +62,9 @@ function DownloadMessage() {
                     openFile(item);
                     item.data = null;
 
+                    //cache the uid value for future downloads
+                    setLoadingProps({ downloadNodesetUid: result.data.uid });
+
                 }
                 else {
                     item = {
