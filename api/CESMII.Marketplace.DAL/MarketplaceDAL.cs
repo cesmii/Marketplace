@@ -75,7 +75,7 @@
             //get related data - pass list of item ids and publisher ids. 
             //pass in this id as well as ids from relatedItems
             var ids = new List<MongoDB.Bson.BsonObjectId>() { new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(id)) };
-            ids = !entity.RelatedItems.Any() ? ids : ids.Union(entity.RelatedItems.Select(x => x.MarketplaceItemId)).ToList();
+            ids = entity.RelatedItems == null || !entity.RelatedItems.Any() ? ids : ids.Union(entity.RelatedItems.Select(x => x.MarketplaceItemId)).ToList();
             GetDependentData(
                 ids,
                 new List<MongoDB.Bson.BsonObjectId>() { entity.PublisherId }).Wait();
