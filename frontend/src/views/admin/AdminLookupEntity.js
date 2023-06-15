@@ -403,8 +403,8 @@ function AdminLookupEntity() {
                 </Dropdown.Toggle>
                 <Dropdown.Menu>
                     <Dropdown.Item href={`/admin/lookup/new`}>Add Lookup Item</Dropdown.Item>
-                    <Dropdown.Item href={`/admin/lookup/copy/${item.id}`}>Copy '{item.name}'</Dropdown.Item>
-                    <Dropdown.Item onClick={onDeleteItem} >Delete '{item.name}'</Dropdown.Item>
+                    <Dropdown.Item href={`/admin/lookup/copy/${item.id}`}>Copy item '{item.name}'</Dropdown.Item>
+                    <Dropdown.Item onClick={onDeleteItem} >Delete item '{item.name}'</Dropdown.Item>
                 </Dropdown.Menu>
             </Dropdown>
         );
