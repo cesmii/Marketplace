@@ -140,47 +140,6 @@ function MarketplaceList() {
     }
 
     //-------------------------------------------------------------------
-    // Region: Hook - Triggers reload of page with proper query string parameters
-    //-------------------------------------------------------------------
-    useEffect(() => {
-        if (_criteria == null) {
-            // this typically happens when navigating to a page or refreshing: ignore
-            return;
-        }
-        let newLocation = {
-            pathname: '/library',
-            search: `?${generateSearchQueryString(_criteria, _currentPage)}`
-        };
-        if (history.location.pathname !== newLocation.pathname || history.location.search != newLocation.search) {
-            history.push(newLocation);
-        }
-    }, [_criteria]);
-    //}, [_criteria, _currentPage]);
-
-    //-------------------------------------------------------------------
-    // Region: Hook - When search criteria in localstorage is updated, then update this criteria value
-    //      This will also trigger a new fetch of data 
-    //-------------------------------------------------------------------
-    /*
-    useEffect(() => {
-        if (_criteria != null || loadingProps?.searchCriteria == null) {
-            return;
-        }
-        setCriteria(loadingProps.searchCriteria);
-    }, [loadingProps.searchCriteria]);
-    */
-
-    //const onTileViewToggle = () => {
-    //    console.log(generateLogMessageString('onTileViewToggle', CLASS_NAME));
-    //    setDataRows({ ..._dataRows, listView: false });
-    //}
-
-    //const onListViewToggle = () => {
-    //    console.log(generateLogMessageString('onListViewToggle', CLASS_NAME));
-    //    setDataRows({ ..._dataRows, listView: true });
-    //}
-
-    //-------------------------------------------------------------------
     // Region: go get the data
     //-------------------------------------------------------------------
     async function fetchData(criteria) {
@@ -336,6 +295,24 @@ function MarketplaceList() {
             //setFilterValOnChild('');
         };
     }, [searchParams, loadingProps.searchCriteria]);
+
+    //-------------------------------------------------------------------
+    // Region: Hook - Triggers reload of page with proper query string parameters
+    //-------------------------------------------------------------------
+    useEffect(() => {
+        if (_criteria == null) {
+            // this typically happens when navigating to a page or refreshing: ignore
+            return;
+        }
+        let newLocation = {
+            pathname: '/library',
+            search: `?${generateSearchQueryString(_criteria, _currentPage)}`
+        };
+        if (history.location.pathname !== newLocation.pathname || history.location.search != newLocation.search) {
+            history.push(newLocation);
+        }
+    }, [_criteria]);
+    //}, [_criteria, _currentPage]);
 
     //-------------------------------------------------------------------
     // Region: Get data 
