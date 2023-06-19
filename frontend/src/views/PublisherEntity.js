@@ -95,10 +95,7 @@ function PublisherEntity() {
         history.goBack();
     };
 
-    const filterByPublisher = (e) => {
-
-        e.preventDefault();
-        console.log(generateLogMessageString('filterByPublisher', CLASS_NAME));
+    const getViewByPublisherUrl = () => {
 
         //clear out the selected, the query val
         var criteria = clearSearchCriteria(loadingProps.searchCriteria);
@@ -106,16 +103,9 @@ function PublisherEntity() {
         //loop through filters and their items and find the publisher id
         toggleSearchFilterSelected(criteria, item.id);
 
-        //update state for other components to see
-        setLoadingProps({ searchCriteria: criteria });
-
-        //navigate to marketplace list
-        history.push({
-            pathname: '/library',
-            search: `?${generateSearchQueryString(criteria, 1)}`
-        });
+        //return url that will filter by publisher
+        return `/library?${generateSearchQueryString(criteria, 1)}`;
     };
-
 
     //-------------------------------------------------------------------
     // Region: Render Helpers
@@ -185,8 +175,7 @@ function PublisherEntity() {
                     </div>
                     <div className="col-sm-12 d-flex align-items-center">
                         <SvgVisibilityIcon fill={color.link} />
-                        <button className="btn btn-link" onClick={filterByPublisher} >
-                            View all by this publisher</button>
+                        <a href={getViewByPublisherUrl()} >View all by this publisher</a>
                     </div>
                 </div>
 

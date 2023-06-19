@@ -112,10 +112,7 @@ function MarketplaceEntity() {
     //    setIsFavorite(revisedList != null && revisedList.findIndex(x => x.url === history.location.pathname) > -1);
     //};
 
-    const filterByPublisher = (e) => {
-
-        e.preventDefault();
-        console.log(generateLogMessageString('filterByPublisher', CLASS_NAME));
+    const getViewByPublisherUrl = () => {
 
         //clear out the selected, the query val
         var criteria = clearSearchCriteria(loadingProps.searchCriteria);
@@ -123,14 +120,8 @@ function MarketplaceEntity() {
         //loop through filters and their items and find the publisher id
         toggleSearchFilterSelected(criteria, item.publisher.id);
 
-        //update state for other components to see
-        setLoadingProps({ searchCriteria: criteria });
-
-        //navigate to marketplace list
-        history.push({
-            pathname: '/library',
-            search: `?${generateSearchQueryString(criteria, 1)}`
-        });
+        //return url that will filter by publisher
+        return `/library?${generateSearchQueryString(criteria, 1)}`;
     };
 
     const onViewSpecifications = (e) => {
@@ -199,8 +190,7 @@ function MarketplaceEntity() {
                             <a href={`/publisher/${item.publisher.name}`} >{item.publisher.displayName}</a></span>
                         <span className="m-0 mr-2 my-2 mb-md-0 d-flex align-items-center">
                             <SvgVisibilityIcon fill={color.link} />
-                            <button className="btn btn-link" onClick={filterByPublisher} >
-                                View all by this publisher</button>
+                            <a href={getViewByPublisherUrl()} >View all by this publisher</a>
                         </span>
                     </div>
                     {(item.publisher.socialMediaLinks != null && item.publisher.socialMediaLinks.length > 0) &&
