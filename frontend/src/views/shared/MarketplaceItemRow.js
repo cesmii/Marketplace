@@ -25,10 +25,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
         });
     };
 
-    const filterByPublisher = (e) => {
-
-        e.preventDefault();
-        console.log(generateLogMessageString('filterByPublisher', CLASS_NAME));
+    const getViewByPublisherUrl = () => {
 
         //clear out the selected, the query val
         var criteria = clearSearchCriteria(loadingProps.searchCriteria);
@@ -36,14 +33,8 @@ function MarketplaceItemRow(props) { //props are item, showActions
         //loop through filters and their items and find the publisher id
         toggleSearchFilterSelected(criteria, props.item.publisher.id);
 
-        //update state for other components to see
-        setLoadingProps({ searchCriteria: criteria });
-
-        //navigate to marketplace list
-        history.push({
-            pathname: '/library',
-            search: `?${generateSearchQueryString(criteria, 1)}`
-        });
+        //return url that will filter by publisher
+        return `/library?${generateSearchQueryString(criteria, 1)}`;
     };
 
     //-------------------------------------------------------------------
@@ -184,8 +175,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
                     <p className="mb-2" ><b className="mr-2" >Published By:</b><a href={`/publisher/${props.item.publisher.name}`} >{props.item.publisher.displayName}</a></p>
                     <p className="mb-2 d-flex align-items-center" >
                         <SvgVisibilityIcon fill={color.link} />
-                        <button className="btn btn-link" onClick={filterByPublisher} >
-                            View all by this publisher</button>
+                        <a href={getViewByPublisherUrl()} >View all by this publisher</a>
                     </p>
                     <p className="mb-3" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
                     <div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>

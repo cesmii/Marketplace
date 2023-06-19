@@ -22,10 +22,7 @@ function PublisherSidebar(props) {
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
-    const filterByPublisher = (e) => {
-
-        e.preventDefault();
-        console.log(generateLogMessageString('filterByPublisher', CLASS_NAME));
+    const getViewByPublisherUrl = () => {
 
         //clear out the selected, the query val
         var criteria = clearSearchCriteria(loadingProps.searchCriteria);
@@ -33,15 +30,10 @@ function PublisherSidebar(props) {
         //loop through filters and their items and find the publisher id
         toggleSearchFilterSelected(criteria, props.item.id);
 
-        //update state for other components to see
-        setLoadingProps({ searchCriteria: criteria });
-
-        //navigate to marketplace list
-        history.push({
-            pathname: '/library',
-            search: `?${generateSearchQueryString(criteria, 1)}`
-        });
+        //return url that will filter by publisher
+        return `/library?${generateSearchQueryString(criteria, 1)}`;
     };
+
 
     //-------------------------------------------------------------------
     // Region: Render helpders
@@ -53,7 +45,10 @@ function PublisherSidebar(props) {
             <div className="col-sm-12 mb-2">
                 <p className="mb-2 headline-3 p-1 px-2 w-100 d-block rounded">{ props.caption == null ? "Publisher" : props.caption }</p>
                 <p className="mb-2 px-2"><a href={`/publisher/${props.item.name}`} >{props.item.displayName}</a></p>
-                <p className="mb-0 px-2"><button className="btn btn-link" onClick={filterByPublisher} ><span className="mr-1" alt="view"><SvgVisibilityIcon fill={color.link} /></span>View all by this publisher</button></p>
+                <p className="mb-0 px-2">
+                    <span className="mr-1" alt="view"><SvgVisibilityIcon fill={color.link} /></span>
+                    <a href={getViewByPublisherUrl()} >View all by this publisher</a>
+                </p>
             </div>
             <div className="col-sm-12">
                 <SocialMedia items={props.item.socialMediaLinks} />
