@@ -83,6 +83,7 @@ function MarketplaceList() {
         //this will trigger a fetch from the API to pull the data for the filtered criteria
         setCurrentPage(1);
         criteria.query = _queryLocal;
+        criteria.skip = 0;
         setCriteria(JSON.parse(JSON.stringify(criteria)));
         setCurrentPageCursors(null);
     };
@@ -96,9 +97,10 @@ function MarketplaceList() {
         //scrollToRef.current.scrollIntoView();
 
         //filter event handler - set global state and navigate to search page
-        criteria.query = _queryLocal;
-        setCriteria(JSON.parse(JSON.stringify(criteria)));
         setCurrentPage(1);
+        criteria.query = _queryLocal;
+        criteria.skip = 0;
+        setCriteria(JSON.parse(JSON.stringify(criteria)));
         setCurrentPageCursors(null);
     }
 
@@ -152,7 +154,8 @@ function MarketplaceList() {
         if (history.location.pathname !== newLocation.pathname || history.location.search != newLocation.search) {
             history.push(newLocation);
         }
-    }, [_criteria, _currentPage]);
+    }, [_criteria]);
+    //}, [_criteria, _currentPage]);
 
     //-------------------------------------------------------------------
     // Region: Hook - When search criteria in localstorage is updated, then update this criteria value
