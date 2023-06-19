@@ -1,15 +1,15 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useHistory } from "react-router-dom"
 import { InteractionStatus } from "@azure/msal-browser";
 import { useMsal } from "@azure/msal-react";
 
 import Dropdown from 'react-bootstrap/Dropdown'
 
-import { isInRole } from '../utils/UtilityService';
 import logo from './img/Logo-CESMII.svg'
 import { SVGIcon } from './SVGIcon'
 import Color from './Constants'
 
+import { useLoadingContext } from './contexts/LoadingContext';
 import { AppSettings } from '../utils/appsettings';
 import { doLogout, useLoginStatus } from './OnLoginHandler';
 import LoginButton from './LoginButton';
@@ -27,10 +27,19 @@ function Navbar() {
     const { instance, inProgress } = useMsal();
     const _activeAccount = instance.getActiveAccount();
     const { isAuthenticated, isAuthorized } = useLoginStatus(null, [AppSettings.AADAdminRole]);
+    const { loadingProps } = useLoadingContext();
+    const [_urlLibrary, setUrlLibrary] = useState('/library');
 
     //-------------------------------------------------------------------
-    // Region: Hooks
+    // Region: Hook - Dynamically set the library url to include page num and page size to avoid 
+    // double load on library page
     //-------------------------------------------------------------------
+    useEffect(() => {
+        if (loadingProps.searchCriteria == null) {
+            return;
+        }
+        setUrlLibrary(`/library?p=1&t=${loadingProps.searchCriteria.take}`);
+    }, [loadingProps.searchCriteria]);
 
     //-------------------------------------------------------------------
     // Region: event handlers
@@ -56,7 +65,7 @@ function Navbar() {
                     </button>
                     <div className="navbar-collapse collapse" id="navbarMain">
                         <div className="ml-auto my-2 my-lg-0 nav navbar-nav  align-items-md-center" >
-                            <a className={`nav-link py-1 px-2 ${history.location.pathname === "/library" ? "active" : ""}`} href="/library">Library</a>
+                            <a className={`nav-link py-1 px-2 ${history.location.pathname === "/library" ? "active" : ""}`} href={_urlLibrary}>Library</a>
                             {/*
                             <a className={`nav-link py-1 px-2 ${history.location.pathname === "/industries" ? "active" : ""}`}
                                 href="/industries">Industries</a>
