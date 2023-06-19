@@ -161,12 +161,14 @@ function MarketplaceList() {
     // Region: Hook - When search criteria in localstorage is updated, then update this criteria value
     //      This will also trigger a new fetch of data 
     //-------------------------------------------------------------------
+    /*
     useEffect(() => {
         if (_criteria != null || loadingProps?.searchCriteria == null) {
             return;
         }
         setCriteria(loadingProps.searchCriteria);
     }, [loadingProps.searchCriteria]);
+    */
 
     //const onTileViewToggle = () => {
     //    console.log(generateLogMessageString('onTileViewToggle', CLASS_NAME));
