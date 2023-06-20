@@ -268,6 +268,8 @@
                 {
                     result.RelatedItems = MapToModelRelatedItems(entity.RelatedItems).Result;
                     result.RelatedProfiles = MapToModelRelatedProfiles(entity.RelatedProfiles);
+                    //map action links to model
+                    result.ActionLinks = entity.ActionLinks;
                 }
                 return result;
             }
@@ -421,6 +423,8 @@
                     ProfileId = x.RelatedId,
                     RelatedTypeId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedType.ID)),
                 }).ToList();
+
+            entity.ActionLinks = model.ActionLinks;
 
             entity._ccName1 = model.ccName1;
             entity._ccEmail1 = model.ccEmail1;
