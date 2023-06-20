@@ -85,6 +85,8 @@
 
         public List<RelatedProfileItem> RelatedProfiles { get; set; }
 
+        public List<ActionLink> ActionLinks { get; set; }
+
         public BsonObjectId Analytics { get; set; }
 
         public BsonObjectId PublisherId { get; set; }
@@ -149,6 +151,18 @@
         /// This will map to a lookup record for RelatedType
         /// </summary>
         public BsonObjectId RelatedTypeId { get; set; }
+    }
+
+    /// <summary>
+    /// This contains the structure to use for action links to a marketplace item. 
+    /// </summary>
+    [BsonIgnoreExtraElements]
+    public class ActionLink
+    {
+        public string Url { get; set; }
+        public string Caption { get; set; }
+        public string IconName { get; set; }
+        public string Target { get; set; }
     }
 
 
