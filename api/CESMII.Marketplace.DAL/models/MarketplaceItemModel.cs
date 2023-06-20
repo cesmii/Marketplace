@@ -107,6 +107,8 @@
 
         public virtual List<JobDefinitionSimpleModel> JobDefinitions { get; set; }
 
+        public List<Data.Entities.ActionLink> ActionLinks { get; set; }
+
         public string ccName1 { get; set; }
         public string ccEmail1 { get; set; }
         public string ccName2 { get; set; }
