@@ -66,7 +66,9 @@ namespace CESMII.Marketplace.Api.Controllers
                                         //x.LookupType.EnumValue == LookupTypeEnum.MarketplaceStatus ||
                                         x.LookupType.EnumValue == LookupTypeEnum.MembershipStatus ||
                                         x.LookupType.EnumValue == LookupTypeEnum.TaskStatus ||
-                                        x.LookupType.EnumValue == LookupTypeEnum.RelatedType
+                                        x.LookupType.EnumValue == LookupTypeEnum.RelatedType || 
+                                        x.LookupType.EnumValue == LookupTypeEnum.MarketplaceStatus ||
+                                        x.LookupType.EnumValue == LookupTypeEnum.SmItemType
                                     ));
             //now trim further by name if needed. 
             if (!string.IsNullOrEmpty(model.Query))
@@ -90,7 +92,9 @@ namespace CESMII.Marketplace.Api.Controllers
                 //new LookupTypeModel() { Name=EnumUtils.GetEnumDescription(LookupTypeEnum.MarketplaceStatus), EnumValue = LookupTypeEnum.MarketplaceStatus },
                 new LookupTypeModel() { Name=EnumUtils.GetEnumDescription(LookupTypeEnum.MembershipStatus), EnumValue = LookupTypeEnum.MembershipStatus },
                 new LookupTypeModel() { Name=EnumUtils.GetEnumDescription(LookupTypeEnum.TaskStatus), EnumValue = LookupTypeEnum.TaskStatus },
-                new LookupTypeModel() { Name=EnumUtils.GetEnumDescription(LookupTypeEnum.RelatedType), EnumValue = LookupTypeEnum.RelatedType }
+                new LookupTypeModel() { Name=EnumUtils.GetEnumDescription(LookupTypeEnum.RelatedType), EnumValue = LookupTypeEnum.RelatedType },
+                new LookupTypeModel() { Name=EnumUtils.GetEnumDescription(LookupTypeEnum.MarketplaceStatus), EnumValue = LookupTypeEnum.MarketplaceStatus },
+                new LookupTypeModel() { Name=EnumUtils.GetEnumDescription(LookupTypeEnum.SmItemType), EnumValue = LookupTypeEnum.SmItemType }
             }
             .OrderBy(x => x.Name).ToList();
 

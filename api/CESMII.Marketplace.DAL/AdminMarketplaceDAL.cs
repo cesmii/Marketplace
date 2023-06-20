@@ -406,14 +406,14 @@
                 MongoDB.Bson.ObjectId.Parse(model.ImageLandscape.ID);
 
             //replace child collection of items - ids are preserved
-            entity.RelatedItems = model.RelatedItems
+            entity.RelatedItems = model.RelatedItems == null ? null : model.RelatedItems
                 .Where(x => x.RelatedType != null) //only include selected rows
                 .Select(x => new RelatedItem() {
                     MarketplaceItemId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedId)),
                     RelatedTypeId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedType.ID)),
                 }).ToList();
             //replace child collection of items - ids are preserved
-            entity.RelatedProfiles = model.RelatedProfiles
+            entity.RelatedProfiles = model.RelatedProfiles == null ? null : model.RelatedProfiles
                 .Where(x => x.RelatedType != null) //only include selected rows
                 .Select(x => new RelatedProfileItem()
                 {
