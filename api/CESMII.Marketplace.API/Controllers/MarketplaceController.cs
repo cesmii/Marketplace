@@ -3,9 +3,13 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
+
+using Newtonsoft.Json;
 
 using CESMII.Marketplace.Api.Shared.Models;
 using CESMII.Marketplace.Api.Shared.Controllers;
@@ -16,8 +20,7 @@ using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Marketplace.Api.Shared.Utils;
-using System.Text;
-using Newtonsoft.Json;
+using CESMII.Marketplace.Api.Shared.Extensions;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
@@ -710,7 +713,13 @@ namespace CESMII.Marketplace.Api.Controllers
             //limit to publish status of live
             if (liveOnly)
             {
-                predicates.Add(util.BuildStatusFilterPredicate());
+                var statuses = new List<string>() { "live" };
+                //if user is an admin, let them also see items listed as 'admin only' status
+                if (User.IsInRole("cesmii.marketplace.marketplaceadmin"))
+                {
+                    statuses.Add("admin-only");
+                }
+                predicates.Add(util.BuildStatusFilterPredicate(statuses));
             }
 
             //build list of where clauses - one for each cat passed in
