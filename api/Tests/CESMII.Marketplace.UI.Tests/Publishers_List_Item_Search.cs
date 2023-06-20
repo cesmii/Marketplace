@@ -128,7 +128,7 @@ public class Publishers_List_Item_Search
                 dictPublisherItems.Add("Litmus Automation", 1);
                 dictPublisherItems.Add("SAS", 2);
                 dictPublisherItems.Add("ShelfAware", 1);
-                dictPublisherItems.Add("SymphonyAI Industrial", 1
+                dictPublisherItems.Add("SymphonyAI Industrial", 1);
                 dictPublisherItems.Add("ThinkIQ", 1);
                 dictPublisherItems.Add("Toward Zero", 1);
                 dictPublisherItems.Add("Amatrol", 1);
