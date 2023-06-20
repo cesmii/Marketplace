@@ -35,7 +35,7 @@ function AdminLookupEntity() {
     const [isLoading, setIsLoading] = useState(true);
     const [isReadOnly, setIsReadOnly] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const [_isValid, setIsValid] = useState({ name: true, displayOrder: true, lookupType: true });
+    const [_isValid, setIsValid] = useState({ name: true, displayOrder: true, lookupType: true, code: true });
     const [_deleteModal, setDeleteModal] = useState({ show: false, items: null });
     const [_error, setError] = useState({ show: false, message: null, caption: null });
     var caption = 'Lookup Item';
@@ -220,6 +220,11 @@ function AdminLookupEntity() {
         setIsValid({ ..._isValid, name: isValid });
     };
 
+    const validateForm_code = (e) => {
+        var isValid = e.target.value != null && e.target.value.trim().length > 0;
+        setIsValid({ ..._isValid, code: isValid });
+    };
+
     const validateForm_displayOrder = (e) => {
         var isValid = (e.target.value == null || e.target.value === '' || !isNaN(parseFloat(e.target.value)));
         setIsValid({ ..._isValid, displayOrder: isValid });
@@ -235,11 +240,12 @@ function AdminLookupEntity() {
         console.log(generateLogMessageString(`validateForm`, CLASS_NAME));
 
         _isValid.name = item.name != null && item.name.trim().length > 0;
+        _isValid.code = item.code != null && item.code.trim().length > 0;
         _isValid.displayOrder = item.displayName == null || item.displayName === '' || !isNaN(parseFloat(item.displayOrder));
         _isValid.lookupType = item.lookupType != null && item.lookupType.enumValue.toString() !== "-1";
 
         setIsValid(JSON.parse(JSON.stringify(_isValid)));
-        return (_isValid.name && _isValid.displayOrder && _isValid.lookupType);
+        return (_isValid.name && _isValid.code && _isValid.displayOrder && _isValid.lookupType);
     }
 
     //-------------------------------------------------------------------
@@ -361,6 +367,7 @@ function AdminLookupEntity() {
         //note you must update the state value for the input to be read only. It is not enough to simply have the onChange handler.
         switch (e.target.id) {
             case "name":
+            case "code":
                 item[e.target.id] = e.target.value;
                 break;
             case "displayOrder":
@@ -484,7 +491,7 @@ function AdminLookupEntity() {
         return (
                 <>
                 <div className="row">
-                    <div className="col-md-4">
+                    <div className="col-md-3">
                         <Form.Group>
                             <Form.Label>Lookup Type</Form.Label>
                             {!_isValid.lookupType &&
@@ -511,7 +518,19 @@ function AdminLookupEntity() {
                                 value={item.name == null ? '' : item.name} onBlur={validateForm_name} onChange={onChange} readOnly={isReadOnly} />
                         </Form.Group>
                     </div>
-                    <div className="col-md-4">
+                    <div className="col-md-3">
+                        <Form.Group>
+                            <Form.Label>Code</Form.Label>
+                            {!_isValid.code &&
+                                <span className="invalid-field-message inline">
+                                    Required
+                                </span>
+                            }
+                            <Form.Control id="code" className={(!_isValid.code ? 'invalid-field minimal pr-5' : 'minimal pr-5')} type="" placeholder={`Enter unique code`}
+                                value={item.code == null ? '' : item.code} onBlur={validateForm_code} onChange={onChange} readOnly={isReadOnly} />
+                        </Form.Group>
+                    </div>
+                    <div className="col-md-2">
                         <Form.Group>
                             <Form.Label>Display Order</Form.Label>
                             {!_isValid.displayOrder &&

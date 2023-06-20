@@ -247,11 +247,16 @@
         /// </summary>
         /// <param name="code"></param>
         /// <returns></returns>
-        public Func<MarketplaceItem, bool> BuildStatusFilterPredicate(string code = "live")
+        public Func<MarketplaceItem, bool> BuildStatusFilterPredicate(List<string> statuses = null)
         {
-                var luStatusLive = _dalLookup.GetAll().Where(x => x.LookupType.EnumValue == LookupTypeEnum.MarketplaceStatus &&
-                    x.Code.ToLower() == code.ToLower()).Select(x => x.ID).ToList();
-                return x => luStatusLive.Any(y => y.Equals(x.StatusId.ToString()));
+            if (statuses == null)
+            { 
+                statuses = new List<string>() { "live"};
+            }
+
+            var luStatusLive = _dalLookup.GetAll().Where(x => x.LookupType.EnumValue == LookupTypeEnum.MarketplaceStatus &&
+                    statuses.Any(y => y.Equals(x.Code.ToLower()))).Select(x => x.ID).ToList();
+            return x => luStatusLive.Any(y => y.Equals(x.StatusId.ToString()));
         }
     }
 }
