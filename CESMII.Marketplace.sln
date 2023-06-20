@@ -36,6 +36,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Common.SelfServiceSi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NLog.Mongo", "api\NLog.Mongo\NLog.Mongo.csproj", "{533A271F-8D53-42A5-84B3-C8623553E93A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{CDBCED6A-2084-42FD-86D8-4DB12FFFA9F8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.UI.Tests", "api\Tests\CESMII.Marketplace.UI.Tests\CESMII.Marketplace.UI.Tests.csproj", "{4732A574-BC5E-463A-B34A-2DBF667C59D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -112,9 +116,18 @@ Global
 		{533A271F-8D53-42A5-84B3-C8623553E93A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{533A271F-8D53-42A5-84B3-C8623553E93A}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
 		{533A271F-8D53-42A5-84B3-C8623553E93A}.Staging|Any CPU.Build.0 = Debug|Any CPU
+		{4732A574-BC5E-463A-B34A-2DBF667C59D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4732A574-BC5E-463A-B34A-2DBF667C59D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4732A574-BC5E-463A-B34A-2DBF667C59D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4732A574-BC5E-463A-B34A-2DBF667C59D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4732A574-BC5E-463A-B34A-2DBF667C59D8}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
+		{4732A574-BC5E-463A-B34A-2DBF667C59D8}.Staging|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4732A574-BC5E-463A-B34A-2DBF667C59D8} = {CDBCED6A-2084-42FD-86D8-4DB12FFFA9F8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DE4E0FBF-6B7D-4479-9902-C42E2F6A879A}
