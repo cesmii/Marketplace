@@ -451,6 +451,10 @@ function AdminMarketplaceEntity() {
         item.metaTags = item.metaTagsConcatenated == null || item.metaTagsConcatenated.trim().length === 0 ?
             null : item.metaTagsConcatenated.split(",").map(x => x.trim(' '));
 
+        if (item.id === '6491c11d484850393fd508eb') {
+            item.actionLinks = [{ iconName: 'play_circle', url: 'https://lab.cesmii.net/cncbasetype', caption: 'Activate App', target: '_blank' }];
+        }
+
         //perform insert call
         console.log(generateLogMessageString(`handleOnSave||${mode}`, CLASS_NAME));
         var url = mode.toLowerCase() === "copy" || mode.toLowerCase() === "new" ?
