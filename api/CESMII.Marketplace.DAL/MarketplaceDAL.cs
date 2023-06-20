@@ -286,6 +286,9 @@
                     
                     //map related items into specific buckets - required, recommended
                     result.RelatedItemsGrouped = GroupAndMergeRelatedItems(relatedItems, relatedProfiles);
+
+                    //map action links to model
+                    result.ActionLinks = entity.ActionLinks;
                 }
                 return result;
             }

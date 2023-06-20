@@ -84,6 +84,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         {/*<div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderCategoryItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderMetaTagItem(props.item)}</div>*/}
+                        {renderActionLinks()}
                         {(props.item.relatedItemsGrouped != null && props.item.relatedItemsGrouped.length > 0) &&
                             <p className="mt-3 mb-0" >
                                 <Button variant="link" type="button" className="d-flex align-self-center px-0" onClick={props.onViewSpecifications} >
@@ -149,6 +150,21 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
         );
     };
 
+
+    const renderActionLinks = () => {
+
+        if (!props.isAuthenticated || !props.isAuthorized || props.item.actionLinks == null || props.item.actionLinks.length === 0) return;
+
+        return props.item.actionLinks.map((x,i) => {
+            return (
+                <p key={`actionLink-${i}`} className="mt-3 mb-0" >
+                    <a className="d-flex align-self-center px-0" href={x.url} target={x.target == null || x.target === '' ? 'self' : x.target} >
+                        {renderMenuColorMaterialIcon(x.iconName == null || x.iconName === '' ? 'settings' : x.iconName
+                            , color.cornflower, 'mr-1')}{x.caption}</a>
+                </p>
+            );
+        });
+    };
 
     const renderJobDefinitions = () => {
 
