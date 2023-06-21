@@ -45,16 +45,20 @@ jobs:
       - name: Build (${{env.SOLUTION_FILE}})
         run: dotnet build ${{env.SOLUTION_FILE}} --configuration Staging --no-restore
         working-directory: ${{env.SOLUTION_DIRECTORY}}
-      - name: Setup ChromeDriver (version 88.0.4324.96)
-        uses: nanasess/setup-chromedriver@v2
-        with:
-           # Optional: do not specify to match Chrome's version
-           chromedriver-version: '113.0.5672.63'
-      - name: Run ChromeDriver 
-        run: |
-           export DISPLAY=:99
-           chromedriver --url-base=/wd/hub --whitelisted-ips="" &
-           sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
+      #- name: Setup ChromeDriver (version 88.0.4324.96)
+      #  uses: nanasess/setup-chromedriver@v2
+      #  with:
+      #     # Optional: do not specify to match Chrome's version
+      #     chromedriver-version: '88.0.4324.96'
+      #- name: Run ChromeDriver 
+      #  run: |
+      #     export DISPLAY=:99
+      #     chromedriver --url-base=/wd/hub --whitelisted-ips="" &
+      #     sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
+      - name: Set up chrome (driver?)
+        uses: browser-actions/setup-chrome@latest
+      - name: Run browser
+        run: chrome --version
       - name: Test (${{env.SOLUTION_FILE}})
         run: dotnet test ${{env.SOLUTION_FILE}} --configuration Staging --no-build --verbosity normal -l:"console;verbosity=normal"
         working-directory: ${{env.SOLUTION_DIRECTORY}}
