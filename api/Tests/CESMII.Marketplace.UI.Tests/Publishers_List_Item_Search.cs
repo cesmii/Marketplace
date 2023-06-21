@@ -31,7 +31,11 @@ public class Publishers_List_Item_Search
     {
         try
         {
-            driver = new ChromeDriver();
+            ChromeOptions options = new ChromeOptions();
+            options.AddArgument("--no-sandbox");
+            options.AddArgument("--disable-dev-shm-usage");
+            options.AddArgument("--headless");
+            driver = new ChromeDriver(options);
         }
         catch (Exception ex)
         {
