@@ -35,7 +35,7 @@ public class Publishers_List_Item_Search
         }
         catch (Exception ex)
         {
-
+            throw new Exception($"Error accessing ChromeDriver: {ex.Message}");
         }
         js = (IJavaScriptExecutor)driver;
         vars = new Dictionary<string, object>();
@@ -51,6 +51,9 @@ public class Publishers_List_Item_Search
     [Test]
     public void testCase()
     {
+        if (driver == null)
+            throw new Exception($"Error accessing ChromeDriver: driver is null");
+
         // Open the website
         driver.Navigate().GoToUrl(strStartUrl);
 
