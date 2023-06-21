@@ -62,5 +62,5 @@ jobs:
       - name: Run browser
         run: chrome --version
       - name: Test (${{env.SOLUTION_FILE}})
-        run: dotnet test ${{env.SOLUTION_FILE}} --configuration Staging --no-build --verbosity normal -l:"console;verbosity=normal"
+        run: dotnet test ${{env.SOLUTION_FILE}} --configuration Staging --no-build --no-restore --verbosity normal -l:"console;verbosity=normal"
         working-directory: ${{env.SOLUTION_DIRECTORY}}
