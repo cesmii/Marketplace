@@ -30,6 +30,7 @@ public class Publishers_List_Item_Search
     [SetUp]
     public void SetUp()
     {
+        Console_WriteLine($"Setup: Entering function");
         try
         {
             ChromeOptions options = new ChromeOptions();
@@ -52,12 +53,15 @@ public class Publishers_List_Item_Search
     [TearDown]
     protected void TearDown()
     {
+        Console_WriteLine($"TearDown: Entering function");
         if (driver != null)
             driver.Quit();
     }
     [Test]
-    public void testCase()
+    public void PublisherEnumerateListAndSelect()
     {
+        Console_WriteLine($"PublisherEnumerateListAndSelect: Entering function");
+
         if (driver == null)
             throw new Exception($"Error accessing ChromeDriver: driver is null");
 
@@ -100,14 +104,14 @@ public class Publishers_List_Item_Search
             {
                 strPublisher = xxPublisher.Text;
                 try { xxPublisher.Click(); } catch (Exception ex) { }
-                System.Threading.Thread.Sleep(10000);
+                System.Threading.Thread.Sleep(15000);
                 cItems = QueryItemCount();
             }
             System.Diagnostics.Debug.WriteLine($"For publisher {iPublisher} ({strPublisher}), Item count = {cItems}");
 
             if (!ValidatePublisherItems(bStaging, strPublisher, cItems, out int cExpected))
             {
-                Console.WriteLine( $"Error in publisher details. Publisher={strPublisher} Expected = {cExpected} Found={cItems}");
+                Console_WriteLine( $"Error in publisher details. Publisher={strPublisher} Expected = {cExpected} Found={cItems}");
             }
         }
 
@@ -117,6 +121,7 @@ public class Publishers_List_Item_Search
 
     private bool ValidatePublisherItems(bool bStaging, string strPublisher, int cItems, out int cExpected)
     {
+        Console_WriteLine($"ValidatePublisherItems: Entering function ");
         cExpected = -1;
         if (dictPublisherItems.Count == 0)
         {
@@ -162,6 +167,8 @@ public class Publishers_List_Item_Search
                 bSuccess = true;
         }
 
+        Console_WriteLine($"ValidatePublisherItems: Publisher: {strPublisher} Expected:{cExpected} Found: {cItems}");
+
         return bSuccess;
     }
 
@@ -187,7 +194,7 @@ public class Publishers_List_Item_Search
 
                 if (iweReturn == null)
                 {
-                    Console.WriteLine($"GetPublisher [{nPublisher}] - iRetry={iRetry}");
+                    Console_WriteLine($"GetPublisher [{nPublisher}] - iRetry={iRetry}");
                     System.Threading.Thread.Sleep(500);
                 }
             }
@@ -207,7 +214,7 @@ public class Publishers_List_Item_Search
 
                 if (iweReturn == null)
                 {
-                    Console.WriteLine($"GetPublisher [{nPublisher}] - iRetry={iRetry}");
+                    Console_WriteLine($"GetPublisher [{nPublisher}] - iRetry={iRetry}");
                     System.Threading.Thread.Sleep(500);
                 }
             }
@@ -240,6 +247,12 @@ public class Publishers_List_Item_Search
         { }
 
         return cItems;
+    }
+
+    private void Console_WriteLine(string strOutput)
+    {
+        DateTime dt = DateTime.Now;
+        Console.WriteLine($"{dt.Year:0000}-{dt.Month:00}-{dt.Day:00}T{dt.Hour:00}:{dt.Minute:00}{dt.Second:00}.{dt.Millisecond:000} {strOutput}");
     }
 
 }
