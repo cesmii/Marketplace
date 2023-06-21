@@ -12,6 +12,7 @@ using OpenQA.Selenium.Interactions;
 using NUnit.Framework;
 using NUnit.Framework.Constraints;
 using CESMII.Marketplace.UI.Tests;
+using Microsoft.VisualBasic.FileIO;
 
 [TestFixture]
 public class Publishers_List_Item_Search
@@ -32,9 +33,11 @@ public class Publishers_List_Item_Search
         try
         {
             ChromeOptions options = new ChromeOptions();
-            options.AddArgument("--no-sandbox");
-            options.AddArgument("--disable-dev-shm-usage");
-            options.AddArgument("--headless");
+            //options.AddArguments("--no-sandbox");
+            //options.AddArguments("--disable-dev-shm-usage");
+            //options.AddArguments("start-maximized");
+            //options.AddArguments("--disable-gpu");
+            options.AddArguments("--headless");
             driver = new ChromeDriver(options);
         }
         catch (Exception ex)
