@@ -57,10 +57,10 @@ jobs:
       #     chromedriver --url-base=/wd/hub --whitelisted-ips="" &
       #     sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
       # Branch: develop. What? I thought it always ran from master. Huh?!?
-      - name: Set up chrome (driver?)
-        uses: browser-actions/setup-chrome@latest
-      - name: Run browser
-        run: chrome --version
-      - name: Test (${{env.SOLUTION_FILE}})
-        run: dotnet test ${{env.SOLUTION_FILE}} --configuration Staging --no-build --no-restore --verbosity normal -l:"console;verbosity=normal"
+      #- name: Set up chrome (driver?)
+      #  uses: browser-actions/setup-chrome@latest
+      #- name: Run browser
+      #  run: chrome --version
+      - name: Run Test on (${{env.SOLUTION_FILE}})
+        run: dotnet test ${{env.SOLUTION_FILE}} --configuration Staging --verbosity normal -l:"console;verbosity=normal"
         working-directory: ${{env.SOLUTION_DIRECTORY}}
