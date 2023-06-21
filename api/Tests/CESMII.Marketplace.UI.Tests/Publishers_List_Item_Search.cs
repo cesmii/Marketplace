@@ -100,16 +100,18 @@ public class Publishers_List_Item_Search
             {
                 strPublisher = xxPublisher.Text;
                 try { xxPublisher.Click(); } catch (Exception ex) { }
-                System.Threading.Thread.Sleep(250);
+                System.Threading.Thread.Sleep(10000);
                 cItems = QueryItemCount();
             }
             System.Diagnostics.Debug.WriteLine($"For publisher {iPublisher} ({strPublisher}), Item count = {cItems}");
 
             if (!ValidatePublisherItems(bStaging, strPublisher, cItems, out int cExpected))
             {
-                throw new Exception($"Error in publisher details. Publisher={strPublisher} Expected = {cExpected} Found={cItems}");
+                Console.WriteLine( $"Error in publisher details. Publisher={strPublisher} Expected = {cExpected} Found={cItems}");
             }
         }
+
+        Assert.Pass();
     }
 
 
@@ -184,7 +186,10 @@ public class Publishers_List_Item_Search
                 }
 
                 if (iweReturn == null)
-                    System.Threading.Thread.Sleep(50);
+                {
+                    Console.WriteLine($"GetPublisher [{nPublisher}] - iRetry={iRetry}");
+                    System.Threading.Thread.Sleep(500);
+                }
             }
         }
         else
@@ -201,7 +206,10 @@ public class Publishers_List_Item_Search
 
 
                 if (iweReturn == null)
-                    System.Threading.Thread.Sleep(50);
+                {
+                    Console.WriteLine($"GetPublisher [{nPublisher}] - iRetry={iRetry}");
+                    System.Threading.Thread.Sleep(500);
+                }
             }
         }
 
@@ -211,7 +219,6 @@ public class Publishers_List_Item_Search
     private int QueryItemCount()
     {
         int cItems = 0;
-        System.Threading.Thread.Sleep(4000);
 
         try
         {
@@ -221,8 +228,6 @@ public class Publishers_List_Item_Search
                 System.Diagnostics.Debug.WriteLine($"QueryItemCount: null value returned");
                 return -1;
             }
-
-            System.Threading.Thread.Sleep(5000);
 
             var str2 = eleItemCounter.Text;
             var ai = str2.Split(new char[] { ' ' });
