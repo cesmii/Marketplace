@@ -62,5 +62,5 @@ jobs:
       #- name: Run browser
       #  run: chrome --version
       - name: Run Test on (${{env.SOLUTION_FILE}})
-        run: dotnet test CESMII.Marketplace.UI.Tests.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
+        run: dotnet test .\api\Tests\CESMII.Marketplace.UI.Tests\CESMII.Marketplace.UI.Tests.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
         working-directory: ${{env.SOLUTION_DIRECTORY}}
