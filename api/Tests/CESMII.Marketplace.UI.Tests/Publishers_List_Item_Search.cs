@@ -25,6 +25,10 @@ public class Publishers_List_Item_Search
     private Dictionary<string, int> dictPublisherItems = new Dictionary<string, int>();
 
     private bool bStaging = true;
+    private const int c50 = 100;
+    private const int c250 = 300;
+    private const int c500 = 800;
+    private const int c1000 = 1500;
 
     private IJavaScriptExecutor js;
     [SetUp]
@@ -77,13 +81,13 @@ public class Publishers_List_Item_Search
             var xxElement = GetPublisher(0);
             if (xxElement != null)
                 bFound = true;
-            System.Threading.Thread.Sleep(50);
+            System.Threading.Thread.Sleep(c50);
         }
 
         // Click to open the "Show More" for the publisher's list
         // click | css=.info-section:nth-child(3) > .btn | 
         try { driver.FindElement(By.CssSelector(".info-section:nth-child(3) > .btn")).Click(); } catch (Exception ex) { }
-        System.Threading.Thread.Sleep(250);
+        System.Threading.Thread.Sleep(c250);
 
         // 4 | click | css=.info-section:nth-child(3) .selectable:nth-child(1) | 
 
@@ -92,7 +96,7 @@ public class Publishers_List_Item_Search
             // 5 | click | css=.ml-sm-auto | 
             // Clear All
             driver.FindElement(By.CssSelector(".ml-sm-auto")).Click();
-            System.Threading.Thread.Sleep(50);
+            System.Threading.Thread.Sleep(c1000);
 
             var xxPublisher = GetPublisher(iPublisher);
             if (xxPublisher == null)
@@ -104,7 +108,7 @@ public class Publishers_List_Item_Search
             {
                 strPublisher = xxPublisher.Text;
                 try { xxPublisher.Click(); } catch (Exception ex) { }
-                System.Threading.Thread.Sleep(15000);
+                System.Threading.Thread.Sleep(c1000);
                 cItems = QueryItemCount();
             }
             System.Diagnostics.Debug.WriteLine($"For publisher {iPublisher} ({strPublisher}), Item count = {cItems}");
@@ -182,7 +186,7 @@ public class Publishers_List_Item_Search
         int nItem = nPublisher + 1;
         if (nItem < 8)
         {
-            for (int iRetry = 10; iRetry > 0 && iweReturn == null; iRetry--)
+            for (int iRetry = 5; iRetry > 0 && iweReturn == null; iRetry--)
             {
                 try
                 {
@@ -195,13 +199,13 @@ public class Publishers_List_Item_Search
                 if (iweReturn == null)
                 {
                     Console_WriteLine($"GetPublisher [{nPublisher}] - iRetry={iRetry}");
-                    System.Threading.Thread.Sleep(500);
+                    System.Threading.Thread.Sleep(c500);
                 }
             }
         }
         else
         {
-            for (int iRetry = 10; iRetry > 0 && iweReturn == null; iRetry--)
+            for (int iRetry = 5; iRetry > 0 && iweReturn == null; iRetry--)
             {
                 try
                 {
@@ -215,7 +219,7 @@ public class Publishers_List_Item_Search
                 if (iweReturn == null)
                 {
                     Console_WriteLine($"GetPublisher [{nPublisher}] - iRetry={iRetry}");
-                    System.Threading.Thread.Sleep(500);
+                    System.Threading.Thread.Sleep(c500);
                 }
             }
         }
@@ -230,6 +234,7 @@ public class Publishers_List_Item_Search
         try
         {
             var eleItemCounter = driver.FindElement(By.CssSelector(".text-left"));
+            System.Threading.Thread.Sleep(c1000);
             if (eleItemCounter == null)
             {
                 System.Diagnostics.Debug.WriteLine($"QueryItemCount: null value returned");
