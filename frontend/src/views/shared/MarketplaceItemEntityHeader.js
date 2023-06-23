@@ -153,7 +153,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
 
     const renderActionLinks = () => {
 
-        if (!props.isAuthenticated || !props.isAuthorized || props.item.actionLinks == null || props.item.actionLinks.length === 0) return;
+        if (props.item.actionLinks == null || props.item.actionLinks.length === 0) return;
 
         return props.item.actionLinks.map((x,i) => {
             return (
