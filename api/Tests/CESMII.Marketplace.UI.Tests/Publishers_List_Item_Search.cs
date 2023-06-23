@@ -30,6 +30,21 @@ public class Publishers_List_Item_Search
     private const int c500 = 800;
     private const int c1000 = 1500;
 
+    static string[] astr = {
+        "5G Technologies USA Ltd.",
+        "Adapdix",
+        "Amatrol",
+        "Augury",
+        "CoreWatts",
+        "Emerson",
+        "Falkonry Inc.",
+        "Litmus Automation",
+        "SymphonyAI Industrial",
+        "Toward Zero"
+        };
+
+    private string[] astrPublishers = null;
+
     private IJavaScriptExecutor js;
     [SetUp]
     public void SetUp()
@@ -53,7 +68,11 @@ public class Publishers_List_Item_Search
         vars = new Dictionary<string, object>();
 
         bStaging = strStartUrl.Contains("-stage.");
+
+        InitPublisherList(bStaging);
     }
+
+
     [TearDown]
     protected void TearDown()
     {
@@ -61,6 +80,42 @@ public class Publishers_List_Item_Search
         if (driver != null)
             driver.Quit();
     }
+
+    [TestCaseSource(nameof(astrPublishers))]
+    public void PublisherQueryPublisherName(string strPublisher)
+    {
+        QueryViaTextbox(strPublisher);
+
+        int cItems = utils.QueryItemCount(driver);
+        bool bFound = ValidatePublisherItems(bStaging, strPublisher, cItems, out int cExpected);
+        System.Diagnostics.Debug.WriteLine($"For publisher ({strPublisher}), Item count = {cItems}");
+        if (!bFound)
+            Console_WriteLine($"Error in publisher details. Publisher={strPublisher} Expected = {cExpected} Found={cItems}");
+    }
+
+    private void QueryViaTextbox(string strValue)
+    {
+        IWebElement iweQueryTextbox = GetQueryTextboxWindow(true);
+        driver.FindElement(By.CssSelector(".with-append")).Click();
+        driver.FindElement(By.CssSelector(".with-append")).SendKeys(strValue);
+        driver.FindElement(By.CssSelector(".with-append")).SendKeys(Keys.Enter);
+    }
+
+    public IWebElement GetQueryTextboxWindow(bool bClear)
+    {
+        IWebElement iwe = null;
+        try { iwe = driver.FindElement(By.CssSelector(".with-append")); } catch (Exception ex) { }
+
+        if (bClear && iwe != null)
+        {
+            iwe.SendKeys(Keys.Control + "a");
+            iwe.SendKeys(Keys.Backspace);
+        }
+        return iwe;
+    }
+
+
+
     [Test]
     public void PublisherEnumerateListAndSelect()
     {
@@ -127,6 +182,23 @@ public class Publishers_List_Item_Search
     {
         Console_WriteLine($"ValidatePublisherItems: Entering function ");
         cExpected = -1;
+
+        bool bSuccess = false;
+        if (dictPublisherItems.ContainsKey(strPublisher))
+        {
+            cExpected = dictPublisherItems[strPublisher];
+            if (cItems == cExpected)
+                bSuccess = true;
+        }
+
+        Console_WriteLine($"ValidatePublisherItems: Publisher: {strPublisher} Expected:{cExpected} Found: {cItems}");
+
+        return bSuccess;
+    }
+
+    private void InitPublisherList(bool bStaging)
+    {
+        
         if (dictPublisherItems.Count == 0)
         {
             if (bStaging)
@@ -161,19 +233,15 @@ public class Publishers_List_Item_Search
                 dictPublisherItems.Add("Emerson", 1);
                 dictPublisherItems.Add("Falkonry Inc.", 1);
             }
+
+            astrPublishers = new string[dictPublisherItems.Count];
+            int iItem = 0;
+            foreach (KeyValuePair<string,int> kvp in dictPublisherItems)
+            {
+                astrPublishers[iItem] = kvp.Key;
+            }
+
         }
-
-        bool bSuccess = false;
-        if (dictPublisherItems.ContainsKey(strPublisher))
-        {
-            cExpected = dictPublisherItems[strPublisher];
-            if (cItems == cExpected)
-                bSuccess = true;
-        }
-
-        Console_WriteLine($"ValidatePublisherItems: Publisher: {strPublisher} Expected:{cExpected} Found: {cItems}");
-
-        return bSuccess;
     }
 
     private IWebElement GetPublisher(int nPublisher)

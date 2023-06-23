@@ -26,5 +26,30 @@ namespace CESMII.Marketplace.UI.Tests
 
             }
         }
-    }
-}
+
+        public static int QueryItemCount(IWebDriver driver)
+        {
+            System.Threading.Thread.Sleep(2000);
+            var eleItemCounter = driver.FindElement(By.CssSelector(".text-left"));
+            if (eleItemCounter == null)
+            {
+                System.Diagnostics.Debug.WriteLine($"QueryItemCount: null value returned");
+                return -1;
+            }
+
+            System.Threading.Thread.Sleep(2000);
+
+            var str2 = eleItemCounter.Text;
+            var ai = str2.Split(new char[] { ' ' });
+            int cItems = -1;
+            if (ai.Length == 2)
+            {
+                int.TryParse(ai[0], out cItems);
+            }
+
+            return cItems;
+        }
+
+
+    } // class utils
+} // namespace CESMII.Marketplace.UI.Tests
