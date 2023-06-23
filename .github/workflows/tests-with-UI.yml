@@ -25,7 +25,7 @@ env:
   # Project file to use
   PROJECT_NAME: 'CESMII.Marketplace.Api'      
   # set this to the .NET core version to use
-  NETCORE_VERSION: "6.0.x"
+  NETCORE_VERSION: "6.x"
 
 jobs:
   build:
