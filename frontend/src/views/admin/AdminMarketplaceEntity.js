@@ -12,18 +12,18 @@ import Nav from 'react-bootstrap/Nav'
 import axiosInstance from "../../services/AxiosService";
 
 import { AppSettings } from '../../utils/appsettings';
+import { clearSearchCriteria } from '../../services/MarketplaceService';
 import { generateLogMessageString, prepDateVal, validate_NoSpecialCharacters } from '../../utils/UtilityService'
 import { useLoadingContext } from "../../components/contexts/LoadingContext";
-
-import { SVGIcon } from "../../components/SVGIcon";
-import color from "../../components/Constants";
 import MultiSelect from '../../components/MultiSelect';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import { WysiwygEditor } from '../../components/WysiwygEditor';
 import AdminImageList from './shared/AdminImageList';
 import AdminRelatedItemList from './shared/AdminRelatedItemList';
-import { clearSearchCriteria } from '../../services/MarketplaceService';
+import AdminActionLinkList from './shared/AdminActionLinkList'
 
+import { SVGIcon } from "../../components/SVGIcon";
+import color from "../../components/Constants";
 import '../../components/styles/TabContainer.scss';
 
 const CLASS_NAME = "AdminMarketplaceEntity";
@@ -47,7 +47,7 @@ function AdminMarketplaceEntity() {
         name: true, nameFormat: true, displayName: true, abstract: true, description: true,
         status: true, type: true, publisher: true, publishDate: true,
         images: { imagePortrait: true, imageSquare: true, imageLandscape: true },
-        relatedItems: true, relatedProfiles: true
+        relatedItems: true, relatedProfiles: true, actionLinks: true
     });
     const [_deleteModal, setDeleteModal] = useState({ show: false, items: null });
     const [_error, setError] = useState({ show: false, message: null, caption: null });
@@ -101,6 +101,11 @@ function AdminMarketplaceEntity() {
             //convert collection to comma separated list
             //special handling of meta tags which shows as a concatenated list in an input box
             result.data.metaTagsConcatenated = result.data == null || result.data.metaTags == null ? "" : result.data.metaTags.join(', ');
+
+            //add id client side to help manage which one to delete. this collection has no unique ids. 
+            result.data.actionLinks = result.data.actionLinks == null ? null :
+                result.data.actionLinks.map((x, i) => { x.id = i;  return x; });
+
             //set item state value
             setItem(result.data);
             setIsLoading(false);
@@ -354,6 +359,13 @@ function AdminMarketplaceEntity() {
             item.relatedProfiles.filter(x => x.relatedId === "-1" || x.relatedType?.id === "-1").length === 0;
     };
 
+    const validateForm_actionLinks = () => {
+        return item.actionLinks == null ||
+            item.actionLinks.filter(x =>
+                x.url === null || x.url === '' ||
+                x.caption === null || x.caption === '').length === 0;
+    };
+
     ////update state for when search click happens
     const validateForm = () => {
         console.log(generateLogMessageString(`validateForm`, CLASS_NAME));
@@ -371,12 +383,13 @@ function AdminMarketplaceEntity() {
         _isValid.images.imageLandscape = item.imageLandscape != null && item.imageLandscape.id.toString() !== "-1";
         _isValid.relatedItems = validateForm_relatedItems();
         _isValid.relatedProfiles = validateForm_relatedProfiles();
+        _isValid.actionLinks = validateForm_actionLinks();
 
         setIsValid(JSON.parse(JSON.stringify(_isValid)));
         return (_isValid.name && _isValid.nameFormat && _isValid.displayName && _isValid.abstract && _isValid.description &&
             _isValid.status && _isValid.publisher && _isValid.publishDate &&
             _isValid.images.imagePortrait && _isValid.images.imageSquare && _isValid.images.imageLandscape &&
-            _isValid.relatedItems && _isValid.relatedProfiles && _isValid.type);
+            _isValid.relatedItems && _isValid.relatedProfiles && _isValid.type && _isValid.actionLinks);
     }
 
     //-------------------------------------------------------------------
@@ -620,6 +633,16 @@ function AdminMarketplaceEntity() {
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
+    const onChangeActionLink = (arg) => {
+        console.log(generateLogMessageString('onChangeActionLink', CLASS_NAME));
+        var match = item.actionLinks.find(x => x.id === arg.id);
+        match.url = arg.url;
+        match.caption = arg.caption;
+        match.target = arg.target;
+        match.iconName = arg.iconName;
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
     const onAddRelatedItem = () => {
         console.log(generateLogMessageString('onAddRelatedItem', CLASS_NAME));
         //we need to be aware of newly added rows and those will be signified by a negative -id. 
@@ -643,6 +666,14 @@ function AdminMarketplaceEntity() {
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
+    const onAddActionLink = () => {
+        console.log(generateLogMessageString('onAddActionLink', CLASS_NAME));
+        //we need to be aware of newly added rows and those will be signified by a negative -id. 
+        var id = (-1) * (item.actionLinks == null ? 1 : item.actionLinks.length + 1);
+        item.actionLinks.push({ id: id, caption: '', url: '', target: '_self', iconName: 'settings' });
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
     const onDeleteRelatedItem = (id) => {
         console.log(generateLogMessageString('onDeleteRelatedItem', CLASS_NAME));
         //make a copy of the array 
@@ -654,6 +685,12 @@ function AdminMarketplaceEntity() {
     const onDeleteRelatedProfile = (id) => {
         console.log(generateLogMessageString('onDeleteRelatedProfile', CLASS_NAME));
         item.relatedProfiles = item.relatedProfiles.filter(x => x.relatedId !== id);
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    const onDeleteActionLink = (id) => {
+        console.log(generateLogMessageString('onDeleteActionLink', CLASS_NAME));
+        item.actionLinks = item.actionLinks.filter(x => x.id !== id);
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
@@ -908,6 +945,7 @@ function AdminMarketplaceEntity() {
         if (!_isValid.images.imageLandscape) summary.push('Landscape image is required.');
         if (!validateForm_relatedItems()) summary.push('Related Items - Select item and set related type.');
         if (!validateForm_relatedProfiles()) summary.push('Related Profiles - Select item and set related type.');
+        if (!validateForm_actionLinks()) summary.push('Action Links - Make sure all action links include required data.');
         if (summary.length == 0) return null;
 
         let content = summary.map(function (x, i) {
@@ -941,7 +979,29 @@ function AdminMarketplaceEntity() {
                             onAdd={onAddRelatedProfile} onDelete={onDeleteRelatedProfile} />
                     </div>
                 </div>
+                <div className="row">
+                    <div className="col-12">
+                        <hr className="my-3" />
+                        <AdminActionLinkList caption="Action Links" captionAdd="Add Action Link"
+                            infoText="These optional links will appear on the detail page in the main banner area."
+                            items={item.actionLinks} onChangeItem={onChangeActionLink}
+                            onAdd={onAddActionLink} onDelete={onDeleteActionLink} />
+                    </div>
+                </div>
             </>
+        );
+    };
+
+    const renderActionLinks = () => {
+        return (
+            <div className="row">
+                <div className="col-12">
+                    <AdminActionLinkList caption="Action Links" captionAdd="Add Action Link"
+                        infoText="These optional links will appear on the detail page in the main banner area."
+                        items={item.actionLinks} onChangeItem={onChangeActionLink}
+                        onAdd={onAddActionLink} onDelete={onDeleteActionLink} />
+                </div>
+            </div>
         );
     };
 
@@ -1187,33 +1247,27 @@ function AdminMarketplaceEntity() {
     }
 
     const renderTabbedForm = () => {
-        /*
-        return (
-            <>
-                {renderGeneralTab()}
-                {renderImagesInfo()}
-            {renderRelatedItems()}
-            </>
-        );
-        */
         return (
             <Tab.Container id="admin-marketplace-entity" defaultActiveKey="general" onSelect={tabListener} >
                 <Nav variant="pills" className="row mt-1 px-2 pr-md-3">
-                    <Nav.Item className="col-sm-4 rounded p-0 pl-2" >
+                    <Nav.Item className="col-sm-3 rounded p-0 pl-2" >
                         <Nav.Link eventKey="general" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">General</span>
                         </Nav.Link>
                     </Nav.Item>
-                    <Nav.Item className="col-sm-4 rounded p-0 px-md-0" >
+                    <Nav.Item className="col-sm-3 rounded p-0 px-md-0" >
                         <Nav.Link eventKey="images" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">Images</span>
-                            {/*<span className="d-none d-md-inline"><br />Type Definitions that depend on 'me'</span>*/}
                         </Nav.Link>
                     </Nav.Item>
-                    <Nav.Item className="col-sm-4 rounded p-0 pr-2">
+                    <Nav.Item className="col-sm-3 rounded p-0">
+                        <Nav.Link eventKey="actionLinks" className="text-center text-md-left p-1 px-2 h-100" >
+                            <span className="headline-3">Action Links</span>
+                        </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item className="col-sm-3 rounded p-0 pr-2">
                         <Nav.Link eventKey="relatedItems" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">Related Items</span>
-                            {/*<span className="d-none d-md-inline"><br />Optional and advanced settings</span>*/}
                         </Nav.Link>
                     </Nav.Item>
                 </Nav>
@@ -1230,6 +1284,13 @@ function AdminMarketplaceEntity() {
                         <Card className="">
                             <Card.Body className="pt-3">
                                 { renderImagesInfo()}
+                            </Card.Body>
+                        </Card>
+                    </Tab.Pane>
+                    <Tab.Pane eventKey="actionLinks">
+                        <Card className="">
+                            <Card.Body className="pt-3">
+                                {renderActionLinks()}
                             </Card.Body>
                         </Card>
                     </Tab.Pane>
