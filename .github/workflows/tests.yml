@@ -2,18 +2,18 @@
 #
 # For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
 name: Test|API|Marketplace
-on:
+on: [workflow_dispatch]
   #manually trigger deploy
-  workflow_dispatch:
+  #workflow_dispatch:
   # Trigger the workflow on push
-  push:
-    branches:
-      - develop
-      - main
-  pull_request:
-    branches:
-      - develop
-      - main
+  # push:
+  #  branches:
+  #    - develop
+  #    - main
+  #pull_request:
+  #  branches:
+  #    - develop
+  #    - main
 
 env:
   # set this to the path to your solution file, defaults to the repository root (this is the folder in the git repo)
