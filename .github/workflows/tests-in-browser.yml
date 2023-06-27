@@ -1,7 +1,7 @@
 # This workflow will build and test a .NET 6 web API
 #
 # For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
-name: Test with UI|API|Marketplace
+name: Tests In Browser|API|Marketplace
 on: [workflow_dispatch]
   #manually trigger deploy
   #workflow_dispatch:
@@ -25,11 +25,11 @@ env:
   # Project file to use
   PROJECT_NAME: 'CESMII.Marketplace.Api'      
   # set this to the .NET core version to use
-  NETCORE_VERSION: "6.0.x"
+  NETCORE_VERSION: "6.x"
 
 jobs:
   build:
-    name: Build and Test .NET6 Web API
+    name: Tests In Browser
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -45,6 +45,7 @@ jobs:
       - name: Build (${{env.SOLUTION_FILE}})
         run: dotnet build ${{env.SOLUTION_FILE}} --configuration Staging --no-restore
         working-directory: ${{env.SOLUTION_DIRECTORY}}
+      # Branch: develop. What? I thought it always ran from master. Huh?!?
       #- name: Setup ChromeDriver (version 88.0.4324.96)
       #  uses: nanasess/setup-chromedriver@v2
       #  with:
@@ -55,10 +56,11 @@ jobs:
       #     export DISPLAY=:99
       #     chromedriver --url-base=/wd/hub --whitelisted-ips="" &
       #     sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
-      - name: Set up chrome (driver?)
-        uses: browser-actions/setup-chrome@latest
-      - name: Run browser
-        run: chrome --version
-      - name: Test (${{env.SOLUTION_FILE}})
-        run: dotnet test ${{env.SOLUTION_FILE}} --configuration Staging --no-build --verbosity normal -l:"console;verbosity=normal"
+      # Branch: develop. What? I thought it always ran from master. Huh?!?
+      #- name: Set up chrome (driver?)
+      #  uses: browser-actions/setup-chrome@latest
+      #- name: Run browser
+      #  run: chrome --version
+      - name: Run Test on (${{env.SOLUTION_FILE}})
+        run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/CESMII.Marketplace.InBrowser.Tests.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
         working-directory: ${{env.SOLUTION_DIRECTORY}}
