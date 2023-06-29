@@ -21,7 +21,7 @@ namespace CESMII.Marketplace.UI.Tests
                         eleMoreLess.Click();
                 }
             }
-            catch (Exception ex)
+            catch (Exception /*ex */)
             {
 
             }

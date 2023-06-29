@@ -20,7 +20,10 @@ public class Publishers_List_Item_Search
     // private string strStartUrl = "https://marketplace-front-stage.azurewebsites.net/library";  // Staging
     private string strStartUrl = "https://marketplace-front.azurewebsites.net/library";     // Production
     private IWebDriver? driver = null;
+
+    #pragma warning disable CS8618
     public IDictionary<string, object> vars { get; private set; }
+    #pragma warning restore CS8618
 
     private Dictionary<string, int> dictPublisherItems = new Dictionary<string, int>();
 
@@ -30,7 +33,10 @@ public class Publishers_List_Item_Search
     private const int c500 = 800;
     private const int c1000 = 1500;
 
+    #pragma warning disable CS8618
     private IJavaScriptExecutor js;
+    #pragma warning restore CS8618
+
     [SetUp]
     public void SetUp()
     {
@@ -86,7 +92,7 @@ public class Publishers_List_Item_Search
 
         // Click to open the "Show More" for the publisher's list
         // click | css=.info-section:nth-child(3) > .btn | 
-        try { driver.FindElement(By.CssSelector(".info-section:nth-child(3) > .btn")).Click(); } catch (Exception ex) { }
+        try { driver.FindElement(By.CssSelector(".info-section:nth-child(3) > .btn")).Click(); } catch (Exception /*ex */) { }
         System.Threading.Thread.Sleep(c250);
 
         // 4 | click | css=.info-section:nth-child(3) .selectable:nth-child(1) | 
@@ -107,7 +113,7 @@ public class Publishers_List_Item_Search
             if (xxPublisher != null)
             {
                 strPublisher = xxPublisher.Text;
-                try { xxPublisher.Click(); } catch (Exception ex) { }
+                try { xxPublisher.Click(); } catch (Exception /*ex */) { }
                 System.Threading.Thread.Sleep(c1000);
                 cItems = QueryItemCount();
             }
@@ -179,10 +185,14 @@ public class Publishers_List_Item_Search
     private IWebElement GetPublisher(int nPublisher)
     {
         // Make sure the "+ Sell all / - See less" is expanded
-        utils.PublisherListShowAll(driver);
+        if (driver != null)
+            utils.PublisherListShowAll(driver);
 
         // Select Nth publisher in list
+        #pragma warning disable CS8600
         IWebElement iweReturn = null;
+        #pragma warning restore CS8600
+
         int nItem = nPublisher + 1;
         if (nItem < 8)
         {
@@ -190,9 +200,11 @@ public class Publishers_List_Item_Search
             {
                 try
                 {
+                    #pragma warning disable CS8602
                     iweReturn = driver.FindElement(By.CssSelector($".info-section:nth-child(3) .selectable:nth-child({nItem})")); // .Click();
+                    #pragma warning restore CS8602
                 }
-                catch (Exception ex)
+                catch (Exception /*ex */)
                 {
                 }
 
@@ -209,9 +221,11 @@ public class Publishers_List_Item_Search
             {
                 try
                 {
+                    #pragma warning disable CS8602
                     iweReturn = driver.FindElement(By.CssSelector($".info-section:nth-child(3) .selectable:nth-child({nItem}) span")); // .Click();
+                    #pragma warning restore CS8602
                 }
-                catch (Exception ex)
+                catch (Exception /*ex */)
                 {
                 }
 
@@ -224,32 +238,37 @@ public class Publishers_List_Item_Search
             }
         }
 
+        #pragma warning disable CS8603
         return iweReturn;
+        #pragma warning restore CS8602
     }
 
     private int QueryItemCount()
     {
         int cItems = 0;
 
-        try
+        if (driver != null)
         {
-            var eleItemCounter = driver.FindElement(By.CssSelector(".text-left"));
-            System.Threading.Thread.Sleep(c1000);
-            if (eleItemCounter == null)
+            try
             {
-                System.Diagnostics.Debug.WriteLine($"QueryItemCount: null value returned");
-                return -1;
-            }
+                var eleItemCounter = driver.FindElement(By.CssSelector(".text-left"));
+                System.Threading.Thread.Sleep(c1000);
+                if (eleItemCounter == null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"QueryItemCount: null value returned");
+                    return -1;
+                }
 
-            var str2 = eleItemCounter.Text;
-            var ai = str2.Split(new char[] { ' ' });
-            if (ai.Length == 2)
-            {
-                int.TryParse(ai[0], out cItems);
+                var str2 = eleItemCounter.Text;
+                var ai = str2.Split(new char[] { ' ' });
+                if (ai.Length == 2)
+                {
+                    int.TryParse(ai[0], out cItems);
+                }
             }
+            catch (Exception /*ex */)
+            { }
         }
-        catch (Exception ex) 
-        { }
 
         return cItems;
     }
