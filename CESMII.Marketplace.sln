@@ -38,7 +38,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NLog.Mongo", "api\NLog.Mong
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{CDBCED6A-2084-42FD-86D8-4DB12FFFA9F8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.UI.Tests", "api\Tests\CESMII.Marketplace.UI.Tests\CESMII.Marketplace.UI.Tests.csproj", "{4732A574-BC5E-463A-B34A-2DBF667C59D8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.InBrowser.Tests", "api\Tests\CESMII.Marketplace.UI.Tests\CESMII.Marketplace.InBrowser.Tests.csproj", "{4732A574-BC5E-463A-B34A-2DBF667C59D8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
