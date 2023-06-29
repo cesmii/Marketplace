@@ -1,7 +1,7 @@
 # This workflow will build and test a .NET 6 web API
 #
 # For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
-name: Tests|In-Browser|Marketplace
+name: Test|In-Browser|Marketplace
 on: [workflow_dispatch]
   #manually trigger deploy
   #workflow_dispatch:
