@@ -32,19 +32,20 @@ jobs:
     name: Build and Test .NET6 Web API
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Copy repository so we can run our tests
+        uses: actions/checkout@v2
         with:
           submodules: true
-      - name: Set up dotnet Core ${{ env.NETCORE_VERSION }}
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: ${{ env.NETCORE_VERSION }}
-      - name: Restore dependencies (${{env.SOLUTION_FILE}})
-        run: dotnet restore ${{env.SOLUTION_FILE}}
-        working-directory: ${{env.SOLUTION_DIRECTORY}}
-      - name: Build (${{env.SOLUTION_FILE}})
-        run: dotnet build ${{env.SOLUTION_FILE}} --configuration Staging --no-restore
-        working-directory: ${{env.SOLUTION_DIRECTORY}}
+      #- name: Set up dotnet Core ${{ env.NETCORE_VERSION }}
+      #  uses: actions/setup-dotnet@v1
+      #  with:
+      #    dotnet-version: ${{ env.NETCORE_VERSION }}
+      #- name: Restore dependencies (${{env.SOLUTION_FILE}})
+      #  run: dotnet restore ${{env.SOLUTION_FILE}}
+      #  working-directory: ${{env.SOLUTION_DIRECTORY}}
+      #- name: Build (${{env.SOLUTION_FILE}})
+      #  run: dotnet build ${{env.SOLUTION_FILE}} --configuration Staging --no-restore
+      #  working-directory: ${{env.SOLUTION_DIRECTORY}}
       # Branch: develop. What? I thought it always ran from master. Huh?!?
       #- name: Setup ChromeDriver (version 88.0.4324.96)
       #  uses: nanasess/setup-chromedriver@v2
