@@ -1,4 +1,4 @@
-# This workflow will build and test a .NET 6 web API
+# This workflow will build and run In Browser Selenium Web Driver Tests
 #
 # For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
 name: Test|In Browser|Marketplace
@@ -16,14 +16,14 @@ on: [workflow_dispatch]
   #    - main
 
 env:
-  # set this to the path to your solution file, defaults to the repository root (this is the folder in the git repo)
+  # set this to the path to your solution file
   SOLUTION_DIRECTORY: './'      
-  # set this to the path to your web app project, defaults to the repository root (this is the folder in the git repo)
-  PROJECT_DIRECTORY: './api/CESMII.Marketplace.Api'      
-  # Solution file to use
+  # Solution file name
   SOLUTION_FILE: 'CESMII.Marketplace.sln'      
-  # Project file to use
-  PROJECT_NAME: 'CESMII.Marketplace.Api'      
+  # Set this to the path to your test project file
+  PROJECT_DIRECTORY: './api/Tests/CESMII.Marketplace.InBrowser.Tests/'
+  # Test project file to use
+  PROJECT_NAME: 'CESMII.Marketplace.InBrowser.Tests'      
   # set this to the .NET core version to use
   NETCORE_VERSION: "6.0.x"
 
@@ -36,32 +36,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: true
-      #- name: Set up dotnet Core ${{ env.NETCORE_VERSION }}
-      #  uses: actions/setup-dotnet@v1
-      #  with:
-      #    dotnet-version: ${{ env.NETCORE_VERSION }}
-      #- name: Restore dependencies (${{env.SOLUTION_FILE}})
-      #  run: dotnet restore ${{env.SOLUTION_FILE}}
-      #  working-directory: ${{env.SOLUTION_DIRECTORY}}
-      #- name: Build (${{env.SOLUTION_FILE}})
-      #  run: dotnet build ${{env.SOLUTION_FILE}} --configuration Staging --no-restore
-      #  working-directory: ${{env.SOLUTION_DIRECTORY}}
-      # Branch: develop. What? I thought it always ran from master. Huh?!?
-      #- name: Setup ChromeDriver (version 88.0.4324.96)
-      #  uses: nanasess/setup-chromedriver@v2
-      #  with:
-      #     # Optional: do not specify to match Chrome's version
-      #     chromedriver-version: '88.0.4324.96'
-      #- name: Run ChromeDriver 
-      #  run: |
-      #     export DISPLAY=:99
-      #     chromedriver --url-base=/wd/hub --whitelisted-ips="" &
-      #     sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
-      # Branch: develop. What? I thought it always ran from master. Huh?!?
-      #- name: Set up chrome (driver?)
-      #  uses: browser-actions/setup-chrome@latest
-      #- name: Run browser
-      #  run: chrome --version
-      - name: Run Test on (${{env.SOLUTION_FILE}})
-        run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/CESMII.Marketplace.InBrowser.Tests.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
+      - name: Run Test on project (${{env.PROJECT_NAME}})
+        run: dotnet test ${{env.PROJECT_DIRECTORY}}${{env.PROJECT_NAME}}.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
         working-directory: ${{env.SOLUTION_DIRECTORY}}
