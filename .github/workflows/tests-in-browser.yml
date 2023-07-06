@@ -1,7 +1,7 @@
 # This workflow will build and test a .NET 6 web API
 #
 # For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
-name: In Browser Tests|API|Marketplace
+name: Tests In Browser|API|Marketplace
 on: [workflow_dispatch]
   #manually trigger deploy
   #workflow_dispatch:
@@ -29,7 +29,7 @@ env:
 
 jobs:
   build:
-    name: In Browser Tests
+    name: Tests In Browser
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -62,5 +62,5 @@ jobs:
       #- name: Run browser
       #  run: chrome --version
       - name: Run Test on (${{env.SOLUTION_FILE}})
-        run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.UI.Tests/CESMII.Marketplace.UI.Tests.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
+        run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/CESMII.Marketplace.InBrowser.Tests.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
         working-directory: ${{env.SOLUTION_DIRECTORY}}
