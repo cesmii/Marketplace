@@ -83,7 +83,10 @@
             RequestInfo entity = _repo.FindByCondition(x => x.ID == model.ID ).FirstOrDefault();
             this.MapToEntity(ref entity, model);
             entity.Updated = DateTime.UtcNow;
-            entity.UpdatedById = MongoDB.Bson.ObjectId.Parse(userId);
+            //this can be called from anonymous user so user id can be null
+            if (!string.IsNullOrEmpty(userId)) {
+                entity.UpdatedById = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(userId));
+            }
 
             await _repo.UpdateAsync(entity);
             return 1;

@@ -135,11 +135,11 @@
                 }
                 else
                 {
-                    if (string.IsNullOrEmpty(strName))
+                    if (string.IsNullOrEmpty(strName) && !string.IsNullOrEmpty(strEmail))
                     {
                         message.CC.Add(new MailAddress(strEmail));
                     }
-                    else
+                    else if (!string.IsNullOrEmpty(strName) && !string.IsNullOrEmpty(strEmail))
                     {
                         message.CC.Add(new MailAddress(strEmail, strName));
                     }

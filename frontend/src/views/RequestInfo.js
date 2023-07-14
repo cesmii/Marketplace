@@ -61,7 +61,7 @@ function RequestInfo() {
             }
             catch (err) {
                 var msg = 'An error occurred retrieving this item.';
-                console.log(generateLogMessageString('useEffect||fetchData||error', CLASS_NAME, 'error'));
+                console.error(generateLogMessageString('useEffect||fetchData||error', CLASS_NAME, 'error'));
                 //console.log(err.response.status);
                 if (err != null && err.response != null && err.response.status === 404) {
                     msg += ' This item was not found.';
@@ -299,8 +299,8 @@ function RequestInfo() {
                         { id: new Date().getTime(), severity: "danger", body: `An error occurred submitting your inquiry.`, isTimed: false }
                     ]
                 });
-                console.log(generateLogMessageString('handleOnSave||error||' + JSON.stringify(error), CLASS_NAME, 'error'));
-                console.log(error);
+                console.error(generateLogMessageString('handleOnSave||error||' + JSON.stringify(error), CLASS_NAME, 'error'));
+                console.error(error);
                 //scroll back to top
                 window.scroll({
                     top: 0,
