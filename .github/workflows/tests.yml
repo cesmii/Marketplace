@@ -4,6 +4,7 @@
 name: Test|API|Marketplace
 on: [workflow_dispatch]
   #manually trigger deploy
+  #workflow_dispatch:
   # Trigger the workflow on push
   # push:
   #  branches:
