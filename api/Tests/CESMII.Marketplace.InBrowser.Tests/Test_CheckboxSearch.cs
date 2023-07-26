@@ -14,9 +14,6 @@
         // private string strStartUrl = "https://marketplace-front-stage.azurewebsites.net/library?sm=sm-app,sm-hardware&p=1&t=10";  // Staging
         // private string strStartUrl = "https://marketplace-front.azurewebsites.net/library?sm=sm-app,sm-hardware&p=1&t=10";     // Production
         private IWebDriver? driver = null;
-        //public IDictionary<string, object> vars { get; private set; }
-
-        // private Dictionary<string, int> dictPublisherItems = new Dictionary<string, int>();
 
         private bool bStaging = true;
         private const int c50 = 100;
@@ -25,9 +22,6 @@
         private const int c1000 = 1500;
 
         private static int cMaxItems = -1;
-
-
-        //    private static string[] astrPublishers = null;
 
         private static bool bNeedToRun = true;
 
@@ -94,45 +88,6 @@
                 driver.Quit();
         }
 
-        //public class MyTestData
-        //{
-        //    public MyTestData(string strTestType, string strItemType, string strItemName, int cExpectedStaging, int cExpectedProduction)
-        //    {
-        //        this.strTestType = strTestType;
-        //        this.strItemType = strItemType;
-        //        this.strItemName = strItemName;
-        //        this.cExpectedStaging = cExpectedStaging;
-        //        this.cExpectedProduction = cExpectedProduction;
-        //    }
-        //    public string strTestType { get; set; }
-        //    public string strItemType { get; set; }
-        //    public string strItemName { get; set; }
-        //    public int cExpectedStaging { get; set; }
-        //    public int cExpectedProduction { get; set; }
-        //}
-
-        //public static MyTestData[] ReadTestsFromInputFile()
-        //{
-        //    MyTestData[] aTestData = new MyTestData[3];
-        //    aTestData[0] = new MyTestData("checkbox", "Category", "Air Compressing", 0, 2);
-        //    aTestData[1] = new MyTestData("checkbox", "Category", "Analytics", 4, 6);
-        //    aTestData[2] = new MyTestData("checkbox", "Category", "Analytics Lifecycle", 0, 1);
-
-        //    return aTestData;
-        //}
-
-
-        //[Test, TestCaseSource("ReadTestsFromInputFile")]
-        //public void ReadTestsFromInputFile_ClickItemInCheckbox(MyTestData mtdInput)
-        //{
-        //    string strTestType = mtdInput.strTestType;
-        //    string strItemType = mtdInput.strItemType;
-        //    string strItemName = mtdInput.strItemName;
-        //    int cExpectedStaging = mtdInput.cExpectedStaging;
-        //    int cExpectedProduction  = mtdInput.cExpectedProduction;
-
-        //    ClickItemInCheckbox(strTestType, strItemType, strItemName, cExpectedStaging, cExpectedProduction);
-        //}
 
         #region MyTests
         // Test Fixture Start
@@ -377,52 +332,6 @@
         }
 
 
-        //public string [] QueryGroupList(IWebDriver mywebdriver, int iGroup, int cMaxListLength)
-        //{
-        //    ArrayList al = new ArrayList();
-        //    utils.Console_WriteLine($"QueryGroupList: Entering function");
-
-        //    if (mywebdriver == null)
-        //        throw new Exception($"Error accessing ChromeDriver: driver is null");
-
-        //    bool bFound = false;
-        //    for (int nRetries = 100; (!bFound && nRetries > 0); nRetries--)
-        //    {
-        //        var xxElement = GetWebElementFromGroup(mywebdriver, iGroup, 1);
-        //        if (xxElement != null)
-        //            bFound = true;
-        //        System.Threading.Thread.Sleep(c50);
-        //    }
-
-        //    // Click to open the "Show More" for the publisher's list
-        //    utils.MarketplaceSeeAllSeeLess(mywebdriver, iGroup, true);
-        //    System.Threading.Thread.Sleep(c50);
-
-        //    for (int iItem = 0; iItem < cMaxListLength; iItem++)
-        //    {
-        //        var eItem = GetWebElementFromGroup(mywebdriver, iGroup, iItem);
-
-        //        // When we cannot find an item, we are done with this group.
-        //        if (eItem == null)
-        //            break;
-
-        //        string strItem = eItem.Text;
-        //        al.Add(strItem);
-        //    }
-
-        //    // Create string array with all items.
-        //    string[] astrReturn = new string[al.Count];
-        //    al.CopyTo(astrReturn);
-
-        //    return astrReturn;
-        //}
-
-        //private IWebElement GetNamedElement(IWebDriver mywebdriver, int iGroup, int iItem)
-        //{
-        //    string strPrefix = (iGroup == 1) ? "v_" :
-        //                       (iGroup == 2) ? "c_" :
-        //                       (iGroup == 3) ? "p_" : "x_";
-        //}
 
         private IWebElement GetWebElementFromGroup(IWebDriver mywebdriver, int iGroup, int iItem)
         {
@@ -491,6 +400,5 @@
 
             return cItems;
         }
-
     }
 }
