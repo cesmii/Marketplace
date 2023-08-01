@@ -344,23 +344,30 @@ namespace CESMII.Marketplace.Api.Controllers
             var timer = Stopwatch.StartNew();
             //init and then flags set by user or system will determine which of the following get applied
 
-            //Special handling for types
-            //if model.query value has specially designated terms, then alter the item type filters or the model.filters for those items
-            var useSpecialTypeSelection = PrepareAdvancedSearchTypeSelections(model);
 
             //extract selected items within a list of items
             var cats = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.FirstOrDefault(x => x.EnumValue == LookupTypeEnum.Process).Items.Where(x => x.Selected).ToList();
             var verts = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.FirstOrDefault(x => x.EnumValue == LookupTypeEnum.IndustryVertical).Items.Where(x => x.Selected).ToList();
             var pubs = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.FirstOrDefault(x => x.EnumValue == LookupTypeEnum.Publisher).Items.Where(x => x.Selected).ToList();
             var types = model.ItemTypes.Count == 0 ? new List<LookupItemFilterModel>() : model.ItemTypes.Where(x => x.Selected).ToList();
+            //Special handling for types - if model.query value has specially designated terms,
+            //then alter the item type filters or the model.filters for those items
+            var keywordTypes = PrepareKeywordTypeSelections(model);
 
+            /* Comment this out. 
+            //  Changing the value of the model.Query is causing problems because it is removing results. 
+            //  Example: "CNC L" query gets changed to "CNC" and then an item like CNC Lab is no longer found.
+            //  The splitting of the query into individual terms also breaks other conventions we are using in the 
+            //  expected behavior.
+            //  There is publisher filtering downstream.
+            
             // Check for publishers in the query string
             if (!string.IsNullOrEmpty(model.Query))
             {
                 bool bAnyAdded = false;
                 StringBuilder sbNewQuery = new StringBuilder();
                 List<PublisherModel> pubAll = _dalPublisher.GetAll(false);
-                var astrWords = model.Query.Split(new char[] { ' ',',','.','\t' }, StringSplitOptions.RemoveEmptyEntries);
+                var astrWords = model.Query.Split(new char[] { ' ', ',', '.', '\t' }, StringSplitOptions.RemoveEmptyEntries);
                 if (astrWords.Length > 0)
                 {
                     foreach (string strItem in astrWords)
@@ -385,6 +392,7 @@ namespace CESMII.Marketplace.Api.Controllers
                         model.Query = sbNewQuery.ToString().Trim();
                 }
             }
+            */
 
             // Any type (Apps or Hardware) but not Profiles
             // User driven flag to select only a certain type. Determine if none are selected or if item type of sm app is selected.
@@ -392,8 +400,9 @@ namespace CESMII.Marketplace.Api.Controllers
 
             // SM Profiles
             // User driven flag to select only a certain type. Determine if none are selected or if item type of sm profile is selected.
-            var includeSmProfileTypes = !types.Any(x => x.Selected) ||
-                types.Any(x => x.Selected && x.Code.ToLower().Equals(_configUtil.MarketplaceSettings.SmProfile.Code.ToLower()));
+            var includeSmProfileTypes = (!types.Any(x => x.Selected) && !keywordTypes.Any(x => x.Selected)) ||
+                (types.Any(x => x.Selected && x.Code.ToLower().Equals(_configUtil.MarketplaceSettings.SmProfile.Code.ToLower())) ||
+                 keywordTypes.Any(x => x.Selected && x.Code.ToLower().Equals(_configUtil.MarketplaceSettings.SmProfile.Code.ToLower())));
             //Skip over this in certain scenarios. ie. admin section
             if (_configUtil.MarketplaceSettings.EnableCloudLibSearch && includeCloudLib && includeSmProfileTypes)
             {
@@ -448,13 +457,13 @@ namespace CESMII.Marketplace.Api.Controllers
                 long swMarketPlaceStarted = timer.ElapsedMilliseconds;
                 var searchMarketplaceTask = Task.Run(() =>
                 {
-                    return AdvancedSearchMarketplace(adjustedModel, types, cats, verts, pubs, useSpecialTypeSelection, liveOnly);
+                    return AdvancedSearchMarketplace(adjustedModel, types, keywordTypes, cats, verts, pubs, liveOnly);
                 });
                 long swMarketPlaceFinished = 0;
                 _ = searchMarketplaceTask.ContinueWith(t => swMarketPlaceFinished = swMarketPlaceFinished == 0 ? timer.ElapsedMilliseconds : swMarketPlaceFinished);
 
                 long swCloudLibStarted = timer.ElapsedMilliseconds;
-                var searchCloudLibTask = AdvancedSearchCloudLib(adjustedModel, cats, verts, pubs, useSpecialTypeSelection);
+                var searchCloudLibTask = AdvancedSearchCloudLib(adjustedModel, keywordTypes, cats, verts, pubs);
                 long swCloudLibFinished = 0;
                 _ = searchCloudLibTask.ContinueWith(t => swCloudLibFinished = swCloudLibFinished == 0 ? timer.ElapsedMilliseconds : swCloudLibFinished);
                 //run in parallel
@@ -493,7 +502,7 @@ namespace CESMII.Marketplace.Api.Controllers
             else
             {
                 long swMarketPlaceStarted = timer.ElapsedMilliseconds;
-                result = await AdvancedSearchMarketplace(model, types, cats, verts, pubs, useSpecialTypeSelection, liveOnly);
+                result = await AdvancedSearchMarketplace(model, types, keywordTypes, cats, verts, pubs, liveOnly);
                 //because we wait to page, sort till after in the combined (Cloud and marketplace) scenario, we need to do same here. 
                 //now page the data. 
                 result.Data = result.Data?
@@ -524,23 +533,26 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <remarks>model.ItemTypes selected items could be altered in this method</remarks>
         /// <param name="model"></param>
         /// <returns>True if a reserved word altered the type selection. This will be used downstream in the search predicate.</returns>
-        private bool PrepareAdvancedSearchTypeSelections(MarketplaceSearchModel model)
+        private List<LookupItemFilterModel> PrepareKeywordTypeSelections(MarketplaceSearchModel model)
         {
-            bool result = false;
-            if (!string.IsNullOrEmpty(model.Query))
-            {
-                var terms = _dalSearchKeyword
-                    .Where(x => x.Term.ToLower().Equals(model.Query.ToLower()), null, null, false, false).Data.ToList();
+            if (string.IsNullOrEmpty(model.Query)) return new List<LookupItemFilterModel>();
 
-                //if there are matching reserved terms and that term has an item type in the collection.
-                result = terms.Any() && model.ItemTypes.Any(x => terms.Any(y => y.Code.ToLower().Equals(x.Code.ToLower())));
+            var terms = _dalSearchKeyword
+                .Where(x => x.Term.ToLower().Equals(model.Query.ToLower()), null, null, false, false).Data.ToList();
 
-                foreach (var t in model.ItemTypes)
-                {
-                    t.Selected = t.Selected || terms.Any(y => y.Code.ToLower().Equals(t.Code.ToLower()));
-                }
-            }
-
+            //if there are matching reserved terms and that term has an item type in the collection.
+            var result = !terms.Any() ? new List<LookupItemFilterModel>() :
+                model.ItemTypes.Where(x => terms.Any(y => y.Code.ToLower().Equals(x.Code.ToLower())))
+                    .Select(x => new LookupItemFilterModel()
+                    {
+                        Code = x.Code,
+                        ID = x.ID,
+                        Name = x.Name,
+                        LookupType = x.LookupType,
+                        IsActive = x.IsActive,
+                        Selected = true,
+                    })
+                    .ToList();
             return result;
         }
 
@@ -649,7 +661,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <remarks>model.Filters selected items could be altered in this method</remarks>
         /// <param name="model"></param>
         /// <returns>list of ids of lookup items matching the word</returns>
-        private Func<MarketplaceItem, bool> BuildQueryPredicate(string query, List<LookupItemFilterModel> types, bool useSpecialTypeSelection)
+        private Func<MarketplaceItem, bool> BuildQueryPredicate(string query, List<LookupItemFilterModel> keywordTypes, bool keywordTypeIsSelected)
         {
             // We are looking for something typed into the search box. If empty, we return an empty list.
             if (string.IsNullOrEmpty(query)) return null;
@@ -668,7 +680,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 || x.Description.ToLower().Contains(query)
                 || x.Abstract.ToLower().Contains(query)
                 || (x.MetaTags != null && x.MetaTags.Contains(query))
-                || (useSpecialTypeSelection && x.ItemTypeId != null && types.Any(y => y.ID.Equals(x.ItemTypeId.ToString())))
+                || (keywordTypeIsSelected && x.ItemTypeId != null && keywordTypes.Any(y => y.ID.Equals(x.ItemTypeId.ToString())))
                 || cats.Any(y => x.Categories.Contains(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y))))
                 || verts.Any(y => x.IndustryVerticals.Contains(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y))))
                 || pubs.Any(y => x.PublisherId.Equals(new MongoDB.Bson.BsonObjectId(new MongoDB.Bson.ObjectId(y))))
@@ -684,10 +696,10 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <returns></returns>
         private async Task<DALResult<MarketplaceItemModel>> AdvancedSearchMarketplace([FromBody] MarketplaceSearchModel model
             , List<LookupItemFilterModel> types
+            , List<LookupItemFilterModel> keywordTypes
             , List<LookupItemFilterModel> cats
             , List<LookupItemFilterModel> verts
             , List<LookupItemFilterModel> pubs
-            , bool useSpecialTypeSelection
             , bool liveOnly = true)
         {
             _logger.LogInformation($"MarketplaceController|AdvancedSearchMarketplace|Starting...");
@@ -751,55 +763,25 @@ namespace CESMII.Marketplace.Api.Controllers
                 predicates.Add(x => combinedPubs.Any(p => p == x.PublisherId.ToString()));
             }
 
-            //build where clause - one for each type passed in
+            //scenarios
+            //if types are selected, add them to the predicate.
+            //any model.query value added would then use an AND with this selected type
             if (types != null && types.Any())
             {
-                //if we are using special type, it means user entered special word for query like "profile". In this case,
-                //we want to get all types of sm-profile >>OR<< any item containing the word profile
-                //so, predicateTypes applied within the model.query section next. 
-                //Otherwise, we add it right away per usual
-                if (!useSpecialTypeSelection)
-                {
-                    predicates.Add(x => x.ItemTypeId != null && types.Any(y => y.ID.Equals(x.ItemTypeId.ToString())));
-                }
+                predicates.Add(x => x.ItemTypeId != null && types.Any(y => y.ID.Equals(x.ItemTypeId.ToString())));
             }
+            
+            //no types selected (sm-app, sm-hardware, sm-profile) - clicking the type filter button
+            //but keyword type is selected via a query value mapped to a type selection (ie profiles maps to sm-profile type)
+            //impact of this scenario - find anything with that type OR anything with that term
+            bool keywordTypeSelected = ((types == null || !types.Any()) && keywordTypes != null && keywordTypes.Any());
 
             //add where clause for the search terms - check against more fields
             if (!string.IsNullOrEmpty(model.Query))
             {
-                Func<MarketplaceItem, bool> predicateQuery = BuildQueryPredicate(model.Query, types, useSpecialTypeSelection);
+                Func<MarketplaceItem, bool> predicateQuery = BuildQueryPredicate(model.Query, keywordTypes, keywordTypeSelected);
                 if (predicateQuery != null) predicates.Add(predicateQuery);
 
-                /*
-                //TBD - Academia - no longer returning value because not in name but is in category. Have to figure out 
-                //how to weave that into the mix.
-                //TBD - check that we can update appsettings values from Azure in Configuraiton area.
-
-                //add series of where conditions
-                if (useSpecialTypeSelection)
-                {
-                    predicateQuery = x => x.Name.ToLower().Contains(model.Query)
-                        //or search on additional fields
-                        || x.DisplayName.ToLower().Contains(model.Query)
-                        || x.Description.ToLower().Contains(model.Query)
-                        || x.Abstract.ToLower().Contains(model.Query)
-                        || (x.MetaTags != null && x.MetaTags.Contains(model.Query))
-                        //if we are using special type, it means user entered special word for query like "profile". In this case,
-                        //we want to get all types of sm-profile >>OR<< any item containing the word profile
-                        || (x.ItemTypeId != null && types.Any(y => y.ID.Equals(x.ItemTypeId.ToString())))
-                        ;
-                }
-                else
-                {
-                    predicateQuery = x => x.Name.ToLower().Contains(model.Query)
-                        //or search on additional fields
-                        || x.DisplayName.ToLower().Contains(model.Query)
-                        || x.Description.ToLower().Contains(model.Query)
-                        || x.Abstract.ToLower().Contains(model.Query)
-                        || (x.MetaTags != null && x.MetaTags.Contains(model.Query))
-                        ;
-                }
-                */
                 predicates.Add(predicateQuery);
             }
 
@@ -896,10 +878,10 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         private async Task<DALResult<MarketplaceItemModelWithCursor>> AdvancedSearchCloudLib([FromBody] MarketplaceSearchModel model
+            , List<LookupItemFilterModel> keywordTypes
             , List<LookupItemFilterModel> cats
             , List<LookupItemFilterModel> verts
             , List<LookupItemFilterModel> pubs
-            , bool useSpecialTypeSelection
             )
         {
             _logger.LogInformation($"MarketplaceController|AdvancedSearchCloudLib|Starting...");
@@ -907,10 +889,15 @@ namespace CESMII.Marketplace.Api.Controllers
 
             //lowercase model.query - preserve original value in model.Query for use elsewere
             var query = string.IsNullOrEmpty(model.Query) ? model.Query : model.Query.ToLower();
-            //if useSpecialTypeSelection == true and we get to this function, then we deduce that the special type was
+            //if keywordTypes has any selected, and we get to this function, then we deduce that the special type was
             //true because the user entered a special term related specifically to profile. So, we need to replace the
             //model.Query value with "" so that we don't filter out profiles by the term profile and yield no/very few matches. 
-            if (useSpecialTypeSelection) query = "";
+            if (keywordTypes != null &&
+                keywordTypes.Any(x => x.Selected && x.Code.ToLower().Equals(_configUtil.MarketplaceSettings.SmProfile.Code.ToLower())))
+            {
+                query = "";
+            }
+
 
             var result = new DALResult<MarketplaceItemModelWithCursor>();
             //if publishers is a filter, then we skip CloudLib for now because search is trying to only show 
@@ -1143,7 +1130,7 @@ namespace CESMII.Marketplace.Api.Controllers
             cursor.CurrentCursor.Offset = skip;
             cursor.CurrentCursor.MarketPlaceOffset = firstMarketPlaceOffset;
             cursor.CurrentCursor.CloudLibCursor = firstCloudLibCursor;
-            cursor.TotalItemCount = (int) totalCount;
+            cursor.TotalItemCount = (int)totalCount;
             return cursor;
         }
 
