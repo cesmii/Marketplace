@@ -17,7 +17,8 @@
             //
             // Generate tests for textquery
             //
-            var dictTextQueryArray = MongoAccess.FetchDictionaryDataFromDatabase(strConnection, strDatabase, "textquery");
+            int cMaxItems;
+            var dictTextQueryArray = MongoAccess.FetchDictionaryDataFromDatabase(strConnection, strDatabase, "textquery", out cMaxItems, true);
             SortedDictionary<string, int> dictTextCat = dictTextQueryArray[0];
             SortedDictionary<string, int> dictTextVert = dictTextQueryArray[1];
             SortedDictionary<string, int> dictTextPub = dictTextQueryArray[2];
@@ -27,30 +28,30 @@
             StringBuilder sb = CSharpGenerator.CreateSourceFileHeader();
 
             // Assemble a list of textquery tests for Categories.
-            CSharpGenerator.CreateTestCases(sb, "Marketplace_TestData_TextQuery_Category", "Category", dictTextCat, "textquery");
+            CSharpGenerator.CreateTestCases(sb, "Marketplace_TestData_TextQuery_Category", "Category", dictTextCat, "textquery", cMaxItems);
 
             // Assemble a list of textquery tests for Verticals.
-            CSharpGenerator.CreateTestCases(sb, "Marketplace_TestData_TextQuery_Vertical", "Vertical", dictTextVert, "textquery");
+            CSharpGenerator.CreateTestCases(sb, "Marketplace_TestData_TextQuery_Vertical", "Vertical", dictTextVert, "textquery", cMaxItems);
 
             // Assemble a list of textquery tests for Publishers.
-            CSharpGenerator.CreateTestCases(sb, "Marketplace_TestData_TextQuery_Publisher", "Publisher", dictTextPub, "textquery");
+            CSharpGenerator.CreateTestCases(sb, "Marketplace_TestData_TextQuery_Publisher", "Publisher", dictTextPub, "textquery", cMaxItems);
 
             //
             // Generate tests for checkbox query
             //
-            var dictCheckboxArray = MongoAccess.FetchDictionaryDataFromDatabase(strConnection, strDatabase, "checkbox");
+            var dictCheckboxArray = MongoAccess.FetchDictionaryDataFromDatabase(strConnection, strDatabase, "checkbox", out cMaxItems);
             SortedDictionary<string, int> dictCheckCat = dictCheckboxArray[0];
             SortedDictionary<string, int> dictCheckVert = dictCheckboxArray[1];
             SortedDictionary<string, int> dictCheckPub = dictCheckboxArray[2];
 
             // Assemble a list of checkbox tests for Categories.
-            CSharpGenerator.CreateTestCases(sb, "Marketplace_TestData_Checkbox_Category", "Category", dictCheckCat, "checkbox");
+            CSharpGenerator.CreateTestCases(sb, "Marketplace_TestData_Checkbox_Category", "Category", dictCheckCat, "checkbox", cMaxItems);
 
             // Assemble a list of checkbox tests for Verticals.
-            CSharpGenerator.CreateTestCases(sb, "Marketplace_TestData_Checkbox_Vertical", "Vertical", dictCheckVert, "checkbox");
+            CSharpGenerator.CreateTestCases(sb, "Marketplace_TestData_Checkbox_Vertical", "Vertical", dictCheckVert, "checkbox", cMaxItems);
 
             // Assemble a list of checkbox tests for Publishers.
-            CSharpGenerator.CreateTestCases(sb, "Marketplace_TestData_Checkbox_Publisher", "Publisher", dictCheckPub, "checkbox");
+            CSharpGenerator.CreateTestCases(sb, "Marketplace_TestData_Checkbox_Publisher", "Publisher", dictCheckPub, "checkbox", cMaxItems);
 
             CSharpGenerator.CreateSourceFileFooter(sb);
 

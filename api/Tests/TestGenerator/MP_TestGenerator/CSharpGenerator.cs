@@ -26,7 +26,7 @@ namespace MP_TestGenerator
             sb.AppendLine("}");
         }
 
-        public static StringBuilder CreateTestCases(StringBuilder sbOutput, string strClassName, string strItemType, SortedDictionary<string, int> dict1, string strTestType)
+        public static StringBuilder CreateTestCases(StringBuilder sbOutput, string strClassName, string strItemType, SortedDictionary<string, int> dict1, string strTestType, int cMaxItems)
         {
             // Class header (declaration)
             sbOutput.AppendLine($"    public class {strClassName}");
@@ -43,7 +43,7 @@ namespace MP_TestGenerator
             {
                 string strItemName = kvp1.Key;
                 int cExpected = kvp1.Value;
-                sbOutput.AppendLine($"\t\tnew object[] {{\"{strTestType}\", \"{strItemType}\", \"{strItemName}\", {iItem}, {cExpected} }},");
+                sbOutput.AppendLine($"\t\tnew object[] {{\"{strTestType}\", \"{strItemType}\", \"{strItemName}\", {iItem}, {cExpected}, {cMaxItems} }},");
                 iItem++;
             }
 

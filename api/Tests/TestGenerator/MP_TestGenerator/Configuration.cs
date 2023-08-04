@@ -11,7 +11,7 @@ namespace MP_TestGenerator
 
             string strConnection = config["MongoDBSnapshot2023-07-19:ConnectionString"];
             string strDatabase = config["MongoDBSnapshot2023-07-19:DatabaseName"];
-            string strOutputFilePath = (args.Length > 0) ? args[0] : "Marketplace_TestData.cs";
+            string strOutputFilePath = (args.Length > 0) ? args[0] : "C:\\CESMII.Testing\\MP\\Marketplace_TestData.cs";
 
             return (strConnection, strDatabase, strOutputFilePath);
         }
