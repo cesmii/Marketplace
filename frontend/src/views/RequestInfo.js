@@ -446,7 +446,7 @@ function RequestInfo() {
                                         <a href="https://www.cesmii.org/" target="_blank" rel="noreferrer" >About CESMII</a>
                                     </li>
                                     <li className="mb-2 px-2">
-                                        <a href="https://www.cesmii.org/membership-information/" target="_blank" rel="noreferrer" >Membership Information</a>
+                                        <a href="https://www.cesmii.org/membership/" target="_blank" rel="noreferrer" >Membership Information</a>
                                     </li>
                                     <li className="mb-2 px-2">
                                         <a href="https://www.cesmii.org/what-is-smart-manufacturing-the-smart-manufacturing-definition/" target="_blank" rel="noreferrer" >About Smart Manufacturing</a>
