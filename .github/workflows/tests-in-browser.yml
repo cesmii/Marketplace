@@ -28,6 +28,8 @@ env:
   NETCORE_VERSION: "6.0.x"
   # set this to the NODE JS version to use
   NODEJS_VERSION: "14.17.3"
+  # set this to npm working directory
+  NPM_WORKING_DIRECTORY: 'frontend'
 
 jobs:
   build:
@@ -51,8 +53,11 @@ jobs:
         uses: actions/setup-node@v1
         with: 
           node-version: ${{env.NODEJS_VERSION}}
-      - run: npm install
-      - run: npm run build:staging --if-present
+      - name: Set up NPM and build our code
+        working-directory: ${{env.NPM_WORKING_DIRECTORY}}
+        run:
+          npm install
+          npm run build:staging --if-present
       - name: Setup chrome driver
         uses: browser-actions/setup-chrome@latest
       - name: Run browser
