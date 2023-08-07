@@ -55,6 +55,8 @@ jobs:
           node-version: ${{env.NODEJS_VERSION}}
       - name: Set up NPM and build our code
         working-directory: ${{env.NPM_WORKING_DIRECTORY}}
+        env: 
+          CI: '' #when process-env-ci is true, warnings are ignored and not treated as errors
         run: |
           npm install
           npm run build:staging --if-present
