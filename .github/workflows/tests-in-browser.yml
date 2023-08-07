@@ -32,10 +32,23 @@ jobs:
     name: Test in Browser
     runs-on: ubuntu-latest
     steps:
-      - name: Copy repository so we can run our tests
+      - name: Check out the repo
         uses: actions/checkout@v2
         with:
           submodules: true
+      - name: Set up dotnet core ${{ env.NETCORE_VERSION }}
+        uses: actions/setup_dotnet@v1
+        with:
+          dotnet-version: ${{ env.NETCORE_VERSION }}
+      - name: Restore dependencies (${{env.SOLUTION_FILE}})
+        run: dotnet restore ${{env.SOLUTION_FILE}}
+        working-directory: ${{env.SOLUTION_DIRECTORY}}
+      - name: Build (${{env.SOLUTION_FILE}})
+        run: dotnet build ${{env.SOLUTION_FILE}} --configuration Staging --no-restore
+      - name: Setup chrome driver
+        uses: browser-actions/setup-chrome@latest
+      - name: Run browser
+        run: chrome --version
       - name: Run Test on project (${{env.PROJECT_NAME}})
-        run: dotnet test ${{env.PROJECT_DIRECTORY}}${{env.PROJECT_NAME}}.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
+        run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/${{env.PROJECT_NAME}}.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
         working-directory: ${{env.SOLUTION_DIRECTORY}}
