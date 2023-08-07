@@ -48,7 +48,7 @@ jobs:
       - name: Build (${{env.SOLUTION_FILE}})
         run: dotnet build ${{env.SOLUTION_FILE}} --configuration Staging --no-restore
       - name: Use Node.js version (${{env.NODEJS_VERSION}})
-        uses: actions/setup-node@1
+        uses: actions/setup-node@v1
         with: 
           node-version: ${{env.NODEJS_VERSION}}
       - run: npm install
