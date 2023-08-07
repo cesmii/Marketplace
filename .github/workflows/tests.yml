@@ -1,12 +1,12 @@
-# This workflow will build and run In Browser Selenium Web Driver Tests
+# This workflow will build and test a .NET 6 web API
 #
 # For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
-name: Test|In Browser|Marketplace
-on: 
+name: Test|API|Marketplace
+on:
   #manually trigger deploy
   workflow_dispatch:
   # Trigger the workflow on push
-  #push:
+  # push:
   #  branches:
   #    - develop
   #    - main
@@ -16,28 +16,27 @@ on:
   #    - main
 
 env:
-  # set this to the path to your solution file
+  # set this to the path to your solution file, defaults to the repository root (this is the folder in the git repo)
   SOLUTION_DIRECTORY: './'      
-  # Solution file name
+  # set this to the path to your web app project, defaults to the repository root (this is the folder in the git repo)
+  PROJECT_DIRECTORY: './api/CESMII.Marketplace.Api'      
+  # Solution file to use
   SOLUTION_FILE: 'CESMII.Marketplace.sln'      
-  # Set this to the path to your test project file
-  PROJECT_DIRECTORY: './api/Tests/CESMII.Marketplace.InBrowser.Tests/'
-  # Test project file to use
-  PROJECT_NAME: 'CESMII.Marketplace.InBrowser.Tests'      
+  # Project file to use
+  PROJECT_NAME: 'CESMII.Marketplace.Api'      
   # set this to the .NET core version to use
   NETCORE_VERSION: "6.0.x"
 
 jobs:
   build:
-    name: Test in Browser
+    name: Build and Test .NET6 Web API
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
         with:
           submodules: true
-      - name: Set up dotnet core ${{ env.NETCORE_VERSION }}
-        uses: actions/setup_dotnet@v1
+      - name: Set up dotnet Core ${{ env.NETCORE_VERSION }}
+        uses: actions/setup-dotnet@v1
         with:
           dotnet-version: ${{ env.NETCORE_VERSION }}
       - name: Restore dependencies (${{env.SOLUTION_FILE}})
@@ -45,10 +44,7 @@ jobs:
         working-directory: ${{env.SOLUTION_DIRECTORY}}
       - name: Build (${{env.SOLUTION_FILE}})
         run: dotnet build ${{env.SOLUTION_FILE}} --configuration Staging --no-restore
-      - name: Setup chrome driver
-        uses: browser-actions/setup-chrome@latest
-      - name: Run browser
-        run: chrome --version
-      - name: Run Test on project (${{env.PROJECT_NAME}})
-        run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/${{env.PROJECT_NAME}}.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
         working-directory: ${{env.SOLUTION_DIRECTORY}}
+#      - name: Test (${{env.SOLUTION_FILE}})
+#        run: dotnet test ${{env.SOLUTION_FILE}} --configuration Staging --no-build --verbosity normal -l:"console;verbosity=normal"
+#        working-directory: ${{env.SOLUTION_DIRECTORY}}
