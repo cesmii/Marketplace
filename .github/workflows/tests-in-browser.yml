@@ -37,7 +37,7 @@ jobs:
         with:
           submodules: true
       - name: Set up dotnet core ${{ env.NETCORE_VERSION }}
-        uses: actions/setup_dotnet@v1
+        uses: actions/setup-dotnet@v1
         with:
           dotnet-version: ${{ env.NETCORE_VERSION }}
       - name: Restore dependencies (${{env.SOLUTION_FILE}})
