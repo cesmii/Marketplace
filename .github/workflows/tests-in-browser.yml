@@ -55,7 +55,7 @@ jobs:
           node-version: ${{env.NODEJS_VERSION}}
       - name: Set up NPM and build our code
         working-directory: ${{env.NPM_WORKING_DIRECTORY}}
-        run:
+        run: |
           npm install
           npm run build:staging --if-present
       - name: Setup chrome driver
