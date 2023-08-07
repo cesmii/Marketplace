@@ -26,6 +26,8 @@ env:
   PROJECT_NAME: 'CESMII.Marketplace.InBrowser.Tests'      
   # set this to the .NET core version to use
   NETCORE_VERSION: "6.0.x"
+  # set this to the NODE JS version to use
+  NODEJS_VERSION: "14.17.3"
 
 jobs:
   build:
@@ -45,6 +47,12 @@ jobs:
         working-directory: ${{env.SOLUTION_DIRECTORY}}
       - name: Build (${{env.SOLUTION_FILE}})
         run: dotnet build ${{env.SOLUTION_FILE}} --configuration Staging --no-restore
+      - name: Use Node.js version (${{env.NODEJS_VERSION}})
+        uses: actions/setup-node@1
+        with: 
+          node-version: ${{env.NODEJS_VERSION}}
+      - run: npm install
+      - run: npm run build:staging --if-present
       - name: Setup chrome driver
         uses: browser-actions/setup-chrome@latest
       - name: Run browser
