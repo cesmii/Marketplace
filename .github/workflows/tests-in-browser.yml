@@ -61,6 +61,10 @@ jobs:
       #  uses: browser-actions/setup-chrome@latest
       #- name: Run browser
       #  run: chrome --version
+      - name: Install Google Chrome 
+        run: |
+          chmod +x ./scripts/InstallChrome.sh
+          ./scripts/InstallChrome.sh 
       - name: Run Test on (${{env.SOLUTION_FILE}})
         run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/CESMII.Marketplace.InBrowser.Tests.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
         working-directory: ${{env.SOLUTION_DIRECTORY}}
