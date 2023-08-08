@@ -51,6 +51,8 @@ jobs:
         run: dotnet build ${{env.SOLUTION_FILE}} --configuration Staging --no-restore
       - name: Setup chrome driver
         uses: browser-actions/setup-chrome@v1
+        with:
+              chrome-version: 100.0
       - name: Run browser
         run: |
             chrome --version
