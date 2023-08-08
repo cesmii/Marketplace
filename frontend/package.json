@@ -36,8 +36,10 @@
   "scripts": {
     "start": "react-scripts start",
     "start-dev": "set PORT=3001 && react-scripts start",
+    "start-in-browser-test": "set PORT=3000 && react-scripts start",
     "build": "GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
+    "build:in-browser-test": "env-cmd -f .env.inbrowsertest npm run-script build",
     "eject": "react-scripts eject",
     "build:staging": "env-cmd -f .env.staging npm run-script build"
   },

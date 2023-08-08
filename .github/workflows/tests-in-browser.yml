@@ -59,7 +59,8 @@ jobs:
           CI: '' #when process-env-ci is true, warnings are ignored and not treated as errors
         run: |
           npm install
-          npm run build:staging --if-present
+          npm run build:in-browser-test 
+          npm run start-in-browser-test
       - name: Setup chrome driver
         uses: browser-actions/setup-chrome@v1
       #- name: Run browser
