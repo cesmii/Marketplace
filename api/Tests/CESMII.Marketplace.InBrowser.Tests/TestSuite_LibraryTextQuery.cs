@@ -15,7 +15,12 @@
         public IJavaScriptExecutor js { get; private set; }
         public TestSuite_LibraryTextQuery()
         {
-            driver = new ChromeDriver();
+            ChromeOptions options = new ChromeOptions();
+            options.AddArguments("--no-sandbox");
+            options.AddArguments("--headless"); //!!!should be enabled for Jenkins
+            options.AddArguments("--disable-dev-shm-usage"); //!!!should be enabled for Jenkins
+            options.AddArguments("--window-size=1920x1080"); //!!!should be enabled for Jenkins
+            driver = new ChromeDriver(options);
             js = (IJavaScriptExecutor)driver;
             driver.Manage().Window.Maximize();
             driver.Navigate().GoToUrl("http://localhost:3000/library?p=1&t=10");
