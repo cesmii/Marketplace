@@ -61,7 +61,7 @@ jobs:
           npm install
           npm run build:staging --if-present
       - name: Setup chrome driver
-        uses: browser-actions/setup-chrome@latest
+        uses: browser-actions/setup-chrome@v1
       - name: Run browser
         run: chrome --version
       - name: Run Test on project (${{env.PROJECT_NAME}})
