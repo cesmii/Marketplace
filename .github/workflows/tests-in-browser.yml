@@ -49,6 +49,11 @@ jobs:
         working-directory: ${{env.SOLUTION_DIRECTORY}}
       - name: Build (${{env.SOLUTION_FILE}})
         run: dotnet build ${{env.SOLUTION_FILE}} --configuration Staging --no-restore
+      - name: Setup chrome driver
+        uses: browser-actions/setup-chrome@v1
+      - name: Run browser
+        run: |
+            chrome --version
       - name: Use Node.js version (${{env.NODEJS_VERSION}})
         uses: actions/setup-node@v1
         with: 
@@ -61,10 +66,6 @@ jobs:
           npm install
           npm run build:in-browser-test 
           npm run start-in-browser-test &
-      - name: Setup chrome driver
-        uses: browser-actions/setup-chrome@v1
-      #- name: Run browser
-      #  run: chrome --version
       - name: Run Test on project (${{env.PROJECT_NAME}})
         run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/${{env.PROJECT_NAME}}.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
         working-directory: ${{env.SOLUTION_DIRECTORY}}
