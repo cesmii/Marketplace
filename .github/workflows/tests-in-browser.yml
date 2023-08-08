@@ -62,8 +62,8 @@ jobs:
           npm run build:staging --if-present
       - name: Setup chrome driver
         uses: browser-actions/setup-chrome@v1
-      - name: Run browser
-        run: chrome --version
+      #- name: Run browser
+      #  run: chrome --version
       - name: Run Test on project (${{env.PROJECT_NAME}})
         run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/${{env.PROJECT_NAME}}.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
         working-directory: ${{env.SOLUTION_DIRECTORY}}
