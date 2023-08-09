@@ -52,18 +52,6 @@ jobs:
       - name: Start up Marketplace Server
         run: |
              ./api/CESMII.Marketplace.API/bin/Staging/net6.0/CESMII.Marketplace.API &
-      - name: Install libnss3.so
-        run: |
-            apt-get update \
-            && apt-get install -y \
-               unzip \
-               wget \
-               libnss3 \
-            && rm -rf /var/lib/apt/lists/* \
-            && echo "progress = dot:giga" | tee /etc/wgetrc \
-            && mkdir -p /mnt /opt /data \
-            && wget https://github.com/andmarios/duphard/releases/download/v1.0/duphard -O /bin/duphard \
-            && chmod +x /bin/duphard
       - name: Setup chrome driver
         uses: browser-actions/setup-chrome@latest
       - name: Start browser and fetch version
