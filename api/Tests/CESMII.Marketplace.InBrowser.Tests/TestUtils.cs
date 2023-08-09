@@ -1,10 +1,23 @@
 ﻿using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 
 namespace Marketplace_InBrowser_Tests
 {
     internal class TestUtils
     {
-    #pragma warning disable CS0168 // Variable is declared but never used
+        public static IWebDriver CreateChromeDriver()
+        {
+            ChromeOptions options = new ChromeOptions();
+            options.AddArguments("--no-sandbox");
+            options.AddArguments("--headless");
+            options.AddArguments("--disable-dev-shm-usage");
+            options.AddArguments("--window-size=1920,1080");
+            options.AddArguments("--whitelisted-ips=''");     // Allow any connections
+            IWebDriver driver = new ChromeDriver(options);
+            return driver;
+        }
+
+#pragma warning disable CS0168 // Variable is declared but never used
         public static (IWebElement?,IWebElement?) TryFindElement2 (IWebDriver driver, string strSelector1, string strSelector2, int cRetry = 10, int cWaitMs = 25)
         {
             IWebElement? iweReturn1 = null;
