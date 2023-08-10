@@ -2,13 +2,13 @@ import React from 'react'
 import { useHistory } from 'react-router-dom'
 import { Button } from 'react-bootstrap'
 
-import { formatItemPublishDate, generateLogMessageString, getImageUrl, getRandomArrayIndexes } from '../../utils/UtilityService';
-import { clearSearchCriteria, generateSearchQueryString, toggleSearchFilterSelected } from '../../services/MarketplaceService'
+import { formatItemPublishDate, getImageUrl, getRandomArrayIndexes } from '../../utils/UtilityService';
+import { clearSearchCriteria, generateSearchQueryString, RenderImageBg, toggleSearchFilterSelected } from '../../services/MarketplaceService'
 import { useLoadingContext } from '../../components/contexts/LoadingContext'
 import { SvgVisibilityIcon } from '../../components/SVGIcon'
 import color from '../../components/Constants'
 
-const CLASS_NAME = "MarketplaceItemRow";
+//const CLASS_NAME = "MarketplaceItemRow";
 
 function MarketplaceItemRow(props) { //props are item, showActions
 
@@ -121,30 +121,6 @@ function MarketplaceItemRow(props) { //props are item, showActions
         return renderCategoryTagsRandom(item.industryVerticals, 3);
     }
 
-    const renderImageBg = () => {
-
-        /*
-        var imgSrc = props.item.imagePortrait == null ? "" : getImageUrl(props.item.imagePortrait);
-        return (
-            <div className="image-bg" >
-                <div className="clickable d-flex" onClick={navigateToMarketplaceItem} >
-                    <img className="z" src={imgSrc} alt={`${props.item.name}-${getImageAlt(props.item.imagePortrait)}`} />
-                </div>
-            </div>
-        );
-        */
-        const bgImageStyle = props.item.imagePortrait == null ? {} :
-            {
-                backgroundImage: `url(${getImageUrl(props.item.imagePortrait)})`
-            };
-
-        return (
-            <div className="image-bg" >
-                <div className="overlay-icon cover clickable" style={bgImageStyle} onClick={navigateToMarketplaceItem} >&nbsp;</div>
-            </div>
-        );
-    };
-
     //build the row
     //-------------------------------------------------------------------
     // Region: Render final output
@@ -156,8 +132,8 @@ function MarketplaceItemRow(props) { //props are item, showActions
     return (
         <>
             <div className={`row mx-0 p-0 ${props.cssClass}`}>
-                <div className="col-sm-6 col-md-5 p-0 d-none d-sm-block" >
-                    {renderImageBg()}
+                <div className="col-sm-6 col-md-5 p-0" >
+                    <RenderImageBg item={props.item} defaultImage={props.item.imagePortrait} responsiveImage={props.item.imageBanner} />
                 </div>
                 <div className="col-sm-6 col-md-7 p-4" >
                     <div className="d-flex align-items-center mb-2" >

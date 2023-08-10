@@ -3,6 +3,7 @@ import { Card } from 'react-bootstrap';
 
 import stockTilePhoto from '../../components/img/icon-molecule-landscape.svg'
 import iconMolecule from '../../components/img/icon-molecule-portrait.svg'
+import { RenderImageBg } from '../../services/MarketplaceService';
 import { AppSettings } from '../../utils/appsettings';
 import { getImageAlt, getImageUrl } from '../../utils/UtilityService';
 import '../styles/MarketplaceTileList.scss';
@@ -95,10 +96,10 @@ function MarketplaceTileList(props) {
         return (
             <Card className="h-100 border-0 mb-0 marketplace-tile marketplace-list-item">
                 <Card.Body className="h-100 p-0 tile-body d-flex">
-                    <div className="col-md-6 col-lg-5 p-0 d-none d-lg-block" >
-                        {renderImageBg(item)}
+                    <div className="col-md-6 col-lg-5 p-0" >
+                        <RenderImageBg item={item} defaultImage={item.imagePortrait} responsiveImage={item.imageBanner} />
                     </div>
-                    <div className="col-md-12 col-lg-7 p-4" >
+                    <div className="col-md-6 col-lg-7 p-4" >
                         <span className="card-title font-weight-bold mb-3 d-block bitter">{renderDisplayName(item)}</span>
                         <div className="card-text mb-0" dangerouslySetInnerHTML={{ __html: item.abstract }} ></div>
                     </div>
@@ -107,7 +108,7 @@ function MarketplaceTileList(props) {
         );
     }
 
-    const renderImageBg = (item) => {
+    const renderImageBg = (item, transpose = false) => {
         const imgSrc = item.imagePortrait == null ? iconMolecule : getImageUrl(item.imagePortrait);
         const bgImageStyle = 
             {
@@ -115,7 +116,7 @@ function MarketplaceTileList(props) {
             };
 
         return (
-            <div className="image-bg" >
+            <div className={`image-bg ${transpose ? 'transpose-image-horizontal-sm': ''}`} >
                 <div className="overlay-icon cover" style={bgImageStyle} >&nbsp;</div>
             </div>
         );
@@ -130,7 +131,7 @@ function MarketplaceTileList(props) {
             )
         }
 
-        const colCountCss = props.colCount == null ? 'col-sm-4' : `col-sm-${(12 / props.colCount).toString()}`;
+        const colCssClass = props.colCssClass == null ? 'col-sm-6' : props.colCssClass;
 
         const mainBody = props.items.map((itm, counter) => {
             const isFirst = counter === 0;
@@ -149,7 +150,7 @@ function MarketplaceTileList(props) {
                     `/library/${itm.name}`;
 
             return (
-                <div key={itm.id} className={`${colCountCss} pb-4`}>
+                <div key={itm.id} className={`${colCssClass} pb-4`}>
                     <a href={url} className="tile-link" >
                         {tile}
                     </a>

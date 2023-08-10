@@ -101,7 +101,7 @@
         public DateTime? PublishDate { get; set; }
 
         public BsonObjectId ImagePortraitId { get; set; }
-        public BsonObjectId ImageSquareId { get; set; }
+        public BsonObjectId ImageBannerId { get; set; }
         public BsonObjectId ImageLandscapeId { get; set; }
 
         public string _ccName1;

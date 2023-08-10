@@ -752,8 +752,39 @@ select.minimal:focus {
     background-color: color("hlBlue");
 }
 
+//on small displays
+//convert an image displayed to left of content to now display atop content. Give it some arbitrary height.
+.transpose-image-horizontal-sm {
+    @include media-breakpoint-down(sm) {
+        min-height: 150px;
 
+        &.contain-sm {
+            .overlay-icon {
+                background-size: contain !important;
+            }
+        }
 
+        .overlay-icon {
+            min-height: inherit;
+        }
+    }
+}
+
+.transpose-image-horizontal-md {
+    @include media-breakpoint-down(md) {
+        min-height: 150px;
+
+        &.contain-md {
+            .overlay-icon {
+                background-size: contain !important;
+            }
+        }
+
+        .overlay-icon {
+            min-height: inherit;
+        }
+    }
+}
 
 /// IMPORT PARTIALS
 @import "./components/styles/HexOpacityValues";
