@@ -67,7 +67,7 @@ jobs:
       working-directory: ./main/Opc.Ua.CloudLib.Client
     - name: CloudLib - Restore dependencies SampleConsoleClient
       run: dotnet restore
-      working-directory: SampleConsoleClient
+      working-directory: ./main/SampleConsoleClient
     - name: CloudLib - Restore dependencies CloudLibClientTests
       run: dotnet restore
       working-directory: ./main/Tests/CloudLibClientTests
