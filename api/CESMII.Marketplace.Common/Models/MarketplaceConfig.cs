@@ -17,6 +17,7 @@ namespace CESMII.Marketplace.Common.Models
         public string Code { get; set; }
         //public string DefaultImageIdSquare { get; set; }
         public string DefaultImageIdPortrait { get; set; }
+        public string DefaultImageIdBanner { get; set; }
         public string DefaultImageIdLandscape { get; set; }
     }
 }

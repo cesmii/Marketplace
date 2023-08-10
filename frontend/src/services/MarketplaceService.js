@@ -1,4 +1,6 @@
-import { generateLogMessageString, getUserPreferences, setUserPreferences } from '../utils/UtilityService';
+import { useHistory } from 'react-router-dom'
+
+import { generateLogMessageString, getImageUrl, getUserPreferences, setUserPreferences } from '../utils/UtilityService';
 import MarketplaceTileList from '../views/shared/MarketplaceTileList';
 
 const CLASS_NAME = "MarketplaceService";
@@ -131,7 +133,7 @@ export function MarketplaceRelatedItems(props) {
                         <div className="card-body">
                             <div className="row" >
                                 <div className="col-sm-12">
-                                    <MarketplaceTileList items={itm.items} layout="banner-abbreviated" colCount={4} />
+                                    <MarketplaceTileList items={itm.items} layout="banner-abbreviated" colCssClass="col-lg-3 col-md-6" />
                                 </div>
                             </div>
                         </div>
@@ -155,3 +157,67 @@ export function MarketplaceRelatedItems(props) {
     );
 
 }
+
+
+//-------------------------------------------------------------------
+// Web part - Render Image BG for featured panel, marketplace item row, marketplace item header
+//-------------------------------------------------------------------
+export function RenderImageBg (props) {
+
+    const history = useHistory();
+
+    //-------------------------------------------------------------------
+    // Region: Event Handling of child component events
+    //-------------------------------------------------------------------
+    const navigateToMarketplaceItem = (e) => {
+        history.push({
+            pathname: `/library/${props.item.name}`,
+            state: { id: `${props.item.name}` }
+        });
+    };
+
+    /*
+    var imgSrc = props.item.imagePortrait == null ? "" : getImageUrl(props.item.imagePortrait);
+    return (
+        <div className="image-bg" >
+            <div className="clickable d-flex" onClick={navigateToMarketplaceItem} >
+                <img className="z" src={imgSrc} alt={`${props.item.name}-${getImageAlt(props.item.imagePortrait)}`} />
+            </div>
+        </div>
+    );
+    */
+
+    /*
+        Example of displaying diff images based on screen size.
+        <div className="d-flex align-items-center mb-2" >
+            <picture>
+                <source srcset={getImageUrl(props.item.imageLandscape)} media="(max-width: 767px)" />
+                <img src={getImageUrl(props.item.imagePortrait)} alt="" />
+            </picture>
+        </div>
+     */
+    const bgImageStyleDefault = props.defaultImage == null ? {} :
+        {
+            backgroundImage: `url(${getImageUrl(props.defaultImage)})`
+        };
+
+    const bgImageStyleResponsive = props.responsiveImage == null ? {} :
+        {
+            backgroundImage: `url(${getImageUrl(props.responsiveImage)})`
+        };
+
+    //backward compatability - banner null, transpose the portrait and show as a banner
+    //if banner not null, then show both images and hide visiblity based on screen size
+    return (
+        <>
+            <div className={`image-bg ${props.responsiveImage != null ? 'd-none d-sm-block' : 'transpose-image-horizontal-sm'}`} >
+                <div className="overlay-icon cover clickable" style={bgImageStyleDefault} onClick={navigateToMarketplaceItem} >&nbsp;</div>
+            </div>
+            {props.responsiveImage != null &&
+                <div className="image-bg d-block d-sm-none transpose-image-horizontal-sm" >
+                    <div className="overlay-icon cover clickable" style={bgImageStyleResponsive} onClick={navigateToMarketplaceItem} >&nbsp;</div>
+                </div>
+            }
+        </>
+    )
+};

@@ -393,8 +393,8 @@ function MarketplaceList() {
                 {(_dataRows.itemCount != null && _dataRows.itemCount > 0) &&
                     <span className="pl-1 text-left headline-2">{_dataRows.itemCount}{_dataRows.itemCount === 1 ? ' item' : ' items'}</span>
                 }
-                <span onClick={onToggleFilters} className="ml-auto d-flex d-sm-none px-2 justify-content-end clickable hover rounded" title="Show/Hide Filters" role="button" >{`${_filterToggle ? "Hide" : "Show"}`}<i className="pl-1 material-icons">filter_alt</i></span>
-                <span onClick={onClearAll} className="ml-2 ml-sm-auto d-flex px-2 justify-content-end clickable hover rounded" title="Clear All Button" role="button" >Clear All<i className="pl-1 material-icons">update</i></span>
+                <span onClick={onToggleFilters} className="ml-auto d-flex d-md-none px-2 justify-content-end clickable hover rounded" title="Show/Hide Filters" role="button" >{`${_filterToggle ? "Hide" : "Show"}`}<i className="pl-1 material-icons">filter_alt</i></span>
+                <span onClick={onClearAll} className="ml-2 ml-md-auto d-flex px-2 justify-content-end clickable hover rounded" title="Clear All Button" role="button" >Clear All<i className="pl-1 material-icons">update</i></span>
             </>
         );
     }
@@ -428,19 +428,19 @@ function MarketplaceList() {
             {renderHeaderRow()}
 
             <div className="row pb-2" >
-                <div className="col-sm-3 d-flex align-items-center" >
+                <div className="col-md-3 d-flex align-items-center" >
                 </div>
-                <div className="col-sm-9 d-flex align-items-center justify-content-end" >
+                <div className="col-md-9 d-flex align-items-center justify-content-end" >
                     {renderSubTitle()}
                     {/*{renderGridActions()}*/}
                 </div>
             </div>
 
             <div className="row" >
-                <div className={`col-sm-3 d-sm-block ${_filterToggle ? "" : "d-none"}`} >
+                <div className={`col-md-3 d-md-block ${_filterToggle ? "" : "d-none"}`} >
                     <MarketplaceFilter searchCriteria={_criteria} selectMode="selectable" onItemClick={filterOnItemClick} showLimited={true} />
                 </div>
-                <div ref={_scrollToRef} className="col-sm-9 mb-4" >
+                <div ref={_scrollToRef} className="col-md-9 mb-4" >
                     {/*<MarketplaceFilterSelected />*/}
                     {renderItemsGrid()}
                     {renderPagination()}

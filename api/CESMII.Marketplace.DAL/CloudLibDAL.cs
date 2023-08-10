@@ -70,7 +70,8 @@
             //get default images
             _images = dalImages.Where(
                 x => x.ID.Equals(_config.DefaultImageIdLandscape) ||
-                x.ID.Equals(_config.DefaultImageIdPortrait)
+                x.ID.Equals(_config.DefaultImageIdPortrait) ||
+                x.ID.Equals(_config.DefaultImageIdBanner)
                 //|| x.ID.Equals(_config.DefaultImageIdSquare)
                 , null, null, false, false).Data;
 
@@ -237,7 +238,7 @@
                     Version = entity.Node.Version,
                     IsFeatured = false,
                     ImagePortrait = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdPortrait)),
-                    //ImageSquare = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdSquare)),
+                    ImageBanner = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdBanner)),
                     ImageLandscape = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdLandscape)),
                     Cursor = entity.Cursor,
                     
