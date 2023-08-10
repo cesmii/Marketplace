@@ -1,4 +1,4 @@
-# This workflow will build and run In Browser Selenium Web Driver Tests
+﻿# This workflow will build and run In Browser Selenium Web Driver Tests
 #
 # For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
 name: Test|In Browser|Marketplace
@@ -33,41 +33,89 @@ env:
 
 jobs:
   build:
-    name: Test in Browser
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v2
-        with:
-          submodules: true
-      - name: Set up dotnet core ${{ env.NETCORE_VERSION }}
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: ${{ env.NETCORE_VERSION }}
-      - name: Restore dependencies (${{env.SOLUTION_FILE}})
-        run: dotnet restore ${{env.SOLUTION_FILE}}
-        working-directory: ${{env.SOLUTION_DIRECTORY}}
-      - name: Build (${{env.SOLUTION_FILE}})
-        run: dotnet build ${{env.SOLUTION_FILE}} --configuration Staging --no-restore
-      - name: Start up Marketplace Server
-        run: |
-             ./api/CESMII.Marketplace.API/bin/Staging/net6.0/CESMII.Marketplace.API &
-      - name: Setup chrome driver
-        uses: browser-actions/setup-chrome@latest
-      - name: Start browser and fetch version
-        run:  chrome --version
-      - name: Use Node.js version (${{env.NODEJS_VERSION}})
-        uses: actions/setup-node@v1
-        with: 
-          node-version: ${{env.NODEJS_VERSION}}
-      - name: Set up NPM and build our code
-        working-directory: ${{env.NPM_WORKING_DIRECTORY}}
-        env: 
-          CI: '' #when process-env-ci is true, warnings are ignored and not treated as errors
-        run: |
-          npm install
-          npm run build:in-browser-test 
-          npm run start-in-browser-test &
-      - name: Run Test on project (${{env.PROJECT_NAME}})
-        run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/${{env.PROJECT_NAME}}.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
-        working-directory: ${{env.SOLUTION_DIRECTORY}}
+    - name: CloudLib - Start PostgreSQL on Ubuntu
+      run: |
+        sudo systemctl start postgresql.service
+        pg_isready
+    - name: CloudLib - Create additional Postgres user
+      run: |
+        sudo -u postgres psql --command="CREATE USER testuser SUPERUSER PASSWORD 'password'" --command="\du"
+    - name: CloudLib - Create test database with proper collation
+      run: |
+        sudo -u postgres psql --command="create database cloudlib_test with LC_COLLATE = 'en_US.UTF8' LC_CTYPE = 'en_US.UTF8' TEMPLATE template0"
+    - name: CloudLib - List existing databases
+      run: |
+        sudo -u postgres psql -l --command="\du"
+    
+    - name: 🤘 CloudLib - checkout repo
+      uses: actions/checkout@v2
+      with:
+        repository: cesmii/CESMII-CloudLibrary
+        path: main
+        fetch-depth: 0
+    - name: ⚙ CloudLib - dotnet
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0.x'
+    - name: CloudLib - Restore dependencies
+      working-directory: UACloudLibraryServer
+      run: CloudLib - dotnet restore
+    - name: CloudLib - Restore dependencies UA-CloudLibrary .NET Client
+      run: dotnet restore
+      working-directory: Opc.Ua.CloudLib.Client
+    - name: CloudLib - Restore dependencies SampleConsoleClient
+      run: dotnet restore
+      working-directory: SampleConsoleClient
+    - name: CloudLib - Restore dependencies CloudLibClientTests
+      run: dotnet restore
+      working-directory: Tests/CloudLibClientTests
+    - name: CloudLib - Restore dependencies CloudLibSync
+      working-directory: CloudLibSync
+      run: dotnet restore
+    - name: CloudLib - Restore dependencies CloudLibSyncAzureFunction
+      working-directory: CloudLibSyncAzureFunction
+      run: dotnet restore
+    - name: CloudLib - Build
+      run: dotnet build UA-CloudLibrary.sln --configuration Release --no-restore
+    - name: CloudLib - Test
+      run: dotnet test UA-CloudLibrary.sln --no-build --configuration Release --verbosity normal -l:"console;verbosity=normal"
+    - name: List databases after test run
+      run: |
+        sudo -u postgres psql -l --command="\du"
+    - name: Marketplace API - Check out the repo
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+    - name: Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ env.NETCORE_VERSION }}
+    - name: Marketplace API - Restore dependencies (${{env.SOLUTION_FILE}})
+      run: dotnet restore ${{env.SOLUTION_FILE}}
+      working-directory: ${{env.SOLUTION_DIRECTORY}}
+    - name: Marketplace API - Build (${{env.SOLUTION_FILE}})
+      run: dotnet build ${{env.SOLUTION_FILE}} --configuration Staging --no-restore
+    - name: Marketplace API - Start up Marketplace Server
+      run: |
+            ./api/CESMII.Marketplace.API/bin/Staging/net6.0/CESMII.Marketplace.API &
+    - name: FrontEnd - Setup chrome driver
+      uses: browser-actions/setup-chrome@latest
+    - name: FrontEnd - Start browser and fetch version
+      run:  chrome --version
+    - name: FrontEnd - Use Node.js version (${{env.NODEJS_VERSION}})
+      uses: actions/setup-node@v1
+      with: 
+        node-version: ${{env.NODEJS_VERSION}}
+    - name: FrontEnd - Set up NPM and build our code
+      working-directory: ${{env.NPM_WORKING_DIRECTORY}}
+      env: 
+        CI: '' #when process-env-ci is true, warnings are ignored and not treated as errors
+      run: |
+        npm install
+        npm run build:in-browser-test 
+        npm run start-in-browser-test &
+    - name: In-Browser Testing - Run Test on project (${{env.PROJECT_NAME}})
+      run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/${{env.PROJECT_NAME}}.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
+      working-directory: ${{env.SOLUTION_DIRECTORY}}
