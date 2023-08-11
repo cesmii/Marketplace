@@ -27,7 +27,7 @@ env:
   # set this to the .NET core version to use
   NETCORE_VERSION: "6.0.x"
   # set this to the NODE JS version to use
-  NODEJS_VERSION: "14.17.3"
+  NODEJS_VERSION: "16.17.0"
   # set this to npm working directory
   NPM_WORKING_DIRECTORY: 'frontend'
 
