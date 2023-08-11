@@ -23,7 +23,7 @@ namespace Marketplace_InBrowser_Tests
             driver.Manage().Window.Maximize();
             string strStartUrl = TestUtils.GetStartUrl();
             driver.Navigate().GoToUrl(strStartUrl);
-);
+
             vars = new Dictionary<String, Object>();
         }
 
