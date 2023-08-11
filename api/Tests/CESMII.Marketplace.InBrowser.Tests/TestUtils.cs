@@ -5,6 +5,10 @@ namespace Marketplace_InBrowser_Tests
 {
     internal class TestUtils
     {
+        public static string GetStartUrl()
+        {
+            return "http://localhost:5000/library?p=1&t=10";
+        }
         public static IWebDriver CreateChromeDriver()
         {
             ChromeOptions options = new ChromeOptions();

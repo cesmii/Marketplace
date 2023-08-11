@@ -21,7 +21,9 @@ namespace Marketplace_InBrowser_Tests
             driver = TestUtils.CreateChromeDriver();
             js = (IJavaScriptExecutor)driver;
             driver.Manage().Window.Maximize();
-            driver.Navigate().GoToUrl("http://localhost:3000/library?p=1&t=10");
+            string strStartUrl = TestUtils.GetStartUrl();
+            driver.Navigate().GoToUrl(strStartUrl);
+);
             vars = new Dictionary<String, Object>();
         }
 
