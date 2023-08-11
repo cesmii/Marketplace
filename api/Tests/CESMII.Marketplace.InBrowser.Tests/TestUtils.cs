@@ -7,7 +7,7 @@ namespace Marketplace_InBrowser_Tests
     {
         public static string GetStartUrl()
         {
-            return "http://localhost:5000/library?p=1&t=10";
+            return "http://localhost:3000/library?p=1&t=10";
         }
         public static IWebDriver CreateChromeDriver()
         {
