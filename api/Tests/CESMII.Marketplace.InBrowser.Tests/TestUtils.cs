@@ -118,6 +118,25 @@ namespace Marketplace_InBrowser_Tests
             }
         }
 
+        public static bool WaitForMax(IWebDriver? d, int nMax, int cRetry, int cMilliseconds)
+        {
+            bool bSuccess = false;
+            for (int i = 0; i < cRetry; i++)
+            {
+                int cCurrentValue = GetItemCountFromWebpage($"WaitForMax", d, -1, 1, 0);
+//                Console_WriteLine($"WaitForMax: i:{i} cCurrentValue:{cCurrentValue} nMax:{nMax}");
+                if (cCurrentValue == nMax)
+                {
+                    bSuccess = true;
+                    break;
+                }
+                // Try again.
+                System.Threading.Thread.Sleep(cMilliseconds);
+            }
+
+            return bSuccess;
+        }
+
         public static void Console_WriteLine(string strOutput)
         {
             DateTime dt = DateTime.Now;
@@ -144,7 +163,7 @@ namespace Marketplace_InBrowser_Tests
 
                         if (bFoundInteger && cItems != cMaxItems)
                         {
-                            //Debug.WriteLine($"GetItemCountFromWebpage: iRetry:from {cRetry} to {iRetry} cMaxItems: {cMaxItems}  cItem:{cItems} ({strItem})");
+                            Console_WriteLine($"GetItemCountFromWebpage: iRetry:from {cRetry} to {iRetry} cMaxItems: {cMaxItems}  cItem:{cItems} ({strItem})");
                             break;
                         }
                     }
@@ -181,7 +200,6 @@ namespace Marketplace_InBrowser_Tests
             Assert.True(iwe != null);
 
             // Set to selected state
-            // iwe.Click();
             TestUtils.ClickWhenPageIsReady(driver, iwe);
         }
 
@@ -192,7 +210,6 @@ namespace Marketplace_InBrowser_Tests
             Assert.True(iwe != null);
 
             // Set to selected state
-            //iwe.Click();
             TestUtils.ClickWhenPageIsReady(driver, iwe);
         }
 

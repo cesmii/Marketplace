@@ -51,19 +51,15 @@
             // Select SM_Hardware category
             TestUtils.Set_SM_Hardware_State_Selected(driver);
 
-            // Set "See All" in category
-            // TestUtils.Set_Category_See_All_State_Selected(driver, iGroup);
-
-            // Get count for all items.
-            // We use this value to watch for a change in actual count.
-            // int cMaxItems = TestUtils.GetItemCountFromWebpage($"GetMaxCount - TextQuery - {strItemName}", driver, -1, 10, 50);
+            // Make sure we start with all items currently selected.
+            bool bMaxAtStart = TestUtils.WaitForMax(driver, cMaxItems, 100, 10);
+            Assert.True(bMaxAtStart);
 
             // Find the text query box.
             IWebElement? iwe = TestUtils.TryFindElement(driver, ".with-append");
             Assert.NotNull(iwe);
 
             // Enter item into text query.
-            // iwe.Click();
             bool bSuccess = TestUtils.ClickWhenPageIsReady(driver, iwe, 50, 50);
             Assert.True(bSuccess);
 
@@ -74,7 +70,7 @@
 // System.Threading.Thread.Sleep(2000);
 
             // Query number items found.
-            int cFound = TestUtils.GetItemCountFromWebpage($"TextQuery - {strItemName}", driver, cMaxItems, 20, 10);
+            int cFound = TestUtils.GetItemCountFromWebpage($"Text query for {strItemName}", driver, cMaxItems, 250, 50);
 
             Assert.Equal(cExpected, cFound);
         }

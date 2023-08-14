@@ -32,14 +32,6 @@ namespace Marketplace_InBrowser_Tests
             driver.Quit();
         }
 
-        //public static int GetGroupIndex(string strGroup)
-        //{
-        //    if (strGroup == "Vertical") return 1;
-        //    if (strGroup == "Category") return 2;
-        //    if (strGroup == "Publisher") return 3;
-        //    return -1;
-        //}
-
         [Theory]
         [MemberData(nameof(Marketplace_TestData_Checkbox_Vertical.MyData), MemberType = typeof(Marketplace_TestData_Checkbox_Vertical))]
         [MemberData(nameof(Marketplace_TestData_Checkbox_Category.MyData), MemberType = typeof(Marketplace_TestData_Checkbox_Category))]
@@ -55,16 +47,11 @@ namespace Marketplace_InBrowser_Tests
             bool bValidCategory = iGroup > -1;
             Assert.True(bValidCategory);
 
-// Maybe we need this?!?
-//            System.Threading.Thread.Sleep(1000);
-//
             // Select SM_App category
             TestUtils.Set_SM_App_State_Selected(driver);
-//            System.Threading.Thread.Sleep(50);
 
             // Select SM_Hardware category
             TestUtils.Set_SM_Hardware_State_Selected(driver);
-//            System.Threading.Thread.Sleep(50);
 
             // Set "See All" in for the group of checkboxes we are testing
             TestUtils.Set_Category_See_All_State_Selected(driver, iGroup);
@@ -77,20 +64,16 @@ namespace Marketplace_InBrowser_Tests
             string strNameOnWebPage = (iwe == null || iwe.Text == null) ? "" : iwe.Text;
             Assert.Equal(strExpectedItemName.Trim(), strNameOnWebPage.Trim());
 
-            // Get count for all items.
-            // We use this value to watch for a change in actual count.
-            // int cMaxItems = TestUtils.GetItemCountFromWebpage($"GetMaxCount - Checkbox - {strExpectedItemName}", driver, -1, 10, 50);
+            // Make sure we start with all items currently selected.
+            bool bMaxAtStart = TestUtils.WaitForMax(driver, cMaxItems, 100, 10);
+            Assert.True(bMaxAtStart);
 
             // Click on selected category.
             bool bSuccess = (driver == null || iwe == null) ? false : TestUtils.ClickWhenPageIsReady(driver, iwe, 50, 10);
             Assert.True(bSuccess);
 
-            // Maybe we need this?!?
-            // System.Threading.Thread.Sleep(50);
-            //
-
             // Query number items found.
-            int cFound = TestUtils.GetItemCountFromWebpage($"Checkbox - {strExpectedItemName}", driver, cMaxItems, 20, 10);
+            int cFound = TestUtils.GetItemCountFromWebpage($"Checkbox query for {strNameOnWebPage}", driver, cMaxItems, 250, 50);
 
             Assert.Equal(cExpected, cFound);
         }
