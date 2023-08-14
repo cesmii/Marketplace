@@ -48,6 +48,7 @@ namespace CESMII.Marketplace.Api
     {
         private readonly string _corsPolicyName = "SiteCorsPolicy";
         private readonly string _version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        public static string strTextMongoDBConnectionString;
 
         public Startup(IConfiguration configuration)
         {
@@ -64,6 +65,14 @@ namespace CESMII.Marketplace.Api
 
             string strConnectionString = Configuration["MongoDBSettings:ConnectionString"];
             string strDatabase = Configuration["MongoDBSettings:DatabaseName"];
+
+            // In a test environment, we get connection string from a github secret
+            if (!string.IsNullOrEmpty(strTextMongoDBConnectionString))
+            {
+                strConnectionString = strTextMongoDBConnectionString;
+                strDatabase = "snapshot_marketplace_db_2023-07-19";
+            }
+
             string strCollection = Configuration["MongoDBSettings:NLogCollectionName"];
             NLog.Mongo.MongoTarget.SetNLogMongoOverrides(strConnectionString: strConnectionString,
                                                          strCollectionName: strCollection,

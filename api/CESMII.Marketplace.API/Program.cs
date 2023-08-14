@@ -10,6 +10,13 @@ namespace CESMII.Marketplace.Api
     {
         public static void Main(string[] args)
         {
+            // During test runs, our connection string arrives from GITHUB secrets on the command line.
+            if (args.Length > 0 && args[0] != null)
+            {
+                string strInput = args[0];
+                if (strInput.StartsWith("mongodb:"))
+                    Startup.strTextMongoDBConnectionString = strInput;
+            }
             CreateHostBuilder(args).Build().Run();
         }
 
