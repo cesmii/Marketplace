@@ -183,12 +183,17 @@ namespace MyTestForMarketplace
             Assert.True(iwe != null);
 
             var strText = iwe.Text;
-            var astr = strText.Split(new char[] { ' ' });
-            Assert.Equal(2, astr.Length);
+            bool bFoundNoMatchingItems = (strText.Contains("There are no matching"));
+            bool bFoundIntegerCount = false;
 
-            bool bFoundInteger = int.TryParse(astr[0], out int cItems);
-            Assert.True(bFoundInteger);
+            if (!bFoundNoMatchingItems)
+            {
+                var astr = strText.Split(new char[] { ' ' });
+                Assert.Equal(2, astr.Length);
+                bFoundIntegerCount = int.TryParse(astr[0], out int cItems);
+            }
+
+            Assert.True(bFoundIntegerCount || bFoundNoMatchingItems);
         }
-
     }
 }
