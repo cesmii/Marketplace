@@ -99,8 +99,10 @@ jobs:
     - name: Marketplace API - Build (${{env.SOLUTION_FILE}})
       run: dotnet build ${{env.SOLUTION_FILE}} --configuration Staging --no-restore
     - name: Marketplace API - Start up Marketplace Server
+      env:
+        DBCONN: ${{ secrets.MONGODB_CONNECTION }}
       run: |
-            ./api/CESMII.Marketplace.API/bin/Staging/net6.0/CESMII.Marketplace.API "{{secrets.MONGODB_CONNECTION}}" &
+            ./api/CESMII.Marketplace.API/bin/Staging/net6.0/CESMII.Marketplace.API "$DBCONN" &
     - name: FrontEnd - Setup chrome driver
       uses: browser-actions/setup-chrome@latest
     - name: FrontEnd - Start browser and fetch version
