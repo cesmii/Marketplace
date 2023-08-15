@@ -85,7 +85,7 @@ jobs:
       env: 
         ServicePassword: ${{env.CLOUDLIB_PASSWORD}}
       run: |
-        ./main/UACloudLibraryServer/bin/Debug/net6.0/UA-CloudLibrary.exe &
+        dotnet ./main/UACloudLibraryServer/bin/Release/net6.0/UA-CloudLibrary.dll &
 # This takes over 10 minutes to run.
 #    - name: CloudLib - Test
 #      run: dotnet test ./main/UA-CloudLibrary.sln --no-build --configuration Release --verbosity normal -l:"console;verbosity=normal"
@@ -104,13 +104,13 @@ jobs:
       run: dotnet restore ${{env.SOLUTION_FILE}}
       working-directory: ${{env.SOLUTION_DIRECTORY}}
     - name: Marketplace API - Build (${{env.SOLUTION_FILE}})
-      run: dotnet build ${{env.SOLUTION_FILE}} --configuration Staging --no-restore
+      run: dotnet build ${{env.SOLUTION_FILE}} --configuration Release --no-restore
     - name: Marketplace API - Start up Marketplace Server
       env:
         DBCONN: ${{ secrets.MONGODB_CONNECTION }}
         SERVICEPASSWORD: ${{env.CLOUDLIB_PASSWORD}}
       run: |
-            ./api/CESMII.Marketplace.API/bin/Staging/net6.0/CESMII.Marketplace.API $DBCONN $SERVICEPASSWORD &
+            ./api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API $DBCONN $SERVICEPASSWORD &
     - name: FrontEnd - Setup chrome driver
       uses: browser-actions/setup-chrome@latest
     - name: FrontEnd - Start browser and fetch version
