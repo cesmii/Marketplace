@@ -5,6 +5,7 @@ namespace MyTestForMarketplace
     using OpenQA.Selenium.Chrome;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.Metrics;
     using Xunit;
     public class TestSuite_LibraryPage : IDisposable
     {
@@ -178,22 +179,41 @@ namespace MyTestForMarketplace
         [Fact]
         public void FoundItemCount_On_NavigateToLibraryPage()
         {
-            // Make sure text search box can be found.
-            IWebElement? iwe = TestUtils.TryFindElement(driver, ".text-left", 5, 50);
-            Assert.True(iwe != null);
+            bool bSuccess = false;
 
-            var strText = iwe.Text;
-            bool bFoundNoMatchingItems = (strText.Contains("There are no matching"));
-            bool bFoundIntegerCount = false;
-
-            if (!bFoundNoMatchingItems)
+            // First, look for centered text -- used when count == zero
+            // There are multiple such items, so we have to dig deeper.
+            var MyCollection = driver.FindElements(By.CssSelector(".text-center"));
+            if (MyCollection.Count == 4)
             {
-                var astr = strText.Split(new char[] { ' ' });
-                Assert.Equal(2, astr.Length);
-                bFoundIntegerCount = int.TryParse(astr[0], out int cItems);
+                try
+                {
+                    string strValue = MyCollection[3].Text;
+                    if (strValue == "There are no matching marketplace item records.")
+                        bSuccess = true;
+                }
+                catch
+                {
+                }
             }
 
-            Assert.True(bFoundIntegerCount || bFoundNoMatchingItems);
+            // Otherwise, look for left-justified text -- used when count > zero
+            if (!bSuccess)
+            {
+                // Find item count control
+                IWebElement? iweItemCount = TestUtils.TryFindElement(driver, ".text-left", 5, 50);
+                if (iweItemCount != null)
+                {
+                    var strText = iweItemCount.Text;
+                    var astr = strText.Split(new char[] { ' ' });
+                    if (astr.Length == 2)
+                    {
+                        bSuccess = int.TryParse(astr[0], out int cItems);
+                    }
+                }
+            }
+
+            Assert.True(bSuccess);
         }
     }
 }
