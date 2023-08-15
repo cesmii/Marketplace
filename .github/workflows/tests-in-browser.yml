@@ -30,6 +30,8 @@ env:
   NODEJS_VERSION: "16.17.0"
   # set this to npm working directory
   NPM_WORKING_DIRECTORY: 'frontend'
+  # Cloud Library Password
+  CLOUDLIB_PASSWORD: 'MyCloudLibrary'
 
 jobs:
   build:
@@ -79,6 +81,11 @@ jobs:
       run: dotnet restore
     - name: CloudLib - Build
       run: dotnet build ./main/UA-CloudLibrary.sln --configuration Release --no-restore
+    - name: CloudLib - Start up UA Cloud Library Server
+      env: 
+        ServicePassword: ${{env.CLOUDLIB_PASSWORD}}
+      run: |
+        ./main/UACloudLibraryServer/bin/Debug/net6.0/UA-CloudLibrary.exe &
 # This takes over 10 minutes to run.
 #    - name: CloudLib - Test
 #      run: dotnet test ./main/UA-CloudLibrary.sln --no-build --configuration Release --verbosity normal -l:"console;verbosity=normal"
@@ -101,8 +108,9 @@ jobs:
     - name: Marketplace API - Start up Marketplace Server
       env:
         DBCONN: ${{ secrets.MONGODB_CONNECTION }}
+        SERVICEPASSWORD: ${{env.CLOUDLIB_PASSWORD}}
       run: |
-            ./api/CESMII.Marketplace.API/bin/Staging/net6.0/CESMII.Marketplace.API $DBCONN &
+            ./api/CESMII.Marketplace.API/bin/Staging/net6.0/CESMII.Marketplace.API $DBCONN $SERVICEPASSWORD &
     - name: FrontEnd - Setup chrome driver
       uses: browser-actions/setup-chrome@latest
     - name: FrontEnd - Start browser and fetch version
@@ -111,7 +119,7 @@ jobs:
       uses: actions/setup-node@v1
       with: 
         node-version: ${{env.NODEJS_VERSION}}
-    - name: FrontEnd - Set up NPM and build our code
+    - name: FrontEnd - Build React Code - npm install, build
       working-directory: ${{env.NPM_WORKING_DIRECTORY}}
       env: 
         CI: '' #when process-env-ci is true, warnings are ignored and not treated as errors

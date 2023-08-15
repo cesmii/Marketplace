@@ -17,6 +17,15 @@ namespace CESMII.Marketplace.Api
                 if (strInput.StartsWith("mongodb:"))
                     Startup.strTextMongoDBConnectionString = strInput;
             }
+
+            // During test runs, the cloud library admin password is passed on the command line.
+            if (args.Length > 1 && args[1] != null)
+            {
+                string strTemp = args[1];
+                if (!string.IsNullOrEmpty(strTemp))
+                    Startup.strCloudLibraryTestPassword = strTemp;
+            }
+
             CreateHostBuilder(args).Build().Run();
         }
 

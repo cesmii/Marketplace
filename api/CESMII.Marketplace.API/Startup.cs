@@ -49,6 +49,7 @@ namespace CESMII.Marketplace.Api
         private readonly string _corsPolicyName = "SiteCorsPolicy";
         private readonly string _version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public static string strTextMongoDBConnectionString;
+        public static string strCloudLibraryTestPassword;
 
         public Startup(IConfiguration configuration)
         {
@@ -70,8 +71,21 @@ namespace CESMII.Marketplace.Api
             if (!string.IsNullOrEmpty(strTextMongoDBConnectionString))
             {
                 strConnectionString = strTextMongoDBConnectionString;
+                Configuration["MongoDBSettings:ConnectionString"] = strConnectionString;
+
                 strDatabase = "snapshot_marketplace_db_2023-07-19";
+                Configuration["MongoDBSettings:DatabaseName"] = strDatabase;
             }
+
+            // In a test environment, we get the Cloud Library password from the github action script
+            if (!string.IsNullOrEmpty(strCloudLibraryTestPassword))
+            {
+                Configuration["CloudLibrary:UserName"] = "admin";
+                Configuration["CloudLibrary:Password"] = strCloudLibraryTestPassword;
+                Configuration["CloudLibrary:EndPoint"] = null;
+                Configuration["CloudLibrary:https"] = "localhost:44388/";
+            }
+
 
             string strCollection = Configuration["MongoDBSettings:NLogCollectionName"];
             NLog.Mongo.MongoTarget.SetNLogMongoOverrides(strConnectionString: strConnectionString,
@@ -124,6 +138,8 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IHttpApiFactory, HttpApiFactory>();
 
             //Cloud Lib
+            //var xx = Configuration.GetSection("CloudLibrary");
+            //if (xx.)
             services.Configure<Opc.Ua.Cloud.Library.Client.UACloudLibClient.Options>(Configuration.GetSection("CloudLibrary"));
             services.AddSingleton<Opc.Ua.Cloud.Library.Client.UACloudLibClient>();
             services.AddSingleton<ICloudLibWrapper, CloudLibWrapper>();
