@@ -84,6 +84,7 @@ jobs:
     - name: CloudLib - Start up UA Cloud Library Server
       env: 
         ServicePassword: ${{env.CLOUDLIB_PASSWORD}}
+        "ConnectionStrings:CloudLibraryPostreSQL" : "Server=localhost;Username=testuser;Database=cloudlib_test;Port=5432;Password=password;SSLMode=Prefer;Include Error Detail=true"
       run: |
         dotnet ./main/UACloudLibraryServer/bin/Release/net6.0/UA-CloudLibrary.dll &
 # This takes over 10 minutes to run.
