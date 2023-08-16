@@ -61,10 +61,10 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '6.0.x'
-    - name: CloudLib - Restore dependencies
+    - name: CloudLib - Restore dependencies in UACloudLibraryServer
       working-directory: ./main/UACloudLibraryServer
       run: dotnet restore
-    - name: CloudLib - Restore dependencies UA-CloudLibrary .NET Client
+    - name: CloudLib - Restore dependencies Opc.Ua.CloudLib.Client
       run: dotnet restore
       working-directory: ./main/Opc.Ua.CloudLib.Client
     - name: CloudLib - Restore dependencies SampleConsoleClient
@@ -127,6 +127,9 @@ jobs:
         npm install
         npm run build:in-browser-test 
         npm run start-in-browser-test &
+    - name: In-Browser Testing - Restore dependencies CESMII.Marketplace.InBrowser.Tests
+      working-directory:  ${{env.SOLUTION_DIRECTORY}}
+      run: dotnet restore
     - name: In-Browser Testing - Run Test on project (${{env.PROJECT_NAME}})
       run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/${{env.PROJECT_NAME}}.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
       working-directory: ${{env.SOLUTION_DIRECTORY}}
