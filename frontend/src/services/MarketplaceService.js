@@ -1,4 +1,5 @@
 import { useHistory } from 'react-router-dom'
+import { AppSettings } from '../utils/appsettings';
 
 import { generateLogMessageString, getImageUrl, getUserPreferences, setUserPreferences } from '../utils/UtilityService';
 import MarketplaceTileList from '../views/shared/MarketplaceTileList';
@@ -170,10 +171,18 @@ export function RenderImageBg (props) {
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
     const navigateToMarketplaceItem = (e) => {
-        history.push({
-            pathname: `/library/${props.item.name}`,
-            state: { id: `${props.item.name}` }
-        });
+        if (props.itemType != null && props.itemType === AppSettings.itemTypeCode.smProfile) {
+            history.push({
+                pathname: `/profile/${props.item.id}`,
+                state: { id: `${props.item.id}` }
+            });
+        }
+        else {
+            history.push({
+                pathname: `/library/${props.item.name}`,
+                state: { id: `${props.item.name}` }
+            });
+        }
     };
 
     /*
@@ -211,7 +220,7 @@ export function RenderImageBg (props) {
     return (
         <>
             <div className={`image-bg ${props.responsiveImage != null ? 'd-none d-sm-block' : 'transpose-image-horizontal-sm'}`} >
-                <div className="overlay-icon cover clickable" style={bgImageStyleDefault} onClick={navigateToMarketplaceItem} >&nbsp;</div>
+                <div className={`overlay-icon cover ${props.clickable ? 'clickable' : ''} `} style={bgImageStyleDefault} onClick={navigateToMarketplaceItem} >&nbsp;</div>
             </div>
             {props.responsiveImage != null &&
                 <div className="image-bg d-block d-sm-none transpose-image-horizontal-sm" >

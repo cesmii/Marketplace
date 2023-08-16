@@ -60,7 +60,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
             <>
                 <div className={`row mx-0 p-0 ${props.cssClass} mb-4 border`}>
                     <div className="col-sm-5 p-0" >
-                        <RenderImageBg item={props.item} defaultImage={props.item.imageLandscape} responsiveImage={props.item.imageBanner} />
+                        <RenderImageBg item={props.item} defaultImage={props.item.imageLandscape} responsiveImage={props.item.imageBanner} clickable={false} />
                     </div>
                     <div className="col-sm-7 p-4" >
                         {/*<h2>{props.item.name}</h2>*/}
@@ -90,7 +90,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
             <>
                 <div className={`row mx-0 p-0 ${props.cssClass} mb-4 border`}>
                     <div className="col-sm-5 p-0" >
-                        <RenderImageBg item={props.item} defaultImage={props.item.imageLandscape} responsiveImage={props.item.imageBanner} />
+                        <RenderImageBg item={props.item} defaultImage={props.item.imageLandscape} responsiveImage={props.item.imageBanner} clickable={false} />
                     </div>
                     <div className="col-sm-7 p-4" >
                         {props.item.abstract != null &&

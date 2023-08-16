@@ -97,7 +97,7 @@ function MarketplaceTileList(props) {
             <Card className="h-100 border-0 mb-0 marketplace-tile marketplace-list-item">
                 <Card.Body className="h-100 p-0 tile-body d-flex">
                     <div className="col-md-6 col-lg-5 p-0" >
-                        <RenderImageBg item={item} defaultImage={item.imagePortrait} responsiveImage={item.imageBanner} />
+                        <RenderImageBg item={item} defaultImage={item.imagePortrait} responsiveImage={item.imageBanner} clickable={true} />
                     </div>
                     <div className="col-md-6 col-lg-7 p-4" >
                         <span className="card-title font-weight-bold mb-3 d-block bitter">{renderDisplayName(item)}</span>

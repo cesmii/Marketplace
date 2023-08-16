@@ -133,7 +133,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
         <>
             <div className={`row mx-0 p-0 ${props.cssClass}`}>
                 <div className="col-sm-6 col-md-5 p-0" >
-                    <RenderImageBg item={props.item} defaultImage={props.item.imagePortrait} responsiveImage={props.item.imageBanner} />
+                    <RenderImageBg item={props.item} defaultImage={props.item.imagePortrait} responsiveImage={props.item.imageBanner} clickable={true} />
                 </div>
                 <div className="col-sm-6 col-md-7 p-4" >
                     <div className="d-flex align-items-center mb-2" >

@@ -4,6 +4,7 @@ import { Button } from 'react-bootstrap'
 
 import { formatItemPublishDate, getImageUrl, getRandomArrayIndexes } from '../../utils/UtilityService';
 import { RenderImageBg } from '../../services/MarketplaceService';
+import { AppSettings } from '../../utils/appsettings';
 
 //const CLASS_NAME = "ProfileItemRow";
 
@@ -92,7 +93,7 @@ function ProfileItemRow(props) { //props are item, showActions
         return (
             <div className={`row mx-0 p-0 ${props.cssClass}`}>
                 <div className="col-sm-5 p-0" >
-                    <RenderImageBg item={props.item} defaultImage={props.item.imagePortrait} responsiveImage={props.item.imageBanner} />
+                    <RenderImageBg item={props.item} defaultImage={props.item.imagePortrait} responsiveImage={props.item.imageBanner} itemType={AppSettings.itemTypeCode.smProfile} clickable={true} />
                 </div>
                 <div className="col-sm-7 p-4" >
                     <div className="d-flex align-items-center mb-2" >
