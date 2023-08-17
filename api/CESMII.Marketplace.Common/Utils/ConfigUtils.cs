@@ -1,7 +1,8 @@
 ﻿namespace CESMII.Marketplace.Common
 {
-    using Microsoft.Extensions.Configuration;
     using CESMII.Marketplace.Common.Models;
+    using Microsoft.Extensions.Configuration;
+    using System;
 
     public class ConfigUtil
     {
@@ -88,6 +89,11 @@
             get
             {
                 var result = new MarketplaceConfig();
+
+                // Allow an override in support of unit test environment.
+                string? strEnableCloudLibSearch = Environment.GetEnvironmentVariable("EnableCloudLibSearch");
+                if (bool.TryParse(strEnableCloudLibSearch, out bool bResult))
+                    result.EnableCloudLibSearch = bResult;
                 _configuration.GetSection("MarketplaceSettings").Bind(result);
                 return result;
             }
