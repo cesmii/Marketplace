@@ -85,7 +85,7 @@ jobs:
       env: 
         ServicePassword: ${{env.CLOUDLIB_PASSWORD}}
         # Connection string for PostgreSQL from Cloud Library
-        CloudLibraryPostgreSQL: "Server=localhost;Username=testuser;Database=cloudlib_test;Port=5432;Password=password;SSLMode=Prefer;Include Error Detail=true"
+        CloudLibraryPostgreSQL: 'Server=localhost;Username=testuser;Database=cloudlib_test;Port=5432;Password=password;SSLMode=Prefer;Include Error Detail=true'
       run: |
         dotnet ./main/UACloudLibraryServer/bin/Release/net6.0/UA-CloudLibrary.dll &
       # This takes over 10 minutes to run.
