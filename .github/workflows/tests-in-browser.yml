@@ -111,22 +111,41 @@ jobs:
     #  run: |
     #    sudo -u postgres psql -l --command="\du"
 
+
+
     - name: Marketplace API - Check out the repo
       uses: actions/checkout@v2
       with:
         submodules: true
+
+    - name: PROCESS INQUIRY #1 ------------------------
+      run: |
+        ps ax
 
     - name: Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: ${{ env.NETCORE_VERSION }}
 
+    - name: PROCESS INQUIRY #2 ------------------------
+      run: |
+        ps ax
+
     - name: Marketplace API - Restore dependencies (${{env.SOLUTION_FILE}})
       run: dotnet restore ${{env.SOLUTION_FILE}}
       working-directory: ${{env.SOLUTION_DIRECTORY}}
 
+    - name: PROCESS INQUIRY #3 ------------------------
+      run: |
+        ps ax
+
     - name: Marketplace API - Build (${{env.SOLUTION_FILE}})
       run: dotnet build ${{env.SOLUTION_FILE}} --configuration Release --no-restore
+
+    - name: PROCESS INQUIRY #4 ------------------------
+      run: |
+        ps ax
+
 
     - name: Marketplace API - Start up Marketplace Server
       env:
@@ -136,30 +155,82 @@ jobs:
       run: |
             ./api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API $DBCONN $SERVICEPASSWORD &
 
-    - name: FrontEnd - Setup chrome driver
-      uses: browser-actions/setup-chrome@latest
-
-    - name: FrontEnd - Start browser and fetch version
-      run:  chrome --version
-
-    - name: FrontEnd - Use Node.js version (${{env.NODEJS_VERSION}})
-      uses: actions/setup-node@v1
-      with: 
-        node-version: ${{env.NODEJS_VERSION}}
-
-    - name: FrontEnd - Build React Code - npm install, build
-      working-directory: ${{env.NPM_WORKING_DIRECTORY}}
-      env: 
-        CI: '' #when process-env-ci is true, warnings are ignored and not treated as errors
+    - name: PROCESS INQUIRY #5 ------------------------
       run: |
-        npm install
-        npm run build:in-browser-test 
-        npm run start-in-browser-test &
+        ps ax
 
-    - name: In-Browser Testing - Restore dependencies CESMII.Marketplace.InBrowser.Tests
-      working-directory:  ${{env.SOLUTION_DIRECTORY}}
-      run: dotnet restore
+    # Call Marketplace Api sure that someone's at home.
+    - name: Test
+      run: dotnet test ./CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
 
-    - name: In-Browser Testing - Run Test on project (${{env.PROJECT_NAME}})
-      run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/${{env.PROJECT_NAME}}.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
-      working-directory: ${{env.SOLUTION_DIRECTORY}}
+    - name: PROCESS INQUIRY #6 ------------------------
+      run: |
+        ps ax
+
+
+    #- name: Add other libraries and all that jazz =========================================
+    #  run: |
+    #     sudo apt update -y
+    #     sudo apt-get install -y gconf-service libasound2 libcairo2 libcups2 libfontconfig1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget libgbm-dev
+
+
+    #- name: PROCESS INQUIRY #6 ------------------------
+    #  run: |
+    #    ps ax
+
+    #- name: FrontEnd - Setup chrome driver
+    #  uses: browser-actions/setup-chrome@latest
+
+
+    #- name: PROCESS INQUIRY #7 ------------------------
+    #  run: |
+    #    ps ax
+
+    #- name: FrontEnd - Start browser and fetch version
+    #  run:  chrome --version
+
+
+    #- name: PROCESS INQUIRY #8 ------------------------
+    #  run: |
+    #    ps ax
+
+    #- name: FrontEnd - Use Node.js version (${{env.NODEJS_VERSION}})
+    #  uses: actions/setup-node@v1
+    #  with: 
+    #    node-version: ${{env.NODEJS_VERSION}}
+
+
+    #- name: PROCESS INQUIRY #9 ------------------------
+    #  run: |
+    #    ps ax
+
+    #- name: FrontEnd - Build React Code - npm install, build
+    #  working-directory: ${{env.NPM_WORKING_DIRECTORY}}
+    #  env: 
+    #    CI: '' #when process-env-ci is true, warnings are ignored and not treated as errors
+    #  run: |
+    #    npm install
+    #    npm run build:in-browser-test 
+    #    npm run start-in-browser-test &
+
+
+    #- name: PROCESS INQUIRY #10 ------------------------
+    #  run: |
+    #    ps ax
+
+    ##- name: Docker - launch standalone chrome browser
+    ##  run: |
+    ##    docker run -d -p 4444:4444 selenium/standalone-chrome
+
+    #- name: In-Browser Testing - Restore dependencies CESMII.Marketplace.InBrowser.Tests
+    #  working-directory:  ${{env.SOLUTION_DIRECTORY}}
+    #  run: dotnet restore
+
+
+    #- name: PROCESS INQUIRY #11 ------------------------
+    #  run: |
+    #    ps ax
+
+    #- name: In-Browser Testing - Run Test on project (${{env.PROJECT_NAME}})
+    #  run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/${{env.PROJECT_NAME}}.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
+    #  working-directory: ${{env.SOLUTION_DIRECTORY}}

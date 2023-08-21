@@ -40,6 +40,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{CDBCED6A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.InBrowser.Tests", "api\Tests\CESMII.Marketplace.InBrowser.Tests\CESMII.Marketplace.InBrowser.Tests.csproj", "{EC1BDF1B-FE93-4A2A-8955-C872E809C367}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CESMII.Marketplace.RestApi", "CESMII.Marketplace.RestApi\CESMII.Marketplace.RestApi.csproj", "{7BEC2BC4-AA20-4A5B-B3D0-05CFA12B4E36}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -122,12 +124,19 @@ Global
 		{EC1BDF1B-FE93-4A2A-8955-C872E809C367}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EC1BDF1B-FE93-4A2A-8955-C872E809C367}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
 		{EC1BDF1B-FE93-4A2A-8955-C872E809C367}.Staging|Any CPU.Build.0 = Debug|Any CPU
+		{7BEC2BC4-AA20-4A5B-B3D0-05CFA12B4E36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BEC2BC4-AA20-4A5B-B3D0-05CFA12B4E36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BEC2BC4-AA20-4A5B-B3D0-05CFA12B4E36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BEC2BC4-AA20-4A5B-B3D0-05CFA12B4E36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BEC2BC4-AA20-4A5B-B3D0-05CFA12B4E36}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BEC2BC4-AA20-4A5B-B3D0-05CFA12B4E36}.Staging|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{EC1BDF1B-FE93-4A2A-8955-C872E809C367} = {CDBCED6A-2084-42FD-86D8-4DB12FFFA9F8}
+		{7BEC2BC4-AA20-4A5B-B3D0-05CFA12B4E36} = {CDBCED6A-2084-42FD-86D8-4DB12FFFA9F8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DE4E0FBF-6B7D-4479-9902-C42E2F6A879A}
