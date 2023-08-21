@@ -1,10 +1,14 @@
 using System.Net.Http.Json;
 using CESMII.Marketplace.DAL.Models;
+using static System.Net.WebRequestMethods;
 
 namespace CESMII.Marketplace.RestApi
 {
     public class TestSuite_MarketplaceAPI
     {
+        // private static string strHost = "https://localhost:5001/api;"
+        private static string strHost = "http://localhost:5000/api";
+
         [Fact]
         public void MarketItemsAvailable_On_Api_Marketplace_All()
         {
@@ -14,7 +18,7 @@ namespace CESMII.Marketplace.RestApi
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
-            var items = GetFirstItem(client, "https://localhost:5001/api/Marketplace/All");
+            var items = GetFirstItem(client, $"{strHost}/Marketplace/All");
             Assert.NotNull(items);
 
             int count = items.Count();
