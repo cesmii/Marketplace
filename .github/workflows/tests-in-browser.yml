@@ -122,14 +122,14 @@ jobs:
 
     - name: Start MongoDB
       run: docker run -d --name mongodb \
-           mongo
+           mongo:latest
            #-p 27017:27017 \
            #-e MONGO_INIT_DATABASE=snapshot_marketplace_db_2023-07-19 \
            #-e MONGO_INITDB_ROOT_USERNAME=testuser \
            #-e MONGO_INITDB_ROOT_PASSWORD=password \
 
-    - name: Create mongoDB Docker container      
-      run: docker run -d -p 27017:27017 mongo:latest
+    #- name: Create mongoDB Docker container      
+    #  run: docker run -d -p 27017:27017 mongo:latest
 
     - name: Add data to MarketplaceItem collection
       run: docker -d mongorestore --collection=MarketplaceItem --db=snapshot_marketplace_db_2023-07-19 --file=test-data/MarketplaceItem.bson
