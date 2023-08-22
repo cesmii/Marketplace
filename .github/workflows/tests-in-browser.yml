@@ -138,6 +138,9 @@ jobs:
         mongorestore --version
         mongoimport --version
 
+    - name: Run Help for mongoimport
+      run: mongoimport --help
+
     - name: Add data to MarketplaceItem collection
       run: mongoimport /db:snapshot_marketplace_db_2023-07-19 /collection:MarketplaceItem /uri:mongodb://localhost:27017 ./Snapshot_Export/MarketplaceItem.json
     #- name: Add data to LookupItem
