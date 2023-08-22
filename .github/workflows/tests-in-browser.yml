@@ -114,6 +114,10 @@ jobs:
     #  run: |
     #    sudo -u postgres psql -l --command="\du"
 
+
+    - name: Start MongoDB
+      uses: supercharge/mongodb-github-action@1.10.0
+
     - name: Create mongoDB Docker container      
       run: sudo docker run -d -p 27017:27017 mongo:latest
 
