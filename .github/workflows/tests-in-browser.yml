@@ -121,15 +121,15 @@ jobs:
         submodules: true
 
     - name: Start MongoDB
-      uses: supercharge/mongodb-github-action@1.10.0
+      run: sudo docker -d --name mongodb -p 27017:27017
 
     - name: Create mongoDB Docker container      
       run: sudo docker run -d -p 27017:27017 mongo:latest
 
     - name: Add data to MarketplaceItem collection
-      run: mongorestore --collection=MarketplaceItem --db=snapshot_marketplace_db_2023-07-19 --file=test-data/MarketplaceItem.bson
+      run: sudo docker -d mongorestore --collection=MarketplaceItem --db=snapshot_marketplace_db_2023-07-19 --file=test-data/MarketplaceItem.bson
     - name: Add data to LookupItem
-      run: mongorestore --collection=LookupItem --db=snapshot_marketplace_db_2023-07-19 --file=test-data/LookupItem.bson
+      run: sudo docker -d mongorestore --collection=LookupItem --db=snapshot_marketplace_db_2023-07-19 --file=test-data/LookupItem.bson
 
     - name: PROCESS INQUIRY #1 ------------------------
       run: |
