@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"1"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_","ns":"snapshot_marketplace_db_2023-07-19.LookupItem"},{"v":{"$numberInt":"1"},"key":{"LookupType.Name":{"$numberInt":"1"}},"name":"idx_LookupType.Name","ns":"snapshot_marketplace_db_2023-07-19.LookupItem"}],"collectionName":"LookupItem","type":"collection"}
