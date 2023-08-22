@@ -122,11 +122,11 @@ jobs:
 
     - name: Start MongoDB
       run: docker run -d --name mongodb \
-           -p 27017:27017 \
-           -e MONGO_INIT_DATABASE=snapshot_marketplace_db_2023-07-19 \
-           -e MONGO_INITDB_ROOT_USERNAME=testuser \
-           -e MONGO_INITDB_ROOT_PASSWORD=password \
            mongo6.0
+           #-p 27017:27017 \
+           #-e MONGO_INIT_DATABASE=snapshot_marketplace_db_2023-07-19 \
+           #-e MONGO_INITDB_ROOT_USERNAME=testuser \
+           #-e MONGO_INITDB_ROOT_PASSWORD=password \
 
     - name: Create mongoDB Docker container      
       run: docker run -d -p 27017:27017 mongo:latest
