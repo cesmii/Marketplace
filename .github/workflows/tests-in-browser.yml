@@ -142,7 +142,7 @@ jobs:
       run: mongoimport --help
 
     - name: Add data to MarketplaceItem collection
-      run: mongoimport /db:snapshot_marketplace_db_2023-07-19 /collection:MarketplaceItem /uri:mongodb://localhost:27017 ./Snapshot_Export/MarketplaceItem.json
+      run: mongoimport --uri:mongodb://localhost:27017 --db:snapshot_marketplace_db_2023-07-19 --collection:MarketplaceItem  --file=./Snapshot_Export/MarketplaceItem.json
     #- name: Add data to LookupItem
     #  run: mongorestore --nsInclude=snapshot_marketplace_db_2023-07-19.LookupItem ./test-data/LookupItem.bson
 
