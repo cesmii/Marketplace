@@ -121,15 +121,15 @@ jobs:
         submodules: true
 
     - name: Start MongoDB
-      run: sudo docker -d --name mongodb -p 27017:27017
+      run: docker run -d --name mongodb -p 27017:27017
 
     - name: Create mongoDB Docker container      
-      run: sudo docker run -d -p 27017:27017 mongo:latest
+      run: docker run -d -p 27017:27017 mongo:latest
 
     - name: Add data to MarketplaceItem collection
-      run: sudo docker -d mongorestore --collection=MarketplaceItem --db=snapshot_marketplace_db_2023-07-19 --file=test-data/MarketplaceItem.bson
+      run: docker -d mongorestore --collection=MarketplaceItem --db=snapshot_marketplace_db_2023-07-19 --file=test-data/MarketplaceItem.bson
     - name: Add data to LookupItem
-      run: sudo docker -d mongorestore --collection=LookupItem --db=snapshot_marketplace_db_2023-07-19 --file=test-data/LookupItem.bson
+      run: docker -d mongorestore --collection=LookupItem --db=snapshot_marketplace_db_2023-07-19 --file=test-data/LookupItem.bson
 
     - name: PROCESS INQUIRY #1 ------------------------
       run: |
