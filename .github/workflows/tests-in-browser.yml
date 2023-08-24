@@ -36,8 +36,8 @@ env:
   # Access to our MongoDB
   MONGODB_CONNECTION: "mongodb://testuser:password@localhost:27017"
 
-  MOUNT_SOURCE_GITHUB: "/home/runner/work/Marketplace/Marketplace/mongo-data"
-  MOUNT_SOURCE_DESKTOP: "c:/CESMII.github/Marketplace/mongo-data"
+  MOUNT_SOURCE: "/home/runner/work/Marketplace/Marketplace/mongo-data"    # In a Github Action
+  # MOUNT_SOURCE: "c:/CESMII.github/Marketplace/mongo-data"               # On the desktop
 
 jobs:
   build:
@@ -50,7 +50,7 @@ jobs:
         submodules: true
 
     - name: MongoDB - Create mongoDB Docker container      
-      run: docker run -d -p 27017:27017 --name=MyMongoAct -e MONGO_INIT_DATABASE=snapshot -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE_GITHUB}}",target=/data,type=bind mongo:4.0
+      run: docker run -d -p 27017:27017 --name=MyMongoAct -e MONGO_INIT_DATABASE=snapshot -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE}}",target=/data,type=bind mongo:4.0
 
     # Putting this between "Create mongoDB container" and "Populate mongo database" seems to help the mongo container settle down
     - name: Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
@@ -59,16 +59,16 @@ jobs:
         dotnet-version: ${{ env.NETCORE_VERSION }}
 
     - name: MongoDB - Populate mongo database
-      run: docker exec -it MyMongoAct mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -it MyMongoAct mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -it MyMongoAct mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -it MyMongoAct mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -it MyMongoAct mongoimport  --collection=Organization --file=/data/Organization.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -it MyMongoAct mongoimport  --collection=Permission --file=/data/Permission.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -it MyMongoAct mongoimport  --collection=ProfileItem --file=/data/ProfileItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -it MyMongoAct mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -it MyMongoAct mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -it MyMongoAct mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="mongodb://testuser:password@localhost:27017" ;
+      run: docker exec -d MyMongoAct mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=Organization --file=/data/Organization.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=Permission --file=/data/Permission.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=ProfileItem --file=/data/ProfileItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="mongodb://testuser:password@localhost:27017" ;
 
     - name: Marketplace API - Restore dependencies (${{env.SOLUTION_FILE}})
       run: dotnet restore ${{env.SOLUTION_FILE}}
