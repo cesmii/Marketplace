@@ -44,15 +44,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: MongoDB - Create mongoDB Docker container      
-      run: docker run -d -p 27017:27017 --name=MyMongoAct -e MONGO_INIT_DATABASE=snapshot -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE_GITHUB}}",target=/data,type=bind mongo:4.0
-
-     
-
     - name: Marketplace API - Check out the repo
       uses: actions/checkout@v2
       with:
         submodules: true
+
+    - name: MongoDB - Create mongoDB Docker container      
+      run: docker run -d -p 27017:27017 --name=MyMongoAct -e MONGO_INIT_DATABASE=snapshot -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE_GITHUB}}",target=/data,type=bind mongo:4.0
+
+    # Putting this between "Create mongoDB container" and "Populate mongo database" seems to help the mongo container settle down
+    - name: Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ env.NETCORE_VERSION }}
 
     - name: MongoDB - Populate mongo database
       run: docker exec -it MyMongoAct mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="mongodb://testuser:password@localhost:27017" ;
@@ -65,11 +69,6 @@ jobs:
            docker exec -it MyMongoAct mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="mongodb://testuser:password@localhost:27017" ;
            docker exec -it MyMongoAct mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="mongodb://testuser:password@localhost:27017" ;
            docker exec -it MyMongoAct mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="mongodb://testuser:password@localhost:27017" ;
-
-    - name: Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: ${{ env.NETCORE_VERSION }}
 
     - name: Marketplace API - Restore dependencies (${{env.SOLUTION_FILE}})
       run: dotnet restore ${{env.SOLUTION_FILE}}
