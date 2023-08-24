@@ -36,13 +36,18 @@ env:
   # Access to our MongoDB
   MONGODB_CONNECTION: "mongodb://testuser:password@localhost:27017"
 
+  MOUNT_SOURCE_GITHUB: "/home/runner/work/Marketplace/Marketplace/mongo-data"
+  MOUNT_SOURCE_DESKTOP: "c:/CESMII.github/Marketplace/mongo-data"
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
 
     - name: MongoDB - Create mongoDB Docker container      
-      run: docker run -d -p 27017:27017 --name=MyMongoAct -e MONGO_INIT_DATABASE=snapshot -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="c:/CESMII.github/Marketplace/mongo-data",target=/data,type=bind mongo:4.0
+      run: docker run -d -p 27017:27017 --name=MyMongoAct -e MONGO_INIT_DATABASE=snapshot -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE_GITHUB}}",target=/data,type=bind mongo:4.0
+
+     
 
     - name: Marketplace API - Check out the repo
       uses: actions/checkout@v2
