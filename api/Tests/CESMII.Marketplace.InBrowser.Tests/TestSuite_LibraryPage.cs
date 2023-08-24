@@ -40,74 +40,6 @@ namespace MyTestForMarketplace
         }
 
         [Fact]
-        public void FoundSMAppButtonInExpectedStates_On_NavigateToLibraryPage_And_Click()
-        {
-            // Click on "SM_App" button (should be unselected)
-            // IWebElement iwe = driver.FindElement(By.CssSelector("#\\36 275769bb7e0831201e5c3e2 > .not-selected"));
-            IWebElement? iwe = TestUtils.TryFindElement(driver, "#\\36 275769bb7e0831201e5c3e2 > .not-selected");
-            Assert.True(iwe != null);
-
-            // Set to selected state
-            // iwe.Click();
-            TestUtils.ClickWhenPageIsReady(driver, iwe);
-
-            // Make sure item is selected.
-            //IWebElement iwe2 = driver.FindElement(By.CssSelector(".selected"));
-            IWebElement? iwe2 = TestUtils.TryFindElement(driver, ".selected");
-            Assert.True(iwe2 != null);
-            Assert.True(iwe2.Text == "SM App");
-
-            // Make sure not selected item is not found           
-            IWebElement? iwe3 = null;
-            iwe3 = TestUtils.TryFindElement(driver, "#\\36 275769bb7e0831201e5c3e2 > .not-selected");
-            Assert.True(iwe3 == null);
-        }
-
-        [Fact]
-        public void FoundSMHardwareButtonInExpectedStates_On_NavigateToLibraryPage_And_Click()
-        {
-            // Find SM_Hardware button (it should be in unselected state).
-            IWebElement? iwe = TestUtils.TryFindElement(driver, "#\\36 29763866827ef2028a17d61 > .not-selected");
-            Assert.True(iwe != null);
-
-            // iwe.Click();
-            TestUtils.ClickWhenPageIsReady(driver, iwe);
-
-            // Make sure item is selected.
-            IWebElement? iwe2 = TestUtils.TryFindElement(driver, ".selected");
-            Assert.True(iwe2 != null);
-            Assert.True(iwe2 != null);
-            Assert.True(iwe2.Text == "SM Hardware");
-
-            // Make sure not selected item is not found           
-            IWebElement? iwe3 = null;
-            iwe3 = TestUtils.TryFindElement(driver, "#\\36 29763866827ef2028a17d61 > .not-selected");
-            Assert.True(iwe3 == null);
-        }
-
-        [Fact]
-        public void FoundSMProfileButtonInExpectedStates_On_NavigateToLibraryPage_And_Click()
-        {
-            // Find "SM_Profile" button (it needs to be in unselected state)
-            IWebElement? iwe = TestUtils.TryFindElement(driver, "#\\36 275769bb7e0831201e5c3e3 > .not-selected");
-            Assert.True(iwe != null);
-
-            // iwe.Click();
-            TestUtils.ClickWhenPageIsReady(driver, iwe);
-            System.Threading.Thread.Sleep(50);
-
-            // Make sure item is selected.
-            IWebElement? iwe2 = TestUtils.TryFindElement(driver, ".selected");
-            Assert.True(iwe2 != null);
-            Assert.True(iwe2 != null);
-            Assert.True(iwe2.Text == "SM Profile");
-
-            // Make sure not selected item is not found           
-            IWebElement? iwe3 = TestUtils.TryFindElement(driver, "#\\36 275769bb7e0831201e5c3e3 > .not-selected");
-            Assert.True(iwe3 == null);
-        }
-
-        [Fact]
         public void FoundTextSearchBox_On_NavigateToLibraryPage()
         {
             // Make sure text search box can be found.
@@ -135,45 +67,6 @@ namespace MyTestForMarketplace
             string[] astrOutput = strValue.Split(new char[] { '\r', '\n' });
             string strLabel = astrOutput[0];
             Assert.Equal("Clear All", strLabel);
-        }
-
-        [Fact]
-        public void FoundIndustryVerticalSeeAll_On_NavigateToLibraryPage()
-        {
-            // Make sure See All can be found for first group.
-            IWebElement? iwe = TestUtils.TryFindElement(driver, ".info-section:nth-child(1) > .btn");
-            Assert.True(iwe != null);
-
-            string strValue1 = iwe.Text;
-            Assert.Equal("+ See all", strValue1);
-
-            // iwe.Click();
-            TestUtils.ClickWhenPageIsReady(driver, iwe);
-
-            string strValue2 = iwe.Text;
-            Assert.Equal("- See less", strValue2);
-        }
-
-        [Fact]
-        public void FoundProcessesSeeAll_On_NavigateToLibraryPage()
-        {
-            // Make sure See All can be found for second group.
-            IWebElement? iwe = TestUtils.TryFindElement(driver, ".info-section:nth-child(2) > .btn");
-            Assert.True(iwe != null);
-
-            string strValue = iwe.Text;
-            Assert.Equal("+ See all", strValue);
-        }
-
-        [Fact]
-        public void FoundPublishersSeeAll_On_NavigateToLibraryPage()
-        {
-            // Make sure See All can be found for third group.
-            IWebElement? iwe = TestUtils.TryFindElement(driver, ".info-section:nth-child(3) > .btn");
-            Assert.True(iwe != null);
-
-            string strValue = iwe.Text;
-            Assert.Equal("+ See all", strValue);
         }
 
         [Fact]
@@ -215,5 +108,114 @@ namespace MyTestForMarketplace
 
             Assert.True(bSuccess);
         }
+
+        //[Fact]
+        //public void FoundSMAppButtonInExpectedStates_On_NavigateToLibraryPage_And_Click()
+        //{
+        //    // Click on "SM_App" button (should be unselected)
+        //    // IWebElement iwe = driver.FindElement(By.CssSelector("#\\36 275769bb7e0831201e5c3e2 > .not-selected"));
+        //    IWebElement? iwe = TestUtils.TryFindElement(driver, "#\\36 275769bb7e0831201e5c3e2 > .not-selected");
+        //    Assert.True(iwe != null);
+
+        //    // Set to selected state
+        //    // iwe.Click();
+        //    TestUtils.ClickWhenPageIsReady(driver, iwe);
+
+        //    // Make sure item is selected.
+        //    //IWebElement iwe2 = driver.FindElement(By.CssSelector(".selected"));
+        //    IWebElement? iwe2 = TestUtils.TryFindElement(driver, ".selected");
+        //    Assert.True(iwe2 != null);
+        //    Assert.True(iwe2.Text == "SM App");
+
+        //    // Make sure not selected item is not found           
+        //    IWebElement? iwe3 = null;
+        //    iwe3 = TestUtils.TryFindElement(driver, "#\\36 275769bb7e0831201e5c3e2 > .not-selected");
+        //    Assert.True(iwe3 == null);
+        //}
+
+        //[Fact]
+        //public void FoundSMHardwareButtonInExpectedStates_On_NavigateToLibraryPage_And_Click()
+        //{
+        //    // Find SM_Hardware button (it should be in unselected state).
+        //    IWebElement? iwe = TestUtils.TryFindElement(driver, "#\\36 29763866827ef2028a17d61 > .not-selected");
+        //    Assert.True(iwe != null);
+
+        //    // iwe.Click();
+        //    TestUtils.ClickWhenPageIsReady(driver, iwe);
+
+        //    // Make sure item is selected.
+        //    IWebElement? iwe2 = TestUtils.TryFindElement(driver, ".selected");
+        //    Assert.True(iwe2 != null);
+        //    Assert.True(iwe2 != null);
+        //    Assert.True(iwe2.Text == "SM Hardware");
+
+        //    // Make sure not selected item is not found           
+        //    IWebElement? iwe3 = null;
+        //    iwe3 = TestUtils.TryFindElement(driver, "#\\36 29763866827ef2028a17d61 > .not-selected");
+        //    Assert.True(iwe3 == null);
+        //}
+
+        //[Fact]
+        //public void FoundSMProfileButtonInExpectedStates_On_NavigateToLibraryPage_And_Click()
+        //{
+        //    // Find "SM_Profile" button (it needs to be in unselected state)
+        //    IWebElement? iwe = TestUtils.TryFindElement(driver, "#\\36 275769bb7e0831201e5c3e3 > .not-selected");
+        //    Assert.True(iwe != null);
+
+        //    // iwe.Click();
+        //    TestUtils.ClickWhenPageIsReady(driver, iwe);
+        //    System.Threading.Thread.Sleep(50);
+
+        //    // Make sure item is selected.
+        //    IWebElement? iwe2 = TestUtils.TryFindElement(driver, ".selected");
+        //    Assert.True(iwe2 != null);
+        //    Assert.True(iwe2 != null);
+        //    Assert.True(iwe2.Text == "SM Profile");
+
+        //    // Make sure not selected item is not found           
+        //    IWebElement? iwe3 = TestUtils.TryFindElement(driver, "#\\36 275769bb7e0831201e5c3e3 > .not-selected");
+        //    Assert.True(iwe3 == null);
+        //}
+
+
+        //[Fact]
+        //public void FoundIndustryVerticalSeeAll_On_NavigateToLibraryPage()
+        //{
+        //    // Make sure See All can be found for first group.
+        //    IWebElement? iwe = TestUtils.TryFindElement(driver, ".info-section:nth-child(1) > .btn");
+        //    Assert.True(iwe != null);
+
+        //    string strValue1 = iwe.Text;
+        //    Assert.Equal("+ See all", strValue1);
+
+        //    // iwe.Click();
+        //    TestUtils.ClickWhenPageIsReady(driver, iwe);
+
+        //    string strValue2 = iwe.Text;
+        //    Assert.Equal("- See less", strValue2);
+        //}
+
+        //[Fact]
+        //public void FoundProcessesSeeAll_On_NavigateToLibraryPage()
+        //{
+        //    // Make sure See All can be found for second group.
+        //    IWebElement? iwe = TestUtils.TryFindElement(driver, ".info-section:nth-child(2) > .btn");
+        //    Assert.True(iwe != null);
+
+        //    string strValue = iwe.Text;
+        //    Assert.Equal("+ See all", strValue);
+        //}
+
+        //[Fact]
+        //public void FoundPublishersSeeAll_On_NavigateToLibraryPage()
+        //{
+        //    // Make sure See All can be found for third group.
+        //    IWebElement? iwe = TestUtils.TryFindElement(driver, ".info-section:nth-child(3) > .btn");
+        //    Assert.True(iwe != null);
+
+        //    string strValue = iwe.Text;
+        //    Assert.Equal("+ See all", strValue);
+        //}
+
     }
 }

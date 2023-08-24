@@ -1,0 +1,10 @@
+{"_id":{"$oid":"63110c2cd6e0cb1608d57782"},"Term":"app","Code":"sm-app"}
+{"_id":{"$oid":"63110c44d6e0cb1608d57783"},"Term":"apps","Code":"sm-app"}
+{"_id":{"$oid":"63110c65d6e0cb1608d57784"},"Term":"sm app","Code":"sm-app"}
+{"_id":{"$oid":"63110c7cd6e0cb1608d57785"},"Term":"sm apps","Code":"sm-app"}
+{"_id":{"$oid":"63110c9ed6e0cb1608d57786"},"Term":"profile","Code":"sm-profile"}
+{"_id":{"$oid":"63110ca7d6e0cb1608d57787"},"Term":"profiles","Code":"sm-profile"}
+{"_id":{"$oid":"63110cb0d6e0cb1608d57788"},"Term":"sm profile","Code":"sm-profile"}
+{"_id":{"$oid":"63110cb7d6e0cb1608d57789"},"Term":"sm profiles","Code":"sm-profile"}
+{"_id":{"$oid":"63110cc4d6e0cb1608d5778a"},"Term":"hardware","Code":"sm-hardware"}
+{"_id":{"$oid":"63110ccbd6e0cb1608d5778b"},"Term":"sm hardware","Code":"sm-hardware"}

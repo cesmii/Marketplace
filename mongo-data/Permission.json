@@ -1,0 +1,6 @@
+{"_id":{"$oid":"613776a14849a53d993fb98b"},"PermissionEnum":1,"Name":"Can Manage Marketplace","Description":null,"CodeName":"CanManageMarketplace"}
+{"_id":{"$oid":"613776a14849a53d993fb98c"},"PermissionEnum":2,"Name":"Can Manage Users","Description":null,"CodeName":"CanManageUsers"}
+{"_id":{"$oid":"613776a14849a53d993fb98d"},"PermissionEnum":3,"Name":"Can Manage System Settings","Description":null,"CodeName":"CanManageSystemSettings"}
+{"_id":{"$oid":"6184219902fdfbdf1899275f"},"PermissionEnum":4,"Name":"Can Manage Publishers","Description":null,"CodeName":"CanManagePublishers"}
+{"_id":{"$oid":"61ae70ee1c65b79debe7a022"},"PermissionEnum":5,"Name":"Can Manage Request Info","Description":null,"CodeName":"CanManageRequestInfo"}
+{"_id":{"$oid":"62c767e2b5def08ca58e7c3e"},"PermissionEnum":6,"Name":"Can Manage Job Definitions","Description":null,"CodeName":"CanManageJobDefinitions"}

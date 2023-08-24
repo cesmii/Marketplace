@@ -79,7 +79,7 @@ namespace Marketplace_InBrowser_Tests
 		new object[] {"textquery", "Category", "Supply Chain Optimization", 71, 5, 21 },
 		new object[] {"textquery", "Category", "Warranty Management", 72, 1, 21 },
 		new object[] {"textquery", "Category", "Workflow Mapping", 73, 3, 21 },
-            };
+			};
     }
     public class Marketplace_TestData_TextQuery_Vertical
     {
@@ -140,7 +140,7 @@ namespace Marketplace_InBrowser_Tests
 		new object[] {"textquery", "Vertical", "Telecom", 51, 5, 21 },
 		new object[] {"textquery", "Vertical", "Textile", 52, 7, 21 },
 		new object[] {"textquery", "Vertical", "Utilities", 53, 11, 21 },
-            };
+			};
     }
     public class Marketplace_TestData_TextQuery_Publisher
     {
@@ -163,7 +163,7 @@ namespace Marketplace_InBrowser_Tests
 		new object[] {"textquery", "Publisher", "SymphonyAI Industrial", 13, 1, 21 },
 		new object[] {"textquery", "Publisher", "ThinkIQ", 14, 1, 21 },
 		new object[] {"textquery", "Publisher", "Toward Zero", 15, 1, 21 },
-            };
+			};
     }
     public class Marketplace_TestData_Checkbox_Category
     {
@@ -244,7 +244,7 @@ namespace Marketplace_InBrowser_Tests
 		new object[] {"checkbox", "Category", "Supply Chain Optimization", 71, 5, 21 },
 		new object[] {"checkbox", "Category", "Warranty Management", 72, 1, 21 },
 		new object[] {"checkbox", "Category", "Workflow Mapping", 73, 3, 21 },
-            };
+			};
     }
     public class Marketplace_TestData_Checkbox_Vertical
     {
@@ -305,7 +305,7 @@ namespace Marketplace_InBrowser_Tests
 		new object[] {"checkbox", "Vertical", "Telecom", 51, 5, 21 },
 		new object[] {"checkbox", "Vertical", "Textile", 52, 7, 21 },
 		new object[] {"checkbox", "Vertical", "Utilities", 53, 11, 21 },
-            };
+			};
     }
     public class Marketplace_TestData_Checkbox_Publisher
     {
@@ -328,6 +328,6 @@ namespace Marketplace_InBrowser_Tests
 		new object[] {"checkbox", "Publisher", "SymphonyAI Industrial", 13, 1, 21 },
 		new object[] {"checkbox", "Publisher", "ThinkIQ", 14, 1, 21 },
 		new object[] {"checkbox", "Publisher", "Toward Zero", 15, 1, 21 },
-            };
+			};
     }
 }

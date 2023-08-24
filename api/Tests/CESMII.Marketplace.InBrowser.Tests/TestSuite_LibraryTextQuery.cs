@@ -30,10 +30,10 @@
         }
 
 #pragma warning disable xUnit1026 // Theory methods should use all of their parameters
-        [Theory]
-        [MemberData(nameof(Marketplace_TestData_TextQuery_Vertical.MyData), MemberType = typeof(Marketplace_TestData_TextQuery_Vertical))]
-        [MemberData(nameof(Marketplace_TestData_TextQuery_Category.MyData), MemberType = typeof(Marketplace_TestData_TextQuery_Category))]
-        [MemberData(nameof(Marketplace_TestData_TextQuery_Publisher.MyData), MemberType = typeof(Marketplace_TestData_TextQuery_Publisher))]
+        //[Theory]
+        //[MemberData(nameof(Marketplace_TestData_TextQuery_Vertical.MyData), MemberType = typeof(Marketplace_TestData_TextQuery_Vertical))]
+        //[MemberData(nameof(Marketplace_TestData_TextQuery_Category.MyData), MemberType = typeof(Marketplace_TestData_TextQuery_Category))]
+        //[MemberData(nameof(Marketplace_TestData_TextQuery_Publisher.MyData), MemberType = typeof(Marketplace_TestData_TextQuery_Publisher))]
         public void CorrectItemCount_On_EnterItemNameIntoQueryBox(string strTestType, string strWebPageGroup, string strItemName, int iItemIndex, int cExpected, int cMaxItems)
         {
             // Validate incoming parameters

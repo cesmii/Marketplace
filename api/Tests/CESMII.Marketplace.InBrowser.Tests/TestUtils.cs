@@ -1,5 +1,6 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Remote;
 
 namespace Marketplace_InBrowser_Tests
 {
@@ -8,16 +9,23 @@ namespace Marketplace_InBrowser_Tests
         public static string GetStartUrl()
         {
             return "http://localhost:3000/library?p=1&t=10";
+            // return "http://localhost:4444/library?p=1&t=10";
         }
         public static IWebDriver CreateChromeDriver()
         {
-            ChromeOptions options = new ChromeOptions();
-            options.AddArguments("--no-sandbox");
-            options.AddArguments("--headless");
-            options.AddArguments("--disable-dev-shm-usage");
-            options.AddArguments("--window-size=1920,1080");
-            options.AddArguments("--whitelisted-ips=''");     // Allow any connections
-            IWebDriver driver = new ChromeDriver(options);
+            //ChromeOptions options = new ChromeOptions();
+            //options.AddArguments("--no-sandbox");
+            ////options.AddArguments("--headless");
+            //options.AddArguments("--disable-dev-shm-usage");
+            //options.AddArguments("--window-size=1920,1080");
+            //options.AddArguments("--whitelisted-ips=''");     // Allow any connections
+            //IWebDriver driver = new ChromeDriver(options);
+
+
+            var chromeOptions = new ChromeOptions();
+            chromeOptions.BrowserVersion = "118";
+            chromeOptions.PlatformName = "Windows 10";
+            IWebDriver driver = new RemoteWebDriver(new Uri("https://localhost:3000"), chromeOptions);
             return driver;
         }
 

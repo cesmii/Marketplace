@@ -34,146 +34,47 @@ env:
   CLOUDLIB_PASSWORD: 'NotUsedAnymore'
 
   # Access to our MongoDB
-  MONGODB_CONNECTION: "mongodb://localhost:27017"
+  MONGODB_CONNECTION: "mongodb://testuser:password@localhost:27017"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    #- name: CloudLib - Start PostgreSQL on Ubuntu
-    #  run: |
-    #    sudo systemctl start postgresql.service
-    #    pg_isready
 
-    #- name: CloudLib - Create additional Postgres user
-    #  run: |
-    #    sudo -u postgres psql --command="CREATE USER testuser SUPERUSER PASSWORD 'password'" --command="\du"
-    #- name: CloudLib - Create test database with proper collation
-    #  run: |
-    #    sudo -u postgres psql --command="create database cloudlib_test with LC_COLLATE = 'en_US.UTF8' LC_CTYPE = 'en_US.UTF8' TEMPLATE template0"
-
-    #- name: CloudLib - List existing databases
-    #  run: |
-    #    sudo -u postgres psql -l --command="\du"
-    
-    #- name: 🤘 CloudLib - checkout repo
-    #  uses: actions/checkout@v2
-    #  with:
-    #    repository: cesmii/CESMII-CloudLibrary
-    #    path: main
-    #    fetch-depth: 0
-
-    #- name: ⚙ CloudLib -Install DotNet (version 6.0.x)
-    #  uses: actions/setup-dotnet@v1
-    #  with:
-    #    dotnet-version: '6.0.x'
-
-    #- name: CloudLib - Restore dependencies in UACloudLibraryServer
-    #  working-directory: ./main/UACloudLibraryServer
-    #  run: dotnet restore
-
-    #- name: CloudLib - Restore dependencies Opc.Ua.CloudLib.Client
-    #  run: dotnet restore
-    #  working-directory: ./main/Opc.Ua.CloudLib.Client
-
-    #- name: CloudLib - Restore dependencies SampleConsoleClient
-    #  run: dotnet restore
-    #  working-directory: ./main/SampleConsoleClient
-
-    #- name: CloudLib - Restore dependencies CloudLibClientTests
-    #  run: dotnet restore
-    #  working-directory: ./main/Tests/CloudLibClientTests
-
-    #- name: CloudLib - Restore dependencies CloudLibSync
-    #  working-directory: ./main/CloudLibSync
-    #  run: dotnet restore
-
-    #- name: CloudLib - Restore dependencies CloudLibSyncAzureFunction
-    #  working-directory: ./main/CloudLibSyncAzureFunction
-    #  run: dotnet restore
-
-    #- name: CloudLib - Build
-    #  run: dotnet build ./main/UA-CloudLibrary.sln --configuration Release --no-restore
-
-    #- name: CloudLib - Start up UA Cloud Library Server
-    #  env: 
-    #    ServicePassword: ${{env.CLOUDLIB_PASSWORD}}
-    #    # Connection string for PostgreSQL from Cloud Library
-    #    CloudLibraryPostgreSQL: 'Server=localhost;Username=testuser;Database=cloudlib_test;Port=5432;Password=password;SSLMode=Prefer;Include Error Detail=true'
-    #    PostgreSQLEndpoint: 'localhost'
-    #    PostgreSQLUsername: 'testuser'
-    #    PostgreSQLPassword: 'password'
-    #  run: |
-    #    dotnet ./main/UACloudLibraryServer/bin/Release/net6.0/UA-CloudLibrary.dll &
-    #  # This takes over 10 minutes to run.
-
-    #- name: CloudLib - Test
-    #  run: dotnet test ./main/UA-CloudLibrary.sln --no-build --configuration Release --verbosity normal -l:"console;verbosity=normal"
-
-    #- name: CloudLib - List databases after test run
-    #  run: |
-    #    sudo -u postgres psql -l --command="\du"
-
+    - name: MongoDB - Create mongoDB Docker container      
+      run: docker run -d -p 27017:27017 --name=MyMongoAct -e MONGO_INIT_DATABASE=snapshot -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="c:/CESMII.github/Marketplace/mongo-data",target=/data,type=bind mongo:4.0
 
     - name: Marketplace API - Check out the repo
       uses: actions/checkout@v2
       with:
         submodules: true
 
-    #- name: Start MongoDB
-    #  run: docker run -d --name mongodb \
-    #       mongo:latest
-           #-p 27017:27017 \
-           #-e MONGO_INIT_DATABASE=snapshot_marketplace_db_2023-07-19 \
-           #-e MONGO_INITDB_ROOT_USERNAME=testuser \
-           #-e MONGO_INITDB_ROOT_PASSWORD=password \
-
-    - name: Create mongoDB Docker container      
-      run: docker run -d -p 27017:27017 -e MONGO_INIT_DATABASE=snapshot_marketplace_db_2023-07-19 -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password mongo
-
-    - name: Setup mongodb-tools
-      run: |
-        wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2204-x86_64-100.6.1.deb
-        sudo apt install ./mongodb-database-tools-*-100.6.1.deb
-        mongorestore --version
-        mongoimport --version
-
-    - name: Run Help for mongoimport
-      run: mongoimport --help
-
-    - name: Add data to MarketplaceItem collection
-      run: mongoimport --uri=mongodb://localhost:27017 --db=snapshot_marketplace_db_2023-07-19 --collection=MarketplaceItem --username=testuser -p password --file=./Snapshot_Export/MarketplaceItem.json
-    #- name: Add data to LookupItem
-    #  run: mongorestore --nsInclude=snapshot_marketplace_db_2023-07-19.LookupItem ./test-data/LookupItem.bson
-
-    - name: PROCESS INQUIRY #1 ------------------------
-      run: |
-        ps ax
+    - name: MongoDB - Populate mongo database
+      run: docker exec -it MyMongoAct mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -it MyMongoAct mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -it MyMongoAct mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -it MyMongoAct mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -it MyMongoAct mongoimport  --collection=Organization --file=/data/Organization.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -it MyMongoAct mongoimport  --collection=Permission --file=/data/Permission.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -it MyMongoAct mongoimport  --collection=ProfileItem --file=/data/ProfileItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -it MyMongoAct mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -it MyMongoAct mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -it MyMongoAct mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="mongodb://testuser:password@localhost:27017" ;
 
     - name: Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: ${{ env.NETCORE_VERSION }}
 
-    - name: PROCESS INQUIRY #2 ------------------------
-      run: |
-        ps ax
-
     - name: Marketplace API - Restore dependencies (${{env.SOLUTION_FILE}})
       run: dotnet restore ${{env.SOLUTION_FILE}}
       working-directory: ${{env.SOLUTION_DIRECTORY}}
 
-    - name: PROCESS INQUIRY #3 ------------------------
-      run: |
-        ps ax
-
     - name: Marketplace API - Build (${{env.SOLUTION_FILE}})
       run: dotnet build ${{env.SOLUTION_FILE}} --configuration Release --no-restore
 
-    - name: PROCESS INQUIRY #4 ------------------------
-      run: |
-        ps ax
-
+    - name: MongoDB - Test access to Mongo database
+      run: dotnet test ./api/Tests/CESMII.Marketplace.MongoDB/CESMII.Marketplace.MongoDB.csproj
 
     - name: Marketplace API - Start up Marketplace Server
       env:
@@ -181,7 +82,7 @@ jobs:
         SERVICEPASSWORD: ${{env.CLOUDLIB_PASSWORD}}
         EnableCloudLibSearch: false
       run: |
-            ./api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API $DBCONN $SERVICEPASSWORD &
+            ./api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API.dll $DBCONN $SERVICEPASSWORD &
 
     - name: PROCESS INQUIRY #5 ------------------------
       run: |
@@ -189,11 +90,12 @@ jobs:
 
     # Call Marketplace Api sure that someone's at home.
     - name: Test
-      run: dotnet test ./CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
+      run: dotnet test ./api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
 
-    - name: PROCESS INQUIRY #6 ------------------------
-      run: |
-        ps ax
+
+    #- name: PROCESS INQUIRY #6 ------------------------
+    #  run: |
+    #    ps ax
 
 
     #- name: Add other libraries and all that jazz =========================================

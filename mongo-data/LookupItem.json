@@ -1,0 +1,159 @@
+{"_id":{"$oid":"6123a2a96f069e7f409f62d0"},"Name":"Asset Monitoring","Code":"AM","LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6123a2a96f069e7f409f62d1"},"Name":"Palletizing","Code":"PAL","LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6123a2a96f069e7f409f62d2"},"Name":"Predictive Maintenance","Code":"PM","LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6123a2a96f069e7f409f62d3"},"Name":"Food & Beverage","Code":"F&B","LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6123a2a96f069e7f409f62d4"},"Name":"Energy (Oil & Gas)","Code":"EOG","LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6123a2a96f069e7f409f62d5"},"Name":"Aerospace","Code":"AER","LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6123a2a96f069e7f409f62d6"},"Id":301,"Name":"Draft","Code":"draft","DisplayOrder":99,"LookupType":{"EnumValue":5,"Name":"Marketplace Status"},"IsActive":true}
+{"_id":{"$oid":"6123a2a96f069e7f409f62d7"},"Id":302,"Name":"Retire","Code":"retire","DisplayOrder":99,"LookupType":{"EnumValue":5,"Name":"Marketplace Status"},"IsActive":true}
+{"_id":{"$oid":"6123a2a96f069e7f409f62d8"},"Id":303,"Name":"Live","Code":"live","DisplayOrder":99,"LookupType":{"EnumValue":5,"Name":"Marketplace Status"},"IsActive":true}
+{"_id":{"$oid":"618aa883557c7b88d5fb4877"},"Name":"Machine Learning","Code":"AM","LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"618aa8c0557c7b88d5fb4878"},"Name":"Petrochemical","Code":"PC","LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"618aa8e8557c7b88d5fb4879"},"Name":"Industrial Gas","Code":"IG","LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"618aa913557c7b88d5fb487a"},"Name":"IIoT","Code":"IIoT","LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"618aa924557c7b88d5fb487b"},"Name":"Analytics","Code":"AM","LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"61928d19557c7b88d5fb4880"},"Id":601,"Name":"Marketplace Item","Code":"marketplaceitem","DisplayOrder":99,"LookupType":{"EnumValue":7,"Name":"RequestInfo"},"IsActive":true}
+{"_id":{"$oid":"61928d2d557c7b88d5fb4881"},"Id":602,"Name":"Publisher","Code":"publisher","DisplayOrder":99,"LookupType":{"EnumValue":7,"Name":"RequestInfo"},"IsActive":true}
+{"_id":{"$oid":"61928d59557c7b88d5fb4882"},"Id":603,"Name":"Become a Partner","Code":"membership","DisplayOrder":99,"LookupType":{"EnumValue":7,"Name":"RequestInfo"},"IsActive":true}
+{"_id":{"$oid":"61ae4e3e1c65b79debe7a009"},"Id":604,"Name":"Become a Publisher","Code":"contribute","DisplayOrder":99,"LookupType":{"EnumValue":7,"Name":"RequestInfo"},"IsActive":true}
+{"_id":{"$oid":"61ae54cd1c65b79debe7a00e"},"Id":605,"Name":"Request a Demo","Code":"request-demo","DisplayOrder":99,"LookupType":{"EnumValue":7,"Name":"RequestInfo"},"IsActive":true}
+{"_id":{"$oid":"61ae54f21c65b79debe7a00f"},"Id":606,"Name":"Support","Code":"support","DisplayOrder":99,"LookupType":{"EnumValue":7,"Name":"RequestInfo"},"IsActive":true}
+{"_id":{"$oid":"61ae55061c65b79debe7a010"},"Id":607,"Name":"General Inquiry","Code":"general","DisplayOrder":99,"LookupType":{"EnumValue":7,"Name":"RequestInfo"},"IsActive":true}
+{"_id":{"$oid":"61ae5bcf1c65b79debe7a015"},"Id":700,"Name":"Not Started","Code":"not-started","DisplayOrder":1,"LookupType":{"EnumValue":8,"Name":"Status"},"IsActive":true}
+{"_id":{"$oid":"61ae5be81c65b79debe7a016"},"Id":701,"Name":"In Progress","Code":"in-progress","DisplayOrder":2,"LookupType":{"EnumValue":8,"Name":"Status"},"IsActive":true}
+{"_id":{"$oid":"61ae5c081c65b79debe7a017"},"Id":702,"Name":"Complete","Code":"complete","DisplayOrder":3,"LookupType":{"EnumValue":8,"Name":"Status"},"IsActive":true}
+{"_id":{"$oid":"61ae5c221c65b79debe7a018"},"Id":703,"Name":"Blocked","Code":"blocked","DisplayOrder":4,"LookupType":{"EnumValue":8,"Name":"Status"},"IsActive":true}
+{"_id":{"$oid":"61ae5c2f1c65b79debe7a019"},"Id":702,"Name":"Deferred","Code":"deferred","DisplayOrder":4,"LookupType":{"EnumValue":8,"Name":"Status"},"IsActive":true}
+{"_id":{"$oid":"61ae934e1c65b79debe7a037"},"Id":607,"Name":"Subscribe","Code":"subscribe","DisplayOrder":99,"LookupType":{"EnumValue":7,"Name":"RequestInfo"},"IsActive":true}
+{"_id":{"$oid":"61af70aae6d640316cfa108c"},"Name":"Current Member","Code":"member-current","LookupType":{"EnumValue":9,"Name":"MembershipStatus"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"61af70c7e6d640316cfa108d"},"Id":902,"Name":"Not a Member","Code":"member-no","DisplayOrder":2,"LookupType":{"EnumValue":9,"Name":"MembershipStatus"},"IsActive":true}
+{"_id":{"$oid":"61af70e4e6d640316cfa108e"},"Name":"Previous Member","Code":"member-previous","LookupType":{"EnumValue":9,"Name":"Membership Status"},"DisplayOrder":1,"IsActive":true}
+{"_id":{"$oid":"61df00efdb7ec22901f11ffc"},"Name":"A process","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":100,"IsActive":false}
+{"_id":{"$oid":"61e6fb0bd8070cc6079638ef"},"Name":"A new process","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":100,"IsActive":false}
+{"_id":{"$oid":"62473787a649292c49921f01"},"Name":"Automotive","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"62473796a649292c49921f02"},"Name":"Chemical","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624737a9a649292c49921f03"},"Name":"Life Sciences","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624737b1a649292c49921f04"},"Name":"Packaging","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624737b9a649292c49921f05"},"Name":"Power","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624737c3a649292c49921f06"},"Name":"Refining","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"62473824a649292c49921f07"},"Name":"Asset Performance Management","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6247382fa649292c49921f08"},"Name":"Data Analytics","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6247383da649292c49921f09"},"Name":"Enterprise Data Management","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"62473845a649292c49921f0a"},"Name":"Historian","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6247384ea649292c49921f0b"},"Name":"Industrial Software","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"62473856a649292c49921f0c"},"Name":"OT Data Lake","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6de6a649292c49921f0d"},"Name":"Academia","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6defa649292c49921f0e"},"Name":"Cement","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6df8a649292c49921f0f"},"Name":"Electronics","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6dffa649292c49921f10"},"Name":"Forestry","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6e07a649292c49921f11"},"Name":"Foundry","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6e0ea649292c49921f12"},"Name":"Government","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6e15a649292c49921f13"},"Name":"Lumber","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6e25a649292c49921f14"},"Name":"Machine Shops","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6e2ca649292c49921f15"},"Name":"Metals","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6e34a649292c49921f16"},"Name":"Mining","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6e5fa649292c49921f17"},"Name":"Personal Care","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6e67a649292c49921f18"},"Name":"Plastics","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6e70a649292c49921f19"},"Name":"Pulp & Paper","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6e80a649292c49921f1a"},"Name":"Small-Medium Enterprises","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6e88a649292c49921f1b"},"Name":"Steel","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6e90a649292c49921f1c"},"Name":"Telecom","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6e98a649292c49921f1d"},"Name":"Textile","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6f92a649292c49921f1e"},"Name":"Augmented Reality","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6f9ea649292c49921f1f"},"Name":"Edge Computing","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6fa8a649292c49921f20"},"Name":"Energy Efficiency","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6fb1a649292c49921f21"},"Name":"Enterprise Integration","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6fb8a649292c49921f22"},"Name":"Machine Vision","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6fc2a649292c49921f23"},"Name":"Maintenance","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6fcda649292c49921f24"},"Name":"Plant Reliability","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6fdaa649292c49921f25"},"Name":"Power Factor","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6fe3a649292c49921f26"},"Name":"Power Quality","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6feda649292c49921f27"},"Name":"Quality Assurance","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6ff4a649292c49921f28"},"Name":"Short Interval Control","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"624c6ffca649292c49921f29"},"Name":"Workflow Mapping","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"625460bf2473fdfd95124117"},"Name":"Utilities","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"625db4eb2473fdfd95124120"},"Name":"Energy","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"625db50d2473fdfd95124121"},"Name":"Pharmaceuticals","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"625db5192473fdfd95124122"},"Name":"Semiconductor","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"625db5212473fdfd95124123"},"Name":"Defense","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"625db52a2473fdfd95124124"},"Name":"Intelligence","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"625db5392473fdfd95124125"},"Name":"Continuous Improvement","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"625db5422473fdfd95124126"},"Name":"Asset Health","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"625db54c2473fdfd95124127"},"Name":"Asset Optimization","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"625db5592473fdfd95124128"},"Name":"Process Optimization","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"625db5632473fdfd95124129"},"Name":"Quality Assessment","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"626ae2fa35286cb67ba0998c"},"Name":"Consumer and Paper Goods","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"626ae30c35286cb67ba0998d"},"Name":"Building Materials and Supplies","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"626ae31535286cb67ba0998e"},"Name":"Heavy Industry","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6275769bb7e0831201e5c3e2"},"Name":"SM App","Code":"sm-app","DisplayOrder":1,"LookupType":{"EnumValue":10,"Name":"SmItemType"},"IsActive":true}
+{"_id":{"$oid":"6275769bb7e0831201e5c3e3"},"Name":"SM Profile","Code":"sm-profile","DisplayOrder":4,"LookupType":{"EnumValue":10,"Name":"SmItemType"},"IsActive":true}
+{"_id":{"$oid":"629020c143d218966422d871"},"Id":607,"Name":"SM Profile","Code":"smprofile","DisplayOrder":99,"LookupType":{"EnumValue":7,"Name":"RequestInfo"},"IsActive":true}
+{"_id":{"$oid":"6291396543d218966422d876"},"Id":608,"Name":"SM Profile Download","Code":"smprofile-download","DisplayOrder":99,"LookupType":{"EnumValue":7,"Name":"RequestInfo"},"IsActive":true}
+{"_id":{"$oid":"629646466519f64c6fab0c7d"},"Name":"Hospitality","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6296464e6519f64c6fab0c7e"},"Name":"Retailers","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"629763866827ef2028a17d61"},"Name":"SM Hardware","Code":"sm-hardware","DisplayOrder":3,"LookupType":{"EnumValue":10,"Name":"SmItemType"},"IsActive":true}
+{"_id":{"$oid":"629763866827ef2028a17d62"},"Name":"SM Datasource","Code":"sm-datasource","DisplayOrder":2,"LookupType":{"EnumValue":10,"Name":"SmItemType"},"IsActive":false}
+{"_id":{"$oid":"629a682e605dda89466cf5b1"},"Name":"Consumer Products","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"629a683b605dda89466cf5b2"},"Name":"Data Management","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"629a6ad2605dda89466cf5b5"},"Name":"OEE","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"629a6b1b605dda89466cf5b6"},"Name":"Discrete Manufacturing","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"629a6b27605dda89466cf5b7"},"Name":"Process Manufacturing","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"629a6b34605dda89466cf5b8"},"Name":"Agriculture","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"629df397b159f4d4ef73c5eb"},"Name":"Plastics and Rubber","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"629df3a2b159f4d4ef73c5ec"},"Name":"Medical Devices","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"629df484b159f4d4ef73c5ed"},"Name":"APS","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"629df48eb159f4d4ef73c5ee"},"Name":"CNC Monitoring","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"629df498b159f4d4ef73c5ef"},"Name":"Data Collection","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"629df4a2b159f4d4ef73c5f0"},"Name":"Energy Monitoring","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"629df4a9b159f4d4ef73c5f1"},"Name":"MES","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"629df4b4b159f4d4ef73c5f2"},"Name":"Machine Connectivity","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"629df4bcb159f4d4ef73c5f3"},"Name":"Planning and Scheduling","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"629df4c6b159f4d4ef73c5f4"},"Name":"Supply Chain","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"629df6a7b159f4d4ef73c5f6"},"Name":"CNC","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"62d6ee3fe96ba6a440c4165d"},"Name":"Manufacturing","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"62d6ee47e96ba6a440c4165e"},"Name":"Distribution","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"62d6ee4fe96ba6a440c4165f"},"Name":"Assembly","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"62d6ee56e96ba6a440c41660"},"Name":"Remanufacturing","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"62d6ee6ae96ba6a440c41661"},"Name":"Inventory Management","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"62d6ee72e96ba6a440c41662"},"Name":"Inventory Optimization","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"62d6ee81e96ba6a440c41663"},"Name":"Supply Chain Management","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"62d6ee8de96ba6a440c41664"},"Name":"Supply Chain Automation","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"632092e09d6d8590bf0e4dbe"},"Name":"Continuous Manufacturing Intelligence","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"632092e99d6d8590bf0e4dbf"},"Name":"Continuous Supply Chain Intelligence","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"632092f59d6d8590bf0e4dc0"},"Name":"Digital Manufacturing","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"632092ff9d6d8590bf0e4dc1"},"Name":"Industry 4.0","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"632093079d6d8590bf0e4dc2"},"Name":"Logistics and Yard Solutions","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6320930f9d6d8590bf0e4dc3"},"Name":"Manufacturing Operations Solutions","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"632093179d6d8590bf0e4dc4"},"Name":"Material Analysis Solutions","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6320931f9d6d8590bf0e4dc5"},"Name":"Material Traceability","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"632093299d6d8590bf0e4dc6"},"Name":"Smart Manufacturing","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6320933b9d6d8590bf0e4dc7"},"Name":"Supply Chain Optimization","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"63483f76b82355dd33cc4b00"},"Name":"Greenhouses","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"63483f7eb82355dd33cc4b01"},"Name":"Sawmills","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"63483f85b82355dd33cc4b02"},"Name":"Seafood","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"63483f92b82355dd33cc4b03"},"Name":"Air Compressing","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"63483f9ab82355dd33cc4b04"},"Name":"Blowing","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"63483fa1b82355dd33cc4b05"},"Name":"Chilling","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"63483fa8b82355dd33cc4b06"},"Name":"Continuous Monitoring","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"63483faeb82355dd33cc4b07"},"Name":"Heating","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"63483fb4b82355dd33cc4b08"},"Name":"Machine Monitoring","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"63483fbab82355dd33cc4b09"},"Name":"Machining","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"63483fc1b82355dd33cc4b0a"},"Name":"Molding","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"635aac65a819c834b31c50dd"},"Name":"Renewables Monitoring","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"635aae18a819c834b31c50de"},"Name":"Cost of Quality","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"635aae22a819c834b31c50df"},"Name":"Digitized Quality Checks","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"635aae2ba819c834b31c50e0"},"Name":"In-House Quality Inspections","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"635aae32a819c834b31c50e1"},"Name":"Quality Traceability","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"635aae39a819c834b31c50e2"},"Name":"Remote Monitoring","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"635aae40a819c834b31c50e3"},"Name":"Supplier Inventory Visibility","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"635aae47a819c834b31c50e4"},"Name":"Supplier Quality","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"641088a39c6e400865a0a870"},"Name":"Communications","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6411ce0d9c6e400865a0a88a"},"Name":"Analytics Lifecycle","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6411ce189c6e400865a0a88b"},"Name":"Production Quality","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6411cf679c6e400865a0a88c"},"Name":"Warranty Management","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6411cf719c6e400865a0a88d"},"Name":"Product Quality","Code":null,"LookupType":{"EnumValue":1,"Name":"Processes"},"DisplayOrder":0,"IsActive":true}
+{"_id":{"$oid":"6435a073fc0aaae42c8a6cb5"},"Name":"Biotechnology","Code":null,"LookupType":{"EnumValue":2,"Name":"Industry Vertical"},"DisplayOrder":0,"IsActive":true}
+{"_id":"646294cf0aa912210a296539","Name":"Required","Code":"required","LookupType":{"EnumValue":11,"Name":"Related Type"},"DisplayOrder":1,"IsActive":true}
+{"_id":"646294cf0aa912210a296540","Name":"Recommended","Code":"recommended","LookupType":{"EnumValue":11,"Name":"Related Type"},"DisplayOrder":2,"IsActive":true}
+{"_id":"646294cf0aa912210a296541","Name":"Similar","Code":"similar","LookupType":{"EnumValue":11,"Name":"Related Type"},"DisplayOrder":3,"IsActive":true}
+{"_id":{"$oid":"6491c4f66e6413716c162e31"},"Name":"Admin Only","Code":"admin-only","LookupType":{"EnumValue":5,"Name":"Marketplace Status"},"DisplayOrder":100,"IsActive":true}
