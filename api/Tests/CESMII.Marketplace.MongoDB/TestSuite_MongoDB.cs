@@ -1,5 +1,7 @@
 namespace CESMII.Marketplace.MongoDB
 {
+    using CESMII.Marketplace.Data.Entities;
+    using global::MongoDB.Bson;
     using global::MongoDB.Driver;
     using MongoDB;
 
@@ -29,6 +31,25 @@ namespace CESMII.Marketplace.MongoDB
 
             var db = client.GetDatabase(strDatabase);
             Assert.NotNull(db);
+        }
+
+        [Fact]
+        public void ValidLookupCollection_on_Startup()
+        {
+            Assert.NotNull(strConnection);
+            Assert.NotNull(strDatabase);
+
+            MongoClient client = new MongoClient(strConnection);
+
+            var db = client.GetDatabase(strDatabase);
+
+            var lookupItems = db.GetCollection<LookupItem>("LookupItem");
+            Assert.NotNull(lookupItems);
+
+            var docLookupItems = lookupItems.Find(new BsonDocument()).ToList();
+
+            Assert.NotNull(docLookupItems);
+            Assert.True(docLookupItems.Any());
         }
     }
 }
