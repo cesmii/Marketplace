@@ -4,6 +4,7 @@ import color from '../../components/Constants';
 
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
 import DownloadNodesetModal from '../../components/DownloadNodesetModal';
+import { RenderImageBg } from '../../services/MarketplaceService';
 import { AppSettings } from '../../utils/appsettings';
 import { formatItemPublishDate, generateLogMessageString, getImageUrl, renderMenuColorIcon, renderMenuColorMaterialIcon } from '../../utils/UtilityService';
 import { MarketplaceItemJobLauncher } from './MarketplaceItemJobLauncher';
@@ -54,28 +55,14 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
     //-------------------------------------------------------------------
     // Region: Render helpers
     //-------------------------------------------------------------------
-    const renderImageBg = () => {
-
-        const bgImageStyle = props.item.imageLandscape == null ? {} :
-            {
-                backgroundImage: `url(${getImageUrl(props.item.imageLandscape)})`
-        };
-
-        return (
-            <div className="image-bg" >
-                <div className="overlay-icon contain" style={bgImageStyle} >&nbsp;</div>
-            </div>
-        );
-    };
-
     const renderMarketplaceHeader = () => {
         return (
             <>
                 <div className={`row mx-0 p-0 ${props.cssClass} mb-4 border`}>
-                    <div className="col-sm-6 col-md-5 p-0 d-none d-sm-block" >
-                        {renderImageBg()}
+                    <div className="col-sm-5 p-0" >
+                        <RenderImageBg item={props.item} defaultImage={props.item.imageLandscape} responsiveImage={props.item.imageBanner} clickable={false} />
                     </div>
-                    <div className="col-sm-6 col-md-7 p-4" >
+                    <div className="col-sm-7 p-4" >
                         {/*<h2>{props.item.name}</h2>*/}
                         {props.item.abstract != null &&
                             <div className="mb-2" dangerouslySetInnerHTML={{ __html: props.item.abstract }} ></div>
@@ -102,10 +89,10 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
         return (
             <>
                 <div className={`row mx-0 p-0 ${props.cssClass} mb-4 border`}>
-                    <div className="col-sm-6 col-md-5 p-0 d-none d-sm-block" >
-                        {renderImageBg()}
+                    <div className="col-sm-5 p-0" >
+                        <RenderImageBg item={props.item} defaultImage={props.item.imageLandscape} responsiveImage={props.item.imageBanner} clickable={false} />
                     </div>
-                    <div className="col-sm-6 col-md-7 p-4" >
+                    <div className="col-sm-7 p-4" >
                         {props.item.abstract != null &&
                             <div className="mb-2" dangerouslySetInnerHTML={{ __html: props.item.abstract }} ></div>
                         }

@@ -46,7 +46,7 @@ function AdminMarketplaceEntity() {
     const [_isValid, setIsValid] = useState({
         name: true, nameFormat: true, displayName: true, abstract: true, description: true,
         status: true, type: true, publisher: true, publishDate: true,
-        images: { imagePortrait: true, imageSquare: true, imageLandscape: true },
+        images: { imagePortrait: true, imageBanner: true, imageLandscape: true },
         relatedItems: true, relatedProfiles: true, actionLinks: true
     });
     const [_deleteModal, setDeleteModal] = useState({ show: false, items: null });
@@ -343,7 +343,7 @@ function AdminMarketplaceEntity() {
         setIsValid({
             ..._isValid, images: {
                 "imagePortrait": e.target.id === "imagePortrait" ? isValid : _isValid.images.imagePortrait,
-                "imageSquare": true, //e.target.id === "imageSquare" ? isValid : _isValid.images.imageSquare,
+                "imageBanner": true, //e.target.id === "imageBanner" ? isValid : _isValid.images.imageBanner,
                 "imageLandscape": e.target.id === "imageLandscape" ? isValid : _isValid.images.imageLandscape
             }
         });
@@ -379,7 +379,7 @@ function AdminMarketplaceEntity() {
         _isValid.publisher = item.publisher != null && item.publisher.id.toString() !== "-1";
         _isValid.publishDate = item.publishDate != null && item.publishDate.trim().length > 0;
         _isValid.images.imagePortrait = item.imagePortrait != null && item.imagePortrait.id.toString() !== "-1";
-        _isValid.images.imageSquare = true; //item.imageSquare != null && item.imageSquare.id.toString() !== "-1";
+        _isValid.images.imageBanner = true; //item.imageBanner != null && item.imageBanner.id.toString() !== "-1";
         _isValid.images.imageLandscape = item.imageLandscape != null && item.imageLandscape.id.toString() !== "-1";
         _isValid.relatedItems = validateForm_relatedItems();
         _isValid.relatedProfiles = validateForm_relatedProfiles();
@@ -388,7 +388,7 @@ function AdminMarketplaceEntity() {
         setIsValid(JSON.parse(JSON.stringify(_isValid)));
         return (_isValid.name && _isValid.nameFormat && _isValid.displayName && _isValid.abstract && _isValid.description &&
             _isValid.status && _isValid.publisher && _isValid.publishDate &&
-            _isValid.images.imagePortrait && _isValid.images.imageSquare && _isValid.images.imageLandscape &&
+            _isValid.images.imagePortrait && _isValid.images.imageBanner && _isValid.images.imageLandscape &&
             _isValid.relatedItems && _isValid.relatedProfiles && _isValid.type && _isValid.actionLinks);
     }
 
@@ -567,7 +567,7 @@ function AdminMarketplaceEntity() {
         //note you must update the state value for the input to be read only. It is not enough to simply have the onChange handler.
         switch (e.target.id) {
             case "imagePortrait":
-            case "imageSquare":
+            case "imageBanner":
             case "imageLandscape":
                 if (e.target.value.toString() === "-1") item[e.target.id] = null;
                 else {
@@ -1175,9 +1175,9 @@ function AdminMarketplaceEntity() {
                     <div className="col-md-6">
                         {renderImageSelection("imagePortrait", "Portrait Image", "Recommended aspect ratio 3:4. Used by: Home page ('Featured Solution' banner image, 'Popular' items tiles), Library page (result tiles)")}
                     </div>
-                    {/*<div className="col-md-6">*/}
-                    {/*    {renderImageSelection("imageSquare", "Square Image (Deprecated)", "Recommended aspect ratio 1:1. Deprecated.")}*/}
-                    {/*</div>*/}
+                    <div className="col-md-6">
+                        {renderImageSelection("imageBanner", "Banner Image", "Recommended aspect ratio 1:3.5. Used when displaying marketplace item image on small screens. Suggest minimum size of 150px x 350px.")}
+                    </div>
                     <div className="col-md-6">
                         {renderImageSelection("imageLandscape", "Landscape Image", "Recommended: 320px w by 180px h (16:9) Used by: Home page ('New' items tiles), Marketplace item page (banner image, 'Related' items tiles)")}
                     </div>

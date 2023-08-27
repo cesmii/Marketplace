@@ -3,6 +3,8 @@ import { useHistory } from 'react-router-dom'
 import { Button } from 'react-bootstrap'
 
 import { formatItemPublishDate, getImageUrl, getRandomArrayIndexes } from '../../utils/UtilityService';
+import { RenderImageBg } from '../../services/MarketplaceService';
+import { AppSettings } from '../../utils/appsettings';
 
 //const CLASS_NAME = "ProfileItemRow";
 
@@ -72,20 +74,6 @@ function ProfileItemRow(props) { //props are item, showActions
         return renderCategoryTagsRandom(item.industryVerticals, 3);
     }
 
-    const renderImageBg = () => {
-
-        var bgImageStyle = props.item.imagePortrait == null ? {} :
-            {
-                backgroundImage: `url(${getImageUrl(props.item.imagePortrait)})`
-            };
-
-        return (
-            <div className="image-bg" >
-                <div className="overlay-icon cover clickable" style={bgImageStyle} onClick={navigateToItem} >&nbsp;</div>
-            </div>
-        );
-    };
-
     const renderImageCompact = () => {
 
         const style = 
@@ -104,10 +92,10 @@ function ProfileItemRow(props) { //props are item, showActions
     const renderRow = () => {
         return (
             <div className={`row mx-0 p-0 ${props.cssClass}`}>
-                <div className="col-sm-6 col-md-5 p-0 d-none d-sm-block" >
-                    {renderImageBg()}
+                <div className="col-sm-5 p-0" >
+                    <RenderImageBg item={props.item} defaultImage={props.item.imagePortrait} responsiveImage={props.item.imageBanner} itemType={AppSettings.itemTypeCode.smProfile} clickable={true} />
                 </div>
-                <div className="col-sm-6 col-md-7 p-4" >
+                <div className="col-sm-7 p-4" >
                     <div className="d-flex align-items-center mb-2" >
                         <h2 className="mb-0" >SM Profile: {props.item.displayName}</h2>
                     </div>
