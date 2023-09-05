@@ -4,14 +4,11 @@
     <TargetFramework>net6.0</TargetFramework>
     <UserSecretsId>072c8be4-56fa-4a54-b74a-5f1230462b95</UserSecretsId>
     <Configurations>Debug;Release;Staging</Configurations>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerfileContext>..\..</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.4" />
     <PackageReference Include="Microsoft.Identity.Web" Version="1.25.1" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
     <PackageReference Include="NLog" Version="4.7.10" />
     <PackageReference Include="NLog.Extensions.Logging" Version="1.7.3" />
     <PackageReference Include="NLog.Schema" Version="4.7.10" />

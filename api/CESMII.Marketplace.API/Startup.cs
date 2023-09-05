@@ -48,8 +48,6 @@ namespace CESMII.Marketplace.Api
     {
         private readonly string _corsPolicyName = "SiteCorsPolicy";
         private readonly string _version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        public static string strTextMongoDBConnectionString;
-        public static string strCloudLibraryTestPassword;
 
         public Startup(IConfiguration configuration)
         {
@@ -64,28 +62,23 @@ namespace CESMII.Marketplace.Api
             //MongoDB approach
             services.Configure<MongoDBConfig>(Configuration);
 
-            string strConnectionString = Configuration["MongoDBSettings:ConnectionString"];
-            string strDatabase = Configuration["MongoDBSettings:DatabaseName"];
+            string strConnectionString = Environment.GetEnvironmentVariable("MARKETPLACE_MONGODB_CONNECTIONSTRING");
+            string strDatabase = Environment.GetEnvironmentVariable("MARKETPLACE_MONGODB_DATABASE");
 
-            // In a test environment, we get connection string from a github secret
-            if (!string.IsNullOrEmpty(strTextMongoDBConnectionString))
-            {
-                strConnectionString = strTextMongoDBConnectionString;
+            // In a test environment, we get connection string from the environment
+            if (!string.IsNullOrEmpty(strConnectionString))
+            { 
                 Configuration["MongoDBSettings:ConnectionString"] = strConnectionString;
-
-                strDatabase = "snapshot_marketplace_db_2023-07-19";
-                Configuration["MongoDBSettings:DatabaseName"] = strDatabase;
             }
 
-            // In a test environment, we get the Cloud Library password from the github action script
-            if (!string.IsNullOrEmpty(strCloudLibraryTestPassword))
+            if (!string.IsNullOrEmpty(strDatabase))
             {
-                Configuration["CloudLibrary:UserName"] = "admin";
-                Configuration["CloudLibrary:Password"] = strCloudLibraryTestPassword;
-                Configuration["CloudLibrary:EndPoint"] = null;
-                Configuration["CloudLibrary:https"] = "localhost:44388/";
+                 Configuration["MongoDBSettings:DatabaseName"] = strDatabase;
             }
 
+            var root = (IConfigurationRoot)Configuration;
+            var debugView = root.GetDebugView();
+            System.Diagnostics.Debug.WriteLine(debugView);
 
             string strCollection = Configuration["MongoDBSettings:NLogCollectionName"];
             NLog.Mongo.MongoTarget.SetNLogMongoOverrides(strConnectionString: strConnectionString,

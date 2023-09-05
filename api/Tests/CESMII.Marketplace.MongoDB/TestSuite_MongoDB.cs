@@ -34,7 +34,7 @@ namespace CESMII.Marketplace.MongoDB
         }
 
         [Fact]
-        public void ValidLookupCollection_on_Startup()
+        public void Lookup_Collection_Found_on_Startup()
         {
             Assert.NotNull(strConnection);
             Assert.NotNull(strDatabase);
@@ -44,6 +44,188 @@ namespace CESMII.Marketplace.MongoDB
             var db = client.GetDatabase(strDatabase);
 
             var lookupItems = db.GetCollection<LookupItem>("LookupItem");
+            Assert.NotNull(lookupItems);
+
+            var docLookupItems = lookupItems.Find(new BsonDocument()).ToList();
+
+            Assert.NotNull(docLookupItems);
+            Assert.True(docLookupItems.Any());
+        }
+
+        [Fact]
+        public void JobLog_Collection_Found_on_Startup()
+        {
+            Assert.NotNull(strConnection);
+            Assert.NotNull(strDatabase);
+
+            MongoClient client = new MongoClient(strConnection);
+
+            var db = client.GetDatabase(strDatabase);
+
+            var lookupItems = db.GetCollection<LookupItem>("JobLog");
+            Assert.NotNull(lookupItems);
+
+            var docLookupItems = lookupItems.Find(new BsonDocument()).ToList();
+
+            Assert.NotNull(docLookupItems);
+            Assert.True(docLookupItems.Any());
+        }
+        [Fact]
+        public void LookupItem_Collection_Found_on_Startup()
+        {
+            Assert.NotNull(strConnection);
+            Assert.NotNull(strDatabase);
+
+            MongoClient client = new MongoClient(strConnection);
+
+            var db = client.GetDatabase(strDatabase);
+
+            var lookupItems = db.GetCollection<LookupItem>("LookupItem");
+            Assert.NotNull(lookupItems);
+
+            var docLookupItems = lookupItems.Find(new BsonDocument()).ToList();
+
+            Assert.NotNull(docLookupItems);
+            Assert.True(docLookupItems.Any());
+        }
+        [Fact]
+        public void MarketplaceItem_Collection_Found_on_Startup()
+        {
+            Assert.NotNull(strConnection);
+            Assert.NotNull(strDatabase);
+
+            MongoClient client = new MongoClient(strConnection);
+
+            var db = client.GetDatabase(strDatabase);
+
+            var lookupItems = db.GetCollection<LookupItem>("MarketplaceItem");
+            Assert.NotNull(lookupItems);
+
+            var docLookupItems = lookupItems.Find(new BsonDocument()).ToList();
+
+            Assert.NotNull(docLookupItems);
+            Assert.True(docLookupItems.Any());
+        }
+        [Fact]
+        public void MarketplaceItemAnalytics_Collection_Found_on_Startup()
+        {
+            Assert.NotNull(strConnection);
+            Assert.NotNull(strDatabase);
+
+            MongoClient client = new MongoClient(strConnection);
+
+            var db = client.GetDatabase(strDatabase);
+
+            var lookupItems = db.GetCollection<LookupItem>("MarketplaceItemAnalytics");
+            Assert.NotNull(lookupItems);
+
+            var docLookupItems = lookupItems.Find(new BsonDocument()).ToList();
+
+            Assert.NotNull(docLookupItems);
+            Assert.True(docLookupItems.Any());
+        }
+        [Fact]
+        public void Organization_Collection_Found_on_Startup()
+        {
+            Assert.NotNull(strConnection);
+            Assert.NotNull(strDatabase);
+
+            MongoClient client = new MongoClient(strConnection);
+
+            var db = client.GetDatabase(strDatabase);
+
+            var lookupItems = db.GetCollection<LookupItem>("Organization");
+            Assert.NotNull(lookupItems);
+
+            var docLookupItems = lookupItems.Find(new BsonDocument()).ToList();
+
+            Assert.NotNull(docLookupItems);
+            Assert.True(docLookupItems.Any());
+        }
+        [Fact]
+        public void Permission_Collection_Found_on_Startup()
+        {
+            Assert.NotNull(strConnection);
+            Assert.NotNull(strDatabase);
+
+            MongoClient client = new MongoClient(strConnection);
+
+            var db = client.GetDatabase(strDatabase);
+
+            var lookupItems = db.GetCollection<LookupItem>("Permission");
+            Assert.NotNull(lookupItems);
+
+            var docLookupItems = lookupItems.Find(new BsonDocument()).ToList();
+
+            Assert.NotNull(docLookupItems);
+            Assert.True(docLookupItems.Any());
+        }
+        [Fact]
+        public void ProfileItem_Collection_Found_on_Startup()
+        {
+            Assert.NotNull(strConnection);
+            Assert.NotNull(strDatabase);
+
+            MongoClient client = new MongoClient(strConnection);
+
+            var db = client.GetDatabase(strDatabase);
+
+            var lookupItems = db.GetCollection<LookupItem>("ProfileItem");
+            Assert.NotNull(lookupItems);
+
+            var docLookupItems = lookupItems.Find(new BsonDocument()).ToList();
+
+            Assert.NotNull(docLookupItems);
+            Assert.True(docLookupItems.Any());
+        }
+        [Fact]
+        public void Publisher_Collection_Found_on_Startup()
+        {
+            Assert.NotNull(strConnection);
+            Assert.NotNull(strDatabase);
+
+            MongoClient client = new MongoClient(strConnection);
+
+            var db = client.GetDatabase(strDatabase);
+
+            var lookupItems = db.GetCollection<LookupItem>("Publisher");
+            Assert.NotNull(lookupItems);
+
+            var docLookupItems = lookupItems.Find(new BsonDocument()).ToList();
+
+            Assert.NotNull(docLookupItems);
+            Assert.True(docLookupItems.Any());
+        }
+        [Fact]
+        public void RequestInfo_Collection_Found_on_Startup()
+        {
+            Assert.NotNull(strConnection);
+            Assert.NotNull(strDatabase);
+
+            MongoClient client = new MongoClient(strConnection);
+
+            var db = client.GetDatabase(strDatabase);
+
+            var lookupItems = db.GetCollection<LookupItem>("RequestInfo");
+            Assert.NotNull(lookupItems);
+
+            var docLookupItems = lookupItems.Find(new BsonDocument()).ToList();
+
+            Assert.NotNull(docLookupItems);
+            Assert.True(docLookupItems.Any());
+        }
+
+        [Fact]
+        public void SearchKeyword_Collection_Found_on_Startup()
+        {
+            Assert.NotNull(strConnection);
+            Assert.NotNull(strDatabase);
+
+            MongoClient client = new MongoClient(strConnection);
+
+            var db = client.GetDatabase(strDatabase);
+
+            var lookupItems = db.GetCollection<LookupItem>("SearchKeyword");
             Assert.NotNull(lookupItems);
 
             var docLookupItems = lookupItems.Find(new BsonDocument()).ToList();

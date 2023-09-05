@@ -1,6 +1,15 @@
 ﻿# This workflow will build and run In Browser Selenium Web Driver Tests
 #
 # For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
+services:
+  web_api:
+    image: web_api
+    container_name: MyMarketplaceContainer
+    ports: 
+    - "3000:3000"
+    - "5000:5000"
+    - "5001:5001"
+
 name: Test|In Browser|Marketplace
 on:
   #manually trigger deploy
@@ -34,28 +43,23 @@ env:
   CLOUDLIB_PASSWORD: 'NotUsedAnymore'
 
   # Access to our MongoDB
-  MONGODB_CONNECTION: "mongodb://testuser:password@127.17.0.2:27017/test?directConnection=true"
+  MONGODB_CONNECTION: "mongodb://testuser:password@localhost:27017"
 
-  # MOUNT_SOURCE: "/home/runner/work/Marketplace/Marketplace/mongo-data"    # In a Github Action
-  MOUNT_SOURCE: "c:/CESMII.github/Marketplace/mongo-data"               # On the desktop
-
-  # VOLUME_APP: "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app"
-  VOLUME_APP: "C:/CESMII.github/Marketplace/api/CESMII.Marketplace.API:/app"
-
-  # VOLUME_SRC: "/home/runner/work/Marketplace/Marketplace:/src/"
-  VOLUME_SRC: "C:/CESMII.github/Marketplace:/src/"
+  MOUNT_SOURCE: "/home/runner/work/Marketplace/Marketplace/mongo-data"    # In a Github Action
+  # MOUNT_SOURCE: "c:/CESMII.github/Marketplace/mongo-data"               # On the desktop
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+
     - name: Marketplace API - Check out the repo
       uses: actions/checkout@v2
       with:
         submodules: true
 
     - name: MongoDB - Create mongoDB Docker container      
-      run: docker run -d -p 27017:27017 --name=MyMongoDB --network bridge -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE}}",target=/data,type=bind mongo:4.0
+      run: docker run -d -p 27017:27017 --name=MyMongoAct -e MONGO_INIT_DATABASE=snapshot -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE}}",target=/data,type=bind mongo:4.0
 
     # Putting this between "Create mongoDB container" and "Populate mongo database" seems to help the mongo container settle down
     - name: Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
@@ -64,16 +68,16 @@ jobs:
         dotnet-version: ${{ env.NETCORE_VERSION }}
 
     - name: MongoDB - Populate mongo database
-      run: docker exec -d MyMongoDB mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -d MyMongoDB mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -d MyMongoDB mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -d MyMongoDB mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -d MyMongoDB mongoimport  --collection=Organization --file=/data/Organization.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -d MyMongoDB mongoimport  --collection=Permission --file=/data/Permission.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -d MyMongoDB mongoimport  --collection=ProfileItem --file=/data/ProfileItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -d MyMongoDB mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -d MyMongoDB mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -d MyMongoDB mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="mongodb://testuser:password@localhost:27017" ;
+      run: docker exec -d MyMongoAct mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=Organization --file=/data/Organization.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=Permission --file=/data/Permission.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=ProfileItem --file=/data/ProfileItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="mongodb://testuser:password@localhost:27017" ;
 
     - name: Marketplace API - Restore dependencies (${{env.SOLUTION_FILE}})
       run: dotnet restore ${{env.SOLUTION_FILE}}
@@ -85,26 +89,13 @@ jobs:
     - name: MongoDB - Test access to Mongo database
       run: dotnet test ./api/Tests/CESMII.Marketplace.MongoDB/CESMII.Marketplace.MongoDB.csproj
 
-    # - name: Marketplace API - Start up Marketplace Server
-    #   env:
-    #     ENABLECLOUDLIBSEARCH: false
-    #     MARKETPLACE_MONGODB_CONNECTIONSTRING: mongodb://testuser:password@localhost:27017
-    #     MARKETPLACE_MONGODB_DATABASE: test
-    #   run: dotnet run --project ./api/CESMII.Marketplace.API/CESMII.Marketplace.API.csproj &
-
-    # Create a Docker Container for Marketplace
-    - name: Marketplace - Build Container
-      run: docker build -t marketplaceserver .
-
-    # Start Marketplace Server
-    - name: Marketplace - Start Server Running
+    - name: Marketplace API - Start up Marketplace Server
       env:
-         ENABLECLOUDLIBSEARCH: false
-         MARKETPLACE_MONGODB_CONNECTIONSTRING: mongodb://testuser:password@localhost:27017
-         MARKETPLACE_MONGODB_DATABASE: test
-         ASPNETCORE_URLS: https://+:443;http://+:80
-         DOTNET_GENERATE_ASPNET_CERTIFICATE: true
-      run: docker run -d -p 5001:443 -p 32775:80 -P  --network bridge --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}} -e "ENABLECLOUDLIBSEARCH=false" -e "MARKETPLACE_MONGODB_CONNECTIONSTRING=mongodb://testuser:password@localhost:27017" -e "MARKETPLACE_MONGODB_DATABASE=test" -e "ASPNETCORE_URLS=https://+:443;http://+:80" -e "ASPNETCORE_HTTPS_PORT=5001" -e "DOTNET_GENERATE_ASPNET_CERTIFICATE=true" -e "DOTNET_RUNNING_IN_CONTAINER=true" -e "ASPNETCORE_ENVIRONMENT=Development" --entrypoint tail cesmiimarketplaceapi:dev
+        DBCONN: ${{ env.MONGODB_CONNECTION }}
+        SERVICEPASSWORD: ${{env.CLOUDLIB_PASSWORD}}
+        EnableCloudLibSearch: false
+      run: |
+            ./api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API.dll $DBCONN $SERVICEPASSWORD &
 
     - name: PROCESS INQUIRY #5 ------------------------
       run: |
