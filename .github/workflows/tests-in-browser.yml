@@ -49,6 +49,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: ubuntu
     steps:
     - name: Marketplace API - Check out the repo
       uses: actions/checkout@v2
