@@ -55,8 +55,11 @@ jobs:
       with:
         submodules: true
 
+    - name: Docker - Set up networking
+      run: docker network create mysubnet1
+
     - name: MongoDB - Create mongoDB Docker container      
-      run: docker run -d -p 27017:27017 --name=MyMongoDB --network bridge -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE}}",target=/data,type=bind mongo:4.0
+      run: docker run -d -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE}}",target=/data,type=bind mongo:4.0
 
     # Putting this between "Create mongoDB container" and "Populate mongo database" seems to help the mongo container settle down
     - name: Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
@@ -105,7 +108,7 @@ jobs:
          MARKETPLACE_MONGODB_DATABASE: test
          ASPNETCORE_URLS: https://+:443;http://+:80
          DOTNET_GENERATE_ASPNET_CERTIFICATE: true
-      run: docker run -d -p 5001:443 -p 32775:80 -P  --network bridge --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}} -e "ENABLECLOUDLIBSEARCH=false" -e "MARKETPLACE_MONGODB_CONNECTIONSTRING=mongodb://testuser:password@localhost:27017" -e "MARKETPLACE_MONGODB_DATABASE=test" -e "ASPNETCORE_URLS=https://+:443;http://+:80" -e "ASPNETCORE_HTTPS_PORT=5001" -e "DOTNET_GENERATE_ASPNET_CERTIFICATE=true" -e "DOTNET_RUNNING_IN_CONTAINER=true" -e "ASPNETCORE_ENVIRONMENT=Development" --entrypoint tail cesmiimarketplaceapi:dev
+      run: docker run -d -p 5001:443 -p 32775:80 -P  --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}} -e "ENABLECLOUDLIBSEARCH=false" -e "MARKETPLACE_MONGODB_CONNECTIONSTRING=mongodb://testuser:password@localhost:27017" -e "MARKETPLACE_MONGODB_DATABASE=test" -e "ASPNETCORE_URLS=https://+:443;http://+:80" -e "ASPNETCORE_HTTPS_PORT=5001" -e "DOTNET_GENERATE_ASPNET_CERTIFICATE=true" -e "DOTNET_RUNNING_IN_CONTAINER=true" -e "ASPNETCORE_ENVIRONMENT=Development" --entrypoint tail cesmiimarketplaceapi:dev
 
     - name: PROCESS INQUIRY #5 ------------------------
       run: |
