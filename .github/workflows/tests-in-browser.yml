@@ -108,7 +108,7 @@ jobs:
          MARKETPLACE_MONGODB_DATABASE: test
          ASPNETCORE_URLS: https://+:443;http://+:80
          DOTNET_GENERATE_ASPNET_CERTIFICATE: true
-      run: docker run -d -p 5001:443 -p 32775:80 -P  --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}} -e "EnableCloudLibSearch=false" -e "MARKETPLACE_MONGODB_CONNECTIONSTRING=${{env.MONGODB_CONNECTION}}" -e "MARKETPLACE_MONGODB_DATABASE=test" -e "ASPNETCORE_URLS=https://+:443;http://+:80" -e "ASPNETCORE_HTTPS_PORT=5001" -e "DOTNET_GENERATE_ASPNET_CERTIFICATE=true" -e "DOTNET_RUNNING_IN_CONTAINER=true" -e "ASPNETCORE_ENVIRONMENT=Development" --entrypoint tail cesmiimarketplaceapi:dev
+      run: docker run -d -p 5001:443 -p 32775:80 -P  --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}} -e "EnableCloudLibSearch=false" -e "MARKETPLACE_MONGODB_CONNECTIONSTRING=${{env.MONGODB_CONNECTION}}" -e "MARKETPLACE_MONGODB_DATABASE=test" -e "ASPNETCORE_URLS=https://+:443;http://+:80" -e "ASPNETCORE_HTTPS_PORT=5001" -e "DOTNET_GENERATE_ASPNET_CERTIFICATE=true" -e "DOTNET_RUNNING_IN_CONTAINER=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_HTTPS_PORT=5001" --entrypoint tail cesmiimarketplaceapi:dev
 
     - name: PROCESS INQUIRY #5 ------------------------
       run: |
