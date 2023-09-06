@@ -34,16 +34,17 @@ env:
   CLOUDLIB_PASSWORD: 'NotUsedAnymore'
 
   # Access to our MongoDB
-  MONGODB_CONNECTION: "mongodb://testuser:password@127.17.0.2:27017/test?directConnection=true"
+  MONGODB_CONNECTION: "mongodb://testuser:password@localhost:27017/test?directConnection=true"
+  # MONGODB_CONNECTION: "mongodb://testuser:password@127.17.0.2:27017/test?directConnection=true"
 
-  # MOUNT_SOURCE: "/home/runner/work/Marketplace/Marketplace/mongo-data"    # In a Github Action
-  MOUNT_SOURCE: "c:/CESMII.github/Marketplace/mongo-data"               # On the desktop
+  MOUNT_SOURCE: "/home/runner/work/Marketplace/Marketplace/mongo-data"    # In a Github Action
+  # MOUNT_SOURCE: "c:/CESMII.github/Marketplace/mongo-data"               # On the desktop
 
-  # VOLUME_APP: "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app"
-  VOLUME_APP: "C:/CESMII.github/Marketplace/api/CESMII.Marketplace.API:/app"
+  VOLUME_APP: "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app"
+  # VOLUME_APP: "C:/CESMII.github/Marketplace/api/CESMII.Marketplace.API:/app"
 
-  # VOLUME_SRC: "/home/runner/work/Marketplace/Marketplace:/src/"
-  VOLUME_SRC: "C:/CESMII.github/Marketplace:/src/"
+  VOLUME_SRC: "/home/runner/work/Marketplace/Marketplace:/src/"
+  # VOLUME_SRC: "C:/CESMII.github/Marketplace:/src/"
 
 jobs:
   build:
