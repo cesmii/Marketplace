@@ -114,6 +114,11 @@ jobs:
       run: |
         ps ax
 
+    # Peek at docker network status
+    - name: Docker - Peeking at network status values
+      run: docker network ls ;
+           docker network inspect mysubnet1 ;
+
     # Call Marketplace Api sure that someone's at home.
     - name: Test
       run: dotnet test ./api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
