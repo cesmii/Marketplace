@@ -119,6 +119,10 @@ jobs:
       run: docker network ls ;
            docker network inspect mysubnet1 ;
 
+    # Give the server a chance to start up
+    - name: Docker - Waiting for Marketplace Server to start
+      run: sleep 30
+
     # Call Marketplace Api sure that someone's at home.
     - name: Test
       run: dotnet test ./api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
