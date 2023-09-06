@@ -125,49 +125,17 @@ jobs:
 
     # Call Marketplace Api sure that someone's at home.
     - name: Test
-      run: dotnet test ./api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
+      run: dotnet test ./api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --no-build --no-restore --verbosity diagnostic
 
 
-    #- name: PROCESS INQUIRY #6 ------------------------
-    #  run: |
-    #    ps ax
-
-
-    #- name: Add other libraries and all that jazz =========================================
-    #  run: |
-    #     sudo apt update -y
-    #     sudo apt-get install -y gconf-service libasound2 libcairo2 libcups2 libfontconfig1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget libgbm-dev
-
-
-    #- name: PROCESS INQUIRY #6 ------------------------
-    #  run: |
-    #    ps ax
-
-    #- name: FrontEnd - Setup chrome driver
-    #  uses: browser-actions/setup-chrome@latest
-
-
-    #- name: PROCESS INQUIRY #7 ------------------------
-    #  run: |
-    #    ps ax
 
     #- name: FrontEnd - Start browser and fetch version
     #  run:  chrome --version
-
-
-    #- name: PROCESS INQUIRY #8 ------------------------
-    #  run: |
-    #    ps ax
 
     #- name: FrontEnd - Use Node.js version (${{env.NODEJS_VERSION}})
     #  uses: actions/setup-node@v1
     #  with: 
     #    node-version: ${{env.NODEJS_VERSION}}
-
-
-    #- name: PROCESS INQUIRY #9 ------------------------
-    #  run: |
-    #    ps ax
 
     #- name: FrontEnd - Build React Code - npm install, build
     #  working-directory: ${{env.NPM_WORKING_DIRECTORY}}
@@ -178,11 +146,6 @@ jobs:
     #    npm run build:in-browser-test 
     #    npm run start-in-browser-test &
 
-
-    #- name: PROCESS INQUIRY #10 ------------------------
-    #  run: |
-    #    ps ax
-
     ##- name: Docker - launch standalone chrome browser
     ##  run: |
     ##    docker run -d -p 4444:4444 selenium/standalone-chrome
@@ -190,11 +153,6 @@ jobs:
     #- name: In-Browser Testing - Restore dependencies CESMII.Marketplace.InBrowser.Tests
     #  working-directory:  ${{env.SOLUTION_DIRECTORY}}
     #  run: dotnet restore
-
-
-    #- name: PROCESS INQUIRY #11 ------------------------
-    #  run: |
-    #    ps ax
 
     #- name: In-Browser Testing - Run Test on project (${{env.PROJECT_NAME}})
     #  run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/${{env.PROJECT_NAME}}.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
