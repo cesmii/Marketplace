@@ -6,10 +6,8 @@ namespace CESMII.Marketplace.RestApi
 {
     public class TestSuite_MarketplaceAPI
     {
-        //private static string strHost = "http://localhost:5000/api";
-        private static string strHostHttps = "https://localhost:5001/api";
-        // private static string strHost = "http://172.17.0.2:5001/api";
-        // private static string strHostHttps = "https://172.17.0.2:5001/api";
+        // private static string strHostHttps = "https://localhost:5001/api";
+        private static string strHostHttps = "https://MyMarketplace:5001/api";
 
         [Fact]
         public void MarketItemsAvailable_On_Https_Api_Marketplace_All()
