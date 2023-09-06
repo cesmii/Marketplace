@@ -115,8 +115,9 @@ jobs:
         ps ax
 
     # Peek at docker network status
-    - name: Docker - Peeking at network status values
-      run: docker network ls ;
+    - name: Docker - Peeking at docker status 
+      run: docker container ls ; 
+           docker network ls ;
            docker network inspect mysubnet1 ;
 
     # Give the server a chance to start up
