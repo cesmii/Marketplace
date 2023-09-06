@@ -30,8 +30,6 @@ env:
   NODEJS_VERSION: "16.17.0"
   # set this to npm working directory
   NPM_WORKING_DIRECTORY: 'frontend'
-  # Cloud Library Password
-  CLOUDLIB_PASSWORD: 'NotUsedAnymore'
 
   # Access to our MongoDB
   MONGODB_CONNECTION: "mongodb://testuser:password@MyMongoDB:27017"
@@ -46,6 +44,11 @@ env:
   VOLUME_SRC: "/home/runner/work/Marketplace/Marketplace:/src/"
   # VOLUME_SRC: "C:/CESMII.github/Marketplace:/src/"
 
+  DOCKERFILE: "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/Dockerfile"
+  # DOCKERFILE: "C:\CESMII.github\Marketplace\api\CESMII.Marketplace.API\Dockerfile"
+
+  DOCKERHOMEFOLDER: "/home/runner/work/Marketplace/Marketplace"
+  # DOCKERHOMEFOLDER: "C:\CESMII.github\Marketplace"
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -99,7 +102,8 @@ jobs:
 
     # Create a Docker Container for Marketplace
     - name: Marketplace - Build Container
-      run: docker build -t cesmiimarketplaceapi:dev .
+      # run: docker build -t cesmiimarketplaceapi:dev .
+      run: docker build -f "${{env.DOCKERFILE}}" --force-rm -t cesmiimarketplaceapi:dev --target base  --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=CESMII.Marketplace.API" "${{env.DOCKERHOMEFOLDER}}"
 
     # Start Marketplace Server
     - name: Marketplace - Start Server Running
