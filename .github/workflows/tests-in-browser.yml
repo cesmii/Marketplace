@@ -68,7 +68,7 @@ jobs:
         dotnet-version: ${{ env.NETCORE_VERSION }}
 
     - name: MongoDB - Populate mongo database
-      run: docker exec -d MyMongoDB mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="mongodb://testuser:password@localhost:27017" ;
+      run: docker exec -d MyMongoDB mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="${{env.MONGODB_CONNECTION}}" ;
            docker exec -d MyMongoDB mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
            docker exec -d MyMongoDB mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
            docker exec -d MyMongoDB mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="mongodb://testuser:password@localhost:27017" ;
@@ -92,7 +92,7 @@ jobs:
     # - name: Marketplace API - Start up Marketplace Server
     #   env:
     #     EnableCloudLibSearch: false
-    #     MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.ODB_CONNECTION}}
+    #     MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
     #     MARKETPLACE_MONGODB_DATABASE: test
     #   run: dotnet run --project ./api/CESMII.Marketplace.API/CESMII.Marketplace.API.csproj &
 
@@ -104,7 +104,7 @@ jobs:
     - name: Marketplace - Start Server Running
       env:
          EnableCloudLibSearch: false
-         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.ODB_CONNECTION}}
+         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: test
          ASPNETCORE_URLS: https://+:443;http://+:80
          DOTNET_GENERATE_ASPNET_CERTIFICATE: true
