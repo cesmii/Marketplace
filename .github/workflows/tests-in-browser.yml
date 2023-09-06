@@ -94,7 +94,7 @@ jobs:
 
     # Create a Docker Container for Marketplace
     - name: Marketplace - Build Container
-      run: docker build -t marketplaceserver .
+      run: docker build -t cesmiimarketplaceapi:dev .
 
     # Start Marketplace Server
     - name: Marketplace - Start Server Running
