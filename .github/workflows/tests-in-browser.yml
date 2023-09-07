@@ -60,29 +60,29 @@ jobs:
          apt update
          apt install -y git
 
-    - name: Docker - set up Docker's Apt repository
-      run: |
-        # Add Docker's official GPG key:
-        sudo apt-get update
-        sudo apt-get install ca-certificates curl gnupg
-        sudo install -m 0755 -d /etc/apt/keyrings
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-        sudo chmod a+r /etc/apt/keyrings/docker.gpg
+    # - name: Docker - set up Docker's Apt repository
+    #   run: |
+    #     # Add Docker's official GPG key:
+    #     sudo apt-get update
+    #     sudo apt-get install ca-certificates curl gnupg
+    #     sudo install -m 0755 -d /etc/apt/keyrings
+    #     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    #     sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
-        # Add the repository to Apt sources:
-        echo \
-          "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-          "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
-          sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-        sudo apt-get update
+    #     # Add the repository to Apt sources:
+    #     echo \
+    #       "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+    #       "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+    #       sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    #     sudo apt-get update
 
-    - name: Docker - install Docker
-      run: |
-          sudo apt update
-          sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    # - name: Docker - install Docker
+    #   run: |
+    #       sudo apt update
+    #       sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
     - name: Docker - verify installation
-      run: sudo docker run hello-world
+      run: /usr/bin/docker run hello-world
 
     - name: Marketplace API - Check out the repo
       uses: actions/checkout@v2
@@ -90,10 +90,10 @@ jobs:
         submodules: true
 
     - name: Docker - Set up networking
-      run: docker network create mysubnet1
+      run: /usr/bin/docker network create mysubnet1
 
     - name: MongoDB - Create mongoDB Docker container      
-      run: docker run -d -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE}}",target=/data,type=bind mongo:4.0
+      run: /usr/bin/docker run -d -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE}}",target=/data,type=bind mongo:4.0
 
     # Putting this between "Create mongoDB container" and "Populate mongo database" seems to help the mongo container settle down
     - name: Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
@@ -102,16 +102,16 @@ jobs:
         dotnet-version: ${{ env.NETCORE_VERSION }}
 
     - name: MongoDB - Populate mongo database
-      run: docker exec -d MyMongoDB mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="${{env.MONGODB_CONNECTION}}" ;
-           docker exec -d MyMongoDB mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -d MyMongoDB mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -d MyMongoDB mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -d MyMongoDB mongoimport  --collection=Organization --file=/data/Organization.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -d MyMongoDB mongoimport  --collection=Permission --file=/data/Permission.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -d MyMongoDB mongoimport  --collection=ProfileItem --file=/data/ProfileItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -d MyMongoDB mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -d MyMongoDB mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="mongodb://testuser:password@localhost:27017" ;
-           docker exec -d MyMongoDB mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="mongodb://testuser:password@localhost:27017" ;
+      run: /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="${{env.MONGODB_CONNECTION}}" ;
+           /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=Organization --file=/data/Organization.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=Permission --file=/data/Permission.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=ProfileItem --file=/data/ProfileItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="mongodb://testuser:password@localhost:27017" ;
 
     - name: Marketplace API - Restore dependencies (${{env.SOLUTION_FILE}})
       run: dotnet restore ${{env.SOLUTION_FILE}}
@@ -133,7 +133,7 @@ jobs:
     # Create a Docker Container for Marketplace
     - name: Marketplace - Build Container
       # run: docker build -t cesmiimarketplaceapi:dev .
-      run: docker build -f "${{env.DOCKERFILE}}" --force-rm -t cesmiimarketplaceapi:dev --target base  --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=CESMII.Marketplace.API" "${{env.DOCKERHOMEFOLDER}}"
+      run: /usr/bin/docker build -f "${{env.DOCKERFILE}}" --force-rm -t cesmiimarketplaceapi:dev --target base  --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=CESMII.Marketplace.API" "${{env.DOCKERHOMEFOLDER}}"
 
     # Start Marketplace Server
     - name: Marketplace - Start Server Running
@@ -143,7 +143,7 @@ jobs:
          MARKETPLACE_MONGODB_DATABASE: test
          ASPNETCORE_URLS: https://+:443;http://+:80
          DOTNET_GENERATE_ASPNET_CERTIFICATE: true
-      run: docker run -d -p 5001:443 -p 32775:80 -P  --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}} -e "EnableCloudLibSearch=false" -e "MARKETPLACE_MONGODB_CONNECTIONSTRING=${{env.MONGODB_CONNECTION}}" -e "MARKETPLACE_MONGODB_DATABASE=test" -e "ASPNETCORE_URLS=https://+:443;http://+:80" -e "ASPNETCORE_HTTPS_PORT=5001" -e "DOTNET_GENERATE_ASPNET_CERTIFICATE=true" -e "DOTNET_RUNNING_IN_CONTAINER=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_HTTPS_PORT=5001" --entrypoint tail cesmiimarketplaceapi:dev
+      run: /usr/bin/docker run -d -p 5001:443 -p 32775:80 -P  --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}} -e "EnableCloudLibSearch=false" -e "MARKETPLACE_MONGODB_CONNECTIONSTRING=${{env.MONGODB_CONNECTION}}" -e "MARKETPLACE_MONGODB_DATABASE=test" -e "ASPNETCORE_URLS=https://+:443;http://+:80" -e "ASPNETCORE_HTTPS_PORT=5001" -e "DOTNET_GENERATE_ASPNET_CERTIFICATE=true" -e "DOTNET_RUNNING_IN_CONTAINER=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_HTTPS_PORT=5001" --entrypoint tail cesmiimarketplaceapi:dev
 
     - name: PROCESS INQUIRY #5 ------------------------
       run: |
@@ -151,9 +151,9 @@ jobs:
 
     # Peek at docker network status
     - name: Docker - Peeking at docker status 
-      run: docker container ls ; 
-           docker network ls ;
-           docker network inspect mysubnet1 ;
+      run: /usr/bin/docker container ls ; 
+           /usr/bin/docker network ls ;
+           /usr/bin/docker network inspect mysubnet1 ;
 
     # Give the server a chance to start up
     - name: Docker - Waiting for Marketplace Server to start
