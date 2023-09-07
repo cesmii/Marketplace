@@ -59,6 +59,8 @@ jobs:
       run: |
          apt update
          apt install -y git
+    - name: Docker - install Docker
+      run: apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
     - name: Marketplace API - Check out the repo
       uses: actions/checkout@v2
