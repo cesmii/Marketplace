@@ -52,7 +52,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: ubuntu/dotnet-runtime
+    container: ubuntu/dotnet-deps
     steps:
     # Docker - We need to install git because our runner is in a Docker container.
     - name: Install git on container
