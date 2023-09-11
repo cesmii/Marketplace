@@ -54,12 +54,28 @@ jobs:
     runs-on: ubuntu-latest
     container: ubuntu@sha256:3246518d9735254519e1b2ff35f95686e4a5011c90c85344c1f38df7bae9dd37
     steps:
+    # We can hide our connection string to keep GitGuardian (somewhat) happy
+    - name: Github Workflow Commands
+      run: echo "::add-mask::$env.MONGODB_CONNECTION"
+
+    # Github Workflow Commands -- displaying a notice
+    - name: Github Workflow Commands
+      run: echo "::notice title=Calling-Github-Workflow-commands-from-a-Github-Action,file=app.js,line=1,col=5,endColumn=7::Missing semicolon"
+
+    # Github Workflow Commands -- displaying a notice
+    - name: Github Workflow Commands
+      run: echo ::notice title=Calling-Github-Workflow-commands-from-a-Github-Action,file=app.js,line=1,col=5,endColumn=7::Missing semicolon
+
+    # Github Workflow Commands -- displaying a notice
+    - name: Github Workflow Commands
+      run: echo ::notice title='Calling Github Workflow commands'
+
     # Docker - We need to install git because our runner is in a Docker container.
     - name: Install git on container
       run: |
          apt update
          apt install -y git
-         echo "::notice title=Calling-Github-Workflow-commands-from-a-Github-Action,file=app.js,line=1,col=5,endColumn=7::Missing semicolon"
+         
 
     # - name: Docker - set up Docker's Apt repository
     #   run: |
@@ -82,9 +98,6 @@ jobs:
     #       sudo apt update
     #       sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-    # We can hide our connection string to keep GitGuardian (somewhat) happy
-    - name: Github Workflow Commands
-      run: echo "::add-mask::$env.MONGODB_CONNECTION"
 
     - name: Docker - verify installation
       run: /usr/bin/docker run hello-world
