@@ -1,7 +1,7 @@
 # This workflow will build and run In Browser Selenium Web Driver Tests
 #
 # For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
-name: Test3|In Browser - Runner Not In Container|Marketplace
+name: Test|In Browser|Marketplace
 on:
   #manually trigger deploy
   workflow_dispatch:
@@ -106,12 +106,16 @@ jobs:
     # Start Marketplace Server
     - name: Marketplace - Start Server Running
       env:
-         EnableCloudLibSearch: false
-         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
-         MARKETPLACE_MONGODB_DATABASE: test
+         ASPNETCORE_ENVIRONMENT: Development
+         ASPNETCORE_HTTPS_PORT: 5001
          ASPNETCORE_URLS: https://+:443;http://+:80
          DOTNET_GENERATE_ASPNET_CERTIFICATE: true
-      run: docker run -d -p 5001:443 -p 32775:80 -P  --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}} -e "EnableCloudLibSearch=false" -e "MARKETPLACE_MONGODB_CONNECTIONSTRING=${{env.MONGODB_CONNECTION}}" -e "MARKETPLACE_MONGODB_DATABASE=test" -e "ASPNETCORE_URLS=https://+:443;http://+:80" -e "ASPNETCORE_HTTPS_PORT=5001" -e "DOTNET_GENERATE_ASPNET_CERTIFICATE=true" -e "DOTNET_RUNNING_IN_CONTAINER=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_HTTPS_PORT=5001" --entrypoint tail cesmiimarketplaceapi:dev
+         DOTNET_RUNNING_IN_CONTAINER: true
+         EnableCloudLibSearch: false
+         MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
+         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
+         MARKETPLACE_MONGODB_DATABASE: test
+      run: docker run -d -p 5001:443 -p 32775:80 -P  --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}}  --entrypoint tail cesmiimarketplaceapi:dev
 
     - name: PROCESS INQUIRY #5 ------------------------
       run: |
@@ -125,7 +129,13 @@ jobs:
 
     # Give the server a chance to start up
     - name: Docker - Waiting for Marketplace Server to start
-      run: sleep 30
+      run: sleep 1
+
+    # Peek at docker network status
+    - name: Docker - Peeking at docker status 
+      run: docker container ls ; 
+           docker network ls ;
+           docker network inspect mysubnet1 ;
 
     # Call Marketplace Api from INSIDE container MyMarketplace
     - name: Test
