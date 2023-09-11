@@ -59,6 +59,10 @@ namespace CESMII.Marketplace.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Check for this later: MARKETPLACE_GITHUB_WORKFLOW_COMMANDS
+            // For now, let's just see if we can see this at all!
+            Console.WriteLine("::notice::ConfigureServices - Entering function. Does this actually work?");
+
             //MongoDB approach
             services.Configure<MongoDBConfig>(Configuration);
 
