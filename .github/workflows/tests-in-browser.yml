@@ -59,7 +59,7 @@ jobs:
       run: |
          apt update
          apt install -y git
-         echo "::notice Calling Github Workflow commands from a Github Action"
+         echo "::notice title=Calling-Github-Workflow-commands-from-a-Github-Action,file=app.js,line=1,col=5,endColumn=7::Missing semicolon"
 
     # - name: Docker - set up Docker's Apt repository
     #   run: |
