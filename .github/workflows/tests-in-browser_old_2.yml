@@ -1,0 +1,179 @@
+﻿# This workflow will build and run In Browser Selenium Web Driver Tests
+#
+# For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
+services:
+  web_api:
+    image: web_api
+    container_name: MyMarketplaceContainer
+    ports: 
+    - "3000:3000"
+    - "5000:5000"
+    - "5001:5001"
+
+name: Test|In Browser|Marketplace
+on:
+  #manually trigger deploy
+  workflow_dispatch:
+  # Trigger the workflow on push
+  #push:
+  #  branches:
+  #    - develop
+  #    - main
+  #pull_request:
+  #  branches:
+  #    - develop
+  #    - main
+
+env:
+  # set this to the path to your solution file
+  SOLUTION_DIRECTORY: './'      
+  # Solution file name
+  SOLUTION_FILE: 'CESMII.Marketplace.sln'      
+  # Set this to the path to your test project file
+  PROJECT_DIRECTORY: './api/Tests/CESMII.Marketplace.InBrowser.Tests/'
+  # Test project file to use
+  PROJECT_NAME: 'CESMII.Marketplace.InBrowser.Tests'      
+  # set this to the .NET core version to use
+  NETCORE_VERSION: "6.0.x"
+  # set this to the NODE JS version to use
+  NODEJS_VERSION: "16.17.0"
+  # set this to npm working directory
+  NPM_WORKING_DIRECTORY: 'frontend'
+  # Cloud Library Password
+  CLOUDLIB_PASSWORD: 'NotUsedAnymore'
+
+  # Access to our MongoDB
+  MONGODB_CONNECTION: "mongodb://testuser:password@localhost:27017"
+
+  MOUNT_SOURCE: "/home/runner/work/Marketplace/Marketplace/mongo-data"    # In a Github Action
+  # MOUNT_SOURCE: "c:/CESMII.github/Marketplace/mongo-data"               # On the desktop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Marketplace API - Check out the repo
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: MongoDB - Create mongoDB Docker container      
+      run: docker run -d -p 27017:27017 --name=MyMongoAct -e MONGO_INIT_DATABASE=snapshot -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE}}",target=/data,type=bind mongo:4.0
+
+    # Putting this between "Create mongoDB container" and "Populate mongo database" seems to help the mongo container settle down
+    - name: Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ env.NETCORE_VERSION }}
+
+    - name: MongoDB - Populate mongo database
+      run: docker exec -d MyMongoAct mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=Organization --file=/data/Organization.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=Permission --file=/data/Permission.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=ProfileItem --file=/data/ProfileItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           docker exec -d MyMongoAct mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="mongodb://testuser:password@localhost:27017" ;
+
+    - name: Marketplace API - Restore dependencies (${{env.SOLUTION_FILE}})
+      run: dotnet restore ${{env.SOLUTION_FILE}}
+      working-directory: ${{env.SOLUTION_DIRECTORY}}
+
+    - name: Marketplace API - Build (${{env.SOLUTION_FILE}})
+      run: dotnet build ${{env.SOLUTION_FILE}} --configuration Release --no-restore
+
+    - name: MongoDB - Test access to Mongo database
+      run: dotnet test ./api/Tests/CESMII.Marketplace.MongoDB/CESMII.Marketplace.MongoDB.csproj
+
+    - name: Marketplace API - Start up Marketplace Server
+      env:
+        DBCONN: ${{ env.MONGODB_CONNECTION }}
+        SERVICEPASSWORD: ${{env.CLOUDLIB_PASSWORD}}
+        EnableCloudLibSearch: false
+      run: |
+            ./api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API.dll $DBCONN $SERVICEPASSWORD &
+
+    - name: PROCESS INQUIRY #5 ------------------------
+      run: |
+        ps ax
+
+    # Call Marketplace Api sure that someone's at home.
+    - name: Test
+      run: dotnet test ./api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
+
+
+    #- name: PROCESS INQUIRY #6 ------------------------
+    #  run: |
+    #    ps ax
+
+
+    #- name: Add other libraries and all that jazz =========================================
+    #  run: |
+    #     sudo apt update -y
+    #     sudo apt-get install -y gconf-service libasound2 libcairo2 libcups2 libfontconfig1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget libgbm-dev
+
+
+    #- name: PROCESS INQUIRY #6 ------------------------
+    #  run: |
+    #    ps ax
+
+    #- name: FrontEnd - Setup chrome driver
+    #  uses: browser-actions/setup-chrome@latest
+
+
+    #- name: PROCESS INQUIRY #7 ------------------------
+    #  run: |
+    #    ps ax
+
+    #- name: FrontEnd - Start browser and fetch version
+    #  run:  chrome --version
+
+
+    #- name: PROCESS INQUIRY #8 ------------------------
+    #  run: |
+    #    ps ax
+
+    #- name: FrontEnd - Use Node.js version (${{env.NODEJS_VERSION}})
+    #  uses: actions/setup-node@v1
+    #  with: 
+    #    node-version: ${{env.NODEJS_VERSION}}
+
+
+    #- name: PROCESS INQUIRY #9 ------------------------
+    #  run: |
+    #    ps ax
+
+    #- name: FrontEnd - Build React Code - npm install, build
+    #  working-directory: ${{env.NPM_WORKING_DIRECTORY}}
+    #  env: 
+    #    CI: '' #when process-env-ci is true, warnings are ignored and not treated as errors
+    #  run: |
+    #    npm install
+    #    npm run build:in-browser-test 
+    #    npm run start-in-browser-test &
+
+
+    #- name: PROCESS INQUIRY #10 ------------------------
+    #  run: |
+    #    ps ax
+
+    ##- name: Docker - launch standalone chrome browser
+    ##  run: |
+    ##    docker run -d -p 4444:4444 selenium/standalone-chrome
+
+    #- name: In-Browser Testing - Restore dependencies CESMII.Marketplace.InBrowser.Tests
+    #  working-directory:  ${{env.SOLUTION_DIRECTORY}}
+    #  run: dotnet restore
+
+
+    #- name: PROCESS INQUIRY #11 ------------------------
+    #  run: |
+    #    ps ax
+
+    #- name: In-Browser Testing - Run Test on project (${{env.PROJECT_NAME}})
+    #  run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/${{env.PROJECT_NAME}}.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
+    #  working-directory: ${{env.SOLUTION_DIRECTORY}}
