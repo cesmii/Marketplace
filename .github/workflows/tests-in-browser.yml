@@ -109,13 +109,15 @@ jobs:
          ASPNETCORE_ENVIRONMENT: Development
          ASPNETCORE_HTTPS_PORT: 5001
          ASPNETCORE_URLS: https://+:443;http://+:80
+         ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: true
          DOTNET_GENERATE_ASPNET_CERTIFICATE: true
          DOTNET_RUNNING_IN_CONTAINER: true
+         DOTNET_USE_POLLING_FILE_WATCHER: 1
          EnableCloudLibSearch: false
          MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
          MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: test
-      run: docker run -d -p 5001:443 -p 32775:80 -P  --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}}  --entrypoint tail cesmiimarketplaceapi:dev
+      run: docker run -dt -p 5001:443 -p 32775:80 -P  --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}}  --entrypoint tail cesmiimarketplaceapi:dev
 
     - name: PROCESS INQUIRY #5 ------------------------
       run: |
@@ -123,7 +125,7 @@ jobs:
 
     # Peek at docker network status
     - name: Docker - Peeking at docker status 
-      run: docker container ls ; 
+      run: docker container ls --all ; 
            docker network ls ;
            docker network inspect mysubnet1 ;
 
@@ -133,7 +135,7 @@ jobs:
 
     # Peek at docker network status
     - name: Docker - Peeking at docker status 
-      run: docker container ls ; 
+      run: docker container ls --all ; 
            docker network ls ;
            docker network inspect mysubnet1 ;
 
