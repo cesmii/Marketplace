@@ -60,15 +60,15 @@ jobs:
 
     # Github Workflow Commands -- displaying a notice
     - name: Github Workflow Commands
-      run: echo "::notice title=Calling-Github-Workflow-commands-from-a-Github-Action,file=app.js,line=1,col=5,endColumn=7::Missing semicolon"
+      run: echo "::notice::This is a notice in a workflow command. The colons are the most important part of this command. Four colons make it work two colons before notice and two colons after notice"
 
     # Github Workflow Commands -- displaying a notice
     - name: Github Workflow Commands
-      run: echo ::notice title=Calling-Github-Workflow-commands-from-a-Github-Action,file=app.js,line=1,col=5,endColumn=7::Missing semicolon
+      run: echo ::notice::This is a notice in a workflow command. Do we need to have quotes or not? Not sure.
 
     # Github Workflow Commands -- displaying a notice
     - name: Github Workflow Commands
-      run: echo ::notice title='Calling Github Workflow commands'
+      run: echo ::notice title='Calling Github Workflow commands'::Here is another notice.
 
     # Docker - We need to install git because our runner is in a Docker container.
     - name: Install git on container
