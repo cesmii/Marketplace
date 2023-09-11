@@ -46,6 +46,9 @@ env:
   VOLUME_SRC: "/home/runner/work/Marketplace/Marketplace:/src/"
   # VOLUME_SRC: "C:/CESMII.github/Marketplace:/src/"
 
+  DOCKER_FILE_MARKETPLACE: "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/Dockerfile"
+  # DOCKER_FILE_MARKETPLACE: "C:\CESMII.github\Marketplace\api\CESMII.Marketplace.API\Dockerfile"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -101,7 +104,7 @@ jobs:
 
     # Create a Docker Container for Marketplace
     - name: Marketplace - Build Container
-      run: docker build -t cesmiimarketplaceapi:dev .
+      run: docker build -f ${{env.DOCKER_FILE_MARKETPLACE}} --force-rm -t cesmiimarketplaceapi:dev --target base .
 
     # Start Marketplace Server
     - name: Marketplace - Start Server Running
@@ -119,11 +122,7 @@ jobs:
          MARKETPLACE_MONGODB_DATABASE: test
       run: docker run -dt -p 5001:443 -p 32775:80 -P  --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}}  --entrypoint tail cesmiimarketplaceapi:dev
 
-    - name: PROCESS INQUIRY #5 ------------------------
-      run: |
-        ps ax
-
-    # Peek at docker network status
+    # Peek at docker status
     - name: Docker - Peeking at docker status 
       run: docker container ls --all ; 
            docker network ls ;
@@ -133,11 +132,13 @@ jobs:
     - name: Docker - Waiting for Marketplace Server to start
       run: sleep 1
 
-    # Peek at docker network status
-    - name: Docker - Peeking at docker status 
-      run: docker container ls --all ; 
-           docker network ls ;
-           docker network inspect mysubnet1 ;
+    # Docker Log Client experiment #1
+    - name: Docker Log Client
+      run: dotnet run --project ./CESMII.LogClient/CESMII.LogClient.csproj
+
+    # Docker Log Client experiment #2
+    - name: Docker Log Client
+      run: docker exec -d MyMarketplace dotnet run --project ./CESMII.LogClient/CESMII.LogClient.csproj
 
     # Call Marketplace Api from INSIDE container MyMarketplace
     - name: Test
@@ -148,7 +149,7 @@ jobs:
       run: dotnet test ./api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
 
 
-
+    
     #- name: FrontEnd - Start browser and fetch version
     #  run:  chrome --version
 
