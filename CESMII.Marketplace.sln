@@ -44,7 +44,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.RestApi"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.MongoDB", "api\Tests\CESMII.Marketplace.MongoDB\CESMII.Marketplace.MongoDB.csproj", "{42FC393F-3918-465D-BB9C-ADDB92FC6E14}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CESMII.LogClient", "Tests\CESMII.LogClient\CESMII.LogClient.csproj", "{F9E9F82D-43C1-4EEC-A1AF-4554BC0C0074}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.LogClient", "CESMII.LogClient\CESMII.LogClient.csproj", "{E28BCD85-3146-44D0-BC52-FDA806D26D7B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -140,12 +140,12 @@ Global
 		{42FC393F-3918-465D-BB9C-ADDB92FC6E14}.Release|Any CPU.Build.0 = Release|Any CPU
 		{42FC393F-3918-465D-BB9C-ADDB92FC6E14}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
 		{42FC393F-3918-465D-BB9C-ADDB92FC6E14}.Staging|Any CPU.Build.0 = Debug|Any CPU
-		{F9E9F82D-43C1-4EEC-A1AF-4554BC0C0074}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F9E9F82D-43C1-4EEC-A1AF-4554BC0C0074}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F9E9F82D-43C1-4EEC-A1AF-4554BC0C0074}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F9E9F82D-43C1-4EEC-A1AF-4554BC0C0074}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F9E9F82D-43C1-4EEC-A1AF-4554BC0C0074}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
-		{F9E9F82D-43C1-4EEC-A1AF-4554BC0C0074}.Staging|Any CPU.Build.0 = Debug|Any CPU
+		{E28BCD85-3146-44D0-BC52-FDA806D26D7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E28BCD85-3146-44D0-BC52-FDA806D26D7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E28BCD85-3146-44D0-BC52-FDA806D26D7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E28BCD85-3146-44D0-BC52-FDA806D26D7B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E28BCD85-3146-44D0-BC52-FDA806D26D7B}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
+		{E28BCD85-3146-44D0-BC52-FDA806D26D7B}.Staging|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
