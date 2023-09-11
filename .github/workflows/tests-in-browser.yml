@@ -59,6 +59,7 @@ jobs:
       run: |
          apt update
          apt install -y git
+         echo "::notice Calling Github Workflow commands from a Github Action"
 
     # - name: Docker - set up Docker's Apt repository
     #   run: |
