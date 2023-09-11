@@ -1,0 +1,214 @@
+﻿# This workflow will build and run In Browser Selenium Web Driver Tests
+#
+# For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
+name: Test|In Browser|Marketplace
+on:
+  #manually trigger deploy
+  workflow_dispatch:
+  # Trigger the workflow on push
+  #push:
+  #  branches:
+  #    - develop
+  #    - main
+  #pull_request:
+  #  branches:
+  #    - develop
+  #    - main
+
+env:
+  # set this to the path to your solution file
+  SOLUTION_DIRECTORY: './'      
+  # Solution file name
+  SOLUTION_FILE: 'CESMII.Marketplace.sln'      
+  # Set this to the path to your test project file
+  PROJECT_DIRECTORY: './api/Tests/CESMII.Marketplace.InBrowser.Tests/'
+  # Test project file to use
+  PROJECT_NAME: 'CESMII.Marketplace.InBrowser.Tests'      
+  # set this to the .NET core version to use
+  NETCORE_VERSION: "6.0.x"
+  # set this to the NODE JS version to use
+  NODEJS_VERSION: "16.17.0"
+  # set this to npm working directory
+  NPM_WORKING_DIRECTORY: 'frontend'
+
+  # Access to our MongoDB
+  MONGODB_CONNECTION: "mongodb://testuser:password@MyMongoDB:27017"
+  # MONGODB_CONNECTION: "mongodb://testuser:password@MyMongoDB:27017"
+
+  MOUNT_SOURCE: "/home/runner/work/Marketplace/Marketplace/mongo-data"    # In a Github Action
+  # MOUNT_SOURCE: "c:/CESMII.github/Marketplace/mongo-data"               # On the desktop
+
+  VOLUME_APP: "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app"
+  # VOLUME_APP: "C:/CESMII.github/Marketplace/api/CESMII.Marketplace.API:/app"
+
+  VOLUME_SRC: "/home/runner/work/Marketplace/Marketplace:/src/"
+  # VOLUME_SRC: "C:/CESMII.github/Marketplace:/src/"
+
+  DOCKERFILE: "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/Dockerfile"
+  # DOCKERFILE: "C:\CESMII.github\Marketplace\api\CESMII.Marketplace.API\Dockerfile"
+
+  DOCKERHOMEFOLDER: "/home/runner/work/Marketplace/Marketplace"
+  # DOCKERHOMEFOLDER: "C:\CESMII.github\Marketplace"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: ubuntu@sha256:3246518d9735254519e1b2ff35f95686e4a5011c90c85344c1f38df7bae9dd37
+    steps:
+    # We can hide our connection string to keep GitGuardian (somewhat) happy
+    - name: Github Workflow Commands
+      run: echo "::add-mask::$env.MONGODB_CONNECTION"
+
+    # Github Workflow Commands -- displaying a notice
+    - name: Github Workflow Commands
+      run: echo "::notice::This is a notice in a workflow command. The colons are the most important part of this command. Four colons make it work two colons before notice and two colons after notice"
+
+    # Github Workflow Commands -- displaying a notice
+    - name: Github Workflow Commands
+      run: echo ::notice::This is a notice in a workflow command. Do we need to have quotes or not? Not sure.
+
+    # Github Workflow Commands -- displaying a notice
+    - name: Github Workflow Commands
+      run: echo ::notice title='Calling Github Workflow commands'::Here is another notice.
+
+    # Docker - We need to install git because our runner is in a Docker container.
+    - name: Install git on container
+      run: |
+         apt update ;
+         apt install -y git ;
+         echo ::notice::In a long list of run commands, we probably have to end each line with a semi-colon ;
+         echo ::notice::Possible to have two notice lines in one run command? Not sure. ;
+
+    # - name: Docker - set up Docker's Apt repository
+    #   run: |
+    #     # Add Docker's official GPG key:
+    #     sudo apt-get update
+    #     sudo apt-get install ca-certificates curl gnupg
+    #     sudo install -m 0755 -d /etc/apt/keyrings
+    #     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    #     sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+    #     # Add the repository to Apt sources:
+    #     echo \
+    #       "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+    #       "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+    #       sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    #     sudo apt-get update
+
+    # - name: Docker - install Docker
+    #   run: |
+    #       sudo apt update
+    #       sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+
+    - name: Docker - verify installation
+      run: /usr/bin/docker run hello-world
+
+    - name: Marketplace API - Check out the repo
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Docker - Set up networking
+      run: /usr/bin/docker network create mysubnet1
+
+    - name: MongoDB - Create mongoDB Docker container      
+      run: /usr/bin/docker run -d -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE}}",target=/data,type=bind mongo:4.0
+
+    # Putting this between "Create mongoDB container" and "Populate mongo database" seems to help the mongo container settle down
+    - name: Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ env.NETCORE_VERSION }}
+
+    - name: MongoDB - Populate mongo database
+      run: /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="${{env.MONGODB_CONNECTION}}" ;
+           /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=Organization --file=/data/Organization.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=Permission --file=/data/Permission.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=ProfileItem --file=/data/ProfileItem.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="mongodb://testuser:password@localhost:27017" ;
+           /usr/bin/docker exec -d MyMongoDB mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="mongodb://testuser:password@localhost:27017" ;
+
+    - name: Marketplace API - Restore dependencies (${{env.SOLUTION_FILE}})
+      run: dotnet restore ${{env.SOLUTION_FILE}}
+      working-directory: ${{env.SOLUTION_DIRECTORY}}
+
+    - name: Marketplace API - Build (${{env.SOLUTION_FILE}})
+      run: dotnet build ${{env.SOLUTION_FILE}} --configuration Release --no-restore
+
+    - name: MongoDB - Test access to Mongo database
+      run: dotnet test ./api/Tests/CESMII.Marketplace.MongoDB/CESMII.Marketplace.MongoDB.csproj
+
+    # - name: Marketplace API - Start up Marketplace Server
+    #   env:
+    #     EnableCloudLibSearch: false
+    #     MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
+    #     MARKETPLACE_MONGODB_DATABASE: test
+    #   run: dotnet run --project ./api/CESMII.Marketplace.API/CESMII.Marketplace.API.csproj &
+
+    # Create a Docker Container for Marketplace
+    - name: Marketplace - Build Container
+      # run: docker build -t cesmiimarketplaceapi:dev .
+      run: /usr/bin/docker build -f "${{env.DOCKERFILE}}" --force-rm -t cesmiimarketplaceapi:dev --target base  --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=CESMII.Marketplace.API" "${{env.DOCKERHOMEFOLDER}}"
+
+    # Start Marketplace Server
+    - name: Marketplace - Start Server Running
+      env:
+         EnableCloudLibSearch: false
+         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
+         MARKETPLACE_MONGODB_DATABASE: test
+         ASPNETCORE_URLS: https://+:443;http://+:80
+         DOTNET_GENERATE_ASPNET_CERTIFICATE: true
+      run: /usr/bin/docker run -d -p 5001:443 -p 32775:80 -P  --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}} -e "EnableCloudLibSearch=false" -e "MARKETPLACE_MONGODB_CONNECTIONSTRING=${{env.MONGODB_CONNECTION}}" -e "MARKETPLACE_MONGODB_DATABASE=test" -e "ASPNETCORE_URLS=https://+:443;http://+:80" -e "ASPNETCORE_HTTPS_PORT=5001" -e "DOTNET_GENERATE_ASPNET_CERTIFICATE=true" -e "DOTNET_RUNNING_IN_CONTAINER=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_HTTPS_PORT=5001" --entrypoint tail cesmiimarketplaceapi:dev
+
+    - name: PROCESS INQUIRY #5 ------------------------
+      run: |
+        ps ax
+
+    # Peek at docker network status
+    - name: Docker - Peeking at docker status 
+      run: /usr/bin/docker container ls ; 
+           /usr/bin/docker network ls ;
+           /usr/bin/docker network inspect mysubnet1 ;
+
+    # Give the server a chance to start up
+    - name: Docker - Waiting for Marketplace Server to start
+      run: sleep 30
+
+    # Call Marketplace Api sure that someone's at home.
+    - name: Test
+      run: dotnet test ./api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
+
+
+
+    #- name: FrontEnd - Start browser and fetch version
+    #  run:  chrome --version
+
+    #- name: FrontEnd - Use Node.js version (${{env.NODEJS_VERSION}})
+    #  uses: actions/setup-node@v1
+    #  with: 
+    #    node-version: ${{env.NODEJS_VERSION}}
+
+    #- name: FrontEnd - Build React Code - npm install, build
+    #  working-directory: ${{env.NPM_WORKING_DIRECTORY}}
+    #  env: 
+    #    CI: '' #when process-env-ci is true, warnings are ignored and not treated as errors
+    #  run: |
+    #    npm install
+    #    npm run build:in-browser-test 
+    #    npm run start-in-browser-test &
+
+    ##- name: Docker - launch standalone chrome browser
+    ##  run: |
+    ##    docker run -d -p 4444:4444 selenium/standalone-chrome
+
+    #- name: In-Browser Testing - Restore dependencies CESMII.Marketplace.InBrowser.Tests
+    #  working-directory:  ${{env.SOLUTION_DIRECTORY}}
+    #  run: dotnet restore
+
+    #- name: In-Browser Testing - Run Test on project (${{env.PROJECT_NAME}})
+    #  run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/${{env.PROJECT_NAME}}.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
+    #  working-directory: ${{env.SOLUTION_DIRECTORY}}
