@@ -119,6 +119,7 @@ jobs:
     - name: MongoDB - Dump contents of test result files
       run: cat --number /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.MongoDB/TestResults/*
 
+
     # - name: Marketplace API - Start up Marketplace Server
     #   env:
     #     EnableCloudLibSearch: false
@@ -169,20 +170,12 @@ jobs:
       run: docker exec -d MyMarketplace dotnet test --logger trx ./api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
 
     # Test Logging - Get list of output files created
-    - name: Test Logging - Get list of output files created
-      run: docker exec -it -d MyMarketplace ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/TestResults
-
-    # Grab the logging output
-    # - name: Read Logging - from INSIDE container MyMarketplace
-    #   run: docker container logs --tail 50 MyMarketplace
-
-    # Call Marketplace Api from OUTSIDE container (on RUNNER)
-    - name: Test Logging - from OUTSIDE container 
+    - name: Marketplace REST - Get list of test result files
       run: ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/TestResults
 
-    # Test Logging - Get list of output files created
-    - name: Test Logging - Get list of output files created
-      run: docker exec -d MyMarketplace ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/TestResults
+    - name: Marketplace REST - Dump contents of test result files
+      run: cat --number /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/TestResults/*
+
 
     
     #- name: FrontEnd - Start browser and fetch version
