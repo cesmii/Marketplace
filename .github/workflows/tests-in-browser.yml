@@ -165,11 +165,11 @@ jobs:
 
     # Test Logging - Get list of output files created
     - name: Test Logging - Get list of output files created
-      run: docker exec -d MyMarketplace ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/TestResults
+      run: docker exec -it -d MyMarketplace ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/TestResults
 
     # Grab the logging output
-    - name: Read Logging - from INSIDE container MyMarketplace
-      run: docker container logs --tail 50 MyMarketplace
+    # - name: Read Logging - from INSIDE container MyMarketplace
+    #   run: docker container logs --tail 50 MyMarketplace
 
     # Call Marketplace Api from OUTSIDE container (on RUNNER)
     - name: Test Logging - from OUTSIDE container 
