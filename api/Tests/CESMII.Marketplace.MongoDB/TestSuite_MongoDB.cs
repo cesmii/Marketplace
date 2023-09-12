@@ -1,5 +1,6 @@
 namespace CESMII.Marketplace.MongoDB
 {
+    using System;
     using CESMII.Marketplace.Data.Entities;
     using global::MongoDB.Bson;
     using global::MongoDB.Driver;
@@ -8,8 +9,12 @@ namespace CESMII.Marketplace.MongoDB
     public class TestSuite_MongoDB
     {
         // Need to have a connection string and a database name.
-        string strConnection = "mongodb://testuser:password@localhost:27017";
-        string strDatabase = "test";
+
+        //string strConnection = "mongodb://testuser:password@localhost:27017";
+        public static string strConnection = utils.GetConnection();
+
+        //string strDatabase = "test";
+        public static string strDatabase = utils.GetDatabase();
 
         [Fact]
         public void ValidConnectionString_on_Startup()

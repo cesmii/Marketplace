@@ -75,6 +75,8 @@ namespace CESMII.Marketplace.Api
                 Configuration["MongoDBSettings:ConnectionString"] = strConnectionString;
             }
 
+            Console.WriteLine("::notice::ConfigureServices - Line 78");
+
             if (!string.IsNullOrEmpty(strDatabase))
             {
                  Configuration["MongoDBSettings:DatabaseName"] = strDatabase;
@@ -109,6 +111,8 @@ namespace CESMII.Marketplace.Api
             //services.AddScoped<IMongoRepository<Permission>, MongoRepository<Permission>>();
             services.AddScoped<IMongoRepository<JobLog>, MongoRepository<JobLog>>();
             services.AddScoped<IMongoRepository<JobDefinition>, MongoRepository<JobDefinition>>();
+
+            Console.WriteLine("::notice::ConfigureServices - Line 115");
 
             //DAL objects
             services.AddScoped<UserDAL>();  //this one has extra methods outside of the IDal interface
@@ -148,6 +152,8 @@ namespace CESMII.Marketplace.Api
             //var configUtil = new ConfigUtil(Configuration);
             //services.AddTransient(provider => new TokenUtils(configUtil));
 
+            Console.WriteLine("::notice::ConfigureServices - Line 155");
+
             services.AddControllers();
 
             services.AddSwaggerGen(c =>
@@ -175,6 +181,8 @@ namespace CESMII.Marketplace.Api
                 }
                 });
             });
+
+            Console.WriteLine("::notice::ConfigureServices - Line 185");
 
             // https://stackoverflow.com/questions/46112258/how-do-i-get-current-user-in-net-core-web-api-from-jwt-token
             //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -230,6 +238,8 @@ namespace CESMII.Marketplace.Api
                 });
             });
 
+            Console.WriteLine("::notice::ConfigureServices - Line 241");
+
             services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
 
             services.AddMvc(); //add this to permit emailing to bind models to view templates.
@@ -237,6 +247,8 @@ namespace CESMII.Marketplace.Api
             {
                 options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
             });
+
+            Console.WriteLine("::notice::ConfigureServices - Line 251");
 
             // Add in-memory caching
             services.AddMemoryCache();
@@ -247,6 +259,8 @@ namespace CESMII.Marketplace.Api
             //add httpclient service for dependency injection
             //https://docs.microsoft.com/en-us/aspnet/core/fundamentals/http-requests?view=aspnetcore-6.0
             services.AddHttpClient();
+
+            Console.WriteLine("::notice::ConfigureServices - EXITING!!!! Line 263 ");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

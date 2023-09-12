@@ -47,7 +47,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "EnableCloudlibSearch": "false",
         "MARKETPLACE_COLLECTION_NAME": "marketplace",
-        "MARKETPLACE_MONGODB_CONNECTIONSTRING": "mongodb://testuser:password@127.17.0.2:27017/test?directConnection=true",
+        "MARKETPLACE_MONGODB_CONNECTIONSTRING": "mongodb://testuser:password@MyMongoDB:27017",
         "MARKETPLACE_MONGODB_DATABASE": "test"
       },
       "publishAllPorts": true,
