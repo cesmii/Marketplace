@@ -108,7 +108,7 @@ jobs:
       run: dotnet build ${{env.SOLUTION_FILE}} --configuration Release --no-restore
 
     - name: MongoDB - Test access to Mongo database
-      run: dotnet test ./api/Tests/CESMII.Marketplace.MongoDB/CESMII.Marketplace.MongoDB.csproj
+      run: dotnet test --logger trx ./api/Tests/CESMII.Marketplace.MongoDB/CESMII.Marketplace.MongoDB.csproj
       env:
          TEST_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
          TEST_DATABASE_NAME: ${{env.MONGODB_DATABASE_NAME}}
@@ -161,7 +161,7 @@ jobs:
 
     # Call Marketplace Api from INSIDE container MyMarketplace
     - name: Test Logging - from INSIDE container MyMarketplace
-      run: docker exec -d MyMarketplace dotnet test ./api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
+      run: docker exec -d MyMarketplace dotnet test --logger trx ./api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
 
     # Grab the logging output
     - name: Read Logging - from INSIDE container MyMarketplace
@@ -169,7 +169,7 @@ jobs:
 
     # Call Marketplace Api from OUTSIDE container (on RUNNER)
     - name: Test Logging - from OUTSIDE container 
-      run: dotnet test ./api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
+      run: dotnet test --logger trx ./api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
 
     
     #- name: FrontEnd - Start browser and fetch version
