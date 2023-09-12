@@ -113,6 +113,11 @@ jobs:
          TEST_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
          TEST_DATABASE_NAME: ${{env.MONGODB_DATABASE_NAME}}
    
+    - name: MongoDB - Get list of test result files
+      run: ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.MongoDB/TestResults
+
+    - name: MongoDB - Dump contents of test result files
+      run: cat --number /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.MongoDB/TestResults/*
 
     # - name: Marketplace API - Start up Marketplace Server
     #   env:
