@@ -10,4 +10,4 @@ docker exec -d MyMongoDB mongoimport  --collection=ProfileItem --file=/data/Prof
 docker exec -d MyMongoDB mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="mongodb://testuser:password@localhost:27017" 
 docker exec -d MyMongoDB mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="mongodb://testuser:password@localhost:27017" 
 docker exec -d MyMongoDB mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="mongodb://testuser:password@localhost:27017" 
-dotnet test ./api/Tests/CESMII.Marketplace.MongoDB/CESMII.Marketplace.MongoDB.csproj
+dotnet test -e TEST_CONNECTIONSTRING=mongodb://testuser:password@localhost:27017 -e TEST_DATABASE_NAME=test ./api/Tests/CESMII.Marketplace.MongoDB/CESMII.Marketplace.MongoDB.csproj
