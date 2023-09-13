@@ -163,65 +163,17 @@ jobs:
     - name: Marketplace - Read the Logs to see whether startup was okay or not -- 1
       run: docker logs --details MyMarketplace
 
-    # Give the server a chance to start up
-    - name: Docker - Waiting for Marketplace Server to start -- 2
-      run: sleep 5
-
-    # Check the logs 
-    - name: Marketplace - Read the Logs to see whether startup was okay or not -- 2
-      run: docker logs --tail 100 MyMarketplace
-
-    # Give the server a chance to start up
-    - name: Docker - Waiting for Marketplace Server to start -- 3
-      run: sleep 5
-
-    # Check the logs 
-    - name: Marketplace - Read the Logs to see whether startup was okay or not -- 3
-      run: docker logs --details MyMarketplace
-
-    # Give the server a chance to start up
-    - name: Docker - Waiting for Marketplace Server to start -- 4
-      run: sleep 20
-
-    # Check the logs 
-    - name: Marketplace - Read the Logs to see whether startup was okay or not -- 4
-      run: docker logs --details MyMarketplace
-
-    # Give the server a chance to start up
-    - name: Docker - Waiting for Marketplace Server to start -- 5
-      run: sleep 5
-
-    # Check the logs 
-    - name: Marketplace - Read the Logs to see whether startup was okay or not -- 5
-      run: docker logs --details MyMarketplace
-
-    # Give the server a chance to start up
-    - name: Docker - Waiting for Marketplace Server to start -- 6
-      run: sleep 30
-
-    # Check the logs 
-    - name: Marketplace - Read the Logs to see whether startup was okay or not -- 6
-      run: docker logs --tail 100 MyMarketplace
-
-    # # Docker Log Client experiment #1
-    # - name: Docker Log Client - On Startup Runner
-    #   run: dotnet run --project ./CESMII.LogClient/CESMII.LogClient.csproj
-
-    # # Docker Log Client experiment #2
-    # - name: Docker Log Client - Inside Docker Container
-    #   run: docker exec -i MyMarketplace dotnet run --project /src/CESMII.LogClient/CESMII.LogClient.csproj
+    # Call Marketplace Api from INSIDE container MyMarketplace
+    - name: Test Logging - from INSIDE container MyMarketplace
+      env:
+        MARKETPLACE_URL: ${{env.MARKETPLACE_RESTAPI_URL}}
+      run: docker exec -i MyMarketplace -e MARKETPLACE_URL=${{env.MARKETPLACE_RESTAPI_URL}} dotnet test /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
 
     # Call Marketplace Api from OUTSIDE container MyMarketplace
     - name: Test Logging - from OUTSIDE container MyMarketplace
       env:
         MARKETPLACE_URL: "https://localhost:5001/api"
       run: dotnet test /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
-
-    # Call Marketplace Api from INSIDE container MyMarketplace
-    - name: Test Logging - from INSIDE container MyMarketplace
-      env:
-        MARKETPLACE_URL: ${{env.MARKETPLACE_RESTAPI_URL}}
-      run: docker exec -i MyMarketplace -e MARKETPLACE_URL=${{env.MARKETPLACE_RESTAPI_URL}} dotnet test /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
 
     # # Test Logging - Get list of output files created
     # - name: Marketplace REST - Get list of test result files
