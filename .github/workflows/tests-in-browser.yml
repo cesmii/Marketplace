@@ -167,7 +167,7 @@ jobs:
     - name: Test Logging - from INSIDE container MyMarketplace
       env:
         MARKETPLACE_URL: ${{env.MARKETPLACE_RESTAPI_URL}}
-      run: docker exec -e "MARKETPLACE_URL=${{env.MARKETPLACE_RESTAPI_URL}}" -i MyMarketplace  dotnet test /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
+      run: docker exec -e "MARKETPLACE_URL=${{env.MARKETPLACE_RESTAPI_URL}}" -i MyMarketplace  dotnet test /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
 
     # Call Marketplace Api from OUTSIDE container MyMarketplace
     - name: Test Logging - from OUTSIDE container MyMarketplace
