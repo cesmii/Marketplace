@@ -171,7 +171,7 @@ jobs:
 
     # Call Marketplace Api from INSIDE container MyMarketplace
     - name: Test Logging - from INSIDE container MyMarketplace
-      run: docker exec -i MyMarketplace dotnet test --logger trx /home/running/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
+      run: docker exec -i MyMarketplace dotnet test --logger trx /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
 
     # Test Logging - Get list of output files created
     - name: Marketplace REST - Get list of test result files
