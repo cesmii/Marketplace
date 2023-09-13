@@ -167,7 +167,7 @@ jobs:
     - name: Test Logging - from OUTSIDE container MyMarketplace
       env:
         MARKETPLACE_URL: "https://MyMarketplace:5001/api"
-      run: dotnet test /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
+      run: dotnet test -e "MARKETPLACE_URL=https://MyMarketplace:5001/api" /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
 
     # Call Marketplace Api from INSIDE container MyMarketplace
     - name: Test Logging - from INSIDE container MyMarketplace
