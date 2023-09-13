@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using CESMII.Marketplace.DAL.Models;
+using CESMII.Marketplace.MongoDB;
 using static System.Net.WebRequestMethods;
 
 namespace CESMII.Marketplace.RestApi
@@ -12,7 +13,8 @@ namespace CESMII.Marketplace.RestApi
         [Fact]
         public void MarketItemsAvailable_On_Https_Api_Marketplace_All()
         {
-            HttpClient client = new HttpClient();
+            strHostHttps = utils.GetConnection();
+
             // client.BaseAddress = new Uri("https://localhost:5001/api");
 
             client.DefaultRequestHeaders.Accept.Clear();

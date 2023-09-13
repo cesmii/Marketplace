@@ -36,6 +36,8 @@ env:
   # Access to our MongoDB
   MONGODB_DATABASE_NAME: "test"
 
+  MARKETPLACE_RESTAPI_URL: https://MyMarketplace:5001/api
+
   MONGODB_LOCAL_CONNECTION: "mongodb://testuser:password@localhost:27017"
   MONGODB_CONNECTION: "mongodb://testuser:password@MyMongoDB:27017"
 
@@ -209,13 +211,17 @@ jobs:
     # - name: Docker Log Client - Inside Docker Container
     #   run: docker exec -i MyMarketplace dotnet run --project /src/CESMII.LogClient/CESMII.LogClient.csproj
 
-    # Call Marketplace Api from INSIDE container MyMarketplace
-    - name: Test Logging - from INSIDE container MyMarketplace
-      run: docker exec -i MyMarketplace dotnet test /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
+    # Call Marketplace Api from OUTSIDE container MyMarketplace
+    - name: Test Logging - from OUTSIDE container MyMarketplace
+      env:
+        MARKETPLACE_URL: "https://localhost:5001/api"
+      run: dotnet test /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
 
     # Call Marketplace Api from INSIDE container MyMarketplace
     - name: Test Logging - from INSIDE container MyMarketplace
-      run: docker exec -i MyMarketplace dotnet test /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
+      env:
+        MARKETPLACE_URL: ${{env.MARKETPLACE_RESTAPI_URL}}
+      run: docker exec -i MyMarketplace -e MARKETPLACE_URL=${{env.MARKETPLACE_RESTAPI_URL}} dotnet test /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
 
     # # Test Logging - Get list of output files created
     # - name: Marketplace REST - Get list of test result files
