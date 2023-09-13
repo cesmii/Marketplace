@@ -163,17 +163,17 @@ jobs:
     - name: Marketplace - Read the Logs to see whether startup was okay or not -- 1
       run: docker logs --details MyMarketplace
 
-    # Call Marketplace Api from INSIDE container MyMarketplace
-    - name: Test Logging - from INSIDE container MyMarketplace
-      env:
-        MARKETPLACE_URL: "https://localhost:5001/api"
-      run: docker exec -e "MARKETPLACE_URL=https://localhost:5001/api" -i MyMarketplace  dotnet test /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
-
     # Call Marketplace Api from OUTSIDE container MyMarketplace
     - name: Test Logging - from OUTSIDE container MyMarketplace
       env:
         MARKETPLACE_URL: "https://MyMarketplace:5001/api"
       run: dotnet test /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
+
+    # Call Marketplace Api from INSIDE container MyMarketplace
+    - name: Test Logging - from INSIDE container MyMarketplace
+      env:
+        MARKETPLACE_URL: "https://MyMarketplace:5001/api"
+      run: docker exec -e "MARKETPLACE_URL=https://MyMarketplace:5001/api" -i MyMarketplace  dotnet test /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
 
     # # Test Logging - Get list of output files created
     # - name: Marketplace REST - Get list of test result files
