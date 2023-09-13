@@ -171,7 +171,17 @@ jobs:
 
     # Test Logging - Get list of output files created
     - name: Marketplace REST - Get list of test result files
-      run: ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/TestResults
+      run: |
+          sudo ls -al / ;
+          sudo ls -al /home ;
+          sudo ls -al /home/runner ;
+          sudo ls -al /home/runner/work ;
+          sudo ls -al /home/runner/work/Marketplace ;
+          sudo ls -al /home/runner/work/Marketplace/Marketplace ;
+          sudo ls -al /home/runner/work/Marketplace/Marketplace/api ;
+          sudo ls -al /home/runner/work/Marketplace/Marketplace/api/Tests ;
+          sudo ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi ;
+          sudo ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/TestResults ;
 
     - name: Marketplace REST - Dump contents of test result files
       run: cat --number /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/TestResults/*
