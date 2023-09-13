@@ -172,20 +172,14 @@ jobs:
     # Test Logging - Get list of output files created
     - name: Marketplace REST - Get list of test result files
       run: |
-          docker exec -i MyMarketplace ls -al / ;
-          docker exec -i MyMarketplace ls -al /home ;
-          docker exec -i MyMarketplace ls -al /home/runner ;
-          docker exec -i MyMarketplace ls -al /home/runner/work ;
-          docker exec -i MyMarketplace ls -al /home/runner/work/Marketplace ;
-          docker exec -i MyMarketplace ls -al /home/runner/work/Marketplace/Marketplace ;
-          docker exec -i MyMarketplace ls -al /home/runner/work/Marketplace/Marketplace/api ;
-          docker exec -i MyMarketplace ls -al /home/runner/work/Marketplace/Marketplace/api/Tests ;
-          docker exec -i MyMarketplace ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi ;
-          docker exec -i MyMarketplace ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/TestResults ;
+          docker exec -i MyMarketplace ls -al /src ;
+          docker exec -i MyMarketplace ls -al /src/api ;
+          docker exec -i MyMarketplace ls -al /src/api/Tests ;
+          docker exec -i MyMarketplace ls -al /src/api/Tests/CESMII.Marketplace.RestApi ;
+          docker exec -i MyMarketplace ls -al /src/api/Tests/CESMII.Marketplace.RestApi/TestResults ;
 
     - name: Marketplace REST - Dump contents of test result files
-      run: cat --number /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/TestResults/*
-
+      run: cat --number /src/api/Tests/CESMII.Marketplace.RestApi/TestResults/*
 
     
     #- name: FrontEnd - Start browser and fetch version
