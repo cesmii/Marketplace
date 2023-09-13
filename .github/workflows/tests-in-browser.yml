@@ -172,16 +172,16 @@ jobs:
     # Test Logging - Get list of output files created
     - name: Marketplace REST - Get list of test result files
       run: |
-          sudo ls -al / ;
-          sudo ls -al /home ;
-          sudo ls -al /home/runner ;
-          sudo ls -al /home/runner/work ;
-          sudo ls -al /home/runner/work/Marketplace ;
-          sudo ls -al /home/runner/work/Marketplace/Marketplace ;
-          sudo ls -al /home/runner/work/Marketplace/Marketplace/api ;
-          sudo ls -al /home/runner/work/Marketplace/Marketplace/api/Tests ;
-          sudo ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi ;
-          sudo ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/TestResults ;
+          docker exec -it MyMarketplace sudo ls -al / ;
+          docker exec -it MyMarketplace sudo ls -al /home ;
+          docker exec -it MyMarketplace sudo ls -al /home/runner ;
+          docker exec -it MyMarketplace sudo ls -al /home/runner/work ;
+          docker exec -it MyMarketplace sudo ls -al /home/runner/work/Marketplace ;
+          docker exec -it MyMarketplace sudo ls -al /home/runner/work/Marketplace/Marketplace ;
+          docker exec -it MyMarketplace sudo ls -al /home/runner/work/Marketplace/Marketplace/api ;
+          docker exec -it MyMarketplace sudo ls -al /home/runner/work/Marketplace/Marketplace/api/Tests ;
+          docker exec -it MyMarketplace sudo ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi ;
+          docker exec -it MyMarketplace sudo ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/TestResults ;
 
     - name: Marketplace REST - Dump contents of test result files
       run: cat --number /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/TestResults/*
