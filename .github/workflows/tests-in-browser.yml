@@ -89,16 +89,16 @@ jobs:
         dotnet-version: ${{ env.NETCORE_VERSION }}
 
     - name: MongoDB - Populate mongo database
-      run: docker exec -d MyMongoDB mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -d MyMongoDB mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -d MyMongoDB mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -d MyMongoDB mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -d MyMongoDB mongoimport  --collection=Organization --file=/data/Organization.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -d MyMongoDB mongoimport  --collection=Permission --file=/data/Permission.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -d MyMongoDB mongoimport  --collection=ProfileItem --file=/data/ProfileItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -d MyMongoDB mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -d MyMongoDB mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -d MyMongoDB mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+      run: docker exec -i MyMongoDB mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=Organization --file=/data/Organization.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=Permission --file=/data/Permission.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=ProfileItem --file=/data/ProfileItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
 
     - name: Marketplace API - Restore dependencies (${{env.SOLUTION_FILE}})
       run: dotnet restore ${{env.SOLUTION_FILE}}
@@ -163,15 +163,15 @@ jobs:
 
     # Docker Log Client experiment #2
     - name: Docker Log Client - Inside Docker Container
-      run: docker exec -i MyMarketplace dotnet run --project ./CESMII.LogClient/CESMII.LogClient.csproj
+      run: docker exec -i MyMarketplace dotnet run --project /src/CESMII.LogClient/CESMII.LogClient.csproj
 
     # Call Marketplace Api from INSIDE container MyMarketplace
     - name: Test Logging - from INSIDE container MyMarketplace
-      run: docker exec -i -d MyMarketplace dotnet test --logger trx /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
+      run: docker exec -i MyMarketplace dotnet test --logger trx /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
 
     # Call Marketplace Api from INSIDE container MyMarketplace
     - name: Test Logging - from INSIDE container MyMarketplace
-      run: docker exec -i -d MyMarketplace dotnet test --logger trx /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
+      run: docker exec -i MyMarketplace dotnet test --logger trx /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
 
     # Test Logging - Get list of output files created
     - name: Marketplace REST - Get list of test result files
