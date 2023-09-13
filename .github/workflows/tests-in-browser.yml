@@ -147,7 +147,7 @@ jobs:
          MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
          MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: test
-      run: docker run -dt -p 5001:443 -p 32775:80 -P  --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}}  --entrypoint tail cesmiimarketplaceapi:dev
+      run: docker run -dt -p 5001:443 -p 32775:80 -P  --log-driver=local --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}}  --entrypoint tail cesmiimarketplaceapi:dev
 
     # Peek at docker status
     - name: Docker - Peeking at docker status 
