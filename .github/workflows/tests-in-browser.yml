@@ -157,6 +157,10 @@ jobs:
     - name: Docker - Waiting for Marketplace Server to start
       run: sleep 1
 
+    # Give the server a chance to start up
+    - name: Marketplace - Read the Logs to see whether startup was okay or not
+      run: docker logs --details MyMarketplace
+
     # # Docker Log Client experiment #1
     # - name: Docker Log Client - On Startup Runner
     #   run: dotnet run --project ./CESMII.LogClient/CESMII.LogClient.csproj
