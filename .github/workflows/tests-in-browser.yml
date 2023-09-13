@@ -154,12 +154,52 @@ jobs:
            docker network inspect mysubnet1 ;
 
     # Give the server a chance to start up
-    - name: Docker - Waiting for Marketplace Server to start
-      run: sleep 1
+    - name: Docker - Waiting for Marketplace Server to start -- 1
+      run: sleep 10
+
+    # Check the logs 
+    - name: Marketplace - Read the Logs to see whether startup was okay or not -- 1
+      run: docker logs --details MyMarketplace
 
     # Give the server a chance to start up
-    - name: Marketplace - Read the Logs to see whether startup was okay or not
+    - name: Docker - Waiting for Marketplace Server to start -- 2
+      run: sleep 5
+
+    # Check the logs 
+    - name: Marketplace - Read the Logs to see whether startup was okay or not -- 2
+      run: docker logs --tail 100 MyMarketplace
+
+    # Give the server a chance to start up
+    - name: Docker - Waiting for Marketplace Server to start -- 3
+      run: sleep 5
+
+    # Check the logs 
+    - name: Marketplace - Read the Logs to see whether startup was okay or not -- 3
       run: docker logs --details MyMarketplace
+
+    # Give the server a chance to start up
+    - name: Docker - Waiting for Marketplace Server to start -- 4
+      run: sleep 20
+
+    # Check the logs 
+    - name: Marketplace - Read the Logs to see whether startup was okay or not -- 4
+      run: docker logs --details MyMarketplace
+
+    # Give the server a chance to start up
+    - name: Docker - Waiting for Marketplace Server to start -- 5
+      run: sleep 5
+
+    # Check the logs 
+    - name: Marketplace - Read the Logs to see whether startup was okay or not -- 5
+      run: docker logs --details MyMarketplace
+
+    # Give the server a chance to start up
+    - name: Docker - Waiting for Marketplace Server to start -- 6
+      run: sleep 30
+
+    # Check the logs 
+    - name: Marketplace - Read the Logs to see whether startup was okay or not -- 6
+      run: docker logs --tail 100 MyMarketplace
 
     # # Docker Log Client experiment #1
     # - name: Docker Log Client - On Startup Runner
