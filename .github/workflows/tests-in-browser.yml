@@ -163,15 +163,15 @@ jobs:
 
     # Docker Log Client experiment #2
     - name: Docker Log Client - Inside Docker Container
-      run: docker exec -d MyMarketplace dotnet run --project ./CESMII.LogClient/CESMII.LogClient.csproj
+      run: docker exec -i MyMarketplace dotnet run --project ./CESMII.LogClient/CESMII.LogClient.csproj
 
     # Call Marketplace Api from INSIDE container MyMarketplace
     - name: Test Logging - from INSIDE container MyMarketplace
-      run: docker exec -i MyMarketplace dotnet test --logger trx /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
+      run: docker exec -i -d MyMarketplace dotnet test --logger trx /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
 
     # Call Marketplace Api from INSIDE container MyMarketplace
     - name: Test Logging - from INSIDE container MyMarketplace
-      run: docker exec -i MyMarketplace dotnet test --logger trx /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
+      run: docker exec -i -d MyMarketplace dotnet test --logger trx /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
 
     # Test Logging - Get list of output files created
     - name: Marketplace REST - Get list of test result files
