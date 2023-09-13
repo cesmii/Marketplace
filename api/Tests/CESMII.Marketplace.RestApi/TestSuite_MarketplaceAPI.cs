@@ -13,9 +13,11 @@ namespace CESMII.Marketplace.RestApi
         [Fact]
         public void MarketItemsAvailable_On_Https_Api_Marketplace_All()
         {
+            HttpClient client = new HttpClient();
+
             strHostHttps = utils.GetConnection();
 
-            // client.BaseAddress = new Uri("https://localhost:5001/api");
+            // client.BaseAddress = new Uri(strHostHttps);
 
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
