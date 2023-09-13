@@ -108,16 +108,16 @@ jobs:
       run: dotnet build ${{env.SOLUTION_FILE}} --configuration Release --no-restore
 
     - name: MongoDB - Test access to Mongo database
-      run: dotnet test --logger trx ./api/Tests/CESMII.Marketplace.MongoDB/CESMII.Marketplace.MongoDB.csproj
+      run: dotnet test ./api/Tests/CESMII.Marketplace.MongoDB/CESMII.Marketplace.MongoDB.csproj
       env:
          TEST_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
          TEST_DATABASE_NAME: ${{env.MONGODB_DATABASE_NAME}}
    
-    - name: MongoDB - Get list of test result files
-      run: ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.MongoDB/TestResults
+    # - name: MongoDB - Get list of test result files
+    #   run: ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.MongoDB/TestResults
 
-    - name: MongoDB - Dump contents of test result files
-      run: cat --number /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.MongoDB/TestResults/*
+    # - name: MongoDB - Dump contents of test result files
+    #   run: cat --number /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.MongoDB/TestResults/*
 
 
     # - name: Marketplace API - Start up Marketplace Server
@@ -157,33 +157,33 @@ jobs:
     - name: Docker - Waiting for Marketplace Server to start
       run: sleep 1
 
-    # Docker Log Client experiment #1
-    - name: Docker Log Client - On Startup Runner
-      run: dotnet run --project ./CESMII.LogClient/CESMII.LogClient.csproj
+    # # Docker Log Client experiment #1
+    # - name: Docker Log Client - On Startup Runner
+    #   run: dotnet run --project ./CESMII.LogClient/CESMII.LogClient.csproj
 
-    # Docker Log Client experiment #2
-    - name: Docker Log Client - Inside Docker Container
-      run: docker exec -i MyMarketplace dotnet run --project /src/CESMII.LogClient/CESMII.LogClient.csproj
-
-    # Call Marketplace Api from INSIDE container MyMarketplace
-    - name: Test Logging - from INSIDE container MyMarketplace
-      run: docker exec -i MyMarketplace dotnet test --logger trx /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
+    # # Docker Log Client experiment #2
+    # - name: Docker Log Client - Inside Docker Container
+    #   run: docker exec -i MyMarketplace dotnet run --project /src/CESMII.LogClient/CESMII.LogClient.csproj
 
     # Call Marketplace Api from INSIDE container MyMarketplace
     - name: Test Logging - from INSIDE container MyMarketplace
-      run: docker exec -i MyMarketplace dotnet test --logger trx /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
+      run: docker exec -i MyMarketplace dotnet test /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
 
-    # Test Logging - Get list of output files created
-    - name: Marketplace REST - Get list of test result files
-      run: |
-          docker exec -i MyMarketplace ls -al /src ;
-          docker exec -i MyMarketplace ls -al /src/api ;
-          docker exec -i MyMarketplace ls -al /src/api/Tests ;
-          docker exec -i MyMarketplace ls -al /src/api/Tests/CESMII.Marketplace.RestApi ;
-          docker exec -i MyMarketplace ls -al /src/api/Tests/CESMII.Marketplace.RestApi/TestResults ;
+    # Call Marketplace Api from INSIDE container MyMarketplace
+    - name: Test Logging - from INSIDE container MyMarketplace
+      run: docker exec -i MyMarketplace dotnet test /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj --verbosity normal
 
-    - name: Marketplace REST - Dump contents of test result files
-      run: cat --number /src/api/Tests/CESMII.Marketplace.RestApi/TestResults/*
+    # # Test Logging - Get list of output files created
+    # - name: Marketplace REST - Get list of test result files
+    #   run: |
+    #       docker exec -i MyMarketplace ls -al /src ;
+    #       docker exec -i MyMarketplace ls -al /src/api ;
+    #       docker exec -i MyMarketplace ls -al /src/api/Tests ;
+    #       docker exec -i MyMarketplace ls -al /src/api/Tests/CESMII.Marketplace.RestApi ;
+    #       docker exec -i MyMarketplace ls -al /src/api/Tests/CESMII.Marketplace.RestApi/TestResults ;
+
+    # - name: Marketplace REST - Dump contents of test result files
+    #   run: cat --number /src/api/Tests/CESMII.Marketplace.RestApi/TestResults/*
 
     
     #- name: FrontEnd - Start browser and fetch version
