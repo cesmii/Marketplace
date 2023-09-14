@@ -168,6 +168,14 @@ jobs:
     - name: Docker - Waiting for Marketplace Server to start -- 1
       run: sleep 20
 
+    - name: Marketplace - Where Are the Files that I Need?
+      run: |
+        ls -al / ;
+        ls -al /usr ;
+        ls -al /usr/share ;
+        ls -al /usr/share/dotnet ;
+
+
     # Marketplace - Start the Marketplace API running
     - name: Marketplace - Start Our DLL running
       run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API.dll
