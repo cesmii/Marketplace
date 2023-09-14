@@ -151,12 +151,8 @@ jobs:
 
     - name: Marketplace - Where Are the Files that I Need?
       run: |
-        ls -al /home/runner/work/Marketplace/Marketplace/api/Tests ;
-        ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.RestApi ;
         ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API ;
-        ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin ;
-        ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Release ;
-        ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Release/net6.0 ;
+        ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API.dll ;
 
     # Peek at docker status
     - name: Docker - Peeking at docker status 
@@ -170,10 +166,6 @@ jobs:
 
     - name: Marketplace - Where Are the Files that I Need?
       run: |
-        ls -al / ;
-        ls -al /usr ;
-        ls -al /usr/share ;
-        ls -al /usr/share/dotnet ;
         ls -al /usr/share/dotnet/dotnet ;
 
     # Marketplace - Start the Marketplace API running
