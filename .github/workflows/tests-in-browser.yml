@@ -158,10 +158,6 @@ jobs:
         ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Release ;
         ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Release/net6.0 ;
 
-
-    - name: Marketplace - Start Our DLL running
-      run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API.dll
-
     # Peek at docker status
     - name: Docker - Peeking at docker status 
       run: docker container ls --all ; 
@@ -170,7 +166,11 @@ jobs:
 
     # Give the server a chance to start up
     - name: Docker - Waiting for Marketplace Server to start -- 1
-      run: sleep 10
+      run: sleep 20
+
+    # Marketplace - Start the Marketplace API running
+    - name: Marketplace - Start Our DLL running
+      run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API.dll
 
     # Check the logs 
     - name: Marketplace - Read the Logs to see whether startup was okay or not -- 1
