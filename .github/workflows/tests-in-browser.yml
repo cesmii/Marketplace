@@ -202,7 +202,7 @@ jobs:
 
     # Marketplace - Start the Marketplace API running
     - name: Marketplace - Start Our DLL running
-      run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API.dll
+      run: docker exec -i MyMarketplace "/usr/share/dotnet/dotnet"  "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API.dll"
 
     # Check the logs 
     - name: Marketplace - Read the Logs to see whether startup was okay or not -- 1
