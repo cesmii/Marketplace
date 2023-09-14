@@ -41,20 +41,20 @@ env:
   MONGODB_LOCAL_CONNECTION: "mongodb://testuser:password@localhost:27017"
   MONGODB_CONNECTION: "mongodb://testuser:password@MyMongoDB:27017"
 
-  MOUNT_SOURCE: "/home/runner/work/Marketplace/Marketplace/mongo-data"    # In a Github Action
-  # MOUNT_SOURCE: "c:/CESMII.github/Marketplace/mongo-data"               # On the desktop
+  # MOUNT_SOURCE: "/home/runner/work/Marketplace/Marketplace/mongo-data"    # In a Github Action
+  MOUNT_SOURCE: "c:/CESMII.github/Marketplace/mongo-data"               # On the desktop
 
-  VOLUME_APP: "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app"
-  # VOLUME_APP: "C:/CESMII.github/Marketplace/api/CESMII.Marketplace.API:/app"
+  #VOLUME_APP: "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app"
+  VOLUME_APP: "C:/CESMII.github/Marketplace/api/CESMII.Marketplace.API:/app"
 
-  VOLUME_SRC: "/home/runner/work/Marketplace/Marketplace:/src/"
-  # VOLUME_SRC: "C:/CESMII.github/Marketplace:/src/"
+  #VOLUME_SRC: "/home/runner/work/Marketplace/Marketplace:/src/"
+  VOLUME_SRC: "C:/CESMII.github/Marketplace:/src/"
 
-  DOCKER_FILE_MARKETPLACE: "/home/runner/work/Marketplace/Marketplace/Dockerfile"
-  # DOCKER_FILE_MARKETPLACE: /mnt/c/CESMII.github/Marketplace/Dockerfile
+  #DOCKER_FILE_MARKETPLACE: "/home/runner/work/Marketplace/Marketplace/Dockerfile"
+  DOCKER_FILE_MARKETPLACE: /mnt/c/CESMII.github/Marketplace/Dockerfile
 
-  DOCKER_HOME_FOLDER: "/home/runner/work/Marketplace/Marketplace"
-  # DOCKER_HOME_FOLDER: /mnt/c/CESMII.github/Marketplace/
+  #DOCKER_HOME_FOLDER: "/home/runner/work/Marketplace/Marketplace"
+  DOCKER_HOME_FOLDER: /mnt/c/CESMII.github/Marketplace/
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -133,8 +133,8 @@ jobs:
     - name: Marketplace - Build Container
       run: docker build -f ${{env.DOCKER_FILE_MARKETPLACE}}  -t cesmiimarketplaceapi:dev --target base  ${{env.DOCKER_HOME_FOLDER}}
 
-    # Start Marketplace Server
-    - name: Marketplace - Start Server Running
+    # Start Marketplace Container
+    - name: Marketplace - Launch Container
       env:
          ASPNETCORE_ENVIRONMENT: Development
          ASPNETCORE_HTTPS_PORT: 5001
@@ -148,6 +148,9 @@ jobs:
          MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: test
       run: docker run -dt -p 5001:443 -p 32775:80 -P  --log-driver=local --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}}  --entrypoint tail cesmiimarketplaceapi:dev
+
+    - name: Marketplace - Start Our DLL running
+      run: docker exec -i CESMII.Marketplace.API dotnet /src/api/CESMII.Marketplace.API/bin/debug/net6.0/CESMII.Marketplace.API.dll
 
     # Peek at docker status
     - name: Docker - Peeking at docker status 
