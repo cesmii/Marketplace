@@ -41,20 +41,20 @@ env:
   MONGODB_LOCAL_CONNECTION: "mongodb://testuser:password@localhost:27017"
   MONGODB_CONNECTION: "mongodb://testuser:password@MyMongoDB:27017"
 
-  # MOUNT_SOURCE: "/home/runner/work/Marketplace/Marketplace/mongo-data"    # In a Github Action
-  MOUNT_SOURCE: "c:/CESMII.github/Marketplace/mongo-data"               # On the desktop
+  MOUNT_SOURCE: "/home/runner/work/Marketplace/Marketplace/mongo-data"    # In a Github Action
+  #MOUNT_SOURCE: "c:/CESMII.github/Marketplace/mongo-data"               # On the desktop
 
-  #VOLUME_APP: "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app"
-  VOLUME_APP: "C:/CESMII.github/Marketplace/api/CESMII.Marketplace.API:/app"
+  VOLUME_APP: "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app"
+  #VOLUME_APP: "C:/CESMII.github/Marketplace/api/CESMII.Marketplace.API:/app"
 
-  #VOLUME_SRC: "/home/runner/work/Marketplace/Marketplace:/src/"
-  VOLUME_SRC: "C:/CESMII.github/Marketplace:/src/"
+  VOLUME_SRC: "/home/runner/work/Marketplace/Marketplace:/src/"
+  #VOLUME_SRC: "C:/CESMII.github/Marketplace:/src/"
 
-  #DOCKER_FILE_MARKETPLACE: "/home/runner/work/Marketplace/Marketplace/Dockerfile"
-  DOCKER_FILE_MARKETPLACE: /mnt/c/CESMII.github/Marketplace/Dockerfile
+  DOCKER_FILE_MARKETPLACE: "/home/runner/work/Marketplace/Marketplace/Dockerfile"
+  #DOCKER_FILE_MARKETPLACE: /mnt/c/CESMII.github/Marketplace/Dockerfile
 
-  #DOCKER_HOME_FOLDER: "/home/runner/work/Marketplace/Marketplace"
-  DOCKER_HOME_FOLDER: /mnt/c/CESMII.github/Marketplace/
+  DOCKER_HOME_FOLDER: "/home/runner/work/Marketplace/Marketplace"
+  #DOCKER_HOME_FOLDER: /mnt/c/CESMII.github/Marketplace/
 jobs:
   build:
     runs-on: ubuntu-latest
