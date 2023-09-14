@@ -174,7 +174,31 @@ jobs:
         ls -al /usr ;
         ls -al /usr/share ;
         ls -al /usr/share/dotnet ;
+        ls -al /usr/share/dotnet/dotnet ;
 
+    # Marketplace - Start the Marketplace API running
+    - name: DotNet - help
+      run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --help
+
+    # Marketplace - Start the Marketplace API running
+    - name: DotNet - Diagnostics
+      run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --diagnostics
+
+    # Marketplace - Start the Marketplace API running
+    - name: DotNet - Info
+      run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --info
+
+    # Marketplace - Start the Marketplace API running
+    - name: DotNet - list-runtimes
+      run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --list-runtimes
+
+    # Marketplace - Start the Marketplace API running
+    - name: DotNet - list-sdks
+      run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --list-sdks
+
+    # Marketplace - Start the Marketplace API running
+    - name: DotNet - Version
+      run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --version
 
     # Marketplace - Start the Marketplace API running
     - name: Marketplace - Start Our DLL running
