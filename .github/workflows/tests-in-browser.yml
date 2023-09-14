@@ -149,8 +149,18 @@ jobs:
          MARKETPLACE_MONGODB_DATABASE: test
       run: docker run -dt -p 5001:443 -p 32775:80 -P  --log-driver=local --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}}  --entrypoint tail cesmiimarketplaceapi:dev
 
+    - name: Marketplace - Where Are the Files that I Need?
+      run: |
+        ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API ;
+        ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin ;
+        ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Debug ;
+        ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Debug/net6.0 ;
+        ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Release ;
+        ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Release/net6.0 ;
+
+
     - name: Marketplace - Start Our DLL running
-      run: docker exec -i CESMII.Marketplace.API dotnet /src/api/CESMII.Marketplace.API/bin/debug/net6.0/CESMII.Marketplace.API.dll
+      run: docker exec -i MyMarketplace dotnet /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/debug/net6.0/CESMII.Marketplace.API.dll
 
     # Peek at docker status
     - name: Docker - Peeking at docker status 
