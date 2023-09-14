@@ -160,7 +160,7 @@ jobs:
 
 
     - name: Marketplace - Start Our DLL running
-      run: docker exec -i MyMarketplace dotnet /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API.dll
+      run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API.dll
 
     # Peek at docker status
     - name: Docker - Peeking at docker status 
