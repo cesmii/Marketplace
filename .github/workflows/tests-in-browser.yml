@@ -151,6 +151,13 @@ jobs:
 
     - name: Marketplace - Where Are the Files that I Need?
       run: |
+        ls -al / ;
+        ls -al /home ;
+        ls -al /home/runner ;
+        ls -al /home/runner/work ;
+        ls -al /home/runner/work/Marketplace ;
+        ls -al /home/runner/work/Marketplace/Marketplace ;
+        ls -al /home/runner/work/Marketplace/Marketplace/api ;
         ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API ;
         ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin ;
         ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Debug ;
