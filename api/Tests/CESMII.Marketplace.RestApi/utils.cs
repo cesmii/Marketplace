@@ -8,9 +8,9 @@ namespace CESMII.Marketplace.MongoDB
 {
     public class utils
     {
-        public static string GetConnection()
+        public static string GetConnection(string strVariable)
         {
-            var c = Environment.GetEnvironmentVariable("MARKETPLACE_URL");
+            var c = Environment.GetEnvironmentVariable(strVariable);
             return (c == null) ? "" : c;
         }
 

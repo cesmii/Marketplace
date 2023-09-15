@@ -11,10 +11,16 @@ namespace CESMII.Marketplace.MongoDB
         // Need to have a connection string and a database name.
 
         //string strConnection = "mongodb://testuser:password@localhost:27017";
-        public static string strConnection = utils.GetConnection();
+        public string strConnection;
 
         //string strDatabase = "test";
-        public static string strDatabase = utils.GetDatabase();
+        public string strDatabase;
+
+        public TestSuite_MongoDB()
+        {
+            strConnection = utils.GetEnvString("MARKETPLACE_MONGODB_CONNECTIONSTRING");
+            strDatabase = utils.GetEnvString("MARKETPLACE_MONGODB_DATABASE");
+        }
 
         [Fact]
         public void ValidConnectionString_on_Startup()

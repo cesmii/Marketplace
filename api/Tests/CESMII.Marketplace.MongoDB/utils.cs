@@ -8,16 +8,10 @@ namespace CESMII.Marketplace.MongoDB
 {
     internal class utils
     {
-        public static string GetConnection()
+        public static string GetEnvString(string strInput)
         {
-            var c = Environment.GetEnvironmentVariable("TEST_CONNECTIONSTRING");
+            var c = Environment.GetEnvironmentVariable(strInput);
             return (c == null) ? "" : c;
-        }
-
-        public static string GetDatabase() 
-        {
-            var d = Environment.GetEnvironmentVariable("TEST_DATABASE_NAME");
-            return (d == null) ? "" : d;
         }
     }
 }

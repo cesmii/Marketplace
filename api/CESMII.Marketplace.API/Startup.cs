@@ -75,12 +75,13 @@ namespace CESMII.Marketplace.Api
                 Configuration["MongoDBSettings:ConnectionString"] = strConnectionString;
             }
 
-            Console.WriteLine("::notice::ConfigureServices - Line 78");
-
             if (!string.IsNullOrEmpty(strDatabase))
             {
                  Configuration["MongoDBSettings:DatabaseName"] = strDatabase;
             }
+
+            Console.WriteLine($"::notice::ConfigureServices - strConnectionString:{strConnectionString}");
+            Console.WriteLine($"::notice::ConfigureServices - strDatabase:{strDatabase}");
 
             var root = (IConfigurationRoot)Configuration;
             var debugView = root.GetDebugView();
@@ -156,33 +157,31 @@ namespace CESMII.Marketplace.Api
 
             services.AddControllers();
 
-            // PAUL YAO - To Do -- Experiment to see whether this is preventing us from running in a Github Action
-
-            //services.AddSwaggerGen(c =>
-            //{
-            //    c.SwaggerDoc("v1", new OpenApiInfo
-            //    {
-            //        Title = "CESMII.Marketplace.Api",
-            //        Version = "v1"
-            //    });
-            //    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            //    {
-            //        In = ParameterLocation.Header,
-            //        Type = SecuritySchemeType.ApiKey,
-            //        Name = "Authorization",
-            //        Description = "Please insert JWT with Bearer into field"
-            //    });
-            //    c.AddSecurityRequirement(new OpenApiSecurityRequirement {
-            //    {
-            //        new OpenApiSecurityScheme {
-            //        Reference = new OpenApiReference {
-            //            Type = ReferenceType.SecurityScheme,
-            //            Id = "Bearer"
-            //        }
-            //        },Array.Empty<string>()
-            //    }
-            //    });
-            //});
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "CESMII.Marketplace.Api",
+                    Version = "v1"
+                });
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.ApiKey,
+                    Name = "Authorization",
+                    Description = "Please insert JWT with Bearer into field"
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+                {
+                    new OpenApiSecurityScheme {
+                    Reference = new OpenApiReference {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                    },Array.Empty<string>()
+                }
+                });
+            });
 
             Console.WriteLine("::notice::ConfigureServices - Line 185");
 
@@ -304,13 +303,12 @@ namespace CESMII.Marketplace.Api
                 await next();
             });
 
-            // PAUL YAO - To Do -- Experiment to see whether this is preventing us from running in a Github Action
             if (env.IsDevelopment())
             {
-                //app.UseDeveloperExceptionPage();
-                //app.UseSwagger();
-                //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CESMII.Marketplace.Api v1"));
-                //IdentityModelEventSource.ShowPII = true;
+                app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "CESMII.Marketplace.Api v1"));
+                IdentityModelEventSource.ShowPII = true;
             }
             else
             {

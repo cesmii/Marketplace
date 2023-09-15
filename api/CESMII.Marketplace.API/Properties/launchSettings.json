@@ -6,9 +6,7 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "ENABLECLOUDLIBSEARCH": "false",
-        "DATABASE_NAME": "cesmii_db",
-        "MARKETPLACE_COLLECTION_NAME": "marketplace"
+        "EnableCloudlibSearch": "false"
       }
     },
     "CESMII.Marketplace.API": {
@@ -23,7 +21,8 @@
         "MARKETPLACE_MONGODB_DATABASE": "test"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:5001;http://localhost:5000"
+      "applicationUrl": "http://localhost:5000",
+      "useSSL": false
     },
     "WSL": {
       "commandName": "Executable",
@@ -31,10 +30,6 @@
       "launchUrl": "https://localhost:5001/swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "EnableCloudlibSearch": "false",
-        "MARKETPLACE_COLLECTION_NAME": "marketplace",
-        "MARKETPLACE_MONGODB_CONNECTIONSTRING": "mongodb://testuser:password@localhost:27017",
-        "MARKETPLACE_MONGODB_DATABASE": "test"
       },
       "distributionName": ""
     },
@@ -46,9 +41,6 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "EnableCloudlibSearch": "false",
-        "MARKETPLACE_COLLECTION_NAME": "marketplace",
-        "MARKETPLACE_MONGODB_CONNECTIONSTRING": "mongodb://testuser:password@MyMongoDB:27017",
-        "MARKETPLACE_MONGODB_DATABASE": "test"
       },
       "publishAllPorts": true,
       "useSSL": true,

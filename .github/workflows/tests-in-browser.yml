@@ -112,14 +112,33 @@ jobs:
     - name: MongoDB - Test access to Mongo database
       run: dotnet test ./api/Tests/CESMII.Marketplace.MongoDB/CESMII.Marketplace.MongoDB.csproj
       env:
-         TEST_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
-         TEST_DATABASE_NAME: ${{env.MONGODB_DATABASE_NAME}}
+         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
+         MARKETPLACE_MONGODB_DATABASE: ${{env.MONGODB_DATABASE_NAME}}
    
-    # - name: MongoDB - Get list of test result files
-    #   run: ls -al /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.MongoDB/TestResults
 
-    # - name: MongoDB - Dump contents of test result files
-    #   run: cat --number /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.MongoDB/TestResults/*
+    # These next two steps two worked in Docker Desktop, although have not solved the run in the background problem
+    # (1) Start Marketplace API and (2) Call Marketplace API w/out SSL
+    # Marketplace - Start the Marketplace API running
+    - name: Marketplace - Start Our DLL running
+      env:
+        EnableCloudLibSearch: false
+        MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
+        MARKETPLACE_MONGODB_DATABASE: test
+        ASPNETCORE_ENVIRONMENT: Development
+        ASPNETCORE_URLS: http://+:80
+        ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: true
+        DOTNET_GENERATE_ASPNET_CERTIFICATE: true
+        DOTNET_RUNNING_IN_CONTAINER: true
+        DOTNET_USE_POLLING_FILE_WATCHER: 1
+        MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
+      run: |
+          "/root/.dotnet/dotnet" run --project "./api/CESMII.Marketplace.API/CESMII.Marketplace.API.csproj" "&"
+
+    # Call Marketplace Api 
+    - name: Test Access to RectApi 
+      env:
+        MARKETPLACE_URL1: "http://localhost:5000/api"
+      run: /root/.dotnet/dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ./api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
 
 
     # - name: Marketplace API - Start up Marketplace Server
@@ -129,88 +148,91 @@ jobs:
     #     MARKETPLACE_MONGODB_DATABASE: test
     #   run: dotnet run --project ./api/CESMII.Marketplace.API/CESMII.Marketplace.API.csproj &
 
-    # Create a Docker Container for Marketplace
-    - name: Marketplace - Build Container
-      run: docker build -f ${{env.DOCKER_FILE_MARKETPLACE}}  -t cesmiimarketplaceapi:dev --target base  ${{env.DOCKER_HOME_FOLDER}}
+    # # Create a Docker Container for Marketplace
+    # - name: Marketplace - Build Container
+    #   run: docker build -f ${{env.DOCKER_FILE_MARKETPLACE}}  -t cesmiimarketplaceapi:dev --target base  ${{env.DOCKER_HOME_FOLDER}}
 
-    # Start Marketplace Container
-    - name: Marketplace - Launch Container
-      env:
-         ASPNETCORE_ENVIRONMENT: Development
-         ASPNETCORE_HTTPS_PORT: 5001
-         ASPNETCORE_URLS: https://+:443;http://+:80
-         ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: true
-         DOTNET_GENERATE_ASPNET_CERTIFICATE: true
-         DOTNET_RUNNING_IN_CONTAINER: true
-         DOTNET_USE_POLLING_FILE_WATCHER: 1
-         EnableCloudLibSearch: false
-         MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
-         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
-         MARKETPLACE_MONGODB_DATABASE: test
-      run: docker run -dt -p 5001:443 -p 32775:80 -P  --log-driver=local --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}}  --entrypoint tail cesmiimarketplaceapi:dev
+    # # Start Marketplace Container
+    # - name: Marketplace - Launch Container
+    #   env:
+    #      ASPNETCORE_ENVIRONMENT: Development
+    #      ASPNETCORE_HTTPS_PORT: 5001
+    #      ASPNETCORE_URLS: https://+:443;http://+:80
+    #      ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: true
+    #      DOTNET_GENERATE_ASPNET_CERTIFICATE: true
+    #      DOTNET_RUNNING_IN_CONTAINER: true
+    #      DOTNET_USE_POLLING_FILE_WATCHER: 1
+    #      EnableCloudLibSearch: false
+    #      MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
+    #      MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
+    #      MARKETPLACE_MONGODB_DATABASE: test
+    #   run: docker run -dt -p 5001:443 -p 32775:80 -P  --log-driver=local --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}}  --entrypoint tail cesmiimarketplaceapi:dev
 
-    - name: Marketplace - Where Are the Files that I Need?
-      run: |
-        ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API ;
-        ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API.dll ;
+    # - name: Marketplace - Where Are the Files that I Need?
+    #   run: |
+    #     ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API ;
+    #     ls -al /home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API.dll ;
 
-    # Peek at docker status
-    - name: Docker - Peeking at docker status 
-      run: docker container ls --all ; 
-           docker network ls ;
-           docker network inspect mysubnet1 ;
+    # # Peek at docker status
+    # - name: Docker - Peeking at docker status 
+    #   run: docker container ls --all ; 
+    #        docker network ls ;
+    #        docker network inspect mysubnet1 ;
 
-    # Give the server a chance to start up
-    - name: Docker - Waiting for Marketplace Server to start -- 1
-      run: sleep 20
+    # # Give the server a chance to start up
+    # - name: Docker - Waiting for Marketplace Server to start -- 1
+    #   run: sleep 20
 
-    - name: Marketplace - Where Are the Files that I Need?
-      run: |
-        ls -al /usr/share/dotnet/dotnet ;
+    # - name: Marketplace - Where Are the Files that I Need?
+    #   run: |
+    #     ls -al /usr/share/dotnet/dotnet ;
 
-    # Marketplace - Start the Marketplace API running
-    - name: DotNet - help
-      run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --help
+    # # Marketplace - Start the Marketplace API running
+    # - name: DotNet - help
+    #   #run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --help
+    #   run: MyMarketplace /usr/share/dotnet/dotnet 
 
-    # Marketplace - Start the Marketplace API running
-    - name: DotNet - Diagnostics
-      run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --diagnostics
+    # # Marketplace - Start the Marketplace API running
+    # - name: DotNet - Diagnostics
+    #   #run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --diagnostics
+    #   run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --diagnostics
 
-    # Marketplace - Start the Marketplace API running
-    - name: DotNet - Info
-      run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --info
+    # # Marketplace - Start the Marketplace API running
+    # - name: DotNet - Info
+    #   run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --info
 
-    # Marketplace - Start the Marketplace API running
-    - name: DotNet - list-runtimes
-      run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --list-runtimes
+    # # Marketplace - Start the Marketplace API running
+    # - name: DotNet - list-runtimes
+    #   run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --list-runtimes
 
-    # Marketplace - Start the Marketplace API running
-    - name: DotNet - list-sdks
-      run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --list-sdks
+    # # Marketplace - Start the Marketplace API running
+    # - name: DotNet - list-sdks
+    #   run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --list-sdks
 
-    # Marketplace - Start the Marketplace API running
-    - name: DotNet - Version
-      run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --version
+    # # Marketplace - Start the Marketplace API running
+    # - name: DotNet - Version
+    #   run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --version
 
-    # Marketplace - Start the Marketplace API running
-    - name: Marketplace - Start Our DLL running
-      run: docker exec -i MyMarketplace "/usr/share/dotnet/dotnet"  "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API.dll"
+    # # Marketplace - Start the Marketplace API running
+    # - name: Marketplace - Start Our DLL running
+    #   #run: docker exec -i MyMarketplace "/usr/share/dotnet/dotnet"  "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API.dll"
+    #   run: dotnet  "/mnt/c/CESMII.github/Marketplace/api/CESMII.Marketplace.API/bin/Release/net6.0/CESMII.Marketplace.API.dll" &
 
-    # Check the logs 
-    - name: Marketplace - Read the Logs to see whether startup was okay or not -- 1
-      run: docker logs --details MyMarketplace
+    # # Check the logs 
+    # - name: Marketplace - Read the Logs to see whether startup was okay or not -- 1
+    #   run: docker logs --details MyMarketplace
 
-    # Call Marketplace Api from OUTSIDE container MyMarketplace
-    - name: Test Logging - from OUTSIDE container MyMarketplace
-      env:
-        MARKETPLACE_URL: "https://MyMarketplace:5001/api"
-      run: dotnet test -e "MARKETPLACE_URL=https://MyMarketplace:5001/api" /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
+    # # Call Marketplace Api from OUTSIDE container MyMarketplace
+    # - name: Test Logging - from OUTSIDE container MyMarketplace
+    #   env:
+    #     MARKETPLACE_URL: "https://MyMarketplace:5001/api"
+    #   run: dotnet test -e "MARKETPLACE_URL=https://MyMarketplace:5001/api" /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
 
     # Call Marketplace Api from INSIDE container MyMarketplace
-    - name: Test Logging - from INSIDE container MyMarketplace
-      env:
-        MARKETPLACE_URL: "https://MyMarketplace:5001/api"
-      run: docker exec -e "MARKETPLACE_URL=https://MyMarketplace:5001/api" -i MyMarketplace  dotnet test /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
+    # - name: Test Logging - from INSIDE container MyMarketplace
+    #   env:
+    #     MARKETPLACE_URL: "https://MyMarketplace:5001/api"
+    #   run: docker exec -e "MARKETPLACE_URL=https://MyMarketplace:5001/api" -i MyMarketplace  dotnet test /src/api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
 
     # # Test Logging - Get list of output files created
     # - name: Marketplace REST - Get list of test result files

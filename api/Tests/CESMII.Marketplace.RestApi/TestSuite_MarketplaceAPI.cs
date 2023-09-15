@@ -7,18 +7,17 @@ namespace CESMII.Marketplace.RestApi
 {
     public class TestSuite_MarketplaceAPI
     {
-        private static string strHostHttps = "https://localhost:5001/api";
-        // private static string strHostHttps = "https://MyMarketplace:5001/api";
-
         [Fact]
-        public void MarketItemsAvailable_On_Https_Api_Marketplace_All()
+        public void MarketItemsAvailable_On_RestCall1()
         {
+            string strHostHttps = "http://localhost:5000/api";
             HttpClient client = new HttpClient();
 
-            strHostHttps = utils.GetConnection();
+            string strTemp = utils.GetConnection("MARKETPLACE_URL1");
+            if (!string.IsNullOrEmpty(strTemp) )
+                strHostHttps = strTemp;
 
-            // client.BaseAddress = new Uri(strHostHttps);
-
+            Console.WriteLine($"MarketItemsAvailable_On_RestCall1: Attempting to connect to {strHostHttps}");
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -30,14 +29,43 @@ namespace CESMII.Marketplace.RestApi
         }
 
 
+        //[Fact]
+        //public void MarketItemsAvailable_On_RestCall2()
+        //{
+        //    string strHostHttps = "https://localhost:5001/api";
+        //    HttpClient client = new HttpClient();
+
+        //    string strTemp = utils.GetConnection("MARKETPLACE_URL2");
+        //    if (!string.IsNullOrEmpty(strTemp))
+        //        strHostHttps = strTemp;
+
+        //    Console.WriteLine($"MarketItemsAvailable_On_RestCall2: Attempting to connect to {strHostHttps}");
+        //    client.DefaultRequestHeaders.Accept.Clear();
+        //    client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+        //    var items = GetFirstItem(client, $"{strHostHttps}/Marketplace/All");
+        //    Assert.NotNull(items);
+
+        //    int count = items.Count();
+        //    Assert.NotEqual(0, count);
+        //}
+
         private MarketplaceItemModel[] GetFirstItem(HttpClient client, string strPath)
         {
             MarketplaceItemModel[] ReturnValue = null;
-            var response = client.GetAsync(strPath).Result;
-            if (response.IsSuccessStatusCode)
+
+            try
             {
-                var output = response.Content.ReadFromJsonAsync<MarketplaceItemModel[]>().Result;
-                ReturnValue = output;
+                var response = client.GetAsync(strPath).Result;
+                if (response.IsSuccessStatusCode)
+                {
+                    var output = response.Content.ReadFromJsonAsync<MarketplaceItemModel[]>().Result;
+                    ReturnValue = output;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception: {ex.Message}");
             }
 
             return ReturnValue;
