@@ -132,13 +132,13 @@ jobs:
         DOTNET_USE_POLLING_FILE_WATCHER: 1
         MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
       run: |
-          "/root/.dotnet/dotnet" run --project "./api/CESMII.Marketplace.API/CESMII.Marketplace.API.csproj" "&"
+          dotnet run --project "./api/CESMII.Marketplace.API/CESMII.Marketplace.API.csproj" "&"
 
     # Call Marketplace Api 
     - name: Test Access to RectApi 
       env:
         MARKETPLACE_URL1: "http://localhost:5000/api"
-      run: /root/.dotnet/dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ./api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
+      run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ./api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
 
 
     # - name: Marketplace API - Start up Marketplace Server
