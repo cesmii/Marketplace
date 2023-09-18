@@ -59,9 +59,8 @@ namespace CESMII.Marketplace.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // Check for this later: MARKETPLACE_GITHUB_WORKFLOW_COMMANDS
-            // For now, let's just see if we can see this at all!
-            Console.WriteLine("::notice::ConfigureServices - Entering function. Does this actually work?");
+            bool bGithubWorkflowLog = Github.QueryEnvironmentBool("MARKETPLACE_GITHUB_WORKFLOW_COMMANDS", false);
+            Github.Write_If(bGithubWorkflowLog, "::notice::Startup-ConfigureServices - Entering function.");
 
             //MongoDB approach
             services.Configure<MongoDBConfig>(Configuration);
@@ -71,17 +70,14 @@ namespace CESMII.Marketplace.Api
 
             // In a test environment, we get connection string from the environment
             if (!string.IsNullOrEmpty(strConnectionString))
-            { 
+            {
                 Configuration["MongoDBSettings:ConnectionString"] = strConnectionString;
             }
 
             if (!string.IsNullOrEmpty(strDatabase))
             {
-                 Configuration["MongoDBSettings:DatabaseName"] = strDatabase;
+                Configuration["MongoDBSettings:DatabaseName"] = strDatabase;
             }
-
-            Console.WriteLine($"::notice::ConfigureServices - strConnectionString:{strConnectionString}");
-            Console.WriteLine($"::notice::ConfigureServices - strDatabase:{strDatabase}");
 
             var root = (IConfigurationRoot)Configuration;
             var debugView = root.GetDebugView();
@@ -113,7 +109,7 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IMongoRepository<JobLog>, MongoRepository<JobLog>>();
             services.AddScoped<IMongoRepository<JobDefinition>, MongoRepository<JobDefinition>>();
 
-            Console.WriteLine("::notice::ConfigureServices - Line 115");
+            Github.Write_If(bGithubWorkflowLog, "::notice::ConfigureServices-StartUp - Line 112");
 
             //DAL objects
             services.AddScoped<UserDAL>();  //this one has extra methods outside of the IDal interface
@@ -153,8 +149,6 @@ namespace CESMII.Marketplace.Api
             //var configUtil = new ConfigUtil(Configuration);
             //services.AddTransient(provider => new TokenUtils(configUtil));
 
-            Console.WriteLine("::notice::ConfigureServices - Line 155");
-
             services.AddControllers();
 
             services.AddSwaggerGen(c =>
@@ -183,7 +177,7 @@ namespace CESMII.Marketplace.Api
                 });
             });
 
-            Console.WriteLine("::notice::ConfigureServices - Line 185");
+            Console.WriteLine("::notice::ConfigureServices - Line 180");
 
             // https://stackoverflow.com/questions/46112258/how-do-i-get-current-user-in-net-core-web-api-from-jwt-token
             //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -239,8 +233,6 @@ namespace CESMII.Marketplace.Api
                 });
             });
 
-            Console.WriteLine("::notice::ConfigureServices - Line 241");
-
             services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
 
             services.AddMvc(); //add this to permit emailing to bind models to view templates.
@@ -248,8 +240,6 @@ namespace CESMII.Marketplace.Api
             {
                 options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
             });
-
-            Console.WriteLine("::notice::ConfigureServices - Line 251");
 
             // Add in-memory caching
             services.AddMemoryCache();
@@ -261,8 +251,9 @@ namespace CESMII.Marketplace.Api
             //https://docs.microsoft.com/en-us/aspnet/core/fundamentals/http-requests?view=aspnetcore-6.0
             services.AddHttpClient();
 
-            Console.WriteLine("::notice::ConfigureServices - EXITING!!!! Line 263 ");
+            Github.Write_If(bGithubWorkflowLog, "::notice::ConfigureServices-Startup - Completed.");
         }
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

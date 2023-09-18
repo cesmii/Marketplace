@@ -41,20 +41,20 @@ env:
   MONGODB_LOCAL_CONNECTION: "mongodb://testuser:password@localhost:27017"
   MONGODB_CONNECTION: "mongodb://testuser:password@MyMongoDB:27017"
 
-  MOUNT_SOURCE: "/home/runner/work/Marketplace/Marketplace/mongo-data"    # In a Github Action
-  #MOUNT_SOURCE: "c:/CESMII.github/Marketplace/mongo-data"               # On the desktop
+  #MOUNT_SOURCE: "/home/runner/work/Marketplace/Marketplace/mongo-data"    # In a Github Action
+  MOUNT_SOURCE: "c:/CESMII.github/Marketplace/mongo-data"               # On the desktop
 
-  VOLUME_APP: "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app"
-  #VOLUME_APP: "C:/CESMII.github/Marketplace/api/CESMII.Marketplace.API:/app"
+  #VOLUME_APP: "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app"
+  VOLUME_APP: "C:/CESMII.github/Marketplace/api/CESMII.Marketplace.API:/app"
 
-  VOLUME_SRC: "/home/runner/work/Marketplace/Marketplace:/src/"
-  #VOLUME_SRC: "C:/CESMII.github/Marketplace:/src/"
+  #VOLUME_SRC: "/home/runner/work/Marketplace/Marketplace:/src/"
+  VOLUME_SRC: "C:/CESMII.github/Marketplace:/src/"
 
-  DOCKER_FILE_MARKETPLACE: "/home/runner/work/Marketplace/Marketplace/Dockerfile"
-  #DOCKER_FILE_MARKETPLACE: /mnt/c/CESMII.github/Marketplace/Dockerfile
+  #DOCKER_FILE_MARKETPLACE: "/home/runner/work/Marketplace/Marketplace/Dockerfile"
+  DOCKER_FILE_MARKETPLACE: /mnt/c/CESMII.github/Marketplace/Dockerfile
 
-  DOCKER_HOME_FOLDER: "/home/runner/work/Marketplace/Marketplace"
-  #DOCKER_HOME_FOLDER: /mnt/c/CESMII.github/Marketplace/
+  #DOCKER_HOME_FOLDER: "/home/runner/work/Marketplace/Marketplace"
+  DOCKER_HOME_FOLDER: /mnt/c/CESMII.github/Marketplace/
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -116,23 +116,46 @@ jobs:
          MARKETPLACE_MONGODB_DATABASE: ${{env.MONGODB_DATABASE_NAME}}
    
 
-    # These next two steps two worked in Docker Desktop, although have not solved the run in the background problem
-    # (1) Start Marketplace API and (2) Call Marketplace API w/out SSL
-    # Marketplace - Start the Marketplace API running
-    - name: Marketplace - Start Our DLL running
+    # Create a Docker Container for Marketplace
+    - name: Marketplace - Build Container
+      run: docker build -f ${{env.DOCKER_FILE_MARKETPLACE}}  -t cesmiimarketplaceapi:dev --target base  ${{env.DOCKER_HOME_FOLDER}}
+
+    # Start Marketplace Container
+    - name: Marketplace - Launch Container
       env:
-        EnableCloudLibSearch: false
-        MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
-        MARKETPLACE_MONGODB_DATABASE: test
-        ASPNETCORE_ENVIRONMENT: Development
-        ASPNETCORE_URLS: http://+:80
-        ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: true
-        DOTNET_GENERATE_ASPNET_CERTIFICATE: true
-        DOTNET_RUNNING_IN_CONTAINER: true
-        DOTNET_USE_POLLING_FILE_WATCHER: 1
-        MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
+         ASPNETCORE_ENVIRONMENT: Development
+         ASPNETCORE_HTTPS_PORT: 5001
+         ASPNETCORE_URLS: https://+:443;http://+:80
+         ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: true
+         DOTNET_GENERATE_ASPNET_CERTIFICATE: true
+         DOTNET_RUNNING_IN_CONTAINER: true
+         DOTNET_USE_POLLING_FILE_WATCHER: 1
+         EnableCloudLibSearch: false
+         MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
+         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
+         MARKETPLACE_MONGODB_DATABASE: test
       run: |
-          dotnet run --project "./api/CESMII.Marketplace.API/CESMII.Marketplace.API.csproj" "&"
+           docker run -dt -p 5001:443 -p 5000:80 -P  --entrypoint tail --log-driver=local --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}}     "cesmiimarketplaceapi:dev" ;
+           docker exec -it MyMarketplace dotnet /app/bin/Release/net6.0/CESMII.Marketplace.API.dll ;
+
+
+    # # These next two steps two worked in Docker Desktop, although have not solved the run in the background problem
+    # # (1) Start Marketplace API and (2) Call Marketplace API w/out SSL
+    # # Marketplace - Start the Marketplace API running
+    # - name: Marketplace - Start Our DLL running
+    #   env:
+    #     EnableCloudLibSearch: false
+    #     MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
+    #     MARKETPLACE_MONGODB_DATABASE: test
+    #     ASPNETCORE_ENVIRONMENT: Development
+    #     ASPNETCORE_URLS: http://+:80
+    #     ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: true
+    #     DOTNET_GENERATE_ASPNET_CERTIFICATE: true
+    #     DOTNET_RUNNING_IN_CONTAINER: true
+    #     DOTNET_USE_POLLING_FILE_WATCHER: 1
+    #     MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
+    #   run: |
+    #       dotnet run --project "./api/CESMII.Marketplace.API/CESMII.Marketplace.API.csproj" "&"
 
     # Call Marketplace Api 
     - name: Test Access to RectApi 

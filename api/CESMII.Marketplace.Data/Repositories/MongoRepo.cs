@@ -37,9 +37,16 @@
                     }
                 });
             };
-            //set public property
-            Client = new MongoClient(mongoClientSettings);
-            Database = Client.GetDatabase(configUtil.MongoDBSettings.DatabaseName);
+
+            try
+            {
+                //set public property
+                Client = new MongoClient(mongoClientSettings);
+                Database = Client.GetDatabase(configUtil.MongoDBSettings.DatabaseName);
+            }
+            catch (Exception ex) 
+            { 
+            }
         }
     }
 

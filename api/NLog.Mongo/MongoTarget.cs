@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using CESMII.Marketplace.Api.Shared.Utils;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using NLog.Common;
@@ -20,6 +21,7 @@ namespace NLog.Mongo
     [Target("Mongo")]
     public class MongoTarget : Target
     {
+        private static bool bErrorWriting = false;
         private struct MongoConnectionKey : IEquatable<MongoConnectionKey>
         {
             private readonly string ConnectionString;
@@ -227,7 +229,7 @@ namespace NLog.Mongo
         /// <param name="logEvents">Logging events to be written out.</param>
         protected override void Write(IList<AsyncLogEventInfo> logEvents)
         {
-            if (logEvents.Count == 0)
+            if (logEvents.Count == 0 || bErrorWriting)
                 return;
 
             try
@@ -239,21 +241,22 @@ namespace NLog.Mongo
                 var collection = GetCollection(logEvents[logEvents.Count - 1].LogEvent.TimeStamp);
                 collection.InsertMany(documents);
 
-                for (int i = 0; i < logEvents.Count; ++i)
+                for (int i = 0; i < logEvents.Count && !bErrorWriting; ++i)
                     logEvents[i].Continuation(null);
             }
             catch (Exception ex)
             {
+                bErrorWriting = true;
                 InternalLogger.Error("Error when writing to MongoDB {0}", ex);
 
                 if (ex.MustBeRethrownImmediately())
                     throw;
 
-                for (int i = 0; i < logEvents.Count; ++i)
-                    logEvents[i].Continuation(ex);
+                //for (int i = 0; i < logEvents.Count; ++i)
+                //    logEvents[i].Continuation(ex);
 
-                if (ex.MustBeRethrown())
-                    throw;
+                //if (ex.MustBeRethrown())
+                //    throw;
             }
         }
 
@@ -266,12 +269,17 @@ namespace NLog.Mongo
         {
             try
             {
-                var document = CreateDocument(logEvent);
-                var collection = GetCollection(logEvent.TimeStamp);
-                collection.InsertOne(document);
+                if (!bErrorWriting)
+                {
+                    var document = CreateDocument(logEvent);
+                    var collection = GetCollection(logEvent.TimeStamp);
+                    collection.InsertOne(document);
+                }
             }
             catch (Exception ex)
             {
+                bErrorWriting = true;
+
                 InternalLogger.Error("Error when writing to MongoDB {0}", ex);
                 throw;
             }
@@ -438,6 +446,9 @@ namespace NLog.Mongo
 
         private IMongoCollection<BsonDocument> GetCollection(DateTime timestamp)
         {
+            if (bErrorWriting)
+                return null;
+
             if (_defaultLogEvent.TimeStamp < timestamp)
                 _defaultLogEvent.TimeStamp = timestamp;
 
@@ -460,7 +471,12 @@ namespace NLog.Mongo
 
                 databaseName = !string.IsNullOrEmpty(databaseName) ? databaseName : (mongoUrl.DatabaseName ?? "NLog");
                 collectionName = !string.IsNullOrEmpty(collectionName) ? collectionName : "Log";
-                InternalLogger.Info("Connecting to MongoDB collection {0} in database {1}", collectionName, databaseName);
+
+                string strLogConnecting = "Connecting to MongoDB collection {collectionName} in database {databaseName}";
+                InternalLogger.Info(strLogConnecting);
+
+                bool bGithubWorkflowLog = Github.QueryEnvironmentBool("MARKETPLACE_GITHUB_WORKFLOW_COMMANDS", false);
+                Github.Write_If(bGithubWorkflowLog, $"::notice::MongoTarget - {strLogConnecting}.");
 
                 var client = new MongoClient(mongoUrl);
 
@@ -469,12 +485,16 @@ namespace NLog.Mongo
 
                 if (CappedCollectionSize.HasValue)
                 {
-                    InternalLogger.Debug("Checking for existing MongoDB collection {0} in database {1}", collectionName, databaseName);
-                    
+                    string strLogChecking = $"Checking for existing MongoDB collection {collectionName} in database {databaseName}";
+                    InternalLogger.Debug(strLogChecking);
+                    Github.Write_If(bGithubWorkflowLog, $"::notice::MongoTarget - {strLogChecking}.");
+
                     var filterOptions = new ListCollectionNamesOptions { Filter = new BsonDocument("name", collectionName) };
                     if (!database.ListCollectionNames(filterOptions).Any())
                     {
-                        InternalLogger.Debug("Creating new MongoDB collection {0} in database {1}", collectionName, databaseName);
+                        string strCreatingCollection = $"Creating new MongoDB collection {collectionName} in database {databaseName}";
+                        InternalLogger.Debug(strCreatingCollection);
+                        Github.Write_If(bGithubWorkflowLog, $"::notice::MongoTarget - {strCreatingCollection}");
 
                         // create capped
                         var options = new CreateCollectionOptions
