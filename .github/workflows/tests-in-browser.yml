@@ -82,20 +82,20 @@ jobs:
       with:
         submodules: true
 
-    # # # - name: Docker - Set up networking
-    # # #   run: |
-    # # #       docker network remove --force mysubnet1 ;
-    # # #       docker network create mysubnet1 ;
+    - name: Docker - Set up networking
+      run: |
+          docker network remove --force mysubnet1 ;
+          docker network create mysubnet1 ;
 
-    # # # # Initialize a Mongo DB database
-    # # # # Note: the "env" section seems not to work and so
-    # # # # the -e switches are necessary
-    # # # - name: MongoDB - Create MongoDB Docker container      
-    # # #   run: docker run -d -P -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE}}",target=/data,type=bind mongo:4.0
-    # # #   env:
-    # # #      MONGO_INIT_DATABASE: test 
-    # # #      MONGO_INITDB_ROOT_USERNAME: testuser
-    # # #      MONGO_INITDB_ROOT_PASSWORD: password
+    # Initialize a Mongo DB database
+    # Note: the "env" section seems not to work and so
+    # the -e switches are necessary
+    - name: MongoDB - Create MongoDB Docker container      
+      run: docker run -d -P -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE}}",target=/data,type=bind mongo:4.0
+      env:
+         MONGO_INIT_DATABASE: test 
+         MONGO_INITDB_ROOT_USERNAME: testuser
+         MONGO_INITDB_ROOT_PASSWORD: password
 
     # Putting this between "Create mongoDB container" and "Populate mongo database" seems to help the mongo container settle down
     - name: Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
@@ -103,17 +103,17 @@ jobs:
       with:
         dotnet-version: ${{ env.NETCORE_VERSION }}
 
-    # # # - name: MongoDB - Populate mongo database
-    # # #   run: docker exec -i MyMongoDB mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-    # # #        docker exec -i MyMongoDB mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-    # # #        docker exec -i MyMongoDB mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-    # # #        docker exec -i MyMongoDB mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-    # # #        docker exec -i MyMongoDB mongoimport  --collection=Organization --file=/data/Organization.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-    # # #        docker exec -i MyMongoDB mongoimport  --collection=Permission --file=/data/Permission.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-    # # #        docker exec -i MyMongoDB mongoimport  --collection=ProfileItem --file=/data/ProfileItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-    # # #        docker exec -i MyMongoDB mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-    # # #        docker exec -i MyMongoDB mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-    # # #        docker exec -i MyMongoDB mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    - name: MongoDB - Populate mongo database
+      run: docker exec -i MyMongoDB mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=Organization --file=/data/Organization.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=Permission --file=/data/Permission.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=ProfileItem --file=/data/ProfileItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
 
     - name: Marketplace API - Restore dependencies (${{env.MARKETPLACE_PROJECT_FILE}})
       run: dotnet restore ${{env.MARKETPLACE_PROJECT_FILE}}
