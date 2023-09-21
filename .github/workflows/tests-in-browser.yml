@@ -194,6 +194,13 @@ jobs:
     #   run: |
     #       dotnet run --project "./api/CESMII.Marketplace.API/CESMII.Marketplace.API.csproj" "&"
 
+    # Query Docker
+    - name: Query Docker 
+      run:
+        docker container ls ;
+        docker system info ;
+        docker port CESMII.Marketplace.API ;
+
     # Call Marketplace Api 
     - name: Test Access to RectApi 
       env:
