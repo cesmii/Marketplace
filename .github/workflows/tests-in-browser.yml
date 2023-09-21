@@ -16,12 +16,26 @@ on:
   #    - main
 
 env:
-  # set this to the path to your solution file
-  SOLUTION_DIRECTORY: './'      
-  # Solution file name
-  SOLUTION_FILE: 'CESMII.Marketplace.sln'      
-  # Set this to the path to your test project file
-  PROJECT_DIRECTORY: './api/Tests/CESMII.Marketplace.InBrowser.Tests/'
+  # Main project path
+  MARKETPLACE_PROJECT_DIRECTORY: './api/CESMII.Marketplace.API/'
+  # Main project file name
+  MARKETPLACE_PROJECT_FILE: 'CESMII.Marketplace.API.csproj'
+  # Main project fqn
+  MARKETPLACE_PROJECT_FQDN: './api/CESMII.Marketplace.API/CESMII.Marketplace.API.csproj'
+  # Mapping volume of project publish
+  MARKETPLACE_PROJECT_VOLUME_PUBLISH: 'C:/CESMII.github/Marketplace/publish:/publish'
+
+  # Paths to Test 1 (In Browser)
+  TEST1_PROJECT_DIRECTORY: './api/Tests/CESMII.Marketplace.Tests.InBrowser/'
+  TEST1_PROJECT_FILE: 'CESMII.Marketplace.InBrowser.Tests.csproj'
+  # Paths to Test 2 (MongoDB)
+  TEST2_PROJECT_DIRECTORY: './api/Tests/CESMII.Marketplace.Tests.MongoDB/'
+  TEST2_PROJECT_FILE: 'CESMII.Marketplace.Tests.MongoDB.csproj'
+
+  # Paths to Test 3 (RestApi)
+  TEST3_PROJECT_DIRECTORY: './api/Tests/CESMII.Marketplace.Tests.RestApi/'
+  TEST3_PROJECT_FILE: 'CESMII.Marketplace.Tests.RestApi.csproj'
+
   # Test project file to use
   PROJECT_NAME: 'CESMII.Marketplace.InBrowser.Tests'      
   # set this to the .NET core version to use
@@ -41,48 +55,47 @@ env:
   MONGODB_LOCAL_CONNECTION: "mongodb://testuser:password@localhost:27017"
   MONGODB_CONNECTION: "mongodb://testuser:password@MyMongoDB:27017"
 
-  #MOUNT_SOURCE: "/home/runner/work/Marketplace/Marketplace/mongo-data"    # In a Github Action
-  MOUNT_SOURCE: "c:/CESMII.github/Marketplace/mongo-data"               # On the desktop
+  MOUNT_SOURCE: '/home/runner/work/Marketplace/Marketplace/mongo-data'    # In a Github Action
+  #MOUNT_SOURCE: 'c:/CESMII.github/Marketplace/mongo-data'               # On the desktop
 
-  #VOLUME_APP: "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app"
-  VOLUME_APP: "C:/CESMII.github/Marketplace/api/CESMII.Marketplace.API:/app"
+  VOLUME_APP: '/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app'
+  #VOLUME_APP: 'C:/CESMII.github/Marketplace/api/CESMII.Marketplace.API:/app'
 
-  #VOLUME_SRC: "/home/runner/work/Marketplace/Marketplace:/src/"
-  VOLUME_SRC: "C:/CESMII.github/Marketplace:/src/"
+  VOLUME_SRC: '/home/runner/work/Marketplace/Marketplace:/src'
+  #VOLUME_SRC: 'C:/CESMII.github/Marketplace:/src'
 
-  #DOCKER_FILE_MARKETPLACE: "/home/runner/work/Marketplace/Marketplace/Dockerfile"
-  DOCKER_FILE_MARKETPLACE: /mnt/c/CESMII.github/Marketplace/Dockerfile
+  DOCKER_VOLUME_PUBLISH: '/home/runner/work/Marketplace/Marketplace/publish:/publish'
+  #DOCKER_VOLUME_PUBLISH: '/mnt/c/CESMII.github/Marketplace/publish:/publish'
+  
+  DOCKER_FILE_MARKETPLACE: '/home/runner/work/Marketplace/Marketplace/Dockerfile'
+  #DOCKER_FILE_MARKETPLACE: '/mnt/c/CESMII.github/Marketplace/api/CESMII.Marketplace.API/Dockerfile'
 
-  #DOCKER_HOME_FOLDER: "/home/runner/work/Marketplace/Marketplace"
-  DOCKER_HOME_FOLDER: /mnt/c/CESMII.github/Marketplace/
+  DOCKER_HOME_FOLDER: '/home/runner/work/Marketplace/Marketplace'
+  #DOCKER_HOME_FOLDER: '/mnt/c/CESMII.github/Marketplace/api/CESMII.Marketplace.API'
+    
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: GitHub Security Mask
-      run: | 
-          echo ::add-mask::$env.MONGODB_CONNECTION ;
-          echo ::add-mask::$env.MONGODB_LOCAL_CONNECTION ;
-
     - name: Marketplace API - Check out the repo
       uses: actions/checkout@v2
       with:
         submodules: true
 
-    - name: Docker - Set up networking
-      run: |
-          docker network remove --force mysubnet1 ;
-          docker network create mysubnet1 ;
+    # # # - name: Docker - Set up networking
+    # # #   run: |
+    # # #       docker network remove --force mysubnet1 ;
+    # # #       docker network create mysubnet1 ;
 
-    # Initialize a Mongo DB database
-    # Note: the "env" section seems not to work and so
-    # the -e switches are necessary
-    - name: MongoDB - Create MongoDB Docker container      
-      run: docker run -d -P -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE}}",target=/data,type=bind mongo:4.0
-      env:
-         MONGO_INIT_DATABASE: test 
-         MONGO_INITDB_ROOT_USERNAME: testuser
-         MONGO_INITDB_ROOT_PASSWORD: password
+    # # # # Initialize a Mongo DB database
+    # # # # Note: the "env" section seems not to work and so
+    # # # # the -e switches are necessary
+    # # # - name: MongoDB - Create MongoDB Docker container      
+    # # #   run: docker run -d -P -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE}}",target=/data,type=bind mongo:4.0
+    # # #   env:
+    # # #      MONGO_INIT_DATABASE: test 
+    # # #      MONGO_INITDB_ROOT_USERNAME: testuser
+    # # #      MONGO_INITDB_ROOT_PASSWORD: password
 
     # Putting this between "Create mongoDB container" and "Populate mongo database" seems to help the mongo container settle down
     - name: Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
@@ -90,44 +103,48 @@ jobs:
       with:
         dotnet-version: ${{ env.NETCORE_VERSION }}
 
-    - name: MongoDB - Populate mongo database
-      run: docker exec -i MyMongoDB mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=Organization --file=/data/Organization.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=Permission --file=/data/Permission.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=ProfileItem --file=/data/ProfileItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # # - name: MongoDB - Populate mongo database
+    # # #   run: docker exec -i MyMongoDB mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # #        docker exec -i MyMongoDB mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # #        docker exec -i MyMongoDB mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # #        docker exec -i MyMongoDB mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # #        docker exec -i MyMongoDB mongoimport  --collection=Organization --file=/data/Organization.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # #        docker exec -i MyMongoDB mongoimport  --collection=Permission --file=/data/Permission.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # #        docker exec -i MyMongoDB mongoimport  --collection=ProfileItem --file=/data/ProfileItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # #        docker exec -i MyMongoDB mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # #        docker exec -i MyMongoDB mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # #        docker exec -i MyMongoDB mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
 
-    - name: Marketplace API - Restore dependencies (${{env.SOLUTION_FILE}})
-      run: dotnet restore ${{env.SOLUTION_FILE}}
-      working-directory: ${{env.SOLUTION_DIRECTORY}}
+    - name: Marketplace API - Restore dependencies (${{env.MARKETPLACE_PROJECT_FILE}})
+      run: dotnet restore ${{env.MARKETPLACE_PROJECT_FILE}}
+      working-directory: ${{env.MARKETPLACE_PROJECT_DIRECTORY}}
 
-    - name: Marketplace API - Build (${{env.SOLUTION_FILE}})
-      run: dotnet build ${{env.SOLUTION_FILE}} --configuration Release --no-restore
+    - name: Marketplace API - Build (${{env.MARKETPLACE_PROJECT_FILE}})
+      run: dotnet build ${{env.MARKETPLACE_PROJECT_FILE}} --configuration Release --no-restore
+      working-directory: ${{env.MARKETPLACE_PROJECT_DIRECTORY}}
 
     - name: MongoDB - Test access to Mongo database
-      run: dotnet test ./api/Tests/CESMII.Marketplace.MongoDB/CESMII.Marketplace.MongoDB.csproj
+      run: dotnet test ${{env.TEST2_PROJECT_DIRECTORY}}${{env.TEST2_PROJECT_FILE}}
       env:
          MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: ${{env.MONGODB_DATABASE_NAME}}
-   
+
+    # Publish the app
+    - name: Marketplace - Publish the app
+      run: |
+        dotnet publish --framework:net6.0 ${{env.MARKETPLACE_PROJECT_FQDN}} -c Release -o ./publish
 
     # Create a Docker Container for Marketplace
-    - name: Marketplace - Build Container
-      run: docker build -f ${{env.DOCKER_FILE_MARKETPLACE}}  -t cesmiimarketplaceapi:dev --target base  ${{env.DOCKER_HOME_FOLDER}}
+    - name: Marketplace - Build Docker Image
+      #run: docker build -f ${{env.DOCKER_FILE_MARKETPLACE}}  -t cesmiimarketplaceapi:dev --target base  ${{env.DOCKER_HOME_FOLDER}}
+      run: docker build -f "/mnt/c/CESMII.github/Marketplace/api/CESMII.Marketplace.API/Dockerfile" --force-rm -t cesmiimarketplaceapi:dev --target base  --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=CESMII.Marketplace.API" "/mnt/c/CESMII.github/Marketplace"
 
     # Start Marketplace Container
-    - name: Marketplace - Launch Container
+    - name: Marketplace - Start the Container
       env:
          ASPNETCORE_ENVIRONMENT: Development
-         ASPNETCORE_HTTPS_PORT: 5001
-         ASPNETCORE_URLS: https://+:443;http://+:80
+         ASPNETCORE_URLS: http://+:80
          ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: true
-         DOTNET_GENERATE_ASPNET_CERTIFICATE: true
          DOTNET_RUNNING_IN_CONTAINER: true
          DOTNET_USE_POLLING_FILE_WATCHER: 1
          EnableCloudLibSearch: false
@@ -135,8 +152,31 @@ jobs:
          MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: test
       run: |
-           docker run -dt -p 5001:443 -p 5000:80 -P  --entrypoint tail --log-driver=local --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}}     "cesmiimarketplaceapi:dev" ;
-           docker exec -it MyMarketplace dotnet /app/bin/Release/net6.0/CESMII.Marketplace.API.dll ;
+           #docker run -d -p 5000:80 -P  --network mysubnet1 --name=MyMarketplace -v "${{env.VOLUME_APP}}" -v "${{env.VOLUME_SRC}}"  -v "${{env.DOCKER_VOLUME_PUBLISH}}" --entrypoint /publish/CESMII.Marketplace.API.dll   cesmiimarketplaceapi
+           # docker run -d -p 5000:80 -P  --network mysubnet1 --name=MyMarketplace -v "${{env.VOLUME_APP}}" -v "${{env.VOLUME_SRC}}"  -v "${{env.MARKETPLACE_PROJECT_VOLUME_PUBLISH}}" --entrypoint tail   cesmiimarketplaceapi
+           docker run -dt -v "C:\Users\paul\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro" -v "C:\Users\paul\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro" -v "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Sdks\Microsoft.Docker.Sdk\tools\TokenService.Proxy\linux-x64\net6.0:/TokenService.Proxy:ro" -v "C:\CESMII.github\Marketplace\api\CESMII.Marketplace.API:/app" -v "C:\CESMII.github\Marketplace:/src/" -v "C:\Users\paul\.nuget\packages\:/root/.nuget/fallbackpackages" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_URLS=http://+:80" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "NUGET_PACKAGES=/root/.nuget/fallbackpackages" -e "NUGET_FALLBACK_PACKAGES=/root/.nuget/fallbackpackages" -e "EnableCloudLibSearch=false" -p 5000:80 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
+
+    - name: Marketplace - Sleep to Allow the container to start
+      run: sleep 10
+
+    - name: Marketplace - Start the Main Dll in the Container
+      env:
+         ASPNETCORE_ENVIRONMENT: Development
+         ASPNETCORE_URLS: http://+:80
+         ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: true
+         DOTNET_RUNNING_IN_CONTAINER: true
+         DOTNET_USE_POLLING_FILE_WATCHER: 1
+         EnableCloudLibSearch: false
+         MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
+         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
+         MARKETPLACE_MONGODB_DATABASE: test
+      run: |
+           docker exec -d CESMII.Marketplace.API dotnet /app/bin/release/net6.0/CESMII.Marketplace.API.dll
+           #dotnet ${{env.MARKETPLACE_PROJECT_DIRECTORY}}publish/CESMII.Marketplace.API.dll
+    
+
+   
+
 
 
     # # These next two steps two worked in Docker Desktop, although have not solved the run in the background problem
@@ -161,7 +201,7 @@ jobs:
     - name: Test Access to RectApi 
       env:
         MARKETPLACE_URL1: "http://localhost:5000/api"
-      run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ./api/Tests/CESMII.Marketplace.RestApi/CESMII.Marketplace.RestApi.csproj
+      run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" /src/api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
 
 
     # - name: Marketplace API - Start up Marketplace Server
