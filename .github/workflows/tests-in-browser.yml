@@ -82,20 +82,20 @@ jobs:
       with:
         submodules: true
 
-    - name: Docker - Set up networking
-      run: |
-          docker network remove --force mysubnet1 ;
-          docker network create mysubnet1 ;
+    # # # - name: Docker - Set up networking
+    # # #   run: |
+    # # #       docker network remove --force mysubnet1 ;
+    # # #       docker network create mysubnet1 ;
 
-    # Initialize a Mongo DB database
-    # Note: the "env" section seems not to work and so
-    # the -e switches are necessary
-    - name: MongoDB - Create MongoDB Docker container      
-      run: docker run -d -P -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE}}",target=/data,type=bind mongo:4.0
-      env:
-         MONGO_INIT_DATABASE: test 
-         MONGO_INITDB_ROOT_USERNAME: testuser
-         MONGO_INITDB_ROOT_PASSWORD: password
+    # # # # Initialize a Mongo DB database
+    # # # # Note: the "env" section seems not to work and so
+    # # # # the -e switches are necessary
+    # # # - name: MongoDB - Create MongoDB Docker container      
+    # # #   run: docker run -d -P -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE}}",target=/data,type=bind mongo:4.0
+    # # #   env:
+    # # #      MONGO_INIT_DATABASE: test 
+    # # #      MONGO_INITDB_ROOT_USERNAME: testuser
+    # # #      MONGO_INITDB_ROOT_PASSWORD: password
 
     # Putting this between "Create mongoDB container" and "Populate mongo database" seems to help the mongo container settle down
     - name: Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
@@ -103,17 +103,17 @@ jobs:
       with:
         dotnet-version: ${{ env.NETCORE_VERSION }}
 
-    - name: MongoDB - Populate mongo database
-      run: docker exec -i MyMongoDB mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=Organization --file=/data/Organization.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=Permission --file=/data/Permission.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=ProfileItem --file=/data/ProfileItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # # - name: MongoDB - Populate mongo database
+    # # #   run: docker exec -i MyMongoDB mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # #        docker exec -i MyMongoDB mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # #        docker exec -i MyMongoDB mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # #        docker exec -i MyMongoDB mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # #        docker exec -i MyMongoDB mongoimport  --collection=Organization --file=/data/Organization.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # #        docker exec -i MyMongoDB mongoimport  --collection=Permission --file=/data/Permission.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # #        docker exec -i MyMongoDB mongoimport  --collection=ProfileItem --file=/data/ProfileItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # #        docker exec -i MyMongoDB mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # #        docker exec -i MyMongoDB mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+    # # #        docker exec -i MyMongoDB mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
 
     - name: Marketplace API - Restore dependencies (${{env.MARKETPLACE_PROJECT_FILE}})
       run: dotnet restore ${{env.MARKETPLACE_PROJECT_FILE}}
@@ -143,7 +143,7 @@ jobs:
     - name: Marketplace - Start the Container
       env:
          ASPNETCORE_ENVIRONMENT: Development
-         ASPNETCORE_URLS: http://+:80
+         ASPNETCORE_URLS: http://+:8080
          ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: true
          DOTNET_RUNNING_IN_CONTAINER: true
          DOTNET_USE_POLLING_FILE_WATCHER: 1
@@ -152,10 +152,10 @@ jobs:
          MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: test
       run: |
-           #docker run -d -p 5000:80 -P  --network mysubnet1 --name=MyMarketplace -v "${{env.VOLUME_APP}}" -v "${{env.VOLUME_SRC}}"  -v "${{env.DOCKER_VOLUME_PUBLISH}}" --entrypoint /publish/CESMII.Marketplace.API.dll   cesmiimarketplaceapi
-           # docker run -d -p 5000:80 -P  --network mysubnet1 --name=MyMarketplace -v "${{env.VOLUME_APP}}" -v "${{env.VOLUME_SRC}}"  -v "${{env.MARKETPLACE_PROJECT_VOLUME_PUBLISH}}" --entrypoint tail   cesmiimarketplaceapi
-           # docker run -dt -v "C:\Users\paul\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro" -v "C:\Users\paul\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro" -v "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Sdks\Microsoft.Docker.Sdk\tools\TokenService.Proxy\linux-x64\net6.0:/TokenService.Proxy:ro" -v "C:\CESMII.github\Marketplace\api\CESMII.Marketplace.API:/app" -v "C:\CESMII.github\Marketplace:/src/" -v "C:\Users\paul\.nuget\packages\:/root/.nuget/fallbackpackages" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_URLS=http://+:80" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "NUGET_PACKAGES=/root/.nuget/fallbackpackages" -e "NUGET_FALLBACK_PACKAGES=/root/.nuget/fallbackpackages" -e "EnableCloudLibSearch=false" -p 5000:80 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
-           docker run -dt -v "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app" -v "/home/runner/work/Marketplace/Marketplace:/src/" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_URLS=http://+:80" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "EnableCloudLibSearch=false" -p 5000:80 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
+           #### docker run -d -p 5000:80 -P  --network mysubnet1 --name=MyMarketplace -v "${{env.VOLUME_APP}}" -v "${{env.VOLUME_SRC}}"  -v "${{env.DOCKER_VOLUME_PUBLISH}}" --entrypoint /publish/CESMII.Marketplace.API.dll   cesmiimarketplaceapi
+           #### docker run -d -p 5000:80 -P  --network mysubnet1 --name=MyMarketplace -v "${{env.VOLUME_APP}}" -v "${{env.VOLUME_SRC}}"  -v "${{env.MARKETPLACE_PROJECT_VOLUME_PUBLISH}}" --entrypoint tail   cesmiimarketplaceapi
+           #docker run -dt -v "C:\Users\paul\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro" -v "C:\Users\paul\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro" -v "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Sdks\Microsoft.Docker.Sdk\tools\TokenService.Proxy\linux-x64\net6.0:/TokenService.Proxy:ro" -v "C:\CESMII.github\Marketplace\api\CESMII.Marketplace.API:/app" -v "C:\CESMII.github\Marketplace:/src/" -v "C:\Users\paul\.nuget\packages\:/root/.nuget/fallbackpackages" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_URLS=http://+:8080" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "NUGET_PACKAGES=/root/.nuget/fallbackpackages" -e "NUGET_FALLBACK_PACKAGES=/root/.nuget/fallbackpackages" -e "EnableCloudLibSearch=false" -p 5000:80 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
+           docker run -dt -v "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app" -v "/home/runner/work/Marketplace/Marketplace:/src/" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_URLS=http://+:8080" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "EnableCloudLibSearch=false" -p 5000:8080 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
 
     - name: Marketplace - Sleep to Allow the container to start
       run: sleep 10
