@@ -198,7 +198,7 @@ jobs:
     - name: Test Access to RectApi 
       env:
         MARKETPLACE_URL1: "http://localhost:5000/api"
-      run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:8080/api" /src/api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
+      run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" /src/api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
 
 
     # - name: Marketplace API - Start up Marketplace Server
