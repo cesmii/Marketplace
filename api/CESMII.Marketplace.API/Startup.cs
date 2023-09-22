@@ -82,7 +82,7 @@ namespace CESMII.Marketplace.Api
             var root = (IConfigurationRoot)Configuration;
             var strDebugView = root.GetDebugView();
             System.Diagnostics.Debug.WriteLine(strDebugView);
-            Console.WriteLine($"::notice::{strDebugView}")
+            Console.WriteLine($"::notice::{strDebugView}");
 
             string strCollection = Configuration["MongoDBSettings:NLogCollectionName"];
             NLog.Mongo.MongoTarget.SetNLogMongoOverrides(strConnectionString: strConnectionString,
