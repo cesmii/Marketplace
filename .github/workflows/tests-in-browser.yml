@@ -53,8 +53,11 @@ env:
   MONGODB_LOCAL_CONNECTION: "mongodb://testuser:password@localhost:27017"
   MONGODB_CONNECTION: "mongodb://testuser:password@MyMongoDB:27017"
 
+  ## These items need to be changed when moving between Windows Desktop and Github.com
   MOUNT_SOURCE: '/home/runner/work/Marketplace/Marketplace/mongo-data'    # In a Github Action
   #MOUNT_SOURCE: 'c:/CESMII.github/Marketplace/mongo-data'               # On the desktop
+
+  ## =======================================================================================
 
   #VOLUME_APP: '/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app'
   VOLUME_APP: './api/CESMII.Marketplace.API:/app'
@@ -139,7 +142,8 @@ jobs:
     # Create a Docker Container for Marketplace
     - name: 10__Marketplace - Build Docker Image
       #run: docker build -f "/mnt/c/CESMII.github/Marketplace/api/CESMII.Marketplace.API/Dockerfile" --force-rm -t cesmiimarketplaceapi:dev --target base  --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=CESMII.Marketplace.API" "/mnt/c/CESMII.github/Marketplace"
-      run: docker build -f "./api/CESMII.Marketplace.API/Dockerfile" --force-rm -t cesmiimarketplaceapi:dev --target base  --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=CESMII.Marketplace.API" "/mnt/c/CESMII.github/Marketplace"
+      #run: docker build -f "./api/CESMII.Marketplace.API/Dockerfile" --force-rm -t cesmiimarketplaceapi:dev --target base  --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=CESMII.Marketplace.API" "/mnt/c/CESMII.github/Marketplace"
+      run: docker build -f "./api/CESMII.Marketplace.API/Dockerfile" --force-rm -t cesmiimarketplaceapi:dev --target base  --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=CESMII.Marketplace.API" "./"
       #run: docker build -f "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/Dockerfile" --force-rm -t cesmiimarketplaceapi:dev --target base  --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=CESMII.Marketplace.API" "/home/runner/work/Marketplace/Marketplace"
 
     # Start Marketplace Container
