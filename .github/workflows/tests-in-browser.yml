@@ -180,7 +180,7 @@ jobs:
       run: |
            # docker exec -d CESMII.Marketplace.API dotnet /app/bin/release/net6.0/CESMII.Marketplace.API.dll
            # dotnet ${{env.MARKETPLACE_PROJECT_DIRECTORY}}publish/CESMII.Marketplace.API.dll
-           docker exec -di CESMII.Marketplace.API dotnet /src/publish/CESMII.Marketplace.API.dll
+           docker exec -i CESMII.Marketplace.API dotnet /src/publish/CESMII.Marketplace.API.dll
     
 
     # Query Docker
