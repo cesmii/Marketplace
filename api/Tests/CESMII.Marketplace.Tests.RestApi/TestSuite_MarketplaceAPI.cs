@@ -70,7 +70,7 @@ namespace CESMII.Marketplace.RestApi
         [Fact]
         public void MarketItemsAvailable_On_Attempt_004()
         {
-            string strHostHttps = "http://localhost:5000/api";
+            string strHostHttps = "https://localhost:5001/api";
             HttpClient client = new HttpClient();
 
             Console.WriteLine($"MarketItemsAvailable_On_Attempt_004: Attempting to connect to {strHostHttps}");
