@@ -198,6 +198,38 @@ jobs:
         docker system info ;
         docker port CESMII.Marketplace.API ;
 
+    - name: Marketplace -- curl 1
+      run: curl http://localhost/api/Marketplace/All | more
+
+    - name: Marketplace -- curl 2
+      run: curl http://localhost:5000/api/Marketplace/All | more
+
+    - name: Marketplace -- curl 3
+      run: curl http://localhost:32768/api/Marketplace/All | more
+
+    - name: Marketplace -- curl 4
+      run: curl https://localhost/api/Marketplace/All | more
+
+    - name: Marketplace -- curl 5
+      run: curl https://localhost:5001/api/Marketplace/All | more
+
+
+    - name: Marketplace -- curl 10
+      run: docker exec -d CESMII.Marketplace.API curl http://localhost/api/Marketplace/All | more
+
+    - name: Marketplace -- curl 11
+      run: docker exec -d CESMII.Marketplace.API curl http://localhost:5000/api/Marketplace/All | more
+
+    - name: Marketplace -- curl 12
+      run: docker exec -d CESMII.Marketplace.API curl http://localhost:32768/api/Marketplace/All | more
+
+    - name: Marketplace -- curl 13
+      run: docker exec -d CESMII.Marketplace.API curl https://localhost/api/Marketplace/All | more
+
+    - name: Marketplace -- curl 14
+      run: docker exec -d CESMII.Marketplace.API curl https://localhost:5001/api/Marketplace/All | more
+
+
     # # Call Marketplace Api 
     # - name: Tests - Access to RectApi inside container
     #   env:
