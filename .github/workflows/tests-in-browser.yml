@@ -42,8 +42,6 @@ env:
   NODEJS_VERSION: "16.17.0"
   # set this to npm working directory
   NPM_WORKING_DIRECTORY: 'frontend'
-  # Cloud Library Password
-  CLOUDLIB_PASSWORD: 'NotUsedAnymore'
 
   # Access to our MongoDB
   MONGODB_DATABASE_NAME: "test"
