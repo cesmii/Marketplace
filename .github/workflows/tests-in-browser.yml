@@ -215,19 +215,19 @@ jobs:
 
 
     - name: Marketplace -- curl 10
-      run: docker exec -d CESMII.Marketplace.API curl http://localhost/api/Marketplace/All | more
+      run: docker exec -i CESMII.Marketplace.API curl http://localhost/api/Marketplace/All | more
 
     - name: Marketplace -- curl 11
-      run: docker exec -d CESMII.Marketplace.API curl http://localhost:5000/api/Marketplace/All | more
+      run: docker exec -i CESMII.Marketplace.API curl http://localhost:5000/api/Marketplace/All | more
 
     - name: Marketplace -- curl 12
-      run: docker exec -d CESMII.Marketplace.API curl http://localhost:32768/api/Marketplace/All | more
+      run: docker exec -i CESMII.Marketplace.API curl http://localhost:32768/api/Marketplace/All | more
 
     - name: Marketplace -- curl 13
-      run: docker exec -d CESMII.Marketplace.API curl https://localhost/api/Marketplace/All | more
+      run: docker exec -i CESMII.Marketplace.API curl https://localhost/api/Marketplace/All | more
 
     - name: Marketplace -- curl 14
-      run: docker exec -d CESMII.Marketplace.API curl https://localhost:5001/api/Marketplace/All | more
+      run: docker exec -i CESMII.Marketplace.API curl https://localhost:5001/api/Marketplace/All | more
 
 
     # # Call Marketplace Api 
