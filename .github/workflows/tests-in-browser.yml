@@ -26,16 +26,18 @@ env:
   # Paths to Test 1 (In Browser)
   TEST1_PROJECT_DIRECTORY: './api/Tests/CESMII.Marketplace.Tests.InBrowser/'
   TEST1_PROJECT_FILE: 'CESMII.Marketplace.InBrowser.Tests.csproj'
+  TEST1_PROJECT_FQDN: './api/Tests/CESMII.Marketplace.Tests.InBrowser/CESMII.Marketplace.InBrowser.Tests.csproj'
+
   # Paths to Test 2 (MongoDB)
   TEST2_PROJECT_DIRECTORY: './api/Tests/CESMII.Marketplace.Tests.MongoDB/'
   TEST2_PROJECT_FILE: 'CESMII.Marketplace.Tests.MongoDB.csproj'
+  TEST2_PROJECT_FQDN: './api/Tests/CESMII.Marketplace.Tests.MongoDB/CESMII.Marketplace.Tests.MongoDB.csproj'
 
   # Paths to Test 3 (RestApi)
   TEST3_PROJECT_DIRECTORY: './api/Tests/CESMII.Marketplace.Tests.RestApi/'
   TEST3_PROJECT_FILE: 'CESMII.Marketplace.Tests.RestApi.csproj'
+  TEST3_PROJECT_FQDN: './api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj'
 
-  # Test project file to use
-  PROJECT_NAME: 'CESMII.Marketplace.InBrowser.Tests'      
   # set this to the .NET core version to use
   NETCORE_VERSION: "6.0.x"
   # set this to the NODE JS version to use
@@ -46,15 +48,13 @@ env:
   # Access to our MongoDB
   MONGODB_DATABASE_NAME: "test"
 
-  MARKETPLACE_RESTAPI_URL: https://MyMarketplace:5001/api
-
   MONGODB_LOCAL_CONNECTION: "mongodb://testuser:password@localhost:27017"
   MONGODB_CONNECTION: "mongodb://testuser:password@MyMongoDB:27017"
 
   ## These items need to be changed when moving between Windows Desktop and Github.com
   # Step 3
-  MOUNT_SOURCE: '/home/runner/work/Marketplace/Marketplace/mongo-data'    # In a Github Action
-  #MOUNT_SOURCE: 'c:/CESMII.github/Marketplace/mongo-data'               # On the desktop
+  #MOUNT_SOURCE: '/home/runner/work/Marketplace/Marketplace/mongo-data'    # In a Github Action
+  MOUNT_SOURCE: 'c:/CESMII.github/Marketplace/mongo-data'               # On the desktop
 
   # Step 9
   # Switch the command line (docker run -dt....)
@@ -150,8 +150,8 @@ jobs:
   # # #   runs-on: ubuntu-latest
 
   # # #   steps:
-    # Publish the app
-    - name: 7__Marketplace - Publish the app
+    # Publish the app and the tests
+    - name: 7__Marketplace - Publish everything - apps and tests
       run: |
         dotnet publish --framework:net6.0 ${{env.MARKETPLACE_PROJECT_FQDN}} -c Release -o ./publish
 
@@ -172,11 +172,11 @@ jobs:
          DOTNET_USE_POLLING_FILE_WATCHER: 1
          EnableCloudLibSearch: false
          MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
-         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
+         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: test
       run: |
-           #docker run -dt -v "C:\Users\paul\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro" -v "C:\Users\paul\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro" -v "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Sdks\Microsoft.Docker.Sdk\tools\TokenService.Proxy\linux-x64\net6.0:/TokenService.Proxy:ro" -v "C:\CESMII.github\Marketplace\api\CESMII.Marketplace.API:/app" -v "C:\CESMII.github\Marketplace:/src/" -v "C:\Users\paul\.nuget\packages\:/root/.nuget/fallbackpackages" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_URLS=http://+:80" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "NUGET_PACKAGES=/root/.nuget/fallbackpackages" -e "NUGET_FALLBACK_PACKAGES=/root/.nuget/fallbackpackages" -e "EnableCloudLibSearch=false" -p 5000:80 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
-           docker run -dt -v "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app" -v "/home/runner/work/Marketplace/Marketplace:/src/" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "EnableCloudLibSearch=false" -e "ASPNETCORE_URLS=https://+:443;http://+:80" -p 5000:80 -p 5001:437 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
+           docker run -dt -v "C:\Users\paul\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro" -v "C:\Users\paul\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro" -v "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Sdks\Microsoft.Docker.Sdk\tools\TokenService.Proxy\linux-x64\net6.0:/TokenService.Proxy:ro" -v "C:\CESMII.github\Marketplace\api\CESMII.Marketplace.API:/app" -v "C:\CESMII.github\Marketplace:/src/" -v "C:\Users\paul\.nuget\packages\:/root/.nuget/fallbackpackages" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_URLS=http://+:80" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "NUGET_PACKAGES=/root/.nuget/fallbackpackages" -e "NUGET_FALLBACK_PACKAGES=/root/.nuget/fallbackpackages" -e "EnableCloudLibSearch=false" -p 5000:80 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
+           #docker run -dt -v "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app" -v "/home/runner/work/Marketplace/Marketplace:/src/" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "EnableCloudLibSearch=false" -e "ASPNETCORE_URLS=https://+:443;http://+:80" -p 5000:80 -p 5001:437 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
 
     - name: 10__Marketplace - Start the Main Dll in the Container
       env:
@@ -187,7 +187,7 @@ jobs:
          DOTNET_USE_POLLING_FILE_WATCHER: 1
          EnableCloudLibSearch: false
          MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
-         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
+         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: test
       run: |
            # docker exec -d CESMII.Marketplace.API dotnet /app/bin/release/net6.0/CESMII.Marketplace.API.dll
@@ -306,6 +306,6 @@ jobs:
     #  working-directory:  ${{env.SOLUTION_DIRECTORY}}
     #  run: dotnet restore
 
-    #- name: In-Browser Testing - Run Test on project (${{env.PROJECT_NAME}})
-    #  run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/${{env.PROJECT_NAME}}.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
+    #- name: In-Browser Testing - Run Test on project (${{env.TEST1_PROJECT_FILE}})
+    #  run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/${{env.TEST1_PROJECT_FILE}}.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
     #  working-directory: ${{env.SOLUTION_DIRECTORY}}
