@@ -31,16 +31,19 @@ env:
   TEST1_PROJECT_DIRECTORY: './api/Tests/CESMII.Marketplace.Tests.InBrowser/'
   TEST1_PROJECT_FILE: 'CESMII.Marketplace.InBrowser.Tests.csproj'
   TEST1_PROJECT_FQDN: './api/Tests/CESMII.Marketplace.Tests.InBrowser/CESMII.Marketplace.InBrowser.Tests.csproj'
+  TEST1_PROJECT_DLL: 'CESMII.Marketplace.InBrowser.Tests.dll'
 
   # Paths to Test 2 (MongoDB)
   TEST2_PROJECT_DIRECTORY: './api/Tests/CESMII.Marketplace.Tests.MongoDB/'
   TEST2_PROJECT_FILE: 'CESMII.Marketplace.Tests.MongoDB.csproj'
   TEST2_PROJECT_FQDN: './api/Tests/CESMII.Marketplace.Tests.MongoDB/CESMII.Marketplace.Tests.MongoDB.csproj'
+  TEST2_PROJECT_DLL: 'CESMII.Marketplace.Tests.MongoDB.dll'
 
   # Paths to Test 3 (RestApi)
   TEST3_PROJECT_DIRECTORY: './api/Tests/CESMII.Marketplace.Tests.RestApi/'
   TEST3_PROJECT_FILE: 'CESMII.Marketplace.Tests.RestApi.csproj'
   TEST3_PROJECT_FQDN: './api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj'
+  TEST3_PROJECT_DLL: 'CESMII.Marketplace.Tests.RestApi.dll'
 
   # set this to the .NET core version to use
   NETCORE_VERSION: "6.0.x"
@@ -159,7 +162,16 @@ jobs:
     # Publish the app and the tests
     - name: 7__Marketplace - Publish everything - apps and tests
       run: |
-        dotnet publish --framework:net6.0 ${{env.MARKETPLACE_PROJECT_FQDN}} -c Release -o ./publish
+        dotnet publish --framework:net6.0 ${{env.MARKETPLACE_PROJECT_FQDN}} -c Release -o ./publish ;
+        #dotnet publish --framework:net6.0 ${{env.TEST1_PROJECT_FQDN}} -c Release -o ./publish ;
+        dotnet publish --framework:net6.0 ${{env.TEST2_PROJECT_FQDN}} -c Release -o ./publish ;
+        dotnet publish --framework:net6.0 ${{env.TEST3_PROJECT_FQDN}} -c Release -o ./publish ;
+
+    - name: 6__MongoDB - Test access to Mongo database
+      run: dotnet test /publish/${{env.TEST2_PROJECT_DLL}}
+      env:
+         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
+         MARKETPLACE_MONGODB_DATABASE: ${{env.MONGODB_DATABASE_NAME}}
 
     # Create a Docker Container for Marketplace
     - name: 8__Marketplace - Build Docker Image
@@ -253,17 +265,20 @@ jobs:
 
     # Call Marketplace Api 
     # This doesn not work, but am going to try calling from outside the container just to see if that can work at all
-    # - name: 19__Tests - Access to RectApi inside container (On Github)
-    #   if: env.ONGITHUB == 'true'
-    #   env:
-    #     MARKETPLACE_URL1: "http://localhost:80/api"
-    #   run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" /src/api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
+    - name: 19__Tests - Access to RectApi inside container (On Github)
+      if: env.ONGITHUB == 'true'
+      env:
+        MARKETPLACE_URL1: "http://localhost:80/api"
+      # run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" /src/api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
+      run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" /publish/${{env.TEST3_PROJECT_DLL}}
+
     # Call Marketplace Api 
     - name: 20__Tests - Access to RectApi inside container (On Github)
       if: env.ONGITHUB == 'true'
       env:
         MARKETPLACE_URL1: "http://localhost:5000/api"
-      run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ./api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
+      # run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ./api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
+      run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ./publish/${{env.TEST3_PROJECT_DLL}}
 
 
     # Calling RestApi - Access from inside container (On Desktop)
@@ -271,14 +286,16 @@ jobs:
       if: env.ONGITHUB == 'false'
       env:
         MARKETPLACE_URL1: "http://localhost:5000/api"
-      run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" /src/api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
+      # run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" /src/api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
+      run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" /publish/${{env.TEST3_PROJECT_DLL}}
 
     # Calling RestApi - Access from outside container (On Desktop)
     - name: 20__Tests - Access to RectApi outside container (On Desktop)
       if: env.ONGITHUB == 'false'
       env:
         MARKETPLACE_URL1: "http://localhost:5000/api"
-      run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ./api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
+      # run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ./api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
+      run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ./publish/${{env.TEST3_PROJECT_DLL}}
 
 #######################################################################################################
 
