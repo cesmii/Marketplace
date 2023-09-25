@@ -162,12 +162,9 @@ jobs:
 
   # # #   steps:
     # Publish the app and the tests
-    - name: 7__Marketplace - Publish everything - apps and tests
+    - name: 7__Marketplace - Publish Marketplace Api
       run: |
-        dotnet publish --framework:net6.0 ${{env.MARKETPLACE_PROJECT_FQDN}} -c Release -o ./publish ;
-        #dotnet publish --framework:net6.0 ${{env.TEST1_PROJECT_FQDN}} -c Release -o ./publish ;
-        #dotnet publish --framework:net6.0 ${{env.TEST2_PROJECT_FQDN}} -c Release -o ./publish ;
-        #dotnet publish --framework:net6.0 ${{env.TEST3_PROJECT_FQDN}} -c Release -o ./publish ;
+        dotnet publish --framework:net6.0 ${{env.MARKETPLACE_PROJECT_FQDN}} -c Release -o ./publish 
 
     - name: 6__MongoDB - Test access to Mongo database
       run: dotnet test ${{env.TEST2_PROJECT_FQDN}}
@@ -290,6 +287,12 @@ jobs:
            docker network inspect mysubnet1 ;
            docker container inspect CESMII.Marketplace.API ;
            docker container inspect MyMongoDB ;
+
+    - name: 6__MongoDB - Test access to Mongo database (Reprise - repeat with slower, more meaningful phrasing)
+      run: dotnet test ${{env.TEST2_PROJECT_FQDN}}
+      env:
+         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
+         MARKETPLACE_MONGODB_DATABASE: ${{env.MONGODB_DATABASE_NAME}}
 
     # Call Marketplace Api 
     - name: 20__Tests - Access to RectApi inside container (On Github)
