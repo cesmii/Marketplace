@@ -215,38 +215,66 @@ jobs:
            # dotnet ${{env.MARKETPLACE_PROJECT_DIRECTORY}}publish/CESMII.Marketplace.API.dll
            docker exec -di CESMII.Marketplace.API dotnet /src/publish/CESMII.Marketplace.API.dll
     
-  # # #   # Query Docker
-  # # #   - name: 11__Query Docker 
-  # # #     run:
-  # # #       docker container ls ;
-  # # #       docker system info ;
-  # # #       docker port CESMII.Marketplace.API ;
+    # Query Docker
+    - name: 11__Query Docker 
+      run:
+        docker container ls ;
+        docker system info ;
+        docker port CESMII.Marketplace.API ;
+
+    # Dotnet -- diagnostics
+    - name: 12__DotNet - Diagnostics
+      #run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --diagnostics
+      run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --diagnostics
+
+    # Dotnet -- info
+    - name: 13__DotNet - Info
+      run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --info
+
+    # Dotnet -- list-runtimes
+    - name: 14__DotNet - list-runtimes
+      run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --list-runtimes
+
+    # Dotnet -- list-sdks
+    - name: 15__DotNet - list-sdks
+      run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --list-sdks
+
+    # Dotnet --version
+    - name: 16__DotNet - Version
+      run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --version
+
+    # MyMongoDB - Check the Logs
+    - name: 17__MyMongoDB Container - Check the Logs
+      run: docker logs --details MyMongoDB
+
+    # CESMII.Marketplace.API - Check the Logs
+    - name: 18__CESMII.Marketplace.API Container - Check the Logs
+      run: docker logs --details CESMII.Marketplace.API
 
     # Call Marketplace Api 
-
-        # This doesn not work, but am going to try calling from outside the container just to see if that can work at all
-    # - name: 11__Tests - Access to RectApi inside container (On Github)
+    # This doesn not work, but am going to try calling from outside the container just to see if that can work at all
+    # - name: 19__Tests - Access to RectApi inside container (On Github)
     #   if: env.ONGITHUB == 'true'
     #   env:
     #     MARKETPLACE_URL1: "http://localhost:80/api"
     #   run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" /src/api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
-
     # Call Marketplace Api 
-    - name: 11__Tests - Access to RectApi inside container (On Github)
+    - name: 20__Tests - Access to RectApi inside container (On Github)
       if: env.ONGITHUB == 'true'
       env:
         MARKETPLACE_URL1: "http://localhost:5000/api"
       run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ./api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
 
 
-    # This seems to work fine, and now I see whether I can make this call from outside the container
-    # # # - name: 11__Tests - Access to RectApi inside container (On Desktop)
-    # # #   if: env.ONGITHUB == 'false'
-    # # #   env:
-    # # #     MARKETPLACE_URL1: "http://localhost:5000/api"
-    # # #   run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" /src/api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
+    # Calling RestApi - Access from inside container (On Desktop)
+    - name: 19__Tests - Access to RectApi inside container (On Desktop)
+      if: env.ONGITHUB == 'false'
+      env:
+        MARKETPLACE_URL1: "http://localhost:5000/api"
+      run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" /src/api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
 
-    - name: 11__Tests - Access to RectApi outside container (On Desktop)
+    # Calling RestApi - Access from outside container (On Desktop)
+    - name: 20__Tests - Access to RectApi outside container (On Desktop)
       if: env.ONGITHUB == 'false'
       env:
         MARKETPLACE_URL1: "http://localhost:5000/api"
@@ -290,40 +318,12 @@ jobs:
 
 
     # Peek at docker status
-    - name: 12__Docker - Peeking at docker status 
+    - name: 21__Docker - Peeking at docker status 
       run: docker container ls --all ; 
            docker network ls ;
            docker network inspect mysubnet1 ;
 
 
-    # Dotnet -- diagnostics
-    - name: 13__DotNet - Diagnostics
-      #run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --diagnostics
-      run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --diagnostics
-
-    # Dotnet -- info
-    - name: 14__DotNet - Info
-      run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --info
-
-    # Dotnet -- list-runtimes
-    - name: 15__DotNet - list-runtimes
-      run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --list-runtimes
-
-    # Dotnet -- list-sdks
-    - name: 16__DotNet - list-sdks
-      run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --list-sdks
-
-    # Dotnet --version
-    - name: 17__DotNet - Version
-      run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --version
-
-    # MyMongoDB - Check the Logs
-    - name: 18__MyMongoDB Container - Check the Logs
-      run: docker logs --details MyMongoDB
-
-    # CESMII.Marketplace.API - Check the Logs
-    - name: 19__CESMII.Marketplace.API Container - Check the Logs
-      run: docker logs --details CESMII.Marketplace.API
 
 
     #- name: FrontEnd - Start browser and fetch version
