@@ -226,7 +226,7 @@ jobs:
          MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: test
       run: |
-           docker exec -i CESMII.Marketplace.API dotnet /src/publish/CESMII.Marketplace.API.dll
+           docker exec -d CESMII.Marketplace.API dotnet /src/publish/CESMII.Marketplace.API.dll
     
     - name: 10__Marketplace - Start the Main Dll in the Container (Desktop)
       if: env.ONGITHUB == 'false'
