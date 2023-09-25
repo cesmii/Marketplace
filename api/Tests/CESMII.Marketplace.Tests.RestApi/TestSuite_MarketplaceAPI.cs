@@ -19,7 +19,7 @@ namespace CESMII.Marketplace.RestApi
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
             var items = GetFirstItem(client, $"{strHostHttps}/Marketplace/All");
-            string strReturned = (items==null) ? "null" : $"Success! count = items.Count()";
+            string strReturned = (items == null) ? "null" : $"Success! count = {items.Count()}";
             Console.WriteLine($"::notice::MarketItemsAvailable_On_Attempt_001: Attempting to connect to {strHostHttps}. strReturned: {strReturned}.");
             //Assert.NotNull(items);
 
@@ -39,7 +39,7 @@ namespace CESMII.Marketplace.RestApi
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
             var items = GetFirstItem(client, $"{strHostHttps}/Marketplace/All");
-            string strReturned = (items == null) ? "null" : $"Success! count = items.Count()";
+            string strReturned = (items == null) ? "null" : $"Success! count = {items.Count()}";
             Console.WriteLine($"::notice::MarketItemsAvailable_On_Attempt_002: Attempting to connect to {strHostHttps}. strReturned: {strReturned}.");
             //Assert.NotNull(items);
 
@@ -59,7 +59,7 @@ namespace CESMII.Marketplace.RestApi
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
             var items = GetFirstItem(client, $"{strHostHttps}/Marketplace/All");
-            string strReturned = (items == null) ? "null" : $"Success! count = items.Count()";
+            string strReturned = (items == null) ? "null" : $"Success! count = {items.Count()}";
             Console.WriteLine($"::notice::MarketItemsAvailable_On_Attempt_003: Attempting to connect to {strHostHttps}. strReturned: {strReturned}.");
             //Assert.NotNull(items);
 
@@ -79,7 +79,7 @@ namespace CESMII.Marketplace.RestApi
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
             var items = GetFirstItem(client, $"{strHostHttps}/Marketplace/All");
-            string strReturned = (items == null) ? "null" : $"Success! count = items.Count()";
+            string strReturned = (items == null) ? "null" : $"Success! count = {items.Count()}";
             Console.WriteLine($"::notice::MarketItemsAvailable_On_Attempt_004: Attempting to connect to {strHostHttps}. strReturned: {strReturned}.");
             //Assert.NotNull(items);
 
@@ -103,7 +103,7 @@ namespace CESMII.Marketplace.RestApi
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
             var items = GetFirstItem(client, $"{strHostHttps}/Marketplace/All");
-            string strReturned = (items == null) ? "null" : $"Success! count = items.Count()";
+            string strReturned = (items == null) ? "null" : $"Success! count = {items.Count()}";
             Console.WriteLine($"::notice::MarketItemsAvailable_On_RestCall1: Attempting to connect to {strHostHttps}. strReturned: {strReturned}.");
 
             Assert.NotNull(items);
