@@ -10,7 +10,7 @@ namespace CESMII.Marketplace.RestApi
         [Fact]
         public void MarketItemsAvailable_On_Attempt_001()
         {
-            string strHostHttps = "http://localhost/api";
+            string strHostHttps = "http://MyMongoDB/api";
             HttpClient client = new HttpClient();
 
             Console.WriteLine($"MarketItemsAvailable_On_Attempt_001: Attempting to connect to {strHostHttps}");
@@ -30,7 +30,7 @@ namespace CESMII.Marketplace.RestApi
         [Fact]
         public void MarketItemsAvailable_On_Attempt_002()
         {
-            string strHostHttps = "https://localhost/api";
+            string strHostHttps = "https://MyMongoDB/api";
             HttpClient client = new HttpClient();
 
             Console.WriteLine($"MarketItemsAvailable_On_Attempt_002: Attempting to connect to {strHostHttps}");
@@ -50,7 +50,7 @@ namespace CESMII.Marketplace.RestApi
         [Fact]
         public void MarketItemsAvailable_On_Attempt_003()
         {
-            string strHostHttps = "http://localhost:5000/api";
+            string strHostHttps = "http://MyMongoDB:5000/api";
             HttpClient client = new HttpClient();
 
             Console.WriteLine($"MarketItemsAvailable_On_Attempt_003: Attempting to connect to {strHostHttps}");
@@ -70,7 +70,7 @@ namespace CESMII.Marketplace.RestApi
         [Fact]
         public void MarketItemsAvailable_On_Attempt_004()
         {
-            string strHostHttps = "https://localhost:5001/api";
+            string strHostHttps = "https://MyMongoDB:5001/api";
             HttpClient client = new HttpClient();
 
             Console.WriteLine($"MarketItemsAvailable_On_Attempt_004: Attempting to connect to {strHostHttps}");
@@ -90,7 +90,7 @@ namespace CESMII.Marketplace.RestApi
         [Fact]
         public void MarketItemsAvailable_On_RestCall1()
         {
-            string strHostHttps = "http://localhost:5000/api";
+            string strHostHttps = "http://MyMongoDB:5000/api";
             HttpClient client = new HttpClient();
 
             string strTemp = utils.GetConnection("MARKETPLACE_URL1");
@@ -113,7 +113,7 @@ namespace CESMII.Marketplace.RestApi
         //[Fact]
         //public void MarketItemsAvailable_On_RestCall2()
         //{
-        //    string strHostHttps = "https://localhost:5001/api";
+        //    string strHostHttps = "https://MyMongoDB:5001/api";
         //    HttpClient client = new HttpClient();
 
         //    string strTemp = utils.GetConnection("MARKETPLACE_URL2");
