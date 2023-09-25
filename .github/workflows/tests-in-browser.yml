@@ -235,22 +235,22 @@ jobs:
     - name: 11__Tests - Access to RectApi inside container (On Github)
       if: env.ONGITHUB == 'true'
       env:
-        MARKETPLACE_URL1: "http://localhost:80/api"
-      run: dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ./api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
+        MARKETPLACE_URL1: "http://localhost:5000/api"
+      run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ./api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
 
 
     # This seems to work fine, and now I see whether I can make this call from outside the container
     # # # - name: 11__Tests - Access to RectApi inside container (On Desktop)
     # # #   if: env.ONGITHUB == 'false'
     # # #   env:
-    # # #     MARKETPLACE_URL1: "http://localhost:80/api"
-    # # #   run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" /src/api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
+    # # #     MARKETPLACE_URL1: "http://localhost:5000/api"
+    # # #   run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" /src/api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
 
     - name: 11__Tests - Access to RectApi outside container (On Desktop)
       if: env.ONGITHUB == 'false'
       env:
-        MARKETPLACE_URL1: "http://CESMII.Marketplace.API:80/api"
-      run: dotnet test -e "MARKETPLACE_URL1=http://CESMII.Marketplace.API:80/api" ./api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
+        MARKETPLACE_URL1: "http://localhost:5000/api"
+      run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ./api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
 
 #######################################################################################################
 
