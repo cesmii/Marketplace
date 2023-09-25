@@ -18,7 +18,7 @@ on:
 env:
   # Hides some of the differences between running in a Github action and running 
   # in nektos/act on Microsoft Windows with Docker Desktop
-  ONGITHUB: false
+  ONGITHUB: true
 
   # Main project path
   MARKETPLACE_PROJECT_DIRECTORY: './api/CESMII.Marketplace.API/'
