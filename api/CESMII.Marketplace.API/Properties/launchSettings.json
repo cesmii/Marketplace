@@ -27,7 +27,7 @@
     "WSL": {
       "commandName": "Executable",
       "launchBrowser": true,
-      "launchUrl": "https://localhost:5001/swagger",
+      "launchUrl": "http://localhost:5000/swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
       },

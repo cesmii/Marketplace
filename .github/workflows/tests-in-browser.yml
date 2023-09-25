@@ -194,7 +194,7 @@ jobs:
          MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: test
       run: |
-           docker run -dt -v "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app" -v "/home/runner/work/Marketplace/Marketplace:/src/" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "EnableCloudLibSearch=false" -e "ASPNETCORE_URLS=https://+:443;http://+:80" -p 5000:80 -p 5001:437 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
+           docker run -dt -v "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app" -v "/home/runner/work/Marketplace/Marketplace:/src/" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "EnableCloudLibSearch=false" -e "ASPNETCORE_URLS=http://+:80" -p 5000:80 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
 
     - name: 9__Marketplace - Start the Container (On Desktop)
       if: env.ONGITHUB == 'false'
@@ -224,8 +224,6 @@ jobs:
          MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: test
       run: |
-           # docker exec -d CESMII.Marketplace.API dotnet /app/bin/release/net6.0/CESMII.Marketplace.API.dll
-           # dotnet ${{env.MARKETPLACE_PROJECT_DIRECTORY}}publish/CESMII.Marketplace.API.dll
            docker exec -i CESMII.Marketplace.API dotnet /src/publish/CESMII.Marketplace.API.dll
     
     - name: 10__Marketplace - Start the Main Dll in the Container (Desktop)
@@ -316,40 +314,6 @@ jobs:
       run: dotnet test  --no-build -e "MARKETPLACE_URL1=http://localhost:5000/api" ${{env.TEST3_PROJECT_FQDN}}
 
 #######################################################################################################
-
-    # # Call Marketplace Api 
-    # - name: 15__Tests - Access to RectApi on runner (outside container)
-    #   env:
-    #     MARKETPLACE_URL1: "http://localhost:5000/api"
-    #   # # # run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" /home/runner/work/Marketplace/Marketplace/api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
-    #   run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" /src/api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
-
-    # - name: Marketplace API - Start up Marketplace Server
-    #   env:
-    #     EnableCloudLibSearch: false
-    #     MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
-    #     MARKETPLACE_MONGODB_DATABASE: test
-    #   run: dotnet run --project ./api/CESMII.Marketplace.API/CESMII.Marketplace.API.csproj &
-
-    # # Create a Docker Container for Marketplace
-    # - name: Marketplace - Build Container
-    #   run: docker build -f ${{env.DOCKER_FILE_MARKETPLACE}}  -t cesmiimarketplaceapi:dev --target base  ${{env.DOCKER_HOME_FOLDER}}
-
-    # # Start Marketplace Container
-    # - name: Marketplace - Launch Container
-    #   env:
-    #      ASPNETCORE_ENVIRONMENT: Development
-    #      ASPNETCORE_HTTPS_PORT: 5001
-    #      ASPNETCORE_URLS: https://+:443;http://+:80
-    #      ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: true
-    #      DOTNET_GENERATE_ASPNET_CERTIFICATE: true
-    #      DOTNET_RUNNING_IN_CONTAINER: true
-    #      DOTNET_USE_POLLING_FILE_WATCHER: 1
-    #      EnableCloudLibSearch: false
-    #      MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
-    #      MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_CONNECTION}}
-    #      MARKETPLACE_MONGODB_DATABASE: test
-    #   run: docker run -dt -p 5001:443 -p 32775:80 -P  --log-driver=local --network mysubnet1 --name=MyMarketplace -v ${{env.VOLUME_APP}} -v ${{env.VOLUME_SRC}}  --entrypoint tail cesmiimarketplaceapi:dev
 
 
     # Peek at docker status
