@@ -166,8 +166,8 @@ jobs:
       run: |
         dotnet publish --framework:net6.0 ${{env.MARKETPLACE_PROJECT_FQDN}} -c Release -o ./publish ;
         #dotnet publish --framework:net6.0 ${{env.TEST1_PROJECT_FQDN}} -c Release -o ./publish ;
-        dotnet publish --framework:net6.0 ${{env.TEST2_PROJECT_FQDN}} -c Release -o ./publish ;
-        dotnet publish --framework:net6.0 ${{env.TEST3_PROJECT_FQDN}} -c Release -o ./publish ;
+        #dotnet publish --framework:net6.0 ${{env.TEST2_PROJECT_FQDN}} -c Release -o ./publish ;
+        #dotnet publish --framework:net6.0 ${{env.TEST3_PROJECT_FQDN}} -c Release -o ./publish ;
 
     - name: 6__MongoDB - Test access to Mongo database
       run: dotnet test ${{env.TEST2_PROJECT_FQDN}}
@@ -196,7 +196,7 @@ jobs:
          MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: test
       run: |
-           docker run -dt -v "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app" -v "/home/runner/work/Marketplace/Marketplace:/src/" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "EnableCloudLibSearch=false" -e "ASPNETCORE_URLS=http://+:80" -p 5000:80 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
+           docker run -dt --network mysubnet1 -v "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app" -v "/home/runner/work/Marketplace/Marketplace:/src/" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "EnableCloudLibSearch=false" -e "ASPNETCORE_URLS=http://+:80" -p 5000:80 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
 
     - name: 9__Marketplace - Start the Container (On Desktop)
       if: env.ONGITHUB == 'false'
@@ -211,7 +211,7 @@ jobs:
          MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: test
       run: |
-           docker run -dt -v "C:\Users\paul\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro" -v "C:\Users\paul\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro" -v "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Sdks\Microsoft.Docker.Sdk\tools\TokenService.Proxy\linux-x64\net6.0:/TokenService.Proxy:ro" -v "C:\CESMII.github\Marketplace\api\CESMII.Marketplace.API:/app" -v "C:\CESMII.github\Marketplace:/src/" -v "C:\Users\paul\.nuget\packages\:/root/.nuget/fallbackpackages" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_URLS=http://+:80" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "NUGET_PACKAGES=/root/.nuget/fallbackpackages" -e "NUGET_FALLBACK_PACKAGES=/root/.nuget/fallbackpackages" -e "EnableCloudLibSearch=false" -p 5000:80 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
+           docker run -dt --network mysubnet1 -v "C:\Users\paul\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro" -v "C:\Users\paul\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro" -v "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Sdks\Microsoft.Docker.Sdk\tools\TokenService.Proxy\linux-x64\net6.0:/TokenService.Proxy:ro" -v "C:\CESMII.github\Marketplace\api\CESMII.Marketplace.API:/app" -v "C:\CESMII.github\Marketplace:/src/" -v "C:\Users\paul\.nuget\packages\:/root/.nuget/fallbackpackages" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_URLS=http://+:80" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "NUGET_PACKAGES=/root/.nuget/fallbackpackages" -e "NUGET_FALLBACK_PACKAGES=/root/.nuget/fallbackpackages" -e "EnableCloudLibSearch=false" -p 5000:80 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
 
     - name: 10__Marketplace - Start the Main Dll in the Container (Github)
       if: env.ONGITHUB == 'true'
@@ -313,12 +313,12 @@ jobs:
       run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ${{env.TEST3_PROJECT_ABSOLUTE}}
 
     # Calling RestApi - Access from outside container (On Desktop)
-    # # # # - name: 21__Tests - Access to RectApi outside container (On Desktop)
-    # # # #   if: env.ONGITHUB == 'false'
-    # # # #   env:
-    # # # #     MARKETPLACE_URL1: "http://localhost:80/api"
-    # # # #   # run: dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ./api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
-    # # # #   run: dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ${{env.TEST3_PROJECT_FQDN}}
+    - name: 21__Tests - Access to RectApi outside container (On Desktop)
+      if: env.ONGITHUB == 'false'
+      env:
+        MARKETPLACE_URL1: "http://localhost:80/api"
+      # run: dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ./api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
+      run: dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ${{env.TEST3_PROJECT_FQDN}}
 
 #######################################################################################################
 
