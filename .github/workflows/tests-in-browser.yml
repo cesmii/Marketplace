@@ -16,6 +16,10 @@ on:
   #    - main
 
 env:
+  # Hides some of the differences between running in a Github action and running 
+  # in nektos/act on Microsoft Windows with Docker Desktop
+  ONGITHUB: true
+
   # Main project path
   MARKETPLACE_PROJECT_DIRECTORY: './api/CESMII.Marketplace.API/'
   # Main project file name
@@ -51,15 +55,8 @@ env:
   MONGODB_LOCAL_CONNECTION: "mongodb://testuser:password@localhost:27017"
   MONGODB_CONNECTION: "mongodb://testuser:password@MyMongoDB:27017"
 
-  ## These items need to be changed when moving between Windows Desktop and Github.com
-  # Step 3
-  #MOUNT_SOURCE: '/home/runner/work/Marketplace/Marketplace/mongo-data'    # In a Github Action
-  MOUNT_SOURCE: 'c:/CESMII.github/Marketplace/mongo-data'               # On the desktop
-
-  # Step 9
-  # Switch the command line (docker run -dt....)
-
-  ## =======================================================================================
+  MOUNT_SOURCE_GITHUB: '/home/runner/work/Marketplace/Marketplace/mongo-data'  
+  MOUNT_SOURCE_DESKTOP: 'c:/CESMII.github/Marketplace/mongo-data'
 
   #VOLUME_APP: '/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app'
   VOLUME_APP: './api/CESMII.Marketplace.API:/app'
@@ -98,8 +95,17 @@ jobs:
     # Initialize a Mongo DB database
     # Note: the "env" section seems not to work and so
     # the -e switches are necessary
-    - name: 3__MongoDB - Create MongoDB Docker container      
-      run: docker run -d -P -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE}}",target=/data,type=bind mongo:4.0
+    - name: 3__MongoDB - Create MongoDB Docker container (On Github)
+      if: env.ONGITHUB == 'true'
+      run: docker run -d -P -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE_GITHUB}}",target=/data,type=bind mongo:4.0
+      env:
+         MONGO_INIT_DATABASE: test 
+         MONGO_INITDB_ROOT_USERNAME: testuser
+         MONGO_INITDB_ROOT_PASSWORD: password
+
+    - name: 3__MongoDB - Create MongoDB Docker container (On Desktop)
+      if: env.ONGITHUB == 'false'
+      run: docker run -d -P -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE_DESKTOP}}",target=/data,type=bind mongo:4.0
       env:
          MONGO_INIT_DATABASE: test 
          MONGO_INITDB_ROOT_USERNAME: testuser
@@ -163,7 +169,23 @@ jobs:
       #run: docker build -f "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/Dockerfile" --force-rm -t cesmiimarketplaceapi:dev --target base  --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=CESMII.Marketplace.API" "/home/runner/work/Marketplace/Marketplace"
 
     # Start Marketplace Container
-    - name: 9__Marketplace - Start the Container
+    - name: 9__Marketplace - Start the Container (On Github)
+      if: env.ONGITHUB == 'true'
+      env:
+         ASPNETCORE_ENVIRONMENT: Development
+         ASPNETCORE_URLS: http://+:80
+         ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS: true
+         DOTNET_RUNNING_IN_CONTAINER: true
+         DOTNET_USE_POLLING_FILE_WATCHER: 1
+         EnableCloudLibSearch: false
+         MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
+         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
+         MARKETPLACE_MONGODB_DATABASE: test
+      run: |
+           docker run -dt -v "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app" -v "/home/runner/work/Marketplace/Marketplace:/src/" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "EnableCloudLibSearch=false" -e "ASPNETCORE_URLS=https://+:443;http://+:80" -p 5000:80 -p 5001:437 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
+
+    - name: 9__Marketplace - Start the Container (On Desktop)
+      if: env.ONGITHUB == 'false'
       env:
          ASPNETCORE_ENVIRONMENT: Development
          ASPNETCORE_URLS: http://+:80
@@ -176,7 +198,6 @@ jobs:
          MARKETPLACE_MONGODB_DATABASE: test
       run: |
            docker run -dt -v "C:\Users\paul\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro" -v "C:\Users\paul\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro" -v "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Sdks\Microsoft.Docker.Sdk\tools\TokenService.Proxy\linux-x64\net6.0:/TokenService.Proxy:ro" -v "C:\CESMII.github\Marketplace\api\CESMII.Marketplace.API:/app" -v "C:\CESMII.github\Marketplace:/src/" -v "C:\Users\paul\.nuget\packages\:/root/.nuget/fallbackpackages" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_URLS=http://+:80" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "NUGET_PACKAGES=/root/.nuget/fallbackpackages" -e "NUGET_FALLBACK_PACKAGES=/root/.nuget/fallbackpackages" -e "EnableCloudLibSearch=false" -p 5000:80 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
-           #docker run -dt -v "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app" -v "/home/runner/work/Marketplace/Marketplace:/src/" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "EnableCloudLibSearch=false" -e "ASPNETCORE_URLS=https://+:443;http://+:80" -p 5000:80 -p 5001:437 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
 
     - name: 10__Marketplace - Start the Main Dll in the Container
       env:
