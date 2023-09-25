@@ -290,20 +290,18 @@ jobs:
 
     # Call Marketplace Api 
     # This doesn not work, but am going to try calling from outside the container just to see if that can work at all
-    - name: 20__Tests - Access to RectApi inside container (On Github)
-      if: env.ONGITHUB == 'true'
-      env:
-        MARKETPLACE_URL1: "http://localhost:80/api"
-      # run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" /src/api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
-      run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ${{env.TEST3_PROJECT_ABSOLUTE}}
+    # - name: 20__Tests - Access to RectApi inside container (On Github)
+    #   if: env.ONGITHUB == 'true'
+    #   env:
+    #     MARKETPLACE_URL1: "http://localhost:80/api"
+    #   run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ${{env.TEST3_PROJECT_ABSOLUTE}}
 
     # Call Marketplace Api 
     - name: 21__Tests - Access to RectApi inside container (On Github)
       if: env.ONGITHUB == 'true'
       env:
-        MARKETPLACE_URL1: "http://localhost:5000/api"
-      # run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ./api/Tests/CESMII.Marketplace.Tests.RestApi/CESMII.Marketplace.Tests.RestApi.csproj
-      run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ${{env.TEST3_PROJECT_FQDN}}
+        MARKETPLACE_URL1: "http://localhost:80/api"
+      run: dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ${{env.TEST3_PROJECT_FQDN}}
 
 
     # Calling RestApi - Access from inside container (On Desktop)
