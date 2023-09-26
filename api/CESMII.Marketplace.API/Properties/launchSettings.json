@@ -15,10 +15,7 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "EnableCloudlibSearch": "false",
-        "MARKETPLACE_COLLECTION_NAME": "marketplace",
-        "MARKETPLACE_MONGODB_CONNECTIONSTRING": "mongodb://testuser:password@localhost:27017",
-        "MARKETPLACE_MONGODB_DATABASE": "test"
+        "EnableCloudlibSearch": "false"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5000",
@@ -29,7 +26,7 @@
       "launchBrowser": true,
       "launchUrl": "http://localhost:5000/swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "distributionName": ""
     },
@@ -40,7 +37,7 @@
       // "DockerfileRunArguments": "--network host",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "EnableCloudlibSearch": "false",
+        "EnableCloudlibSearch": "false"
       },
       "publishAllPorts": true,
       "useSSL": true,
