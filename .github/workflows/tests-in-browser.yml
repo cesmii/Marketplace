@@ -118,7 +118,7 @@ jobs:
 
     # Putting this between "Create mongoDB container" and "Populate mongo database" seems to help the mongo container settle down
     - name: 4__Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{ env.NETCORE_VERSION }}
 
