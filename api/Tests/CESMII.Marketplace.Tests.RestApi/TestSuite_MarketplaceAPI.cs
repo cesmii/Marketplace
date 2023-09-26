@@ -29,9 +29,9 @@ namespace CESMII.Marketplace.RestApi
         }
 
 
-        private MarketplaceItemModel[] GetFirstItem(HttpClient client, string strPath)
+        private MarketplaceItemModel[]? GetFirstItem(HttpClient client, string strPath)
         {
-            MarketplaceItemModel[] ReturnValue = new MarketplaceItemModel[1];
+            MarketplaceItemModel[]? ReturnValue = null;
 
             try
             {
@@ -45,7 +45,7 @@ namespace CESMII.Marketplace.RestApi
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"::error::Exception in GetFirstItem: {ex.Message}");
+                //Console.WriteLine($"::error::Exception in GetFirstItem: {ex.Message}");
             }
 
             return ReturnValue;
