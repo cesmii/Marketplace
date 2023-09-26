@@ -58,26 +58,10 @@ env:
   MONGODB_DATABASE_NAME: "test"
 
   MONGODB_LOCAL_CONNECTION: "mongodb://testuser:password@localhost:27017"
-  #MONGODB_CONNECTION: "mongodb://testuser:password@MyMongoDB:27017"
 
   MOUNT_SOURCE_GITHUB: '/home/runner/work/Marketplace/Marketplace/mongo-data'  
   MOUNT_SOURCE_DESKTOP: 'c:/CESMII.github/Marketplace/mongo-data'
 
-  #VOLUME_APP: '/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app'
-  #VOLUME_APP: './api/CESMII.Marketplace.API:/app'
-  #VOLUME_APP: 'C:/CESMII.github/Marketplace/api/CESMII.Marketplace.API:/app'
-
-  #VOLUME_SRC: '/home/runner/work/Marketplace/Marketplace:/src'
-  #VOLUME_SRC: './:/src'
-  #VOLUME_SRC: 'C:/CESMII.github/Marketplace:/src'
-
-  #DOCKER_VOLUME_PUBLISH: '/home/runner/work/Marketplace/Marketplace/publish:/publish'
-  #DOCKER_VOLUME_PUBLISH: './publish:/publish'
-  #DOCKER_VOLUME_PUBLISH: '/mnt/c/CESMII.github/Marketplace/publish:/publish'
-  
-  #DOCKER_FILE_MARKETPLACE: '/home/runner/work/Marketplace/Marketplace/Dockerfile'
-  #DOCKER_FILE_MARKETPLACE: './api/CESMII.Marketplace.API/Dockerfile'
-  #DOCKER_FILE_MARKETPLACE: '/mnt/c/CESMII.github/Marketplace/api/CESMII.Marketplace.API/Dockerfile'
 
 jobs:
   runner-job:
@@ -94,9 +78,8 @@ jobs:
           docker network remove --force mysubnet1 ;
           docker network create mysubnet1 ;
 
-    # Initialize a Mongo DB database
-    # Note: the "env" section seems not to work and so
-    # the -e switches are necessary
+    # Initialize a Mongo DB database (on Github)
+    # Note: the "env" section seems not to work and so the -e switches are necessary
     - name: 3__MongoDB - Create MongoDB Docker container (On Github)
       if: env.ONGITHUB == 'true'
       run: docker run -d -P -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE_GITHUB}}",target=/data,type=bind mongo:4.0
@@ -105,6 +88,8 @@ jobs:
          MONGO_INITDB_ROOT_USERNAME: testuser
          MONGO_INITDB_ROOT_PASSWORD: password
 
+    # Initialize a Mongo DB database (on the Desktop)
+    # The mount source needs to be an absolute path
     - name: 3__MongoDB - Create MongoDB Docker container (On Desktop)
       if: env.ONGITHUB == 'false'
       run: docker run -d -P -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE_DESKTOP}}",target=/data,type=bind mongo:4.0
@@ -114,6 +99,7 @@ jobs:
          MONGO_INITDB_ROOT_PASSWORD: password
 
     # Putting this between "Create mongoDB container" and "Populate mongo database" seems to help the mongo container settle down
+    # The mount source needs to be an absolute path
     - name: 4__Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
       uses: actions/setup-dotnet@v3
       with:
