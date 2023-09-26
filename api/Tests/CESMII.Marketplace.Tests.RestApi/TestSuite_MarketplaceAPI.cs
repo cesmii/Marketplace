@@ -43,7 +43,7 @@ namespace CESMII.Marketplace.RestApi
                         ReturnValue = output;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //Console.WriteLine($"::error::Exception in GetFirstItem: {ex.Message}");
             }
