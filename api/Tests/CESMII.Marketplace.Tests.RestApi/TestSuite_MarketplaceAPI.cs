@@ -136,7 +136,7 @@ namespace CESMII.Marketplace.RestApi
 
         private MarketplaceItemModel[] GetFirstItem(HttpClient client, string strPath)
         {
-            MarketplaceItemModel[] ReturnValue = null;
+            MarketplaceItemModel[] ReturnValue = new MarketplaceItemModel[1];
 
             try
             {

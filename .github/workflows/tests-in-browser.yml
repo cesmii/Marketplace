@@ -123,7 +123,8 @@ jobs:
         dotnet-version: ${{ env.NETCORE_VERSION }}
 
     - name: 5__MongoDB - Populate mongo database
-      run: docker exec -i MyMongoDB mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+      run: docker exec -i MyMongoDB mongoimport  --collection=app_log --file=/data/app_log.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
            docker exec -i MyMongoDB mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
            docker exec -i MyMongoDB mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
            docker exec -i MyMongoDB mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
@@ -141,45 +142,25 @@ jobs:
          MARKETPLACE_MONGODB_DATABASE: ${{env.MONGODB_DATABASE_NAME}}
 
 #######################################################################################################
-
-  # # # marketplace-job:
-  # # #   runs-on: ubuntu-latest
-  # # #   steps:
-
-
-
   # # #   # # - name: 6__Marketplace API - Restore dependencies (${{env.MARKETPLACE_PROJECT_FILE}})
   # # #   # #   run: dotnet restore ${{env.MARKETPLACE_PROJECT_FILE}}
   # # #   # #   working-directory: ${{env.MARKETPLACE_PROJECT_DIRECTORY}}
-
   # # #   # # - name: 7__Marketplace API - Build (${{env.MARKETPLACE_PROJECT_FILE}})
   # # #   # #   run: dotnet build ${{env.MARKETPLACE_PROJECT_FILE}} --configuration Release --no-restore
   # # #   # #   working-directory: ${{env.MARKETPLACE_PROJECT_DIRECTORY}}
+#######################################################################################################
 
 
-  # # # marketplace-next-job:
-  # # #   runs-on: ubuntu-latest
-
-  # # #   steps:
     # Publish the app and the tests
     - name: 7__Marketplace - Publish Marketplace Api
       run: |
         dotnet publish --framework:net6.0 ${{env.MARKETPLACE_PROJECT_FQDN}} -c Release -o ./publish 
 
-    - name: 6__MongoDB - Test access to Mongo database
-      run: dotnet test ${{env.TEST2_PROJECT_FQDN}}
-      env:
-         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
-         MARKETPLACE_MONGODB_DATABASE: ${{env.MONGODB_DATABASE_NAME}}
-
     # Create a Docker Container for Marketplace
     - name: 8__Marketplace - Build Docker Image
-      #run: docker build -f "/mnt/c/CESMII.github/Marketplace/api/CESMII.Marketplace.API/Dockerfile" --force-rm -t cesmiimarketplaceapi:dev --target base  --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=CESMII.Marketplace.API" "/mnt/c/CESMII.github/Marketplace"
-      #run: docker build -f "./api/CESMII.Marketplace.API/Dockerfile" --force-rm -t cesmiimarketplaceapi:dev --target base  --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=CESMII.Marketplace.API" "/mnt/c/CESMII.github/Marketplace"
       run: docker build -f "./api/CESMII.Marketplace.API/Dockerfile" --force-rm -t cesmiimarketplaceapi:dev --target base  --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=CESMII.Marketplace.API" "./"
-      #run: docker build -f "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API/Dockerfile" --force-rm -t cesmiimarketplaceapi:dev --target base  --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=CESMII.Marketplace.API" "/home/runner/work/Marketplace/Marketplace"
 
-    # Start Marketplace Container
+    # Start Marketplace Container (On Github)
     - name: 9__Marketplace - Start the Container (On Github)
       if: env.ONGITHUB == 'true'
       env:
@@ -195,6 +176,7 @@ jobs:
       run: |
            docker run -dt --network mysubnet1 -v "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app" -v "/home/runner/work/Marketplace/Marketplace:/src/" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "EnableCloudLibSearch=false" -e "ASPNETCORE_URLS=http://+:80" -p 5000:80 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
 
+    # Start Marketplace Container (On Desktop)
     - name: 9__Marketplace - Start the Container (On Desktop)
       if: env.ONGITHUB == 'false'
       env:
@@ -210,9 +192,9 @@ jobs:
       run: |
            docker run -dt --network mysubnet1 -v "C:\Users\paul\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro" -v "C:\Users\paul\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro" -v "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Sdks\Microsoft.Docker.Sdk\tools\TokenService.Proxy\linux-x64\net6.0:/TokenService.Proxy:ro" -v "C:\CESMII.github\Marketplace\api\CESMII.Marketplace.API:/app" -v "C:\CESMII.github\Marketplace:/src/" -v "C:\Users\paul\.nuget\packages\:/root/.nuget/fallbackpackages" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_URLS=http://+:80" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "NUGET_PACKAGES=/root/.nuget/fallbackpackages" -e "NUGET_FALLBACK_PACKAGES=/root/.nuget/fallbackpackages" -e "EnableCloudLibSearch=false" -p 5000:80 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
 
+    # Start the Main Dll in the Container (On Github)
     ##  Github can accommodate "docker exec -i.... & ", ampersand at the end!!!)
-    ##  I need to check whether Windows is okay with that...
-    ##
+    ##  In Windows, docker exec -id works better
     - name: 10__Marketplace - Start the Main Dll in the Container (Github)
       if: env.ONGITHUB == 'true'
       env:
@@ -228,6 +210,7 @@ jobs:
       run: |
            docker exec -i CESMII.Marketplace.API dotnet /src/publish/CESMII.Marketplace.API.dll &
     
+    # Start the Main Dll in the Container (On the Desktop)
     - name: 10__Marketplace - Start the Main Dll in the Container (Desktop)
       if: env.ONGITHUB == 'false'
       env:
@@ -243,59 +226,53 @@ jobs:
       run: |
            docker exec -di CESMII.Marketplace.API dotnet /src/publish/CESMII.Marketplace.API.dll
 
-    # Query Docker
-    - name: 11__Query Docker 
-      run:
-        docker container ls ;
-        docker system info ;
-        docker port CESMII.Marketplace.API ;
-
     # Dotnet -- diagnostics
-    - name: 12__DotNet - Diagnostics
+    - name: A__Diagnostic__DotNet - Diagnostics
       #run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --diagnostics
       run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --diagnostics
 
     # Dotnet -- info
-    - name: 13__DotNet - Info
+    - name: B__Diagnostic__DotNet - Info
       run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --info
 
     # Dotnet -- list-runtimes
-    - name: 14__DotNet - list-runtimes
+    - name: C__Diagnostic__DotNet - list-runtimes
       run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --list-runtimes
 
     # Dotnet -- list-sdks
-    - name: 15__DotNet - list-sdks
+    - name: D__Diagnostic__DotNet - list-sdks
       run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --list-sdks
 
     # Dotnet --version
-    - name: 16__DotNet - Version
+    - name: E__Diagnostic__DotNet - Version
       run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --version
 
     # MyMongoDB - Check the Logs
-    - name: 17__MyMongoDB Container - Check the Logs
+    - name: F__Diagnostic__MyMongoDB Container - Check the Logs
       run: docker logs --details MyMongoDB
 
     # CESMII.Marketplace.API - Check the Logs
-    - name: 18__CESMII.Marketplace.API Container - Check the Logs
+    - name: G__Diagnostic__CESMII.Marketplace.API Container - Check the Logs
       run: docker logs --details CESMII.Marketplace.API
 
-
     # Peek at docker status
-    - name: 19__Docker - Peeking at docker status 
+    - name: H__Diagnostic__Docker - Peeking at docker status 
       run: docker container ls --all ; 
            docker network ls ;
            docker network inspect mysubnet1 ;
            docker container inspect CESMII.Marketplace.API ;
            docker container inspect MyMongoDB ;
+           docker system info ;
+           docker port CESMII.Marketplace.API ;
 
-    - name: 6__MongoDB - Test access to Mongo database (Reprise - repeat with slower, more meaningful phrasing)
+    - name: I__Diagnostic____MongoDB - Test access to Mongo database (Reprise - repeat with slower, more meaningful phrasing)
       run: dotnet test ${{env.TEST2_PROJECT_FQDN}}
       env:
          MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: ${{env.MONGODB_DATABASE_NAME}}
 
     # Call Marketplace Api 
-    - name: 20__Tests - Access to RectApi inside container (On Github)
+    - name: 11__Tests - Access to RectApi inside container (On Github)
       if: env.ONGITHUB == 'true'
       env:
         MARKETPLACE_URL1: "http://localhost:80/api"
@@ -303,7 +280,7 @@ jobs:
 
     # Call Marketplace Api 
     # Access from outsident he container does not seem to be doable
-    # - name: 21__Tests - Access to RectApi inside container (On Github)
+    # - name: 12__Tests - Access to RectApi inside container (On Github)
     #   if: env.ONGITHUB == 'true'
     #   env:
     #     MARKETPLACE_URL1: "http://localhost:5000/api"
@@ -311,7 +288,7 @@ jobs:
 
 
     # Calling RestApi - Access from inside container (On Desktop)
-    - name: 20__Tests - Access to RectApi inside container (On Desktop)
+    - name: 11__Tests - Access to RectApi inside container (On Desktop)
       if: env.ONGITHUB == 'false'
       env:
         MARKETPLACE_URL1: "http://localhost:80/api"
@@ -319,7 +296,7 @@ jobs:
       run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ${{env.TEST3_PROJECT_ABSOLUTE}}
 
     # Calling RestApi - Access from outside container (On Desktop)
-    - name: 21__Tests - Access to RectApi outside container (On Desktop)
+    - name: 12__Tests - Access to RectApi outside container (On Desktop)
       if: env.ONGITHUB == 'false'
       env:
         MARKETPLACE_URL1: "http://localhost:80/api"

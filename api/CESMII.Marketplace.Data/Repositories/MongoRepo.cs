@@ -23,23 +23,24 @@
         public readonly IMongoDatabase Database;
         public MongoClientGlobal(ConfigUtil configUtil, ILogger<MongoClient> logger)
         {
-            //https://stackoverflow.com/questions/30333925/how-do-i-log-my-queries-in-mongodb-c-sharp-driver-2-0
-            var mongoConnectionUrl = new MongoUrl(configUtil.MongoDBSettings.ConnectionString);
-            var mongoClientSettings = MongoClientSettings.FromUrl(mongoConnectionUrl);
-            mongoClientSettings.ClusterConfigurator = cb =>
-            {
-                cb.Subscribe<CommandStartedEvent>(e =>
-                {
-                    if (!e.CommandName.Equals("isMaster") && !e.CommandName.Equals("buildInfo")
-                     && !e.CommandName.Equals("saslStart") && !e.CommandName.Equals("saslContinue"))
-                    {
-                        logger.LogInformation($"{e.Command}");
-                    }
-                });
-            };
 
             try
             {
+                //https://stackoverflow.com/questions/30333925/how-do-i-log-my-queries-in-mongodb-c-sharp-driver-2-0
+                var mongoConnectionUrl = new MongoUrl(configUtil.MongoDBSettings.ConnectionString);
+                var mongoClientSettings = MongoClientSettings.FromUrl(mongoConnectionUrl);
+                mongoClientSettings.ClusterConfigurator = cb =>
+                {
+                    cb.Subscribe<CommandStartedEvent>(e =>
+                    {
+                        if (!e.CommandName.Equals("isMaster") && !e.CommandName.Equals("buildInfo")
+                         && !e.CommandName.Equals("saslStart") && !e.CommandName.Equals("saslContinue"))
+                        {
+                            logger.LogInformation($"{e.Command}");
+                        }
+                    });
+                };
+
                 //set public property
                 Client = new MongoClient(mongoClientSettings);
                 Database = Client.GetDatabase(configUtil.MongoDBSettings.DatabaseName);

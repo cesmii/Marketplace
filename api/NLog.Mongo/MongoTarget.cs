@@ -21,7 +21,7 @@ namespace NLog.Mongo
     [Target("Mongo")]
     public class MongoTarget : Target
     {
-        private static bool bErrorWriting = false;
+        private static bool bErrorIgnoreAllLogRequests = false;
         private struct MongoConnectionKey : IEquatable<MongoConnectionKey>
         {
             private readonly string ConnectionString;
@@ -229,7 +229,7 @@ namespace NLog.Mongo
         /// <param name="logEvents">Logging events to be written out.</param>
         protected override void Write(IList<AsyncLogEventInfo> logEvents)
         {
-            if (logEvents.Count == 0 || bErrorWriting)
+            if (logEvents.Count == 0 || bErrorIgnoreAllLogRequests)
                 return;
 
             try
@@ -241,22 +241,16 @@ namespace NLog.Mongo
                 var collection = GetCollection(logEvents[logEvents.Count - 1].LogEvent.TimeStamp);
                 collection.InsertMany(documents);
 
-                for (int i = 0; i < logEvents.Count && !bErrorWriting; ++i)
+                for (int i = 0; i < logEvents.Count && !bErrorIgnoreAllLogRequests; ++i)
                     logEvents[i].Continuation(null);
             }
             catch (Exception ex)
             {
-                bErrorWriting = true;
+                bErrorIgnoreAllLogRequests = true;
                 InternalLogger.Error("Error when writing to MongoDB {0}", ex);
 
                 if (ex.MustBeRethrownImmediately())
                     throw;
-
-                //for (int i = 0; i < logEvents.Count; ++i)
-                //    logEvents[i].Continuation(ex);
-
-                //if (ex.MustBeRethrown())
-                //    throw;
             }
         }
 
@@ -267,18 +261,22 @@ namespace NLog.Mongo
         /// <param name="logEvent">Logging event to be written out.</param>
         protected override void Write(LogEventInfo logEvent)
         {
+            if (bErrorIgnoreAllLogRequests) return;
             try
             {
-                if (!bErrorWriting)
+                if (!bErrorIgnoreAllLogRequests)
                 {
                     var document = CreateDocument(logEvent);
                     var collection = GetCollection(logEvent.TimeStamp);
-                    collection.InsertOne(document);
+                    if (collection != null)
+                    {
+                        collection.InsertOne(document);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                bErrorWriting = true;
+                bErrorIgnoreAllLogRequests = true;
 
                 InternalLogger.Error("Error when writing to MongoDB {0}", ex);
                 throw;
@@ -287,6 +285,8 @@ namespace NLog.Mongo
 
         private BsonDocument CreateDocument(LogEventInfo logEvent)
         {
+            if (bErrorIgnoreAllLogRequests) return null;
+
             var document = new BsonDocument();
             if (IncludeDefaults || Fields.Count == 0)
                 AddDefaults(document, logEvent);
@@ -306,6 +306,8 @@ namespace NLog.Mongo
 
         private void AddDefaults(BsonDocument document, LogEventInfo logEvent)
         {
+            if (bErrorIgnoreAllLogRequests) return;
+
             document.Add("Date", new BsonDateTime(logEvent.TimeStamp));
 
             if (logEvent.Level != null)
@@ -364,6 +366,8 @@ namespace NLog.Mongo
 
         private BsonValue CreateException(Exception exception)
         {
+            if (bErrorIgnoreAllLogRequests) return null;
+
             if (exception == null)
                 return BsonNull.Value;
 
@@ -414,6 +418,8 @@ namespace NLog.Mongo
 
         private BsonValue GetValue(MongoField field, LogEventInfo logEvent)
         {
+            if (bErrorIgnoreAllLogRequests) return null;
+
             var value = (field.Layout != null ? RenderLogEvent(field.Layout, logEvent) : string.Empty).Trim();
             if (string.IsNullOrEmpty(value))
                 return null;
@@ -446,7 +452,7 @@ namespace NLog.Mongo
 
         private IMongoCollection<BsonDocument> GetCollection(DateTime timestamp)
         {
-            if (bErrorWriting)
+            if (bErrorIgnoreAllLogRequests)
                 return null;
 
             if (_defaultLogEvent.TimeStamp < timestamp)
@@ -485,9 +491,30 @@ namespace NLog.Mongo
 
                 if (CappedCollectionSize.HasValue)
                 {
-                    string strLogChecking = $"Checking for existing MongoDB collection {collectionName} in database {databaseName}";
-                    InternalLogger.Debug(strLogChecking);
-                    Github.Write_If(bGithubWorkflowLog, $"::notice::MongoTarget - {strLogChecking}.");
+                    try
+                    {
+                        string strLogChecking = $"Checking for existing MongoDB collection {collectionName} in database {databaseName}";
+                        InternalLogger.Debug(strLogChecking);
+                        Github.Write_If(bGithubWorkflowLog, $"::notice::MongoTarget - {strLogChecking}.");
+
+                        // If app_log does not exist, try to create it.
+                        var listCollections = database.ListCollectionNames().ToList();
+                        if (!listCollections.Contains("app_log"))
+                        {
+                            database.CreateCollection("app_log");
+                            string strCreatingCollection = $"Creating collection {collectionName} in database {databaseName}";
+                            InternalLogger.Debug(strCreatingCollection);
+                            Github.Write_If(bGithubWorkflowLog, $"::notice::MongoTarget - {strCreatingCollection}.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        bErrorIgnoreAllLogRequests = true;
+                        string strError = $"Unable to access collection {collectionName} in database {databaseName}";
+                        InternalLogger.Debug(strError);
+                        Github.Write_If(bGithubWorkflowLog, $"::error file=MongoTarget.cs,line=503::MongoTarget - {strError}. Exception: {ex.Message}");
+                        return null;
+                    }
 
                     var filterOptions = new ListCollectionNamesOptions { Filter = new BsonDocument("name", collectionName) };
                     if (!database.ListCollectionNames(filterOptions).Any())
@@ -516,6 +543,8 @@ namespace NLog.Mongo
 
         private static string GetConnectionString(string connectionName)
         {
+            if (bErrorIgnoreAllLogRequests) return String.Empty;
+
             if (connectionName == null)
                 throw new ArgumentNullException(nameof(connectionName));
 
