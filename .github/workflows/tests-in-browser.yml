@@ -258,12 +258,13 @@ jobs:
     # # #      MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
     # # #      MARKETPLACE_MONGODB_DATABASE: ${{env.MONGODB_DATABASE_NAME}}
 
-    # Testing -- Call into Marketplace Rest Api (call from inside container) - On Github
-    - name: 11__Tests - Access to RectApi inside container (On Github)
-      if: env.ONGITHUB == 'true'
-      env:
-        MARKETPLACE_URL1: "http://localhost:80/api"
-      run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ${{env.TEST3_PROJECT_ABSOLUTE}}
+    # # Testing -- Call into Marketplace Rest Api (call from inside container) - On Github
+    # # Does not work 
+    # - name: 11__Tests - Access to RectApi inside container (On Github)
+    #   if: env.ONGITHUB == 'true'
+    #   env:
+    #     MARKETPLACE_URL1: "http://localhost:80/api"
+    #   run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ${{env.TEST3_PROJECT_ABSOLUTE}}
 
     # Testing -- Call into Marketplace Rest Api (call from runner) - On Github
     - name: 12__Tests - Access to RectApi from outside container (On Github)
