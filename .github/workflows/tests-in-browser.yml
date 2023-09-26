@@ -58,30 +58,27 @@ env:
   MONGODB_DATABASE_NAME: "test"
 
   MONGODB_LOCAL_CONNECTION: "mongodb://testuser:password@localhost:27017"
-  MONGODB_CONNECTION: "mongodb://testuser:password@MyMongoDB:27017"
+  #MONGODB_CONNECTION: "mongodb://testuser:password@MyMongoDB:27017"
 
   MOUNT_SOURCE_GITHUB: '/home/runner/work/Marketplace/Marketplace/mongo-data'  
   MOUNT_SOURCE_DESKTOP: 'c:/CESMII.github/Marketplace/mongo-data'
 
   #VOLUME_APP: '/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app'
-  VOLUME_APP: './api/CESMII.Marketplace.API:/app'
+  #VOLUME_APP: './api/CESMII.Marketplace.API:/app'
   #VOLUME_APP: 'C:/CESMII.github/Marketplace/api/CESMII.Marketplace.API:/app'
 
   #VOLUME_SRC: '/home/runner/work/Marketplace/Marketplace:/src'
-  VOLUME_SRC: './:/src'
+  #VOLUME_SRC: './:/src'
   #VOLUME_SRC: 'C:/CESMII.github/Marketplace:/src'
 
   #DOCKER_VOLUME_PUBLISH: '/home/runner/work/Marketplace/Marketplace/publish:/publish'
-  DOCKER_VOLUME_PUBLISH: './publish:/publish'
+  #DOCKER_VOLUME_PUBLISH: './publish:/publish'
   #DOCKER_VOLUME_PUBLISH: '/mnt/c/CESMII.github/Marketplace/publish:/publish'
   
   #DOCKER_FILE_MARKETPLACE: '/home/runner/work/Marketplace/Marketplace/Dockerfile'
-  DOCKER_FILE_MARKETPLACE: './api/CESMII.Marketplace.API/Dockerfile'
+  #DOCKER_FILE_MARKETPLACE: './api/CESMII.Marketplace.API/Dockerfile'
   #DOCKER_FILE_MARKETPLACE: '/mnt/c/CESMII.github/Marketplace/api/CESMII.Marketplace.API/Dockerfile'
 
-  DOCKER_HOME_FOLDER: './api/CESMII.Marketplace.API'
-  #DOCKER_HOME_FOLDER: '/mnt/c/CESMII.github/Marketplace/api/CESMII.Marketplace.API'
-    
 jobs:
   runner-job:
     runs-on: ubuntu-latest
