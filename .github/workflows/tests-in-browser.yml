@@ -250,7 +250,7 @@ jobs:
            docker container inspect CESMII.Marketplace.API ;
            docker container inspect MyMongoDB ;
            docker system info ;
-           docker port CESMII.Marketplace.API ;
+           docker port CESMII.Marketplace.API ; 
 
     # # # - name: I__Diagnostic____MongoDB - Test access to Mongo database (Reprise - repeat with slower, more meaningful phrasing)
     # # #   run: dotnet test ${{env.TEST2_PROJECT_FQDN}}
