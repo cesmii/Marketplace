@@ -58,10 +58,26 @@ env:
   MONGODB_DATABASE_NAME: "test"
 
   MONGODB_LOCAL_CONNECTION: "mongodb://testuser:password@localhost:27017"
+  #MONGODB_CONNECTION: "mongodb://testuser:password@MyMongoDB:27017"
 
   MOUNT_SOURCE_GITHUB: '/home/runner/work/Marketplace/Marketplace/mongo-data'  
   MOUNT_SOURCE_DESKTOP: 'c:/CESMII.github/Marketplace/mongo-data'
 
+  #VOLUME_APP: '/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app'
+  #VOLUME_APP: './api/CESMII.Marketplace.API:/app'
+  #VOLUME_APP: 'C:/CESMII.github/Marketplace/api/CESMII.Marketplace.API:/app'
+
+  #VOLUME_SRC: '/home/runner/work/Marketplace/Marketplace:/src'
+  #VOLUME_SRC: './:/src'
+  #VOLUME_SRC: 'C:/CESMII.github/Marketplace:/src'
+
+  #DOCKER_VOLUME_PUBLISH: '/home/runner/work/Marketplace/Marketplace/publish:/publish'
+  #DOCKER_VOLUME_PUBLISH: './publish:/publish'
+  #DOCKER_VOLUME_PUBLISH: '/mnt/c/CESMII.github/Marketplace/publish:/publish'
+  
+  #DOCKER_FILE_MARKETPLACE: '/home/runner/work/Marketplace/Marketplace/Dockerfile'
+  #DOCKER_FILE_MARKETPLACE: './api/CESMII.Marketplace.API/Dockerfile'
+  #DOCKER_FILE_MARKETPLACE: '/mnt/c/CESMII.github/Marketplace/api/CESMII.Marketplace.API/Dockerfile'
 
 jobs:
   runner-job:
@@ -89,7 +105,6 @@ jobs:
          MONGO_INITDB_ROOT_PASSWORD: password
 
     # Initialize a Mongo DB database (on the Desktop)
-    # The mount source needs to be an absolute path
     - name: 3__MongoDB - Create MongoDB Docker container (On Desktop)
       if: env.ONGITHUB == 'false'
       run: docker run -d -P -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE_DESKTOP}}",target=/data,type=bind mongo:4.0
@@ -99,7 +114,6 @@ jobs:
          MONGO_INITDB_ROOT_PASSWORD: password
 
     # Putting this between "Create mongoDB container" and "Populate mongo database" seems to help the mongo container settle down
-    # The mount source needs to be an absolute path
     - name: 4__Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
       uses: actions/setup-dotnet@v3
       with:
@@ -244,20 +258,25 @@ jobs:
     # # #      MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
     # # #      MARKETPLACE_MONGODB_DATABASE: ${{env.MONGODB_DATABASE_NAME}}
 
-    # Testing -- Call into Marketplace Rest Api (call from inside container) - On Github
-    - name: 11__Tests - Access to RectApi inside container (On Github)
-      if: env.ONGITHUB == 'true'
-      env:
-        MARKETPLACE_URL1: "http://localhost:80/api"
-      run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ${{env.TEST3_PROJECT_ABSOLUTE}}
+    # # Testing -- Call into Marketplace Rest Api (call from inside container) - On Github
+    # - name: 11__Tests - Access to RectApi inside container (On Github)
+    #   if: env.ONGITHUB == 'true'
+    #   env:
+    #     MARKETPLACE_URL1: "http://localhost:80/api"
+    #   run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ${{env.TEST3_PROJECT_ABSOLUTE}}
 
     # Testing -- Call into Marketplace Rest Api (call from runner) - On Github
+    # - name: 12__Tests - Access to RectApi from outside container (On Github)
+    #   if: env.ONGITHUB == 'true'
+    #   env:
+    #     MARKETPLACE_URL1: "http://localhost:5000/api"
+    #   run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ${{env.TEST3_PROJECT_FQDN}}
+
     - name: 12__Tests - Access to RectApi from outside container (On Github)
       if: env.ONGITHUB == 'true'
       env:
-        MARKETPLACE_URL1: "http://localhost:5000/api"
-      run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ${{env.TEST3_PROJECT_FQDN}}
-
+        MARKETPLACE_URL1: "http://localhost:80/api"
+      run: dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ${{env.TEST3_PROJECT_FQDN}}
 
     # Testing -- Call into Marketplace Rest Api (call from inside container ) - On Desktop
     - name: 11__Tests - Access to RectApi inside container (On Desktop)
@@ -270,7 +289,7 @@ jobs:
     - name: 12__Tests - Access to RectApi from outside container (On Desktop)
       if: env.ONGITHUB == 'false'
       env:
-        MARKETPLACE_URL1: "http://localhost:5000/api"
+        MARKETPLACE_URL1: "http://localhost:80/api"
       run: /root/.dotnet/dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ${{env.TEST3_PROJECT_FQDN}}
 
 #######################################################################################################
