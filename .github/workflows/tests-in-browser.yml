@@ -113,13 +113,24 @@ jobs:
          MONGO_INITDB_ROOT_USERNAME: testuser
          MONGO_INITDB_ROOT_PASSWORD: password
 
-    # Putting this between "Create mongoDB container" and "Populate mongo database" seems to help the mongo container settle down
+    # Putting steps 4, 5 & 6 between "Create mongoDB container" and "Populate mongo database" seems to help the mongo container settle down
     - name: 4__Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{ env.NETCORE_VERSION }}
 
-    - name: 5__MongoDB - Populate mongo database
+    # Publish the app and the tests
+    - name: 5__Marketplace - Publish Marketplace Api
+      run: |
+        dotnet publish --framework:net6.0 ${{env.MARKETPLACE_PROJECT_FQDN}} -c Release -o ./publish ;
+        dotnet publish ./DumpAppLog/DumpAppLog.csproj
+
+    # Create a Docker Container for Marketplace
+    - name: 6__Marketplace - Build Docker Image
+      run: docker build -f "./api/CESMII.Marketplace.API/Dockerfile" --force-rm -t cesmiimarketplaceapi:dev --target base  --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=CESMII.Marketplace.API" "./"
+
+    # Populate mongo database - 
+    - name: 7__MongoDB - Populate mongo database
       run: docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=app_log --file=/data/app_log.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
            docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=JobLog --file=/data/JobLog.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
            docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=LookupItem --file=/data/LookupItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
@@ -132,21 +143,11 @@ jobs:
            docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=RequestInfo --file=/data/RequestInfo.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
            docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
 
-    - name: 6__MongoDB - Test access to Mongo database
+    - name: 8__MongoDB - Test access to Mongo database
       run: dotnet test ${{env.TEST2_PROJECT_DIRECTORY}}${{env.TEST2_PROJECT_FILE}}
       env:
          MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: ${{env.MONGODB_DATABASE_NAME}}
-
-    # Publish the app and the tests
-    - name: 7__Marketplace - Publish Marketplace Api
-      run: |
-        dotnet publish --framework:net6.0 ${{env.MARKETPLACE_PROJECT_FQDN}} -c Release -o ./publish ;
-        dotnet publish ./DumpAppLog/DumpAppLog.csproj
-
-    # Create a Docker Container for Marketplace
-    - name: 8__Marketplace - Build Docker Image
-      run: docker build -f "./api/CESMII.Marketplace.API/Dockerfile" --force-rm -t cesmiimarketplaceapi:dev --target base  --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=CESMII.Marketplace.API" "./"
 
     # Start Marketplace Container (On Github)
     - name: 9__Marketplace - Start the Container (On Github)
