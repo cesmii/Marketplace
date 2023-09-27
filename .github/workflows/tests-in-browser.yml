@@ -58,7 +58,7 @@ env:
   MONGODB_DATABASE_NAME: "test"
 
   MONGODB_LOCAL_CONNECTION: "mongodb://testuser:password@localhost:27017"
-  #MONGODB_CONNECTION: "mongodb://testuser:password@MyMongoDB:27017"
+  MONGODB_SECUR_CONNECTION: "mongodb://testuser:password@MyMongoDB:27017?ssl=true"
 
   MOUNT_SOURCE_GITHUB: '/home/runner/work/Marketplace/Marketplace/mongo-data'  
   MOUNT_SOURCE_DESKTOP: 'c:/CESMII.github/Marketplace/mongo-data'
@@ -98,7 +98,7 @@ jobs:
     # Note: the "env" section seems not to work and so the -e switches are necessary
     - name: 3__MongoDB - Create MongoDB Docker container (On Github)
       if: env.ONGITHUB == 'true'
-      run: docker run -d -P -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE_GITHUB}}",target=/data,type=bind mongo:4.0
+      run: docker run -d -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE_GITHUB}}",target=/data,type=bind mongo:6.0
       env:
          MONGO_INIT_DATABASE: test 
          MONGO_INITDB_ROOT_USERNAME: testuser
@@ -107,7 +107,7 @@ jobs:
     # Initialize a Mongo DB database (on the Desktop)
     - name: 3__MongoDB - Create MongoDB Docker container (On Desktop)
       if: env.ONGITHUB == 'false'
-      run: docker run -d -P -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE_DESKTOP}}",target=/data,type=bind mongo:4.0
+      run: docker run -d -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE_DESKTOP}}",target=/data,type=bind mongo:6.0
       env:
          MONGO_INIT_DATABASE: test 
          MONGO_INITDB_ROOT_USERNAME: testuser
@@ -120,17 +120,17 @@ jobs:
         dotnet-version: ${{ env.NETCORE_VERSION }}
 
     - name: 5__MongoDB - Populate mongo database
-      run: docker exec -i MyMongoDB mongoimport  --collection=app_log --file=/data/app_log.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=JobLog --file=/data/JobLog.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=LookupItem --file=/data/LookupItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=Organization --file=/data/Organization.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=Permission --file=/data/Permission.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=ProfileItem --file=/data/ProfileItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=Publisher --file=/data/Publisher.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=RequestInfo --file=/data/RequestInfo.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
-           docker exec -i MyMongoDB mongoimport  --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+      run: docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=app_log --file=/data/app_log.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=JobLog --file=/data/JobLog.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=LookupItem --file=/data/LookupItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=MarketplaceItem --file=/data/MarketplaceItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=MarketplaceItemAnalytics --file=/data/MarketplaceItemAnalytics.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=Organization --file=/data/Organization.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=Permission --file=/data/Permission.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=ProfileItem --file=/data/ProfileItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=Publisher --file=/data/Publisher.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=RequestInfo --file=/data/RequestInfo.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
+           docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
 
     - name: 6__MongoDB - Test access to Mongo database
       run: dotnet test ${{env.TEST2_PROJECT_DIRECTORY}}${{env.TEST2_PROJECT_FILE}}
@@ -141,7 +141,8 @@ jobs:
     # Publish the app and the tests
     - name: 7__Marketplace - Publish Marketplace Api
       run: |
-        dotnet publish --framework:net6.0 ${{env.MARKETPLACE_PROJECT_FQDN}} -c Release -o ./publish 
+        dotnet publish --framework:net6.0 ${{env.MARKETPLACE_PROJECT_FQDN}} -c Release -o ./publish ;
+        dotnet publish ./DumpAppLog/DumpAppLog.csproj
 
     # Create a Docker Container for Marketplace
     - name: 8__Marketplace - Build Docker Image
@@ -158,10 +159,10 @@ jobs:
          DOTNET_USE_POLLING_FILE_WATCHER: 1
          EnableCloudLibSearch: false
          MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
-         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
+         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_SECUR_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: test
       run: |
-           docker run -dt --network mysubnet1 -v "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app" -v "/home/runner/work/Marketplace/Marketplace:/src/" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "EnableCloudLibSearch=false" -e "ASPNETCORE_URLS=http://+:80" -p 5000:80 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
+           docker run -dt --network mysubnet1 -v "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app" -v "/home/runner/work/Marketplace/Marketplace:/src/" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "EnableCloudLibSearch=false" -e "ASPNETCORE_URLS=http://+:80" -p 5000:80 -p:5001:443 --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
 
     # Start Marketplace Container (On Desktop)
     - name: 9__Marketplace - Start the Container (On Desktop)
@@ -174,10 +175,10 @@ jobs:
          DOTNET_USE_POLLING_FILE_WATCHER: 1
          EnableCloudLibSearch: false
          MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
-         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
+         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_SECUR_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: test
       run: |
-           docker run -dt --network mysubnet1 -v "C:\Users\paul\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro" -v "C:\Users\paul\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro" -v "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Sdks\Microsoft.Docker.Sdk\tools\TokenService.Proxy\linux-x64\net6.0:/TokenService.Proxy:ro" -v "C:\CESMII.github\Marketplace\api\CESMII.Marketplace.API:/app" -v "C:\CESMII.github\Marketplace:/src/" -v "C:\Users\paul\.nuget\packages\:/root/.nuget/fallbackpackages" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_URLS=http://+:80" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "NUGET_PACKAGES=/root/.nuget/fallbackpackages" -e "NUGET_FALLBACK_PACKAGES=/root/.nuget/fallbackpackages" -e "EnableCloudLibSearch=false" -p 5000:80 -P --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
+           docker run -dt --network mysubnet1 -v "C:\Users\paul\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro" -v "C:\Users\paul\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro" -v "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Sdks\Microsoft.Docker.Sdk\tools\TokenService.Proxy\linux-x64\net6.0:/TokenService.Proxy:ro" -v "C:\CESMII.github\Marketplace\api\CESMII.Marketplace.API:/app" -v "C:\CESMII.github\Marketplace:/src/" -v "C:\Users\paul\.nuget\packages\:/root/.nuget/fallbackpackages" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_URLS=http://+:80" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "NUGET_PACKAGES=/root/.nuget/fallbackpackages" -e "NUGET_FALLBACK_PACKAGES=/root/.nuget/fallbackpackages" -e "EnableCloudLibSearch=false" -p 5000:80 -p 5001:443 --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
 
     # Start the Main Dll in the Container (On Github)
     ##  Github can accommodate "docker exec -i.... & ", ampersand at the end!!!)
@@ -192,7 +193,7 @@ jobs:
          DOTNET_USE_POLLING_FILE_WATCHER: 1
          EnableCloudLibSearch: false
          MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
-         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
+         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_SECUR_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: test
       run: |
            docker exec -i CESMII.Marketplace.API dotnet /src/publish/CESMII.Marketplace.API.dll &
@@ -208,10 +209,18 @@ jobs:
          DOTNET_USE_POLLING_FILE_WATCHER: 1
          EnableCloudLibSearch: false
          MARKETPLACE_GITHUB_WORKFLOW_COMMANDS: true
-         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
+         MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_SECUR_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: test
       run: |
            docker exec -di CESMII.Marketplace.API dotnet /src/publish/CESMII.Marketplace.API.dll
+
+    # Dump from the log database
+    - name: A__Diagnostic__MarketplaceAPI - Dump Log
+      if: always()
+      env:
+        MARKETPLACE_MONGODB_CONNECTIONSTRING: mongodb://testuser:password@localhost:27017
+        MARKETPLACE_MONGODB_DATABASE: test
+      run: dotnet run --project ./DumpAppLog/DumpAppLog.csproj
 
     # # # # Dotnet -- diagnostics
     # # # - name: A__Diagnostic__DotNet - Diagnostics
@@ -243,19 +252,19 @@ jobs:
     # # #   run: docker logs --details CESMII.Marketplace.API
 
     # Peek at docker status
-    - name: H__Diagnostic__Docker - Peeking at docker status 
-      run: docker container ls --all ; 
-           docker network ls ;
-           docker network inspect mysubnet1 ;
-           docker container inspect CESMII.Marketplace.API ;
-           docker container inspect MyMongoDB ;
-           docker system info ;
-           docker port CESMII.Marketplace.API ; 
+    # # # - name: H__Diagnostic__Docker - Peeking at docker status 
+    # # #   run: docker container ls --all ; 
+    # # #        docker network ls ;
+    # # #        docker network inspect mysubnet1 ;
+    # # #        docker container inspect CESMII.Marketplace.API ;
+    # # #        docker container inspect MyMongoDB ;
+    # # #        docker system info ;
+    # # #        docker port CESMII.Marketplace.API ; 
 
     # # # - name: I__Diagnostic____MongoDB - Test access to Mongo database (Reprise - repeat with slower, more meaningful phrasing)
     # # #   run: dotnet test ${{env.TEST2_PROJECT_FQDN}}
     # # #   env:
-    # # #      MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
+    # # #      MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_SECUR_CONNECTION}}
     # # #      MARKETPLACE_MONGODB_DATABASE: ${{env.MONGODB_DATABASE_NAME}}
 
     # # Testing -- Call into Marketplace Rest Api (call from inside container) - On Github
@@ -265,6 +274,7 @@ jobs:
     #   env:
     #     MARKETPLACE_URL1: "http://localhost:80/api"
     #   run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ${{env.TEST3_PROJECT_ABSOLUTE}}
+
 
     # Testing -- Call into Marketplace Rest Api (call from runner) - On Github
     - name: 12__Tests - Access to RectApi from outside container (On Github)
@@ -285,7 +295,16 @@ jobs:
       if: env.ONGITHUB == 'false'
       env:
         MARKETPLACE_URL1: "http://localhost:5000/api"
-      run: /root/.dotnet/dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ${{env.TEST3_PROJECT_FQDN}}
+      run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ${{env.TEST3_PROJECT_FQDN}}
+
+
+    # Dump from the log database
+    - name: A__Diagnostic__MarketplaceAPI - Dump Log
+      if: always()
+      env:
+        MARKETPLACE_MONGODB_CONNECTIONSTRING: mongodb://testuser:password@localhost:27017
+        MARKETPLACE_MONGODB_DATABASE: test
+      run: dotnet run --project ./DumpAppLog/DumpAppLog.csproj
 
 #######################################################################################################
 
@@ -297,7 +316,7 @@ jobs:
     #  run:  chrome --version
 
     #- name: FrontEnd - Use Node.js version (${{env.NODEJS_VERSION}})
-    #  uses: actions/setup-node@v1
+    #  uses: actions/setup-node@v3
     #  with: 
     #    node-version: ${{env.NODEJS_VERSION}}
 

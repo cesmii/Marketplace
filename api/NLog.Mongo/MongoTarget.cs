@@ -478,7 +478,7 @@ namespace NLog.Mongo
                 databaseName = !string.IsNullOrEmpty(databaseName) ? databaseName : (mongoUrl.DatabaseName ?? "NLog");
                 collectionName = !string.IsNullOrEmpty(collectionName) ? collectionName : "Log";
 
-                string strLogConnecting = "Connecting to MongoDB collection {collectionName} in database {databaseName}";
+                string strLogConnecting = $"Connecting to MongoDB collection {collectionName} in database {databaseName}";
                 InternalLogger.Info(strLogConnecting);
 
                 bool bGithubWorkflowLog = Github.QueryEnvironmentBool("MARKETPLACE_GITHUB_WORKFLOW_COMMANDS", false);
