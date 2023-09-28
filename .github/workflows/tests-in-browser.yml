@@ -60,6 +60,8 @@ env:
   MONGODB_LOCAL_CONNECTION: "mongodb://testuser:password@localhost:27017"
   MONGODB_BRIDGE_CONNECTION: "mongodb://testuser:password@XX.XX.XX.XX:27017"
 
+  MARKETPLACE_BRIDGE_CONNECTION: "http://XX.XX.XX.XX"
+
   MOUNT_SOURCE_GITHUB: '/home/runner/work/Marketplace/Marketplace/mongo-data'  
   MOUNT_SOURCE_DESKTOP: 'c:/CESMII.github/Marketplace/mongo-data'
 
@@ -117,6 +119,7 @@ jobs:
       run:
          export TEMPIPVALUE=$(docker exec -i MyMongoDB hostname -i) ;
          echo "MONGODB_BRIDGE_CONNECTION=mongodb://testuser:password@$TEMPIPVALUE:27017" >> $GITHUB_ENV
+
 
     - name: 1001___Dump Github context
       env:
@@ -194,6 +197,11 @@ jobs:
       run: |
            docker run -dt --network mysubnet1 -v "C:\Users\paul\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro" -v "C:\Users\paul\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro" -v "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Sdks\Microsoft.Docker.Sdk\tools\TokenService.Proxy\linux-x64\net6.0:/TokenService.Proxy:ro" -v "C:\CESMII.github\Marketplace\api\CESMII.Marketplace.API:/app" -v "C:\CESMII.github\Marketplace:/src/" -v "C:\Users\paul\.nuget\packages\:/root/.nuget/fallbackpackages" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_URLS=http://+:80" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "NUGET_PACKAGES=/root/.nuget/fallbackpackages" -e "NUGET_FALLBACK_PACKAGES=/root/.nuget/fallbackpackages" -e "EnableCloudLibSearch=false" -p 5000:80 -p 5001:443 --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
 
+    - name: 5__CESMII.Marketplace.API - Query Bridge Connection to CESMII.Marketplace.API Container
+      run:
+         export TEMPIPVALUE=$(docker exec -i CESMII.Marketplace.API hostname -i) ;
+         echo "MARKETPLACE_BRIDGE_CONNECTION=http://$TEMPIPVALUE" >> $GITHUB_ENV
+
     # Start the Main Dll in the Container (On Github)
     ##  Github can accommodate "docker exec -i.... & ", ampersand at the end!!!)
     ##  In Windows, docker exec -id works better
@@ -265,28 +273,78 @@ jobs:
          MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: ${{env.MONGODB_DATABASE_NAME}}
          
-    # Testing -- Call into Marketplace Rest Api (call from runner) - On Github
-    - name: 13__Tests - Access to RectApi from outside container (On Github)
-      if: env.ONGITHUB == 'true'
+    # Testing -- Call into Marketplace Rest Api (call from runner)`
+    - name: T_001__Tests - Calling RectApi
+      if: true
+      env:
+        MARKETPLACE_URL1: "http://localhost/api"
+      run: dotnet test -e "MARKETPLACE_URL1=http://localhost/api" ${{env.TEST3_PROJECT_FQDN}}
+
+    - name: T_002__Tests - Calling RectApi
+      if: true
+      env:
+        MARKETPLACE_URL1: "http://localhost:80/api"
+      run: dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ${{env.TEST3_PROJECT_FQDN}}
+
+    - name: T_003__Tests - Calling RectApi
+      if: true
       env:
         MARKETPLACE_URL1: "http://localhost:5000/api"
       run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ${{env.TEST3_PROJECT_FQDN}}
 
-    # Testing -- Call into Marketplace Rest Api (call from inside container ) - On Desktop
-    - name: 12__Tests - Access to RectApi inside container (On Desktop)
-      if: env.ONGITHUB == 'false'
+    - name: T_004__Tests - Calling RectApi
+      if: true
+      env:
+        MARKETPLACE_URL1: "http://localhost:5001/api"
+      run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5001/api" ${{env.TEST3_PROJECT_FQDN}}
+
+
+    # Testing -- Call into Marketplace Rest Api (call from inside container )
+    - name: T__010__Tests - Access to RectApi inside container (On Desktop)
+      if: true
+      env:
+        MARKETPLACE_URL1: "http://localhost/api"
+      run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost/api" ${{env.TEST3_PROJECT_ABSOLUTE}}
+
+    - name: T__011__Tests - Access to RectApi inside container (On Desktop)
+      if: true
       env:
         MARKETPLACE_URL1: "http://localhost:80/api"
       run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ${{env.TEST3_PROJECT_ABSOLUTE}}
-
-    # Testing -- Call into Marketplace Rest Api (call from runner ) - On Desktop
-    - name: 13__Tests - Access to RectApi from outside container (On Desktop)
-      if: env.ONGITHUB == 'false'
+    - name: T__012__Tests - Access to RectApi inside container (On Desktop)
+      if: true
       env:
         MARKETPLACE_URL1: "http://localhost:5000/api"
-      run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ${{env.TEST3_PROJECT_FQDN}}
+      run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ${{env.TEST3_PROJECT_ABSOLUTE}}
+    - name: T__013__Tests - Access to RectApi inside container (On Desktop)
+      if: true
+      env:
+        MARKETPLACE_URL1: "http://localhost:5001/api"
+      run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:5001/api" ${{env.TEST3_PROJECT_ABSOLUTE}}
 
 
+    # Testing -- Call into Marketplace Rest Api using bridge IP address from inside container
+    - name: T__1010__Tests - Access to RectApi inside container (On Desktop)
+      if: true
+      env:
+        MARKETPLACE_URL1: "${{ env.MARKETPLACE_BRIDGE_CONNECTION}}/api"
+      run: docker exec -i CESMII.Marketplace.API dotnet test ${{env.TEST3_PROJECT_ABSOLUTE}}
+
+    - name: T__1011__Tests - Access to RectApi inside container (On Desktop)
+      if: true
+      env:
+        MARKETPLACE_URL1: "${{ env.MARKETPLACE_BRIDGE_CONNECTION}}:80/api"
+      run: docker exec -i CESMII.Marketplace.API dotnet test ${{env.TEST3_PROJECT_ABSOLUTE}}
+    - name: T__1012__Tests - Access to RectApi inside container (On Desktop)
+      if: true
+      env:
+        MARKETPLACE_URL1: "${{ env.MARKETPLACE_BRIDGE_CONNECTION}}:5000/api"
+      run: docker exec -i CESMII.Marketplace.API dotnet test ${{env.TEST3_PROJECT_ABSOLUTE}}
+    - name: T__1013__Tests - Access to RectApi inside container (On Desktop)
+      if: true
+      env:
+        MARKETPLACE_URL1: "${{ env.MARKETPLACE_BRIDGE_CONNECTION}}:5001/api"
+      run: docker exec -i CESMII.Marketplace.API dotnet test ${{env.TEST3_PROJECT_ABSOLUTE}}
 
 #######################################################################################################
 
