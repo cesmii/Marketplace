@@ -275,25 +275,25 @@ jobs:
          
     # Testing -- Call into Marketplace Rest Api (call from runner)`
     - name: T_001__Tests - Calling RectApi
-      if: true
+      if: always()
       env:
         MARKETPLACE_URL1: "http://localhost/api"
       run: dotnet test -e "MARKETPLACE_URL1=http://localhost/api" ${{env.TEST3_PROJECT_FQDN}}
 
     - name: T_002__Tests - Calling RectApi
-      if: true
+      if: always()
       env:
         MARKETPLACE_URL1: "http://localhost:80/api"
       run: dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ${{env.TEST3_PROJECT_FQDN}}
 
     - name: T_003__Tests - Calling RectApi
-      if: true
+      if: always()
       env:
         MARKETPLACE_URL1: "http://localhost:5000/api"
       run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ${{env.TEST3_PROJECT_FQDN}}
 
     - name: T_004__Tests - Calling RectApi
-      if: true
+      if: always()
       env:
         MARKETPLACE_URL1: "http://localhost:5001/api"
       run: dotnet test -e "MARKETPLACE_URL1=http://localhost:5001/api" ${{env.TEST3_PROJECT_FQDN}}
@@ -301,23 +301,23 @@ jobs:
 
     # Testing -- Call into Marketplace Rest Api (call from inside container )
     - name: T__010__Tests - Access to RectApi inside container (On Desktop)
-      if: true
+      if: always()
       env:
         MARKETPLACE_URL1: "http://localhost/api"
       run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost/api" ${{env.TEST3_PROJECT_ABSOLUTE}}
 
     - name: T__011__Tests - Access to RectApi inside container (On Desktop)
-      if: true
+      if: always()
       env:
         MARKETPLACE_URL1: "http://localhost:80/api"
       run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:80/api" ${{env.TEST3_PROJECT_ABSOLUTE}}
     - name: T__012__Tests - Access to RectApi inside container (On Desktop)
-      if: true
+      if: always()
       env:
         MARKETPLACE_URL1: "http://localhost:5000/api"
       run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:5000/api" ${{env.TEST3_PROJECT_ABSOLUTE}}
     - name: T__013__Tests - Access to RectApi inside container (On Desktop)
-      if: true
+      if: always()
       env:
         MARKETPLACE_URL1: "http://localhost:5001/api"
       run: docker exec -i CESMII.Marketplace.API dotnet test -e "MARKETPLACE_URL1=http://localhost:5001/api" ${{env.TEST3_PROJECT_ABSOLUTE}}
@@ -325,23 +325,23 @@ jobs:
 
     # Testing -- Call into Marketplace Rest Api using bridge IP address from inside container
     - name: T__1010__Tests - Access to RectApi inside container (On Desktop)
-      if: true
+      if: always()
       env:
         MARKETPLACE_URL1: "${{ env.MARKETPLACE_BRIDGE_CONNECTION}}/api"
       run: docker exec -i CESMII.Marketplace.API dotnet test ${{env.TEST3_PROJECT_ABSOLUTE}}
 
     - name: T__1011__Tests - Access to RectApi inside container (On Desktop)
-      if: true
+      if: always()
       env:
         MARKETPLACE_URL1: "${{ env.MARKETPLACE_BRIDGE_CONNECTION}}:80/api"
       run: docker exec -i CESMII.Marketplace.API dotnet test ${{env.TEST3_PROJECT_ABSOLUTE}}
     - name: T__1012__Tests - Access to RectApi inside container (On Desktop)
-      if: true
+      if: always()
       env:
         MARKETPLACE_URL1: "${{ env.MARKETPLACE_BRIDGE_CONNECTION}}:5000/api"
       run: docker exec -i CESMII.Marketplace.API dotnet test ${{env.TEST3_PROJECT_ABSOLUTE}}
     - name: T__1013__Tests - Access to RectApi inside container (On Desktop)
-      if: true
+      if: always()
       env:
         MARKETPLACE_URL1: "${{ env.MARKETPLACE_BRIDGE_CONNECTION}}:5001/api"
       run: docker exec -i CESMII.Marketplace.API dotnet test ${{env.TEST3_PROJECT_ABSOLUTE}}
