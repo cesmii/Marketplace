@@ -18,7 +18,7 @@ on:
 env:
   # Hides some of the differences between running in a Github action and running 
   # in nektos/act on Microsoft Windows with Docker Desktop
-  ONGITHUB: false
+  ONGITHUB: true
 
   # Main project path
   MARKETPLACE_PROJECT_DIRECTORY: './api/CESMII.Marketplace.API/'
@@ -118,12 +118,12 @@ jobs:
          export TEMPIPVALUE=$(docker exec -i MyMongoDB hostname -i) ;
          echo "MONGODB_BRIDGE_CONNECTION=mongodb://testuser:password@$TEMPIPVALUE:27017" >> $GITHUB_ENV
 
-    - name: 1001___Dump Environment context
+    - name: 1001___Dump Github context
       env:
-         ENV_CONTEXT: ${{ toJson(env) }}
+         GH_CONTEXT: ${{ toJson(github) }}
       run: 
         echo "This is Before"
-        echo "$ENV_CONTEXT"
+        echo "$GH_CONTEXT"
         echo "This is After"
  
     # Putting steps 5, 6 & 7 between "Create mongoDB container" and "Populate mongo database" seems to help the mongo container settle down
