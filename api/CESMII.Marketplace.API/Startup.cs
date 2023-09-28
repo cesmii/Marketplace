@@ -48,6 +48,7 @@ namespace CESMII.Marketplace.Api
     {
         private readonly string _corsPolicyName = "SiteCorsPolicy";
         private readonly string _version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        protected static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public Startup(IConfiguration configuration)
         {
@@ -59,9 +60,6 @@ namespace CESMII.Marketplace.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            bool bGithubWorkflowLog = Github.QueryEnvironmentBool("MARKETPLACE_GITHUB_WORKFLOW_COMMANDS", false);
-            Github.Write_If(bGithubWorkflowLog, "::notice::Startup-ConfigureServices - Entering function.");
-
             //MongoDB approach
             services.Configure<MongoDBConfig>(Configuration);
 
@@ -79,11 +77,6 @@ namespace CESMII.Marketplace.Api
                 Configuration["MongoDBSettings:DatabaseName"] = strDatabase;
             }
 
-            var root = (IConfigurationRoot)Configuration;
-            var strDebugView = root.GetDebugView();
-            System.Diagnostics.Debug.WriteLine(strDebugView);
-            Console.WriteLine($"::notice::{strDebugView}");
-
             string strCollection = Configuration["MongoDBSettings:NLogCollectionName"];
             NLog.Mongo.MongoTarget.SetNLogMongoOverrides(strConnectionString: strConnectionString,
                                                          strCollectionName: strCollection,
@@ -91,6 +84,16 @@ namespace CESMII.Marketplace.Api
 
             // Set variable used in nLog.config
             NLog.LogManager.Configuration.Variables["appName"] = "CESMII-Marketplace";
+
+            bool bGithubWorkflowLog = Github.QueryEnvironmentBool("MARKETPLACE_GITHUB_WORKFLOW_COMMANDS", false);
+            Github.Write_If(bGithubWorkflowLog, "::notice::Startup-ConfigureServices - Entering function.");
+            _logger.Info("Startup-ConfigureServices - Entering function.");
+
+            var root = (IConfigurationRoot)Configuration;
+            var strDebugView = root.GetDebugView();
+            System.Diagnostics.Debug.WriteLine(strDebugView);
+            Console.WriteLine($"::notice::{strDebugView}");
+
 
             //marketplace and related data
             services.AddScoped<IMongoRepository<MarketplaceItem>, MongoRepository<MarketplaceItem>>();
@@ -110,7 +113,8 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IMongoRepository<JobLog>, MongoRepository<JobLog>>();
             services.AddScoped<IMongoRepository<JobDefinition>, MongoRepository<JobDefinition>>();
 
-            Github.Write_If(bGithubWorkflowLog, "::notice::ConfigureServices-StartUp - Line 112");
+            Github.Write_If(bGithubWorkflowLog, "::notice::StartUp-ConfigureServices - Line 115");
+            _logger.Info("Startup-ConfigureServices - Line 115.");
 
             //DAL objects
             services.AddScoped<UserDAL>();  //this one has extra methods outside of the IDal interface
@@ -178,7 +182,8 @@ namespace CESMII.Marketplace.Api
                 });
             });
 
-            Console.WriteLine("::notice::ConfigureServices - Line 180");
+            Console.WriteLine("::notice::Startup-ConfigureServices - Line 184");
+            _logger.Info("Startup-ConfigureServices - Line 184");
 
             // https://stackoverflow.com/questions/46112258/how-do-i-get-current-user-in-net-core-web-api-from-jwt-token
             //services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -252,7 +257,8 @@ namespace CESMII.Marketplace.Api
             //https://docs.microsoft.com/en-us/aspnet/core/fundamentals/http-requests?view=aspnetcore-6.0
             services.AddHttpClient();
 
-            Github.Write_If(bGithubWorkflowLog, "::notice::ConfigureServices-Startup - Completed.");
+            Github.Write_If(bGithubWorkflowLog, "::notice::Startup-ConfigureServices - Completed.");
+            _logger.Info("Startup-ConfigureServices - Completed.");
         }
 
 
