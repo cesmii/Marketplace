@@ -10,12 +10,11 @@ namespace CESMII.Marketplace.RestApi
         [Fact]
         public void MarketItemsAvailable_On_RestCall()
         {
-            string strHostHttps = "http://localhost:5000/api";
+            string strHostHttps; 
             HttpClient client = new HttpClient();
 
-            string strTemp = utils.GetConnection("MARKETPLACE_URL1");
-            if (!string.IsNullOrEmpty(strTemp) )
-                strHostHttps = strTemp;
+            strHostHttps = utils.GetConnection("MARKETPLACE_URL1");   // We expect to find a value like this http://localhost:5000/api
+            Assert.NotNull(strHostHttps);
 
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
