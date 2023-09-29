@@ -16,8 +16,8 @@ on:
   #    - main
 
 env:
-  # Hides some of the differences between running in a Github action and running 
-  # in nektos/act on Microsoft Windows with Docker Desktop
+  # Flags that is set automatically to determine whether we 
+  # are running on Github.com or within nektos/act (on Desktop).
   ONGITHUB: true
 
   # Main project path
@@ -65,40 +65,32 @@ env:
   MOUNT_SOURCE_GITHUB: '/home/runner/work/Marketplace/Marketplace/mongo-data'  
   MOUNT_SOURCE_DESKTOP: 'c:/CESMII.github/Marketplace/mongo-data'
 
-  #VOLUME_APP: '/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app'
-  #VOLUME_APP: './api/CESMII.Marketplace.API:/app'
-  #VOLUME_APP: 'C:/CESMII.github/Marketplace/api/CESMII.Marketplace.API:/app'
-
-  #VOLUME_SRC: '/home/runner/work/Marketplace/Marketplace:/src'
-  #VOLUME_SRC: './:/src'
-  #VOLUME_SRC: 'C:/CESMII.github/Marketplace:/src'
-
-  #DOCKER_VOLUME_PUBLISH: '/home/runner/work/Marketplace/Marketplace/publish:/publish'
-  #DOCKER_VOLUME_PUBLISH: './publish:/publish'
-  #DOCKER_VOLUME_PUBLISH: '/mnt/c/CESMII.github/Marketplace/publish:/publish'
-  
-  #DOCKER_FILE_MARKETPLACE: '/home/runner/work/Marketplace/Marketplace/Dockerfile'
-  #DOCKER_FILE_MARKETPLACE: './api/CESMII.Marketplace.API/Dockerfile'
-  #DOCKER_FILE_MARKETPLACE: '/mnt/c/CESMII.github/Marketplace/api/CESMII.Marketplace.API/Dockerfile'
 
 jobs:
   runner-job:
     runs-on: ubuntu-latest
     steps:
-    - name: 1__Marketplace API - Check out the repo
+    # Automating the setting of a flag that helps resolves
+    # differences between Github Actions on github.com and
+    # using nektos/act on Windows using Docker Desktop.
+    - name: 1__Github - Update ONGITHUB Flag
+      if: github.actor == 'nektos/act'
+      run: echo "ONGITHUB=false" >> $GITHUB_ENV
+
+    - name: 2__Marketplace API - Check out the repo
       uses: actions/checkout@v3
       with:
         submodules: true
 
     # Create bridge network for communication between containers
-    - name: 2__Docker - Set up networking
+    - name: 3__Docker - Set up networking
       run: |
           docker network remove --force mysubnet1 ;
           docker network create mysubnet1 ;
 
     # Initialize a Mongo DB database (on Github)
     # Note: the "env" section seems not to work and so the -e switches are necessary
-    - name: 3__MongoDB - Create MongoDB Docker container (On Github)
+    - name: 4__MongoDB - Create MongoDB Docker container (On Github)
       if: env.ONGITHUB == 'true'
       run: docker run -d -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE_GITHUB}}",target=/data,type=bind mongo:6.0
       env:
@@ -107,7 +99,7 @@ jobs:
          MONGO_INITDB_ROOT_PASSWORD: password
 
     # Initialize a Mongo DB database (on the Desktop)
-    - name: 3__MongoDB - Create MongoDB Docker container (On Desktop)
+    - name: 4__MongoDB - Create MongoDB Docker container (On Desktop)
       if: env.ONGITHUB == 'false'
       run: docker run -d -p 27017:27017 --name=MyMongoDB --network mysubnet1 -e MONGO_INIT_DATABASE=test -e MONGO_INITDB_ROOT_USERNAME=testuser -e MONGO_INITDB_ROOT_PASSWORD=password --mount src="${{env.MOUNT_SOURCE_DESKTOP}}",target=/data,type=bind mongo:6.0
       env:
@@ -115,38 +107,30 @@ jobs:
          MONGO_INITDB_ROOT_USERNAME: testuser
          MONGO_INITDB_ROOT_PASSWORD: password
 
-    - name: 4__MongoDB - Query Bridge Connection to MyMongoDB Container
+    - name: 5__MongoDB - Query Bridge Connection to MyMongoDB Container
       run:
          export TEMPIPVALUE=$(docker exec -i MyMongoDB hostname -i) ;
          echo "MONGODB_BRIDGE_CONNECTION=mongodb://testuser:password@$TEMPIPVALUE:27017" >> $GITHUB_ENV
 
 
-    - name: 1001___Dump Github context
-      env:
-         GH_CONTEXT: ${{ toJson(github) }}
-      run: 
-        echo "This is Before"
-        echo "$GH_CONTEXT"
-        echo "This is After"
- 
-    # Putting steps 5, 6 & 7 between "Create mongoDB container" and "Populate mongo database" seems to help the mongo container settle down
-    - name: 5__Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
+    # Putting steps 6, 7 & 8 between "Create mongoDB container" and "Populate mongo database" seems to help the mongo container settle down
+    - name: 6__Marketplace API - Set up dotnet core ${{ env.NETCORE_VERSION }}
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{ env.NETCORE_VERSION }}
 
     # Publish the app and the tests
-    - name: 6__Marketplace - Publish Marketplace Api
+    - name: 7__Marketplace - Publish Marketplace Api
       run: |
         dotnet publish --framework:net6.0 ${{env.MARKETPLACE_PROJECT_FQDN}} -c Release -o ./publish ;
         dotnet publish ./DumpAppLog/DumpAppLog.csproj
 
     # Create a Docker Container for Marketplace
-    - name: 7__Marketplace - Build Docker Image
+    - name: 8__Marketplace - Build Docker Image
       run: docker build -f "./api/CESMII.Marketplace.API/Dockerfile" --force-rm -t cesmiimarketplaceapi:dev --target base  --label "com.microsoft.created-by=visual-studio" --label "com.microsoft.visual-studio.project-name=CESMII.Marketplace.API" "./"
 
     # Populate mongo database - 
-    - name: 8__MongoDB - Populate mongo database
+    - name: 9__MongoDB - Populate mongo database
       run: docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=app_log --file=/data/app_log.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
            docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=JobLog --file=/data/JobLog.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
            docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=LookupItem --file=/data/LookupItem.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
@@ -159,14 +143,14 @@ jobs:
            docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=RequestInfo --file=/data/RequestInfo.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
            docker exec -i MyMongoDB mongoimport  --authenticationDatabase=admin --collection=SearchKeyword --file=/data/SearchKeyword.json  --uri="${{env.MONGODB_LOCAL_CONNECTION}}" ;
 
-    - name: 9__MongoDB - Test access to Mongo database
+    - name: 10__MongoDB - Test access to Mongo database
       run: dotnet test ${{env.TEST2_PROJECT_DIRECTORY}}${{env.TEST2_PROJECT_FILE}}
       env:
          MARKETPLACE_MONGODB_CONNECTIONSTRING: ${{env.MONGODB_LOCAL_CONNECTION}}
          MARKETPLACE_MONGODB_DATABASE: ${{env.MONGODB_DATABASE_NAME}}
 
     # Start Marketplace Container (On Github)
-    - name: 10__Marketplace - Start the Container (On Github)
+    - name: 11__Marketplace - Start the Container (On Github)
       if: env.ONGITHUB == 'true'
       env:
          ASPNETCORE_ENVIRONMENT: Development
@@ -182,7 +166,7 @@ jobs:
            docker run -dt --network mysubnet1 -v "/home/runner/work/Marketplace/Marketplace/api/CESMII.Marketplace.API:/app" -v "/home/runner/work/Marketplace/Marketplace:/src/" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "EnableCloudLibSearch=false" -e "ASPNETCORE_URLS=http://+:80" -p 5000:80 -p:5001:443 --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
 
     # Start Marketplace Container (On Desktop)
-    - name: 10__Marketplace - Start the Container (On Desktop)
+    - name: 11__Marketplace - Start the Container (On Desktop)
       if: env.ONGITHUB == 'false'
       env:
          ASPNETCORE_ENVIRONMENT: Development
@@ -197,7 +181,7 @@ jobs:
       run: |
            docker run -dt --network mysubnet1 -v "C:\Users\paul\AppData\Roaming\Microsoft\UserSecrets:/root/.microsoft/usersecrets:ro" -v "C:\Users\paul\AppData\Roaming\ASP.NET\Https:/root/.aspnet/https:ro" -v "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Sdks\Microsoft.Docker.Sdk\tools\TokenService.Proxy\linux-x64\net6.0:/TokenService.Proxy:ro" -v "C:\CESMII.github\Marketplace\api\CESMII.Marketplace.API:/app" -v "C:\CESMII.github\Marketplace:/src/" -v "C:\Users\paul\.nuget\packages\:/root/.nuget/fallbackpackages" -e "ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true" -e "ASPNETCORE_ENVIRONMENT=Development" -e "ASPNETCORE_URLS=http://+:80" -e "DOTNET_USE_POLLING_FILE_WATCHER=1" -e "NUGET_PACKAGES=/root/.nuget/fallbackpackages" -e "NUGET_FALLBACK_PACKAGES=/root/.nuget/fallbackpackages" -e "EnableCloudLibSearch=false" -p 5000:80 -p 5001:443 --name CESMII.Marketplace.API --entrypoint tail cesmiimarketplaceapi:dev -f /dev/null
 
-    - name: 5__CESMII.Marketplace.API - Query Bridge Connection to CESMII.Marketplace.API Container
+    - name: 12__CESMII.Marketplace.API - Query Bridge Connection to CESMII.Marketplace.API Container
       run:
          export TEMPIPVALUE=$(docker exec -i CESMII.Marketplace.API hostname -i) ;
          echo "MARKETPLACE_BRIDGE_CONNECTION=http://$TEMPIPVALUE" >> $GITHUB_ENV
@@ -205,7 +189,7 @@ jobs:
     # Start the Main Dll in the Container (On Github)
     ##  Github can accommodate "docker exec -i.... & ", ampersand at the end!!!)
     ##  In Windows, docker exec -id works better
-    - name: 11__Marketplace - Start the Main Dll in the Container (Github)
+    - name: 13__Marketplace - Start the Main Dll in the Container (Github)
       if: env.ONGITHUB == 'true'
       env:
          ASPNETCORE_ENVIRONMENT: Development
@@ -221,7 +205,7 @@ jobs:
            docker exec -i CESMII.Marketplace.API dotnet /src/publish/CESMII.Marketplace.API.dll &
     
     # Start the Main Dll in the Container (On the Desktop)
-    - name: 11__Marketplace - Start the Main Dll in the Container (Desktop)
+    - name: 13__Marketplace - Start the Main Dll in the Container (Desktop)
       if: env.ONGITHUB == 'false'
       env:
          ASPNETCORE_ENVIRONMENT: Development
@@ -236,26 +220,26 @@ jobs:
       run: |
            docker exec -di CESMII.Marketplace.API dotnet /src/publish/CESMII.Marketplace.API.dll
 
-    # Dotnet -- diagnostics
-    - name: A__Diagnostic__DotNet - Diagnostics
-      #run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --diagnostics
-      run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --diagnostics
+    # # # # Dotnet -- diagnostics
+    # # # - name: A__Diagnostic__DotNet - Diagnostics
+    # # #   #run: docker exec -i MyMarketplace /usr/share/dotnet/dotnet --diagnostics
+    # # #   run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --diagnostics
 
-    # Dotnet -- info
-    - name: B__Diagnostic__DotNet - Info
-      run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --info
+    # # # # Dotnet -- info
+    # # # - name: B__Diagnostic__DotNet - Info
+    # # #   run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --info
 
-    # Dotnet -- list-runtimes
-    - name: C__Diagnostic__DotNet - list-runtimes
-      run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --list-runtimes
+    # # # # Dotnet -- list-runtimes
+    # # # - name: C__Diagnostic__DotNet - list-runtimes
+    # # #   run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --list-runtimes
 
-    # Dotnet -- list-sdks
-    - name: D__Diagnostic__DotNet - list-sdks
-      run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --list-sdks
+    # # # # Dotnet -- list-sdks
+    # # # - name: D__Diagnostic__DotNet - list-sdks
+    # # #   run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --list-sdks
 
-    # Dotnet --version
-    - name: E__Diagnostic__DotNet - Version
-      run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --version
+    # # # # Dotnet --version
+    # # # - name: E__Diagnostic__DotNet - Version
+    # # #   run: docker exec -i CESMII.Marketplace.API /usr/share/dotnet/dotnet --version
 
     # Peek at docker status
     - name: H__Diagnostic__Docker - Peeking at docker status 
