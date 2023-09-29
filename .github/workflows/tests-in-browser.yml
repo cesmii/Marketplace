@@ -172,7 +172,7 @@ jobs:
     - name: 13__Marketplace - Start the Main Dll in the Container (Github)
       if: env.ONGITHUB == 'true'
       run: |
-        docker exec -i CESMII.Marketplace.API -e 'ASPNETCORE_ENVIRONMENT=$ASPNETCORE_ENVIRONMENT' -e 'ASPNETCORE_URLS=$ASPNETCORE_URLS' -e 'ASPNETCORE_LOGGING_CONSOLE_DISABLECOLORS=$ASPNETCORE_LOGGING_CONSOLE_DISABLECOLORS' -e 'DOTNET_RUNNING_IN_CONTAINER=$DOTNET_RUNNING_IN_CONTAINER' -e 'DOTNET_USE_POLLING_FILE_WATCHER=$DOTNET_USE_POLLING_FILE_WATCHER' -e 'EnableCloudLibSearch=$EnableCloudLibSearch' -e 'MARKETPLACE_GITHUB_WORKFLOW_COMMANDS=$MARKETPLACE_GITHUB_WORKFLOW_COMMANDS' -e 'MARKETPLACE_MONGODB_CONNECTIONSTRING=$MARKETPLACE_MONGODB_CONNECTIONSTRING' -e 'MARKETPLACE_MONGODB_DATABASE=$MARKETPLACE_MONGODB_DATABASE' dotnet /src/publish/CESMII.Marketplace.API.dll &
+        docker exec -di CESMII.Marketplace.API dotnet /src/publish/CESMII.Marketplace.API.dll
     
     # Start the Main Dll in the Container (On the Desktop)
     - name: 13__Marketplace - Start the Main Dll in the Container (Desktop)
