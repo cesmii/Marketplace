@@ -48,7 +48,7 @@
 
             //init some stuff we will use during the mapping methods
             _smItemTypeIdDefault = new MongoDB.Bson.BsonObjectId(
-                MongoDB.Bson.ObjectId.Parse(configUtil.MarketplaceSettings.SmApp.TypeId));
+                MongoDB.Bson.ObjectId.Parse(configUtil.MarketplaceSettings.DefaultItemTypeId));
         }
 
         public async Task<string> Add(AdminMarketplaceItemModel model, string userId)

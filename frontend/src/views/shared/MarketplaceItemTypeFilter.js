@@ -94,7 +94,7 @@ function MarketplaceItemTypeFilter(props) {
             return (
                 <li id={`${item.id}`} key={`${item.id}`} className="m-1 d-inline-block"
                     onClick={onToggleSelection} data-id={item.id} >
-                    <span className={`${item.selected ? "selected" : "not-selected"} py-1 px-3 d-flex toggle`} >{item.name}</span>
+                    <span className={`${item.selected ? "selected" : "not-selected"} py-1 px-2 d-flex toggle`} >{item.name}</span>
                 </li>
             )
         });
