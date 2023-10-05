@@ -100,7 +100,6 @@
         public List<RelatedItemsGroupBy> RelatedItemsGrouped { get; set; }
 
         public ImageItemModel ImagePortrait { get; set; }
-        
         public ImageItemModel ImageBanner { get; set; }
         public ImageItemModel ImageLandscape { get; set; }
 
@@ -113,6 +112,18 @@
         public string ccName2 { get; set; }
         public string ccEmail2 { get; set; }
 
+        /// <summary>
+        /// This will be an indicator that this item is derived from an external data source. 
+        /// The value is determined at runtime in the DAL based on where we get the data from.
+        /// </summary>
+        public string ExternalSourceId { get; set; }
+
+        /// <summary>
+        /// This will be an indicator that this item is derived from an external data source. 
+        /// The value is determined at runtime in the DAL based on where we get the data from.
+        /// Default to false. 
+        /// </summary>
+        public bool IsExternal { get { return (!string.IsNullOrEmpty(ExternalSourceId));  } }
 
         public override string ToString() => $"{DisplayName} {ID}";
 

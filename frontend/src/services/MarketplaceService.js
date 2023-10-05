@@ -177,6 +177,12 @@ export function RenderImageBg (props) {
                 state: { id: `${props.item.id}` }
             });
         }
+        else if (props.item.isExternal) {
+            history.push({
+                pathname: `/library/${props.item.externalSourceId.toLowerCase()}/${props.item.id}`,
+                state: { id: `${props.item.id}` }
+            });
+        }
         else {
             history.push({
                 pathname: `/library/${props.item.name}`,

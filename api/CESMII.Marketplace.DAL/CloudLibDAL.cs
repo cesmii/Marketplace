@@ -241,7 +241,7 @@
                     ImageBanner = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdBanner)),
                     ImageLandscape = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdLandscape)),
                     Cursor = entity.Cursor,
-                    
+                    ExternalSourceId = "cloudlib"  //TBD - update this once we fold this into external source approach
                 };
             }
             else
@@ -301,7 +301,8 @@
                     ImageLandscape = entity.IconUrl == null ?
                         _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdLandscape)) :
                         new ImageItemModel() { Src = entity.IconUrl.ToString() },
-                    Updated = entity.Nodeset?.LastModifiedDate
+                    Updated = entity.Nodeset?.LastModifiedDate,
+                    ExternalSourceId = "cloudlib"  //TBD - update this once we fold this into external source approach
                 };
 
                 //get related data - if any

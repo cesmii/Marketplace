@@ -128,6 +128,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
     //TBD - improve this check
     if (props.item === null || props.item === {}) return null;
     if (props.item.name == null) return null;
+    const url = (!props.item.isExternal ? `/library/${props.item.name}` : `/library/${props.item.externalSourceId.toLowerCase()}/${props.item.id}`)
 
     return (
         <>
@@ -139,14 +140,14 @@ function MarketplaceItemRow(props) { //props are item, showActions
                     <div className="d-flex align-items-center mb-2" >
                         <h2 className="mb-0" >{props.item.displayName}
                         </h2>
-                        {(props.isAuthorized) &&
+                        {(props.isAuthorized && !props.item.isExternal) &&
                             <a className="btn btn-icon-outline circle ml-auto" href={`/admin/library/${props.item.id}`} ><i className="material-icons">edit</i></a>
                         }
                     </div>
                     {props.item.abstract != null &&
                         <div className="mb-0" dangerouslySetInnerHTML={{ __html: props.item.abstract }} ></div>
                     }
-                    <p className="my-4" ><Button variant="secondary" type="button" className="px-4" href={`/library/${props.item.name}`} >More Info</Button>
+                    <p className="my-4" ><Button variant="secondary" type="button" className="px-4" href={url} >More Info</Button>
                     </p>
                     <p className="mb-2" ><b className="mr-2" >Published By:</b><a href={`/publisher/${props.item.publisher.name}`} >{props.item.publisher.displayName}</a></p>
                     {props.item.displayViewAllLink &&

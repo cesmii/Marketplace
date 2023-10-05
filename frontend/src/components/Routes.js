@@ -32,6 +32,7 @@ import SitemapGenerator from '../views/admin/SitemapGenerator'
 import AccountProfile from '../views/AccountProfile'
 import LoginSuccess from '../views/LoginSuccess'
 import { AppSettings } from '../utils/appsettings'
+import ExternalSourceEntity from '../views/ExternalSourceEntity'
 
 //const CLASS_NAME = "Routes";
 
@@ -49,6 +50,7 @@ function Routes() {
             <PublicRouteWFilter path="/login/returnUrl=:returnUrl" component={Home} />
             <PublicRouteWFilter exact path="/login" component={Home} />
             {/*<PublicRoute exact path="/about" component={About} />*/}
+            <PublicRoute exact path="/library/:sourceId/:id" component={ExternalSourceEntity} />
             <PublicRoute exact path="/library/:id" component={MarketplaceEntity} />
             <PublicRoute exact path="/profile/:id" component={ProfileEntity} />
             <PublicRouteWFilter exact path="/library" component={MarketplaceList} />

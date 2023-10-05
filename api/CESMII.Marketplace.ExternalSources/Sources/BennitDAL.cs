@@ -29,15 +29,24 @@ namespace CESMII.Marketplace.ExternalSources.DAL
         public string OrgName { get; set; }
         public string FK_Org_Id { get; set; }
         //properties not yet in data
-        public List<string> Skills { get; set; }
-        public List<BennitSmProfileLink> RelatedProfiles { get; set; }
-        public List<BennitSmProfileLink> Certifications { get; set; }
+        public List<BennitSkills> Skills { get; set; }
+        //public List<BennitSmProfileLink> RelatedProfiles { get; set; }
+        //public List<BennitSmProfileLink> Certifications { get; set; }
     }
 
     public class BennitSmProfileLink
     {
         public string Id { get; set; }
         public string Name { get; set; }
+    }
+
+    public class BennitSkills
+    {
+        public string Id { get; set; }
+        public string Skill_Name { get; set; }
+        public string FK_Solver_Id { get; set; }
+        //public string Duration { get; set; }
+        //public string Level { get; set; }
     }
 
     public class BennitRelatedItem
@@ -106,16 +115,10 @@ namespace CESMII.Marketplace.ExternalSources.DAL
             }
 
             //no error response, proceed
-            var entities = JsonConvert.DeserializeObject<List<BennitResponseEntity>>(response.Data);
-            if (entities == null) return null;
+            var entity = JsonConvert.DeserializeObject<BennitResponseEntity>(response.Data);
+            if (entity == null) return null;
 
-            //send warning to log if more than one item returned
-            if (entities.Count > 1)
-            {
-                _logger.Log(NLog.LogLevel.Warn, $"BennitDAL|GetById|Id: {id}|Expected one item, API returned {entities.Count}.");
-            }
-
-            return MapToModel(entities[0]);
+            return MapToModel(entity, true);
         }
 
         public async Task<List<MarketplaceItemModel>> GetManyById(List<string> ids)
@@ -216,7 +219,7 @@ namespace CESMII.Marketplace.ExternalSources.DAL
             try
             {
                 var err = JsonConvert.DeserializeObject<BennitErrorResponse>(data);
-                if (err != null)
+                if (err != null && !string.IsNullOrEmpty(err.Error))
                 {
                     _logger.Log(NLog.LogLevel.Error, $"BennitDAL|CheckForErrorResponse|Error returned from API|{err.Error}.");
                     return true;
@@ -240,8 +243,8 @@ namespace CESMII.Marketplace.ExternalSources.DAL
                     //ensure this value is always without spaces and is lowercase. 
                     Name = entity.Headline.ToLower().Trim().Replace(" ", "-").Replace("_", "-"),
                     DisplayName = entity.Headline,
-                    Abstract = entity.Experience,   //trim this down to first 300 characters
-                    Description = entity.Experience,
+                    Abstract = entity.Experience,   //TBD - trim this down to first 300 characters
+                    Description = string.IsNullOrEmpty(entity.Experience) ? "" : $"<p>{entity.Experience}</p>",
                     Type = _config.ItemType,
                     AuthorId = null,
                     Created = new DateTime(0),
@@ -249,7 +252,7 @@ namespace CESMII.Marketplace.ExternalSources.DAL
                     PublishDate = null,
                     Version = null,
                     //Type = new LookupItemModel() { ID = entity.TypeId, Name = entity.Type.Name }
-                    MetaTags = entity.Skills,
+                    MetaTags = entity.Skills != null ? entity.Skills.Select(x => x.Skill_Name).ToList() : null,
                     // Categories = MapToModelLookupData(entity.Categories, _lookupItemsAll.Where(x => x.TypeId.Equals((int)LookupTypeEnum.Categories)).ToList()),
                     // IndustryVerticals = MapToModelLookupData(entity.IndustryVerticals, _lookupItemsAll.Where(x => x.TypeId.Equals((int)LookupTypeEnum.IndustryVerticals)).ToList()),
                     // MarketplaceStatus = MapToModelLookupData(entity.MarketplaceStatus, _lookupItemsAll.Where(x => x.TypeId.Equals((int)LookupTypeEnum.MarketplaceStatus)).ToList())
@@ -269,11 +272,18 @@ namespace CESMII.Marketplace.ExternalSources.DAL
                         _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageBanner?.ID))),
                     ImageLandscape = MapToModelImage(entity.ImagePath, $"{entity.Headline.Replace(" ", "-")} - landscape",
                         _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageLandscape?.ID))),
+                    ExternalSourceId = _config.Name  //we need to ensure this is unique
                 };
                 //get additional data under certain scenarios
                 if (verbose)
                 {
-                    //map related profiles 
+                    result.Description +=
+                        (string.IsNullOrEmpty(entity.OrgName) ? "" : $"<p><b>Organization</b>: {entity.OrgName}</p>") +
+                        (string.IsNullOrEmpty(entity.Availability) ? "" : $"<p><b>Availability</b>: {entity.Availability}</p>") +
+                        (string.IsNullOrEmpty(entity.Locations) ? "" : $"<p><b>Locations</b>: {entity.Locations}</p>");
+
+                    //map related profiles
+                    /*
                     var relatedProfiles = MapToModelRelatedProfiles(
                         new LookupItemModel() { ID = "1", DisplayOrder = 1, Code = "expertise", Name = "Expertise In" },
                         entity.RelatedProfiles);
@@ -284,6 +294,7 @@ namespace CESMII.Marketplace.ExternalSources.DAL
 
                     //map related items into specific buckets
                     result.RelatedItemsGrouped = GroupAndMergeRelatedItems(relatedProfiles, relatedCertifications);
+                    */
                 }
                 return result;
             }
