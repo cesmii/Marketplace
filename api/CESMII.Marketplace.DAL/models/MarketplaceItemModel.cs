@@ -99,10 +99,10 @@
         /// <remarks>Doing it this way allows for additional groups to be added w/o additional back end coding</remarks>
         public List<RelatedItemsGroupBy> RelatedItemsGrouped { get; set; }
 
-        public ImageItemSimpleModel ImagePortrait { get; set; }
+        public ImageItemModel ImagePortrait { get; set; }
         
-        public ImageItemSimpleModel ImageBanner { get; set; }
-        public ImageItemSimpleModel ImageLandscape { get; set; }
+        public ImageItemModel ImageBanner { get; set; }
+        public ImageItemModel ImageLandscape { get; set; }
 
         public virtual List<JobDefinitionSimpleModel> JobDefinitions { get; set; }
 

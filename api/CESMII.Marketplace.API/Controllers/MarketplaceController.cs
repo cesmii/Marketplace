@@ -33,6 +33,9 @@ namespace CESMII.Marketplace.Api.Controllers
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
         private readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _dalCloudLib;
         private readonly IDal<SearchKeyword, SearchKeywordModel> _dalSearchKeyword;
+        private readonly ExternalSources.IExternalSourceFactory<MarketplaceItemModel> _sourceFactory;
+        private readonly IDal<ExternalSource, ExternalSourceModel> _dalExternalSource;
+
         public MarketplaceController(IDal<MarketplaceItem, MarketplaceItemModel> dal,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IDal<Publisher, PublisherModel> dalPublisher,
@@ -40,6 +43,8 @@ namespace CESMII.Marketplace.Api.Controllers
             ICloudLibDAL<MarketplaceItemModelWithCursor> dalCloudLib,
             IDal<SearchKeyword, SearchKeywordModel> dalSearchKeyword,
             UserDAL dalUser,
+            ExternalSources.IExternalSourceFactory<MarketplaceItemModel> sourceFactory,
+            IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             ConfigUtil config, ILogger<MarketplaceController> logger)
             : base(config, logger, dalUser)
         {
@@ -49,6 +54,9 @@ namespace CESMII.Marketplace.Api.Controllers
             _dalAnalytics = dalAnalytics;
             _dalCloudLib = dalCloudLib;
             _dalSearchKeyword = dalSearchKeyword;
+
+            _sourceFactory = sourceFactory;
+            _dalExternalSource = dalExternalSource; 
         }
 
         [HttpGet, Route("All")]
@@ -339,7 +347,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         private async Task<IActionResult> AdvancedSearch([FromBody] MarketplaceSearchModel model
-            , bool includeCloudLib = true, bool liveOnly = true)
+            , bool includeExternalSources = true, bool liveOnly = true)
         {
             var timer = Stopwatch.StartNew();
             //init and then flags set by user or system will determine which of the following get applied
@@ -404,7 +412,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 (types.Any(x => x.Selected && x.Code.ToLower().Equals(_configUtil.MarketplaceSettings.SmProfile.Code.ToLower())) ||
                  keywordTypes.Any(x => x.Selected && x.Code.ToLower().Equals(_configUtil.MarketplaceSettings.SmProfile.Code.ToLower())));
             //Skip over this in certain scenarios. ie. admin section
-            if (_configUtil.MarketplaceSettings.EnableCloudLibSearch && includeCloudLib && includeSmProfileTypes)
+            if (_configUtil.MarketplaceSettings.EnableCloudLibSearch && includeExternalSources && includeSmProfileTypes)
             {
 
                 var startCursor = ParseCursor(model?.PageCursors);
@@ -518,6 +526,34 @@ namespace CESMII.Marketplace.Api.Controllers
             }
 
             //_logger.LogWarning($"MarketplaceController|AdvancedSearch|Duration: { timer.ElapsedMilliseconds}ms.");
+            //TBD - for now, just append this to the end. Once we get data flowing, then weave it into the 
+            //overall search process...
+            if (includeExternalSources)
+            {
+                var sources = _dalExternalSource.Where(x => x.Enabled && x.IsActive, null, null, false, false).Data;
+                foreach (var src in sources)
+                {
+                    if (!src.Enabled) continue;
+
+                    //see if there are selections for this external source that warrant a search
+                    // User driven flag to select only a certain type. Determine if none are selected or if item type of sm service is selected.
+                    if (!IsTypeIncluded(src.ItemType.Code, types, keywordTypes)) continue;
+
+                    //now perform the search(es)
+                    var dalSource = await _sourceFactory.InitializeSource(src);
+                    //TBD - add in other parameters once we get data flowing
+                    var resultExternal = await dalSource.Where(model.Query);
+
+                    //TBD - replace these with real stuff once we get data flowing
+                    result.Data = result.Data.Union(resultExternal.Data)
+                                    .ToList()
+                                    .OrderByDescending(x=> x.IsFeatured)
+                                    .ThenBy(x => x.Name)
+                                    .ToList();
+                }
+            }
+
+
 
             if (result == null)
             {
@@ -525,6 +561,26 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest($"No records found matching the search criteria.");
             }
             return Ok(result);
+        }
+
+        /// <summary>
+        /// Check if we should filter by type
+        /// Check if the type is selected - inspect the types list
+        /// check if the user entered a value that is a reserved keyword that makes the type selected. 
+        /// </summary>
+        /// <param name="types"></param>
+        /// <param name="keywordTypes"></param>
+        /// <returns></returns>
+        private bool IsTypeIncluded(string typeCode, List<LookupItemFilterModel> types, List<LookupItemFilterModel> keywordTypes)
+        {
+            //nothing is selected meaning everything is selected
+            if (!types.Any(x => x.Selected) && !keywordTypes.Any(x => x.Selected)) return true;
+            //of the selected types, the typeId passed in is a selected type
+            if (types.Any(x => x.Selected && x.Code.ToLower().Equals(typeCode.ToLower()))) return true;
+            //of the selected keywords, the typeId passed in is a selected type
+            if (keywordTypes.Any(x => x.Selected && x.Code.ToLower().Equals(typeCode.ToLower()))) return true;
+            //if we get here, false
+            return false;
         }
 
         /// <summary>

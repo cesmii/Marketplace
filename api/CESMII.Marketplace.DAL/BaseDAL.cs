@@ -248,16 +248,19 @@
             };
         }
 
-        protected ImageItemSimpleModel MapToModelImageSimple(Func<ImageItemSimple, bool> predicate, List<ImageItemSimple> allItems)
+        protected ImageItemModel MapToModelImageSimple(Func<ImageItemSimple, bool> predicate, List<ImageItemSimple> allItems)
         {
             var match = allItems.FirstOrDefault(predicate);
             if (match == null) return null;
             return MapToModelImageSimple(match);
         }
 
-        protected ImageItemSimpleModel MapToModelImageSimple(ImageItemSimple entity)
+        protected ImageItemModel MapToModelImageSimple(ImageItemSimple entity)
         {
-            return new ImageItemSimpleModel()
+            //Change - still not setting the src value to keep return data small.
+            //However, using normall ImageItemModel to allow flexibility for some area
+            //to set external src link
+            return new ImageItemModel()
             {
                 ID = entity.ID,
                 FileName = entity.FileName,

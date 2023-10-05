@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -13,7 +11,7 @@ namespace CESMII.Marketplace.Common
 {
     public interface IHttpApiFactory 
     {
-        Task<string> Run(HttpApiConfig config, string actionType = "Post");
+        Task<string> Run(HttpApiConfig config);
     }
     
     public class HttpApiFactory : IHttpApiFactory
@@ -27,9 +25,8 @@ namespace CESMII.Marketplace.Common
             _logger = logger;
         }
 
-        public async Task<string> Run(HttpApiConfig config, string actionType = "Post")
+        public async Task<string> Run(HttpApiConfig config)
         {
-
             //log the final query as info
             _logger.LogInformation($"HttpApiFactory||Run||Url: {config.Url}");
             if (!string.IsNullOrEmpty(config.QueryString))
@@ -41,7 +38,7 @@ namespace CESMII.Marketplace.Common
             HttpClient client = _httpClientFactory.CreateClient();
             try
             {
-                client.BaseAddress = new Uri(config.Url);
+                client.BaseAddress = new Uri(config.BaseAddress);
 
                 // Add an bearer token if necessary
                 if (!string.IsNullOrEmpty(config.BearerToken))
@@ -72,36 +69,39 @@ namespace CESMII.Marketplace.Common
                     new MediaTypeWithQualityHeaderValue(config.ContentType));
                 }
 
-                // List data response.
-                HttpResponseMessage response;
+                //prepare the request
+                var queryString = !string.IsNullOrEmpty(config.QueryString) ? "?" + config.QueryString : "" ;
+                var urlFinal = $"{config.Url}{queryString}";
+                using (var requestMessage = new HttpRequestMessage(config.Method, urlFinal))
+                {
+                    //add the body as JSON content
+                    requestMessage.Content = config.Body;
 
-                if (config.IsPost)
-                {
-                    var data = new StringContent(config.Body, Encoding.UTF8, "application/json");
-                    // Blocking call! Program will wait here until a response is received or a timeout occurs.
-                    response = await (string.IsNullOrEmpty(config.QueryString) ?
-                        client.PostAsync("", data) : client.PostAsync(config.QueryString, data)); 
-                }
-                else
-                {
-                    // Blocking call! Program will wait here until a response is received or a timeout occurs.
-                    response = await client.GetAsync(config.QueryString);
-                }
+                    //add headers passed in
+                    if (config.Headers != null)
+                    {
+                        foreach (var h in config.Headers)
+                        {
+                            requestMessage.Headers.Add(h.Key, h.Value);
+                        }
+                    }
 
-                if (response.IsSuccessStatusCode)
-                {
-                    // Return the response body.
-                    var data = response.Content.ReadAsStringAsync().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
-                    _logger.LogInformation($"HttpApiFactory||Run||Success...returning response");
-                    return data;
-                }
-                else
-                {
-                    var msg = $"{(int)response.StatusCode}-{response.ReasonPhrase}";
-                    _logger.LogWarning($"HttpApiFactory||Run||Unexpected Response:{msg}");
-                    throw new HttpRequestException(msg);
-                }
+                    //call the api
+                    HttpResponseMessage response = await client.SendAsync(requestMessage);
 
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // Return the response body.
+                        var data = response.Content.ReadAsStringAsync().Result;  //Make sure to add a reference to System.Net.Http.Formatting.dll
+                        _logger.LogInformation($"HttpApiFactory||Run||Success...returning response");
+                        return data;
+                    }
+                    else
+                    {
+                        var msg = $"{(int)response.StatusCode}-{response.ReasonPhrase}";
+                        throw new HttpRequestException(msg);
+                    }
+                }
             }
             catch (Exception ex)
             {

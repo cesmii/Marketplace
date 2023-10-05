@@ -149,11 +149,15 @@ function MarketplaceItemRow(props) { //props are item, showActions
                     <p className="my-4" ><Button variant="secondary" type="button" className="px-4" href={`/library/${props.item.name}`} >More Info</Button>
                     </p>
                     <p className="mb-2" ><b className="mr-2" >Published By:</b><a href={`/publisher/${props.item.publisher.name}`} >{props.item.publisher.displayName}</a></p>
-                    <p className="mb-2 d-flex align-items-center" >
-                        <SvgVisibilityIcon fill={color.link} />
-                        <a href={getViewByPublisherUrl()} >View all by this publisher</a>
-                    </p>
-                    <p className="mb-3" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
+                    {props.item.displayViewAllLink &&
+                        <p className="mb-2 d-flex align-items-center" >
+                            <SvgVisibilityIcon fill={color.link} />
+                            <a href={getViewByPublisherUrl()} >View all by this publisher</a>
+                        </p>
+                    }
+                    {props.item.publishDate != null &&
+                        <p className="mb-3" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
+                    }
                     <div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>
                     <div className="d-none d-lg-inline" >{renderCategoryItem(props.item)}</div>
                     <div className="d-none d-lg-inline" >{renderMetaTagItem(props.item)}</div>

@@ -170,13 +170,17 @@ function PublisherEntity() {
                     <div className="col-sm-6" >
                         <span className="material-icons-outlined d-flex align-items-left"><i className="material-icons mr-1" style={{ color: color.selectedBg }}>language</i><a href={item.companyUrl} className="a-text">Website </a></span>
                     </div>
-                    <div className="col-sm-6" >
-                        <span className="d-flex justify-content-end"><SocialMedia items={item.socialMediaLinks} /> </span>
-                    </div>
-                    <div className="col-sm-12 d-flex align-items-center">
-                        <SvgVisibilityIcon fill={color.link} />
-                        <a href={getViewByPublisherUrl()} >View all by this publisher</a>
-                    </div>
+                    {item.socialMediaLinks != null &&
+                        <div className="col-sm-6" >
+                            <span className="d-flex justify-content-end"><SocialMedia items={item.socialMediaLinks} /> </span>
+                        </div>
+                    }
+                    {item.displayViewAllLink &&
+                        <div className="col-sm-12 d-flex align-items-center">
+                            <SvgVisibilityIcon fill={color.link} />
+                            <a href={getViewByPublisherUrl()} >View all by this publisher</a>
+                        </div>
+                    }
                 </div>
 
             </>

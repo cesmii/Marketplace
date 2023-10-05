@@ -40,7 +40,7 @@ using CESMII.Marketplace.Api.Shared.Extensions;
 using CESMII.Common.CloudLibClient;
 using CESMII.Common.SelfServiceSignUp.Services;
 using CESMII.Common.SelfServiceSignUp.Models;
-using System.Security;
+using CESMII.Marketplace.ExternalSources;
 
 namespace CESMII.Marketplace.Api
 {
@@ -82,6 +82,7 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IMongoRepository<ImageItemSimple>, MongoRepository<ImageItemSimple>>();
             services.AddScoped<IMongoRepository<SearchKeyword>, MongoRepository<SearchKeyword>>();
             services.AddScoped<IMongoRepository<ProfileItem>, MongoRepository<ProfileItem>>();
+            services.AddScoped<IMongoRepository<ExternalSource>, MongoRepository<ExternalSource>>();
 
             //stock tables
             services.AddScoped<IMongoRepository<Organization>, MongoRepository<Organization>>();
@@ -105,6 +106,7 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IDal<JobLog, JobLogModel>, JobLogDAL>();
             services.AddScoped<IDal<JobDefinition, JobDefinitionModel>, JobDefinitionDAL>();
             services.AddScoped<IDal<SearchKeyword, SearchKeywordModel>, SearchKeywordDAL>();
+            services.AddScoped<IDal<ExternalSource, ExternalSourceModel>, ExternalSourceDAL>();
 
             // Configuration, utils, one off objects
             services.AddSingleton<IConfiguration>(Configuration);
@@ -113,6 +115,7 @@ namespace CESMII.Marketplace.Api
             services.AddSingleton<MongoClientGlobal>();
             services.AddScoped<IJobFactory, JobFactory>();
             services.AddScoped<IHttpApiFactory, HttpApiFactory>();
+            services.AddScoped<IExternalSourceFactory<MarketplaceItemModel>, ExternalSourceFactory<MarketplaceItemModel>>();
 
             //Cloud Lib
             services.Configure<Opc.Ua.Cloud.Library.Client.UACloudLibClient.Options>(Configuration.GetSection("CloudLibrary"));
