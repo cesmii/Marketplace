@@ -35,7 +35,7 @@ jobs:
         with:
           submodules: true
       - name: Set up dotnet Core ${{ env.NETCORE_VERSION }}
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ env.NETCORE_VERSION }}
       - name: Restore dependencies (${{env.SOLUTION_FILE}})
@@ -48,7 +48,7 @@ jobs:
         run: dotnet publish --configuration Release --output ${{ env.PUBLISH_FOLDER_RELATIVE }}
         working-directory: ${{env.PROJECT_DIRECTORY}}
       - name: 'Deploy to Azure WebApp'
-        uses: azure/webapps-deploy@v2
+        uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_MARKETPLACE_BACK_PUBLISHSETTINGS }}
