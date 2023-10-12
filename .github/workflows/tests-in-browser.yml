@@ -222,7 +222,7 @@ jobs:
     - name: 19__Docker - Create container for selenium (Github)
       if: env.ONGITHUB == 'true'
       run: |
-         docker run -d --name=MySelenium --network mysubnet1 --mount src="/home/runner/work/Marketplace",target=/src,type=bind -p 4444:4444 selenium/standalone-chrome
+         docker run -d --name=MySelenium --network mysubnet1 --mount src="/home/runner/work/Marketplace/Marketplace",target=/src,type=bind -p 4444:4444 selenium/standalone-chrome
 
     - name: 20__Docker - Create container for selenium (Desktop)
       if: env.ONGITHUB == 'false'
