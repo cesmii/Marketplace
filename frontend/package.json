@@ -35,13 +35,13 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "start-dev": "set PORT=3001 && react-scripts start",
-    "start-in-browser-test": "set PORT=3000 && react-scripts start",
-    "build": "GENERATE_SOURCEMAP=false react-scripts build",
+    "start-dev": "cross-env PORT=3001 react-scripts start",
+    "start-in-browser-test": "cross-env env-cmd -f .env.staging react-scripts start",
+    "build": "cross-env GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
-    "build:in-browser-test": "env-cmd -f .env.inbrowsertest npm run-script build",
+    "build:in-browser-test": "cross-env env-cmd -f .env.inbrowsertest npm run-script build",
     "eject": "react-scripts eject",
-    "build:staging": "env-cmd -f .env.staging npm run-script build"
+    "build:staging": "cross-env env-cmd -f .env.staging npm run-script build"
   },
   "eslintConfig": {
     "extends": [
@@ -62,6 +62,7 @@
     ]
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "dotenv": "^8.2.0"
   }
 }
