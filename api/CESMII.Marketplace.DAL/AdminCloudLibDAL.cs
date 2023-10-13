@@ -201,16 +201,6 @@
                 }
             } while (bMore && (take == null || result.Count < skip + take));
 
-            if (!backwards)
-            {
-                result.StartCursor = startCursor;
-                result.EndCursor = currentCursor;
-            }
-            else
-            {
-                result.StartCursor = currentCursor;
-                result.EndCursor = endCursor;
-            }
             //TBD - exclude some nodesets which are core nodesets - list defined in appSettings
 
             if (skip > 0)

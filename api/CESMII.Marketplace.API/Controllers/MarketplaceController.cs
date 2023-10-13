@@ -351,6 +351,7 @@ namespace CESMII.Marketplace.Api.Controllers
             , bool includeExternalSources = true, bool liveOnly = true)
         {
             var timer = Stopwatch.StartNew();
+            var durations = new List<KeyValuePair<string, long>>(); 
             //init and then flags set by user or system will determine which of the following get applied
 
             //extract selected items within a list of items
@@ -366,16 +367,14 @@ namespace CESMII.Marketplace.Api.Controllers
             _logger.LogInformation($"MarketplaceController|AdvancedSearchExecuteTasks|Setting up tasks.");
             var mtkplCursor = PrepareSearchCursor(model, null);
 
-            long swMarketPlaceStarted = timer.ElapsedMilliseconds;
+            durations.Add(new KeyValuePair<string, long>("Prep", timer.ElapsedMilliseconds));
+            long swMarketPlaceStart = timer.ElapsedMilliseconds;
             var searchMarketplaceTask = Task.Run(() =>
             {
                 return AdvancedSearchMarketplace(model, mtkplCursor, types, keywordTypes, cats, verts, pubs, liveOnly);
             });
-            long swMarketPlaceFinished = 0;
-            _ = searchMarketplaceTask.ContinueWith(t => swMarketPlaceFinished = swMarketPlaceFinished == 0 ? timer.ElapsedMilliseconds : swMarketPlaceFinished);
+            _ = searchMarketplaceTask.ContinueWith(t => durations.Add(new KeyValuePair<string, long>("Marketplace", timer.ElapsedMilliseconds - swMarketPlaceStart)));
 
-            long swCloudLibStarted = 0;
-            long swCloudLibFinished = 0;
             var listSearchExternalSources = new List<Task>();
             //add native marketplace task to list for downstream parallel execution
             listSearchExternalSources.Add(searchMarketplaceTask);
@@ -393,6 +392,8 @@ namespace CESMII.Marketplace.Api.Controllers
                     // User driven flag to select only a certain type. Determine if none are selected or if item type of sm service is selected.
                     if (!IsTypeIncluded(src.ItemType.Code, types, keywordTypes)) continue;
 
+                    long swExternalStart = timer.ElapsedMilliseconds;
+
                     //cursor for this specific source - look at cached cursors and return the best cursor 
                     //option or new cursor for new searches
                     var nextCursor = PrepareSearchCursor(model, src.ID);
@@ -401,31 +402,34 @@ namespace CESMII.Marketplace.Api.Controllers
                     //flow. When time allows, come back and refine so we don't need the custom aspect of the flow. 
                     if (src.Name.ToLower().Equals("cloudlib"))
                     {
-                        swCloudLibStarted = timer.ElapsedMilliseconds;
                         var searchCloudLibTask = AdvancedSearchCloudLib(model, nextCursor, keywordTypes, cats, verts, pubs);
-                        _ = searchCloudLibTask.ContinueWith(t => swCloudLibFinished = swCloudLibFinished == 0 ? timer.ElapsedMilliseconds : swCloudLibFinished);
+                        _ = searchCloudLibTask.ContinueWith(t => durations.Add(new KeyValuePair<string, long>(src.Name, timer.ElapsedMilliseconds - swExternalStart)));
                         listSearchExternalSources.Add(searchCloudLibTask);
                     }
                     else
                     {
                         //now perform the search(es)
                         var dalSource = await _sourceFactory.InitializeSource(src);
-                        listSearchExternalSources.Add(dalSource.Where(model.Query, nextCursor, null,
+                        var externalTask = dalSource.Where(model.Query, nextCursor, null,
                             processes: cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
                             verticals: verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList(),
-                            null));
+                            null);
+                        _ = externalTask.ContinueWith(t => durations.Add(new KeyValuePair<string, long>(src.Name, timer.ElapsedMilliseconds - swExternalStart)));
+                        listSearchExternalSources.Add(externalTask);
                     }
                 }
             }
 
             //run query calls in parallel
-            long swWaitStarted = timer.ElapsedMilliseconds;
+            long swAllStart = timer.ElapsedMilliseconds;
             var allTasks = Task.WhenAll(listSearchExternalSources);
+            //_ = allTasks.ContinueWith(t => durations.Add(new KeyValuePair<string, long>("All Sources", timer.ElapsedMilliseconds - swAllStart)));
             //wrap exception handling around the tasks execution so no task exception gets lost
             try
             {
                 _logger.LogInformation($"MarketplaceController|AdvancedSearch|Await outcome of .whenAll");
                 await allTasks;
+                durations.Add(new KeyValuePair<string, long>("All Sources", timer.ElapsedMilliseconds - swAllStart));
             }
             catch (Exception ex)
             {
@@ -434,8 +438,6 @@ namespace CESMII.Marketplace.Api.Controllers
             }
 
             long swWaitFinished = timer.ElapsedMilliseconds;
-            swMarketPlaceFinished = swMarketPlaceFinished == 0 ? timer.ElapsedMilliseconds : swMarketPlaceFinished;
-            swCloudLibFinished = swCloudLibFinished == 0 ? timer.ElapsedMilliseconds : swCloudLibFinished;
 
             //get the tasks results into format we can use
             _logger.LogInformation($"MarketplaceController|AdvancedSearch|Executing tasks using await...");
@@ -451,9 +453,18 @@ namespace CESMII.Marketplace.Api.Controllers
             _logger.LogInformation($"MarketplaceController|AdvancedSearch|Unifying results...");
 
             //unify the results, sort, handle paging
+            long swMergeStart = timer.ElapsedMilliseconds;
             var result = MergeSortPageSearchedItems(model, resultSearches);
-            long mergeFinished = timer.ElapsedMilliseconds;
-            _logger.LogWarning($"MarketplaceController|AdvancedSearch|Duration: {timer.ElapsedMilliseconds}ms. (Marketplace: {swMarketPlaceFinished - swMarketPlaceStarted} ms. CloudLib {swCloudLibFinished - swCloudLibStarted}. MPS: {swMarketPlaceStarted}. ClStart: {swCloudLibStarted}). WaitS/F: {swWaitStarted}/{swWaitFinished}. Merge S/F: {mergeStarted}/{mergeFinished}");
+            durations.Add(new KeyValuePair<string, long>("Merge", timer.ElapsedMilliseconds - swMergeStart));
+
+            //report total duration
+            durations.Add(new KeyValuePair<string, long>("Overall", timer.ElapsedMilliseconds));
+
+            foreach (var d in durations)
+            {
+                _logger.LogWarning($"MarketplaceController|AdvancedSearch|Duration: {d.Key}: {d.Value}ms.");
+            }
+            //_logger.LogWarning($"MarketplaceController|AdvancedSearch|Duration: {timer.ElapsedMilliseconds}ms. (Marketplace: {swMarketPlaceFinish - swMarketPlaceStart} ms. CloudLib {swCloudLibFinished - swCloudLibStarted}. MPS: {swMarketPlaceStart}. ClStart: {swCloudLibStarted}). WaitS/F: {swAllStart}/{swWaitFinished}. Merge S/F: {mergeStarted}/{mergeFinished}");
 
             if (result == null)
             {
@@ -725,7 +736,7 @@ namespace CESMII.Marketplace.Api.Controllers
             , List<LookupItemFilterModel> pubs
             , bool liveOnly = true)
         {
-            _logger.LogInformation($"MarketplaceController|AdvancedSearchMarketplace|Starting...");
+            _logger.LogWarning($"MarketplaceController|AdvancedSearchMarketplace|Starting...");
             var timer = Stopwatch.StartNew();
             var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
 
@@ -899,7 +910,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 }
             }
 
-            _logger.LogInformation($"MarketplaceController|AdvancedSearchCloudLib|Duration: {timer.ElapsedMilliseconds}ms.");
+            _logger.LogWarning($"MarketplaceController|AdvancedSearchCloudLib|Duration: { timer.ElapsedMilliseconds}ms.");
             return result;
         }
 

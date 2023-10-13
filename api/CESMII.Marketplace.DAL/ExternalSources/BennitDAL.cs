@@ -169,6 +169,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
             List<string> ids = null, List<string> processes = null, List<string> verticals = null,
             List<string> exclude = null)
         {
+            var timer = System.Diagnostics.Stopwatch.StartNew();
             /*
             //possible future usage
             var keywords = new List<string>();
@@ -233,6 +234,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                 Cursor = cursor
             };
 
+            _logger.Log(NLog.LogLevel.Warn, $"BennitDAL|Where|Duration: { timer.ElapsedMilliseconds}ms.");
             return result;
         }
 

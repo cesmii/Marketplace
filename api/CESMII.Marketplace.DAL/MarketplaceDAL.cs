@@ -102,6 +102,7 @@
         /// <returns></returns>
         public override DALResult<MarketplaceItemModel> GetAllPaged(int? skip = null, int? take = null, bool returnCount = false, bool verbose = false)
         {
+            var timer = System.Diagnostics.Stopwatch.StartNew();
             //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
             var query = _repo.FindByCondition(
                 x => x.IsActive,  //is active is a soft delete indicator. IsActive == false means deleted so we filter out those.
@@ -125,6 +126,7 @@
                 Data = MapToModels(data, verbose),
                 SummaryData = null
             };
+            _logger.Log(NLog.LogLevel.Warn, $"MarketplaceDAL|GetAll|Duration: { timer.ElapsedMilliseconds}ms.");
             return result;
         }
 
@@ -136,6 +138,7 @@
         public override DALResult<MarketplaceItemModel> Where(List<Func<MarketplaceItem, bool>> predicates, int? skip, int? take, bool returnCount = false, bool verbose = false,
             params OrderByExpression<MarketplaceItem>[] orderByExpressions)
         {
+            var timer = System.Diagnostics.Stopwatch.StartNew();
             //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
             var query = _repo.FindByCondition(
                 predicates,  //is active is a soft delete indicator. IsActive == false means deleted so we filter out those.
@@ -167,6 +170,7 @@
                 Data = MapToModels(data, verbose),
                 SummaryData = null
             };
+            _logger.Log(NLog.LogLevel.Warn, $"MarketplaceDAL|Where|Duration: { timer.ElapsedMilliseconds}ms.");
             return result;
 
         }

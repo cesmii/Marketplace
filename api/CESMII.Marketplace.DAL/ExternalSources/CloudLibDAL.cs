@@ -142,6 +142,7 @@
             List<string> ids = null, List<string> processes = null, List<string> verticals = null, 
             List<string> exclude = null)
         {
+            var timer = System.Diagnostics.Stopwatch.StartNew();
             //Note - splitting out each word in query into a separate string in the list
             //Per team, don't split out query into multiple keyword items
             //var keywords = string.IsNullOrEmpty(query) ? new List<string>() : query.Split(" ").ToList();
@@ -204,22 +205,13 @@
                 result.Count = matches.TotalCount;
                 result.Cursor.TotalCount = matches.TotalCount;
             }
-            if (!backwards)
-            {
-                result.StartCursor = cursor.StartCursor;
-                result.EndCursor = currentCursor;
-            }
-            else
-            {
-                result.StartCursor = currentCursor;
-                result.EndCursor = cursor.EndCursor;
-            }
             //TBD - exclude some nodesets which are core nodesets - list defined in appSettings
 
             if (cursor.Skip > 0)
             {
                 result.Data = result.Data.Skip(cursor.Skip).ToList();
             }
+            _logger.Log(NLog.LogLevel.Warn, $"CloudLibDAL|Where|Duration: { timer.ElapsedMilliseconds}ms.");
             return result;
         }
 

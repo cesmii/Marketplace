@@ -7,9 +7,6 @@
         // Record count
         public long Count { get; set; }
 
-        public string StartCursor { get; set; }
-        public string EndCursor { get; set; }
-
         // The actual data as a list of type <T>
         public List<T> Data { get; set; }
 
@@ -19,6 +16,11 @@
         public override string ToString() => $"{Data?.Count} of {Count}";
     }
 
+    /// <summary>
+    /// This is returned by the external source search and marketplace item search.
+    /// This will return the data but also the cursor used in making the search.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class DALResultWithSource<T>: DALResult<T>
     {
         /// <summary>
@@ -32,6 +34,15 @@
 
     }
 
+    /// <summary>
+    /// This is the object returned to client on search. 
+    /// The cached cursors will be returned back to the server on 
+    /// a subsequent search call. If the search changes by either 
+    /// different filters, different query value, different sm types, different page size, then the 
+    /// cached cursor is reset. It only lasts as long as the only changes
+    /// are changes to the page index. 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class DALResultWithCursors<T> : DALResult<T>
     {
         /// <summary>
@@ -41,6 +52,10 @@
     }
 
 
+    /// <summary>
+    /// This identifies the search source (ie marketplace item is null, Cloud lib or Bennit)
+    /// and the 
+    /// </summary>
     public class SourceSearchCursor 
     {
         public string SourceId { get; set; }
