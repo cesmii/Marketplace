@@ -82,33 +82,30 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         public BennitDAL(ExternalSourceModel config,
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             IHttpApiFactory httpApiFactory,
+            IMongoRepository<ImageItem> repoImages,
             IConfiguration configuration,
-            IDal<ImageItem, ImageItemModel> dalImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
             IMongoRepository<ProfileItem> repoExternalItem
-            ) : base(dalExternalSource, config, httpApiFactory)
+            ) : base(dalExternalSource, config, httpApiFactory, repoImages)
         {
-            this.Init(dalExternalSource, dalImages);
+            this.Init(dalExternalSource);
         }
 
         public BennitDAL(
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             IHttpApiFactory httpApiFactory,
+            IMongoRepository<ImageItem> repoImages,
             IConfiguration configuration,
-            IDal<ImageItem, ImageItemModel> dalImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
             IMongoRepository<ProfileItem> repoExternalItem
-            ) : base(dalExternalSource, "bennit", httpApiFactory)
+            ) : base(dalExternalSource, "bennit", httpApiFactory, repoImages)
         {
-            this.Init(dalExternalSource, dalImages);
+            this.Init(dalExternalSource);
         }
 
-        protected void Init(
-            IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
-            IDal<ImageItem, ImageItemModel> dalImages
-            )
+        protected void Init(IDal<ExternalSource, ExternalSourceModel> dalExternalSource)
         {
             //init some stuff we will use during the mapping methods
             //go get the config for this source
@@ -120,15 +117,14 @@ namespace CESMII.Marketplace.DAL.ExternalSources
             }
 
             //get default images
-            _images = dalImages.Where(
-                x => x.ID.Equals(_config.DefaultImageBanner?.ID) ||
-                x.ID.Equals(_config.DefaultImageLandscape?.ID) ||
-                x.ID.Equals(_config.DefaultImagePortrait?.ID) ||
-                x.ID.Equals(_configSmProfile.DefaultImageLandscape.ID) ||
-                x.ID.Equals(_configSmProfile.DefaultImagePortrait.ID) ||
-                x.ID.Equals(_configSmProfile.DefaultImageBanner.ID)
-                //|| x.ID.Equals(_config.DefaultImageIdSquare)
-                , null, null, false, false).Data;
+            _images = GetImagesByIdList(new List<string>() {
+                _config.DefaultImageBanner?.ID,
+                _config.DefaultImageLandscape?.ID,
+                _config.DefaultImagePortrait?.ID,
+                _config.DefaultImageBanner?.ID,
+                _config.DefaultImagePortrait?.ID,
+                _config.DefaultImageBanner?.ID
+            }).Result;
         }
 
         public async Task<MarketplaceItemModel> GetById(string id) {

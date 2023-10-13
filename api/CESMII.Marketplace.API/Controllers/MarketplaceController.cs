@@ -399,13 +399,13 @@ namespace CESMII.Marketplace.Api.Controllers
                     if (src.Code.ToLower().Equals("cloudlib"))
                     {
                         var searchCloudLibTask = AdvancedSearchCloudLib(model, nextCursor, keywordTypes, cats, verts, pubs);
-                        _ = searchCloudLibTask.ContinueWith(t => AdvancedSearchLogDurationTime(src.Name, timer.ElapsedMilliseconds - swExternalStart));
+                        _ = searchCloudLibTask.ContinueWith(t => AdvancedSearchLogDurationTime(src.Code, timer.ElapsedMilliseconds - swExternalStart));
                         listSearchExternalSources.Add(searchCloudLibTask);
                     }
                     else
                     {
                         var externalTask = AdvancedSearchExternal(model, cats, verts, src, nextCursor);
-                        _ = externalTask.ContinueWith(t => AdvancedSearchLogDurationTime(src.Name, timer.ElapsedMilliseconds - swExternalStart));
+                        _ = externalTask.ContinueWith(t => AdvancedSearchLogDurationTime(src.Code, timer.ElapsedMilliseconds - swExternalStart));
                         listSearchExternalSources.Add(externalTask);
                     }
                 }

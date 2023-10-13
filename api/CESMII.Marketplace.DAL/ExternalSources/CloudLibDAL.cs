@@ -27,41 +27,37 @@
         private ICloudLibWrapper _cloudLib;
         protected IMongoRepository<ProfileItem> _repoExternalItem;
         protected IMongoRepository<MarketplaceItem> _repoMarketplace;
-        protected IDal<ImageItem, ImageItemModel> _dalImages;
-        private List<LookupItemModel> _lookupItemsRelatedType;
-
-        //supporting data
+        protected List<LookupItemModel> _lookupItemsRelatedType;
         protected List<ImageItemModel> _images;
 
         public CloudLibDAL(ExternalSourceModel config,
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             IHttpApiFactory httpApiFactory,
+            IMongoRepository<ImageItem> repoImages,
             IConfiguration configuration,
-            IDal<ImageItem, ImageItemModel> dalImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
             IMongoRepository<ProfileItem> repoExternalItem
-            ) : base(dalExternalSource, config, httpApiFactory)
+            ) : base(dalExternalSource, config, httpApiFactory, repoImages)
         {
-            this.Init(configuration, dalImages, dalLookup, repoMarketplace, repoExternalItem);
+            this.Init(configuration, dalLookup, repoMarketplace, repoExternalItem);
         }
 
         public CloudLibDAL(
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             IHttpApiFactory httpApiFactory,
+            IMongoRepository<ImageItem> repoImages,
             IConfiguration configuration,
-            IDal<ImageItem, ImageItemModel> dalImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
             IMongoRepository<ProfileItem> repoExternalItem
-            ) : base(dalExternalSource, "cloudlib", httpApiFactory)
+            ) : base(dalExternalSource, "cloudlib", httpApiFactory, repoImages)
         {
-            this.Init(configuration, dalImages,dalLookup, repoMarketplace, repoExternalItem);
+            this.Init(configuration, dalLookup, repoMarketplace, repoExternalItem);
         }
 
         protected void Init(
             IConfiguration configuration,
-            IDal<ImageItem, ImageItemModel> dalImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
             IMongoRepository<ProfileItem> repoExternalItem
@@ -77,32 +73,24 @@
             //    Microsoft.Extensions.Logging.LoggerFactoryExtensions.CreateLogger<CloudLibWrapper>();
             _cloudLib = new CloudLibWrapper(options, null); //logger not used in CloudLibWrapper
 
-            //get default images
-            _images = dalImages.Where(
-                x => x.ID.Equals(_config.DefaultImageBanner?.ID) ||
-                x.ID.Equals(_config.DefaultImageLandscape?.ID) ||
-                x.ID.Equals(_config.DefaultImagePortrait?.ID)
-                , null, null, false, false).Data;
-
             //set some default settings specific for this external source. 
             _config.Publisher.DisplayViewAllLink = false;
 
             //init objects to use for related items
             _repoExternalItem = repoExternalItem;
             _repoMarketplace = repoMarketplace;
-            _dalImages = dalImages;
             //_dalMarkteplace = dalMarkteplace;
+
+            //get default images
+            _images = GetImagesByIdList(new List<string>() {
+                _config.DefaultImageBanner?.ID,
+                _config.DefaultImageLandscape?.ID,
+                _config.DefaultImagePortrait?.ID
+            }).Result;
 
             //get related type lookup items
             _lookupItemsRelatedType = dalLookup.Where(
                 x => x.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)
-                , null, null, false, false).Data;
-
-            //get default images
-            _images = dalImages.Where(
-                x => x.ID.Equals(_config.DefaultImageLandscape.ID) ||
-                x.ID.Equals(_config.DefaultImagePortrait.ID) ||
-                x.ID.Equals(_config.DefaultImageBanner.ID)
                 , null, null, false, false).Data;
         }
 
@@ -380,10 +368,8 @@
             if (!matches.Any()) return new List<MarketplaceItemRelatedModel>();
 
             //get all images associated with the list of related marketplace items
-            var images = _dalImages.Where(x => matches.Any(y =>
-                y.ImageLandscapeId.Equals(new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))) ||
-                y.ImagePortraitId.Equals(new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID)))),
-                null, null, false, false).Data;
+            var images = await GetImagesByMarketplaceIdList(
+                matches.Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList());
 
             return !matches.Any() ? new List<MarketplaceItemRelatedModel>() :
                 matches.Select(x => new MarketplaceItemRelatedModel()
@@ -466,5 +452,6 @@
                 Name = match.Name
             };
         }
+
     }
 }

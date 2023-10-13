@@ -60,7 +60,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                 //initialize scoped services for DI
                 var logger = scope.ServiceProvider.GetService<ILogger<IExternalDAL<TModel>>>();
                 var httpFactory = scope.ServiceProvider.GetService<IHttpApiFactory>();
-                var dalImages = scope.ServiceProvider.GetService<IDal<ImageItem, ImageItemModel>>();
+                var repoImages = scope.ServiceProvider.GetService<IMongoRepository<ImageItem>>();
                 var dalLookup = scope.ServiceProvider.GetService<IDal<LookupItem, LookupItemModel>>();
                 var repoMarketplace = scope.ServiceProvider.GetService<IMongoRepository<MarketplaceItem>>();
                 var repoExternalItem = scope.ServiceProvider.GetService<IMongoRepository<ProfileItem>>();
@@ -71,9 +71,9 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                     return InstantiateItem(model.TypeName, 
                         model, 
                         _dalExternalSource, 
-                        httpFactory, 
+                        httpFactory,
+                        repoImages, 
                         _configuration, 
-                        dalImages, 
                         dalLookup, 
                         repoMarketplace, 
                         repoExternalItem);

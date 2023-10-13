@@ -12,6 +12,7 @@ using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.DAL.ExternalSources.Models;
 using CESMII.Marketplace.Data.Entities;
+using CESMII.Marketplace.Data.Repositories;
 
 namespace CESMII.Marketplace.DAL.ExternalSources
 {
@@ -22,12 +23,14 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         protected readonly IDal<ExternalSource, ExternalSourceModel> _dalExternalSource;
         protected readonly ExternalSourceModel _config;
         protected readonly IHttpApiFactory _httpFactory;
+        protected readonly IMongoRepository<ImageItem> _repoImages;
         protected readonly string _baseAddress;
 
         public ExternalBaseDAL(
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource, 
             string externalSourceCodeName,
-            IHttpApiFactory httpFactory)
+            IHttpApiFactory httpFactory,
+            IMongoRepository<ImageItem> repoImages)
         {
             _dalExternalSource = dalExternalSource;
             //go get the config for this source
@@ -39,17 +42,20 @@ namespace CESMII.Marketplace.DAL.ExternalSources
             }
 
             _httpFactory = httpFactory;
+            _repoImages = repoImages;
         }
 
         public ExternalBaseDAL(
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             ExternalSourceModel config,
-            IHttpApiFactory httpFactory)
+            IHttpApiFactory httpFactory,
+            IMongoRepository<ImageItem> repoImages)
         {
             //go get the config for this source
             _dalExternalSource = dalExternalSource;
             _config = config;
             _httpFactory = httpFactory;
+            _repoImages = repoImages;
         }
 
         protected async Task<HttpResponseModel> ExecuteApiCall(HttpApiConfig config)
@@ -164,6 +170,36 @@ namespace CESMII.Marketplace.DAL.ExternalSources
             }
 
             return result;
+        }
+
+        protected async Task<List<ImageItemModel>> GetImagesByIdList(List<string> imageIds)
+        {
+            var filterImages = MongoDB.Driver.Builders<ImageItem>.Filter.In(x => x.ID, imageIds);
+            var fieldList = new List<string>()
+                { nameof(ImageItem.ID), nameof(ImageItem.Src), nameof(ImageItem.FileName), nameof(ImageItem.Type)};
+            return (await _repoImages.AggregateMatchAsync(filterImages, fieldList))
+                .Select(x => new ImageItemModel()
+                {
+                    ID = x.ID,
+                    FileName = x.FileName,
+                    Src = x.Src,
+                    Type = x.Type
+                }).ToList();
+        }
+
+        protected async Task<List<ImageItemModel>> GetImagesByMarketplaceIdList(List<MongoDB.Bson.BsonObjectId> marketplaceIds)
+        {
+            var filterImages = MongoDB.Driver.Builders<ImageItem>.Filter.In(x => x.MarketplaceItemId, marketplaceIds);
+            var fieldList = new List<string>()
+                { nameof(ImageItem.ID), nameof(ImageItem.Src), nameof(ImageItem.FileName), nameof(ImageItem.Type)};
+            return (await _repoImages.AggregateMatchAsync(filterImages, fieldList))
+                .Select(x => new ImageItemModel()
+                {
+                    ID = x.ID,
+                    FileName = x.FileName,
+                    Src = x.Src,
+                    Type = x.Type
+                }).ToList();
         }
 
         public virtual void Dispose()
