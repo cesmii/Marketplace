@@ -396,7 +396,7 @@ namespace CESMII.Marketplace.Api.Controllers
 
                     //TBD - temp logic - if the external source is CloudLib, then we still call a somewhat customized 
                     //flow. When time allows, come back and refine so we don't need the custom aspect of the flow. 
-                    if (src.Name.ToLower().Equals("cloudlib"))
+                    if (src.Code.ToLower().Equals("cloudlib"))
                     {
                         var searchCloudLibTask = AdvancedSearchCloudLib(model, nextCursor, keywordTypes, cats, verts, pubs);
                         _ = searchCloudLibTask.ContinueWith(t => AdvancedSearchLogDurationTime(src.Name, timer.ElapsedMilliseconds - swExternalStart));
@@ -404,12 +404,7 @@ namespace CESMII.Marketplace.Api.Controllers
                     }
                     else
                     {
-                        //now perform the search(es)
-                        var dalSource = await _sourceFactory.InitializeSource(src);
-                        var externalTask = dalSource.Where(model.Query, nextCursor, null,
-                            processes: cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
-                            verticals: verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList(),
-                            null);
+                        var externalTask = AdvancedSearchExternal(model, cats, verts, src, nextCursor);
                         _ = externalTask.ContinueWith(t => AdvancedSearchLogDurationTime(src.Name, timer.ElapsedMilliseconds - swExternalStart));
                         listSearchExternalSources.Add(externalTask);
                     }
@@ -909,6 +904,16 @@ namespace CESMII.Marketplace.Api.Controllers
 
             AdvancedSearchLogDurationTime("Duration", timer.ElapsedMilliseconds, sender: "AdvancedSearchCloudLib");
             return result;
+        }
+
+        private async Task<DALResultWithSource<MarketplaceItemModel>> AdvancedSearchExternal(MarketplaceSearchModel model, List<LookupItemFilterModel> cats, List<LookupItemFilterModel> verts, ExternalSourceModel src, SearchCursor nextCursor)
+        {
+            //now perform the search(es)
+            var dalSource = await _sourceFactory.InitializeSource(src);
+            return await dalSource.Where(model.Query, nextCursor, null,
+                processes: cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
+                verticals: verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList(),
+                null);
         }
 
 

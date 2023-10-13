@@ -195,6 +195,7 @@
                         DisplayOrder = itemType.DisplayOrder
                     },
                     Name = entity.Name,
+                    Code = entity.Code,
                     AccessToken = entity.AccessToken,
                     BaseUrl = entity.BaseUrl,
                     Enabled = entity.Enabled,
@@ -222,6 +223,7 @@
         {
             entity.ItemTypeId = MongoDB.Bson.ObjectId.Parse(model.ItemType.ID);
             entity.Name = model.Name;
+            entity.Code = model.Code;
             entity.AccessToken = model.AccessToken;
             entity.BaseUrl = model.BaseUrl;
             entity.Enabled = model.Enabled;

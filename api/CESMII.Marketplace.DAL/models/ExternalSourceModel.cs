@@ -20,6 +20,12 @@ namespace CESMII.Marketplace.DAL.Models
         public string Name { get; set; }
 
         /// <summary>
+        /// Expected to be unique across external sources. Using code rather than id so that
+        /// we don't have to maintain a settings file for each environment with code for each source. 
+        /// </summary>
+        public string Code { get; set; }
+
+        /// <summary>
         /// This is the .NET type to instantiate for this external source. 
         /// </summary>
         public string TypeName { get; set; }
