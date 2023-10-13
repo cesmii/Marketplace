@@ -838,23 +838,24 @@ namespace CESMII.Marketplace.Api.Controllers
             var result = await Task.Run(() =>
             {
                 //retrun from task.run
-                return predicates.Count == 0 && cursor.Skip == 0
+                var res = predicates.Count == 0 && cursor.Skip == 0
                     ? _dal.GetAllPaged(null, null, !cursor.HasTotalCount, false)
                     : _dal.Where(predicates, cursor.Skip, cursor.Take, !cursor.HasTotalCount, false,
                             new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
                             new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName });
-            });
 
-            _logger.LogWarning($"MarketplaceController|AdvancedSearchMarketplace|Duration: { timer.ElapsedMilliseconds}ms.");
-            cursor.TotalCount = (int)result.Count;
-            return new DALResultWithSource<MarketplaceItemModel>()
-            { 
-                Data = result.Data,
-                Count = result.Count,
-                SummaryData = result.SummaryData,
-                SourceId = null,
-                Cursor = cursor
-            };
+                _logger.LogWarning($"MarketplaceController|AdvancedSearchMarketplace|Duration: { timer.ElapsedMilliseconds}ms.");
+                cursor.TotalCount = (int)res.Count;
+                return new DALResultWithSource<MarketplaceItemModel>()
+                {
+                    Data = res.Data,
+                    Count = res.Count,
+                    SummaryData = res.SummaryData,
+                    SourceId = null,
+                    Cursor = cursor
+                };
+            });
+            return result;
         }
 
         /// <summary>
