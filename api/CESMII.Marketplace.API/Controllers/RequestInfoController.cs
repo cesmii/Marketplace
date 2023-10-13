@@ -10,6 +10,7 @@ using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.DAL.Models;
+using CESMII.Marketplace.DAL.ExternalSources;
 using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.Api.Shared.Controllers;
 using CESMII.Marketplace.Api.Shared.Extensions;
@@ -23,12 +24,12 @@ namespace CESMII.Marketplace.Api.Controllers
     {
 
         private readonly IDal<RequestInfo, RequestInfoModel> _dal;
-        private readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _dalCloudLib;
+        private readonly IExternalDAL<MarketplaceItemModel> _dalCloudLib;
         private readonly MailRelayService _mailRelayService;
 
         public RequestInfoController(
             IDal<RequestInfo, RequestInfoModel> dal,
-            ICloudLibDAL<MarketplaceItemModelWithCursor> dalCloudLib,
+            IExternalDAL<MarketplaceItemModel> dalCloudLib,
             UserDAL dalUser,
             ConfigUtil config, ILogger<RequestInfoController> logger,
             MailRelayService mailRelayService)

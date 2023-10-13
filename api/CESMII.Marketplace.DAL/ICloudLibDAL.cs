@@ -8,6 +8,7 @@
     using CESMII.Marketplace.DAL.Models;
     using CESMII.Marketplace.Data.Entities;
 
+    /*
     public interface ICloudLibDAL<TModel> : IDisposable where TModel : AbstractModel
     {
         Task<TModel> GetById(string id);
@@ -46,6 +47,7 @@
             List<string> ids = null, List<string> processes = null, List<string> verticals = null, List<string> exclude = null);
 
     }
+    */
 
     /// <summary>
     /// Admin version of CloudLib DAL
@@ -98,5 +100,4 @@
         /// <returns></returns>
         Task<int> Delete(string id, string userId);
     }
-
 }

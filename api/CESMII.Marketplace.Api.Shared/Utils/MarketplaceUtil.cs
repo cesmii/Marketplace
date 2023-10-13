@@ -7,6 +7,7 @@
 
     using CESMII.Marketplace.Data.Entities;
     using CESMII.Marketplace.DAL;
+    using CESMII.Marketplace.DAL.ExternalSources;
     using CESMII.Marketplace.DAL.Models;
     using CESMII.Marketplace.Data.Extensions;
     using CESMII.Marketplace.Common.Enums;
@@ -14,12 +15,12 @@
     public class MarketplaceUtil
     {
         private readonly IDal<MarketplaceItem, MarketplaceItemModel> _dalMarketplace;
-        private readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _dalCloudLib;
+        private readonly IExternalDAL<MarketplaceItemModel> _dalCloudLib;
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
         private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
 
         public MarketplaceUtil(IDal<MarketplaceItem, MarketplaceItemModel> dalMarketplace,
-            ICloudLibDAL<MarketplaceItemModelWithCursor> dalCloudLib,
+            IExternalDAL<MarketplaceItemModel> dalCloudLib,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
             IDal<LookupItem, LookupItemModel> dalLookup
             )
@@ -173,7 +174,7 @@
             var itemsMarketplace = _dalMarketplace.Where(predicatesMarketplace, null, 4, false, false).Data;
 
             //now get the cloudlib items with popular rankings
-            var itemsCloudLib = await _dalCloudLib.Where(query: null, skip: 0, take: 4, startCursor: null, endCursor: null, noTotalCount: false, 
+            var itemsCloudLib = await _dalCloudLib.Where(query: null, new SearchCursor() { Skip= 0, Take = 4 },  
                 ids: popularCloudLib, processes: null, verticals: null, exclude: null);
 
             return itemsMarketplace.Union(itemsCloudLib.Data).ToList();
@@ -233,13 +234,13 @@
             return Task.FromResult(itemsMarketplace.ToList());
         }
 
-        private async Task<List<MarketplaceItemModelWithCursor>> PopularItemsCloudLib(List<OrderByExpression<MarketplaceItemAnalytics>> orderBys)
+        private async Task<List<MarketplaceItemModel>> PopularItemsCloudLib(List<OrderByExpression<MarketplaceItemAnalytics>> orderBys)
         {
             //run in parallel
             var popularCloudLib = _dalAnalytics.Where(x => !string.IsNullOrEmpty(x.CloudLibId), null, 4, false, false, orderBys.ToArray()).Data
                 .Select(x => x.CloudLibId).ToList();
             //now get the cloudlib items with popular rankings
-            return (await _dalCloudLib.Where(null, null, 4, null, null, false, popularCloudLib, null, null, null)).Data;
+            return (await _dalCloudLib.Where(query: null, new SearchCursor() { Skip = 0, Take = 4 }, popularCloudLib, null, null, null)).Data;
         }
 
         /// <summary>

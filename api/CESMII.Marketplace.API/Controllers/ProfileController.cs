@@ -9,6 +9,7 @@ using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.DAL.Models;
+using CESMII.Marketplace.DAL.ExternalSources;
 using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.Api.Shared.Extensions;
 using CESMII.Marketplace.Api.Shared.Controllers;
@@ -20,13 +21,13 @@ namespace CESMII.Marketplace.Api.Controllers
     [Route("api/[controller]")]
     public class ProfileController : BaseController<ProfileController>
     {
-        private readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _dalCloudLib;
+        private readonly IExternalDAL<MarketplaceItemModel> _dalCloudLib;
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
         private readonly IDal<RequestInfo, RequestInfoModel> _dalRequestInfo;
         private readonly MailRelayService _mailRelayService;
 
         public ProfileController(
-            ICloudLibDAL<MarketplaceItemModelWithCursor> dalCloudLib,
+            IExternalDAL<MarketplaceItemModel> dalCloudLib,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
             IDal<RequestInfo, RequestInfoModel> dalRequestInfo,
             UserDAL dalUser,
@@ -101,7 +102,7 @@ namespace CESMII.Marketplace.Api.Controllers
             }
 
             //Search CloudLib.
-            var result = await _dalCloudLib.Where(model.Query);
+            var result = await _dalCloudLib.Where(model.Query, new SearchCursor() { Skip = model.Skip, Take = model.Take });
             return Ok(result);
         }
 

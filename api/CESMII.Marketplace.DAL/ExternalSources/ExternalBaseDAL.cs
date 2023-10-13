@@ -10,22 +10,44 @@ using NLog;
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.DAL.Models;
-using CESMII.Marketplace.ExternalSources.Models;
+using CESMII.Marketplace.DAL.ExternalSources.Models;
+using CESMII.Marketplace.Data.Entities;
 
-namespace CESMII.Marketplace.ExternalSources.DAL
+namespace CESMII.Marketplace.DAL.ExternalSources
 {
     public class ExternalBaseDAL<TEntity, TModel> where TEntity : ExternalAbstractEntity where TModel : AbstractModel
     {
         protected bool _disposed = false;
         protected static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        protected readonly IDal<ExternalSource, ExternalSourceModel> _dalExternalSource;
         protected readonly ExternalSourceModel _config;
         protected readonly IHttpApiFactory _httpFactory;
         protected readonly string _baseAddress;
 
         public ExternalBaseDAL(
+            IDal<ExternalSource, ExternalSourceModel> dalExternalSource, 
+            string externalSourceCodeName,
+            IHttpApiFactory httpFactory)
+        {
+            _dalExternalSource = dalExternalSource;
+            //go get the config for this source
+            _config = dalExternalSource.Where(x => x.Code.ToLower().Equals(externalSourceCodeName.ToLower())
+                , null, null, false, true).Data?.FirstOrDefault();
+            if (_config == null)
+            {
+                throw new ArgumentNullException($"External Source Config: {externalSourceCodeName}");
+            }
+
+            _httpFactory = httpFactory;
+        }
+
+        public ExternalBaseDAL(
+            IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             ExternalSourceModel config,
             IHttpApiFactory httpFactory)
         {
+            //go get the config for this source
+            _dalExternalSource = dalExternalSource;
             _config = config;
             _httpFactory = httpFactory;
         }

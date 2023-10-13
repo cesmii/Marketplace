@@ -40,7 +40,7 @@ using CESMII.Marketplace.Api.Shared.Extensions;
 using CESMII.Common.CloudLibClient;
 using CESMII.Common.SelfServiceSignUp.Services;
 using CESMII.Common.SelfServiceSignUp.Models;
-using CESMII.Marketplace.ExternalSources;
+using CESMII.Marketplace.DAL.ExternalSources;
 
 namespace CESMII.Marketplace.Api
 {
@@ -121,8 +121,8 @@ namespace CESMII.Marketplace.Api
             services.Configure<Opc.Ua.Cloud.Library.Client.UACloudLibClient.Options>(Configuration.GetSection("CloudLibrary"));
             services.AddSingleton<Opc.Ua.Cloud.Library.Client.UACloudLibClient>();
             services.AddSingleton<ICloudLibWrapper, CloudLibWrapper>();
-            services.AddScoped<ICloudLibDAL<MarketplaceItemModelWithCursor>, CloudLibDAL>();
-            services.AddScoped<IAdminCloudLibDAL<AdminMarketplaceItemModelWithCursor>, AdminCloudLibDAL>();
+            services.AddScoped<IExternalDAL<MarketplaceItemModel>, CloudLibDAL>();
+            services.AddScoped<IAdminCloudLibDAL<AdminMarketplaceItemModel>, AdminCloudLibDAL>();
 
             //AAD - no longer need this
             // Add token builder.

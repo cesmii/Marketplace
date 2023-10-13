@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
 
     using CESMII.Marketplace.DAL.Models;
+    using CESMII.Marketplace.DAL.ExternalSources;
     using CESMII.Marketplace.Data.Entities;
     using CESMII.Marketplace.Data.Repositories;
     using CESMII.Marketplace.Common;
@@ -23,7 +24,7 @@
         protected List<ImageItemSimple> _imagesAll;
         protected IMongoRepository<JobDefinition> _repoJobDefinition; 
         protected List<JobDefinition> _jobDefinitionAll;
-        protected readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _cloudLibDAL;
+        protected readonly IExternalDAL<MarketplaceItemModel> _cloudLibDAL;
 
         //default type - use if none assigned yet.
         private readonly MongoDB.Bson.BsonObjectId _smItemTypeIdDefault;
@@ -33,7 +34,7 @@
             IMongoRepository<MarketplaceItemAnalytics> repoAnalytics,
             IMongoRepository<ImageItemSimple> repoImages,
             IMongoRepository<JobDefinition> repoJobDefinition,
-            ICloudLibDAL<MarketplaceItemModelWithCursor> cloudLibDAL,
+            IExternalDAL<MarketplaceItemModel> cloudLibDAL,
             ConfigUtil configUtil
             ) : base(repo)
         {
@@ -371,7 +372,7 @@
             }
 
             //get list of profile items associated with this list of ids, call CloudLib to get the supporting info for these
-            var matches = _cloudLibDAL.GetManyById(items.Select(x => x.ProfileId).ToList()).Result;
+            var matches = _cloudLibDAL.GetManyById(items.Select(x => x.ExternalId).ToList()).Result.Data;
             return !matches.Any() ? new List<MarketplaceItemRelatedModel>() : 
                 matches.Select(x => new MarketplaceItemRelatedModel()
                 {
@@ -388,7 +389,7 @@
                     ImageBanner = x.ImageBanner,
                     ImageLandscape = x.ImageLandscape,
                     //assumes only one related item per type
-                    RelatedType = MapToModelLookupItem(items.Find(z => z.ProfileId.ToString().Equals(x.ID)).RelatedTypeId,
+                    RelatedType = MapToModelLookupItem(items.Find(z => z.ExternalId.ToString().Equals(x.ID)).RelatedTypeId,
                             _lookupItemsAll.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList()),
                 }).ToList();
         }

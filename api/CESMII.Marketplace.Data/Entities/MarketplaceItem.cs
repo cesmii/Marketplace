@@ -141,12 +141,18 @@
     /// It is the profile id and the related type (recommended, required, related)
     /// </summary>
     [BsonIgnoreExtraElements]
+    //TBD - rename collection name once we cutover to this.
     public class RelatedProfileItem
     {
         /// <summary>
         /// This is the id from the CloudLib
         /// </summary>
-        public string ProfileId { get; set; }
+        [BsonElement("ProfileId")]  //TBD - rename column name once we cutover to this.
+        public string ExternalId { get; set; }
+        /// <summary>
+        /// This is the id of the external source so we know where to get the data from.
+        /// </summary>
+        public BsonObjectId ExternalSourceId { get; set; }
         /// <summary>
         /// This will map to a lookup record for RelatedType
         /// </summary>

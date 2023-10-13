@@ -1,4 +1,4 @@
-﻿namespace CESMII.Marketplace.DAL
+﻿namespace CESMII.Marketplace.DAL.ExternalSources
 {
     using System;
     using System.Collections.Generic;
@@ -12,55 +12,86 @@
     using CESMII.Marketplace.Common.Enums;
     using CESMII.Marketplace.Common.Models;
     using CESMII.Marketplace.DAL.Models;
+    using CESMII.Marketplace.DAL.ExternalSources.Models;
     using CESMII.Marketplace.Data.Entities;
+    using CESMII.Marketplace.Data.Repositories;
     using CESMII.Common.CloudLibClient;
 
     using Opc.Ua.Cloud.Library.Client;
-    using CESMII.Marketplace.Data.Repositories;
 
     /// <summary>
     /// Most lookup data is contained in this single entity and differntiated by a lookup type. 
     /// </summary>
-    public class CloudLibDAL : ICloudLibDAL<MarketplaceItemModelWithCursor>
+    public class CloudLibDAL : ExternalBaseDAL<ExternalAbstractEntity, MarketplaceItemModel>, IExternalDAL<MarketplaceItemModel>
     {
-        protected bool _disposed = false;
-        protected static readonly Logger _logger = LogManager.GetCurrentClassLogger();
-        private readonly ICloudLibWrapper _cloudLib;
-        protected readonly IMongoRepository<ProfileItem> _repoProfile;
-        protected readonly IMongoRepository<MarketplaceItem> _repoMarketplace;
-        protected readonly IDal<ImageItem, ImageItemModel> _dalImages;
-        private readonly MarketplaceItemConfig _config;
-        private readonly LookupItemModel _smItemType;
-        private readonly List<LookupItemModel> _lookupItemsRelatedType;
-        //protected readonly IDal<MarketplaceItem, MarketplaceItemModelWithCursor> _dalMarkteplace;
+        private ICloudLibWrapper _cloudLib;
+        protected IMongoRepository<ProfileItem> _repoExternalItem;
+        protected IMongoRepository<MarketplaceItem> _repoMarketplace;
+        protected IDal<ImageItem, ImageItemModel> _dalImages;
+        private List<LookupItemModel> _lookupItemsRelatedType;
 
         //supporting data
         protected List<ImageItemModel> _images;
 
-        public CloudLibDAL(ICloudLibWrapper cloudLib,
-            IMongoRepository<ProfileItem> repoProfile,
-            IDal<LookupItem, LookupItemModel> dalLookup,
+        public CloudLibDAL(ExternalSourceModel config,
+            IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
+            IHttpApiFactory httpApiFactory,
+            IConfiguration configuration,
             IDal<ImageItem, ImageItemModel> dalImages,
+            IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
-            //IDal<MarketplaceItem, MarketplaceItemModelWithCursor> dalMarkteplace,
-            ConfigUtil configUtil)
+            IMongoRepository<ProfileItem> repoExternalItem
+            ) : base(dalExternalSource, config, httpApiFactory)
         {
-            _cloudLib = cloudLib;
+            this.Init(configuration, dalImages, dalLookup, repoMarketplace, repoExternalItem);
+        }
+
+        public CloudLibDAL(
+            IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
+            IHttpApiFactory httpApiFactory,
+            IConfiguration configuration,
+            IDal<ImageItem, ImageItemModel> dalImages,
+            IDal<LookupItem, LookupItemModel> dalLookup,
+            IMongoRepository<MarketplaceItem> repoMarketplace,
+            IMongoRepository<ProfileItem> repoExternalItem
+            ) : base(dalExternalSource, "cloudlib", httpApiFactory)
+        {
+            this.Init(configuration, dalImages,dalLookup, repoMarketplace, repoExternalItem);
+        }
+
+        protected void Init(
+            IConfiguration configuration,
+            IDal<ImageItem, ImageItemModel> dalImages,
+            IDal<LookupItem, LookupItemModel> dalLookup,
+            IMongoRepository<MarketplaceItem> repoMarketplace,
+            IMongoRepository<ProfileItem> repoExternalItem
+            )
+        {
+            //instantiate this way rather than through DI so that the factory does not need to know 
+            //about specifics of each external data source
+            var settings = new UACloudLibClient.Options();
+            configuration.GetSection("CloudLibrary").Bind(settings);
+            Microsoft.Extensions.Options.IOptions<UACloudLibClient.Options> options =
+                Microsoft.Extensions.Options.Options.Create(settings);
+            //Microsoft.Extensions.Logging.ILogger<CloudLibWrapper> log = 
+            //    Microsoft.Extensions.Logging.LoggerFactoryExtensions.CreateLogger<CloudLibWrapper>();
+            _cloudLib = new CloudLibWrapper(options, null); //logger not used in CloudLibWrapper
+
+            //get default images
+            _images = dalImages.Where(
+                x => x.ID.Equals(_config.DefaultImageBanner?.ID) ||
+                x.ID.Equals(_config.DefaultImageLandscape?.ID) ||
+                x.ID.Equals(_config.DefaultImagePortrait?.ID)
+                , null, null, false, false).Data;
+
+            //set some default settings specific for this external source. 
+            _config.Publisher.DisplayViewAllLink = false;
 
             //init objects to use for related items
-            _repoProfile = repoProfile;
+            _repoExternalItem = repoExternalItem;
             _repoMarketplace = repoMarketplace;
             _dalImages = dalImages;
             //_dalMarkteplace = dalMarkteplace;
-
-            //init some stuff we will use during the mapping methods
-            _config = configUtil.MarketplaceSettings.SmProfile;
-
-            //get SM Profile type
-            _smItemType = dalLookup.Where(
-                x => x.LookupType.EnumValue.Equals(LookupTypeEnum.SmItemType) &&
-                x.ID.Equals(_config.TypeId)
-                , null, null, false, false).Data.FirstOrDefault();
 
             //get related type lookup items
             _lookupItemsRelatedType = dalLookup.Where(
@@ -69,20 +100,18 @@
 
             //get default images
             _images = dalImages.Where(
-                x => x.ID.Equals(_config.DefaultImageIdLandscape) ||
-                x.ID.Equals(_config.DefaultImageIdPortrait) ||
-                x.ID.Equals(_config.DefaultImageIdBanner)
-                //|| x.ID.Equals(_config.DefaultImageIdSquare)
+                x => x.ID.Equals(_config.DefaultImageLandscape.ID) ||
+                x.ID.Equals(_config.DefaultImagePortrait.ID) ||
+                x.ID.Equals(_config.DefaultImageBanner.ID)
                 , null, null, false, false).Data;
-
         }
 
-        public async Task<MarketplaceItemModelWithCursor> GetById(string id) {
+        public async Task<MarketplaceItemModel> GetById(string id) {
             var entity = await _cloudLib.DownloadAsync(id);
             //var entity = await _cloudLib.GetById(id);
             if (entity == null) return null;
             //get related items from local db
-            var entityLocal = _repoProfile.FindByCondition(x => x.ProfileId.Equals(id)).FirstOrDefault();
+            var entityLocal = _repoExternalItem.FindByCondition(x => x.ExternalId.Equals(id)).FirstOrDefault();
 
             return MapToModelNamespace(entity, entityLocal);
         }
@@ -102,14 +131,16 @@
             return result;
         }
 
-        public async Task<List<MarketplaceItemModelWithCursor>> GetAll() {
+        public async Task<DALResultWithSource<MarketplaceItemModel>> GetAll() {
             //setting to very high to get all...this is called by admin which needs full list right now for dropdown selection
-            var result = await this.Where(null, 0, 999); 
-            return result.Data;
+            var result = await this.Where(null, new SearchCursor() { PageIndex = 0, Skip = 0, Take = 999 }); 
+            return result;
         }
 
-        public async Task<DALResult<MarketplaceItemModelWithCursor>> Where(string query, int? skip = null, int? take = null, string? startCursor = null, string? endCursor = null, bool noTotalCount = false,
-            List<string> ids = null, List<string> processes = null, List<string> verticals = null, List<string> exclude = null)
+        public async Task<DALResultWithSource<MarketplaceItemModel>> Where(string query,
+            SearchCursor cursor, 
+            List<string> ids = null, List<string> processes = null, List<string> verticals = null, 
+            List<string> exclude = null)
         {
             //Note - splitting out each word in query into a separate string in the list
             //Per team, don't split out query into multiple keyword items
@@ -134,19 +165,23 @@
             if (string.IsNullOrEmpty(query) && keywords.Count == 0) keywords.Add("*");
             if (!string.IsNullOrEmpty(query)) keywords.Add(query);
 
-            DALResult<MarketplaceItemModelWithCursor> result = new DALResult<MarketplaceItemModelWithCursor>();
-            result.Data = new List<MarketplaceItemModelWithCursor>();
+            var result = new DALResultWithSource<MarketplaceItemModel>() { 
+                Data = new List<MarketplaceItemModel>(),
+                Cursor = cursor, 
+                SourceId = _config.ID
+            };
             GraphQlResult<Nodeset> matches;
 
-            string currentCursor = startCursor ?? endCursor;
-            bool backwards = endCursor != null;
+            //limits max amount to 100, if our take is larger, make multiple calls in batches of 100
+            string currentCursor = cursor != null ? cursor.StartCursor ?? cursor.EndCursor : null;
+            bool backwards = cursor?.EndCursor != null;
             int actualTake;
             bool bMore;
             do
             {
-                actualTake = Math.Min((skip + take ?? 100) - (int)result.Count, 100);
+                actualTake = Math.Min((cursor.Skip + cursor.Take ?? 100) - (int)result.Count, 100);
                 bMore = false;
-                matches = await _cloudLib.SearchAsync(actualTake, currentCursor, backwards, keywords, exclude, noTotalCount,
+                matches = await _cloudLib.SearchAsync(actualTake, currentCursor, backwards, keywords, exclude, cursor.HasTotalCount,
                     order:
                         new { metadata = new { title = OrderEnum.ASC }, modelUri = OrderEnum.ASC, publicationDate = OrderEnum.DESC });// "{metadata: {title: ASC}, modelUri: ASC, publicationDate: DESC}");
                 if (matches == null || matches.Edges == null) return result;
@@ -162,27 +197,28 @@
                     currentCursor = matches.PageInfo.StartCursor;
                     bMore = true;
                 }
-            } while (bMore && (take == null || result.Count < skip + take));
+            } while (bMore && (!cursor.Take.HasValue || result.Count < cursor.Skip + cursor.Take.Value));
 
             if (matches?.TotalCount > 0)
             {
                 result.Count = matches.TotalCount;
+                result.Cursor.TotalCount = matches.TotalCount;
             }
             if (!backwards)
             {
-                result.StartCursor = startCursor;
+                result.StartCursor = cursor.StartCursor;
                 result.EndCursor = currentCursor;
             }
             else
             {
                 result.StartCursor = currentCursor;
-                result.EndCursor = endCursor;
+                result.EndCursor = cursor.EndCursor;
             }
             //TBD - exclude some nodesets which are core nodesets - list defined in appSettings
 
-            if (skip > 0)
+            if (cursor.Skip > 0)
             {
-                result.Data = result.Data.Skip(skip.Value).ToList();
+                result.Data = result.Data.Skip(cursor.Skip).ToList();
             }
             return result;
         }
@@ -194,17 +230,24 @@
         };
 
 
-        public async Task<List<MarketplaceItemModelWithCursor>> GetManyById(List<string> ids)
+        public async Task<DALResultWithSource<MarketplaceItemModel>> GetManyById(List<string> ids)
         {
             var matches = await _cloudLib.GetManyAsync(ids);
-            if (matches == null || matches.Edges == null) return new List<MarketplaceItemModelWithCursor>();
 
-            return MapToModelsNodesetResult(matches.Edges);
+            return new DALResultWithSource<MarketplaceItemModel>()
+            {
+                //Count = matches.Count,
+                Data = (matches == null || matches.Edges == null) ? 
+                    new List<MarketplaceItemModel>() :
+                    MapToModelsNodesetResult(matches.Edges),
+                SummaryData = null,
+                SourceId = _config.ID
+            };
         }
 
-        protected List<MarketplaceItemModelWithCursor> MapToModelsNodesetResult(List<GraphQlNodeAndCursor<Nodeset>> entities)
+        protected List<MarketplaceItemModel> MapToModelsNodesetResult(List<GraphQlNodeAndCursor<Nodeset>> entities)
         {
-            var result = new List<MarketplaceItemModelWithCursor>();
+            var result = new List<MarketplaceItemModel>();
 
             foreach (var item in entities)
             {
@@ -218,12 +261,12 @@
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        protected MarketplaceItemModelWithCursor MapToModelNodesetResult(GraphQlNodeAndCursor<Nodeset> entity)
+        protected MarketplaceItemModel MapToModelNodesetResult(GraphQlNodeAndCursor<Nodeset> entity)
         {
             if (entity != null && entity.Node != null)
             {
                 //map results to a format that is common with marketplace items
-                return new MarketplaceItemModelWithCursor()
+                return new MarketplaceItemModel()
                 {
                     ID = entity.Node.Identifier.ToString(),
                     Name = entity.Node.Identifier.ToString(),  //in marketplace items, name is used for navigation in friendly url
@@ -234,14 +277,14 @@
                     DisplayName = !string.IsNullOrEmpty(entity.Node.Metadata.Title) ? entity.Node.Metadata.Title : entity.Node.NamespaceUri.AbsolutePath,
                     Namespace = entity.Node.NamespaceUri.ToString(),
                     PublishDate = entity.Node.PublicationDate,
-                    Type = _smItemType,
+                    Type = _config.ItemType,
                     Version = entity.Node.Version,
                     IsFeatured = false,
-                    ImagePortrait = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdPortrait)),
-                    ImageBanner = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdBanner)),
-                    ImageLandscape = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdLandscape)),
+                    ImagePortrait = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImagePortrait.ID)),
+                    ImageBanner = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageBanner.ID)),
+                    ImageLandscape = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageLandscape.ID)),
                     Cursor = entity.Cursor,
-                    ExternalSourceId = "cloudlib"  //TBD - update this once we fold this into external source approach
+                    ExternalSourceId = _config.ID
                 };
             }
             else
@@ -257,7 +300,7 @@
         /// <param name="entity"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        protected MarketplaceItemModelWithCursor MapToModelNamespace(UANameSpace entity, ProfileItem entityLocal)
+        protected MarketplaceItemModel MapToModelNamespace(UANameSpace entity, ProfileItem entityLocal)
         {
             if (entity != null)
             {
@@ -266,7 +309,7 @@
                 //if (entity.Category != null) metatags.Add(entity.Category.Name);
 
                 //map results to a format that is common with marketplace items
-                var result = new MarketplaceItemModelWithCursor()
+                var result = new MarketplaceItemModel()
                 {
                     ID = entity.Nodeset.Identifier.ToString(),
                     Name = entity.Nodeset.Identifier.ToString(),  //in marketplace items, name is used for navigation in friendly url
@@ -292,14 +335,14 @@
                     Namespace = entity.Nodeset?.NamespaceUri?.ToString(),
                     MetaTags = metatags,
                     PublishDate = entity.Nodeset?.PublicationDate,
-                    Type = _smItemType,
+                    Type = _config.ItemType,
                     Version = entity.Nodeset?.Version,
                     IsFeatured = false,
                     ImagePortrait = entity.IconUrl == null ?
-                        _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdPortrait)) :
+                        _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImagePortrait.ID)) :
                         new ImageItemModel() { Src = entity.IconUrl.ToString() },
                     ImageLandscape = entity.IconUrl == null ?
-                        _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageIdLandscape)) :
+                        _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageLandscape.ID)) :
                         new ImageItemModel() { Src = entity.IconUrl.ToString() },
                     Updated = entity.Nodeset?.LastModifiedDate,
                     ExternalSourceId = "cloudlib"  //TBD - update this once we fold this into external source approach
@@ -313,10 +356,10 @@
                     var relatedItems = MapToModelRelatedItems(entityLocal?.RelatedItems).Result;
 
                     //get related profiles from CloudLib
-                    var relatedProfiles = MapToModelRelatedProfiles(entityLocal?.RelatedProfiles);
+                    var relatedProfiles = MapToModelRelatedProfiles(entityLocal?.RelatedExternalItems);
 
                     //map related items into specific buckets - required, recommended
-                    result.RelatedItemsGrouped = GroupAndMergeRelatedItems(relatedItems, relatedProfiles);
+                    result.RelatedItemsGrouped = base.GroupAndMergeRelatedItems(relatedItems, relatedProfiles);
                 }
                 return result;
             }
@@ -381,7 +424,7 @@
             }
 
             //get list of profile items associated with this list of ids, call CloudLib to get the supporting info for these
-            var matches = this.GetManyById(items.Select(x => x.ProfileId).ToList()).Result;
+            var matches = this.GetManyById(items.Select(x => x.ExternalId).ToList()).Result.Data;
             return !matches.Any() ? new List<MarketplaceItemRelatedModel>() :
                 matches.Select(x => new MarketplaceItemRelatedModel()
                 {
@@ -398,82 +441,9 @@
                     //assumes only one related item per type
                     RelatedType = //items.Find(x => x.ProfileId.Equals(x.ID)) == null ? null :
                         MapToModelLookupItem(
-                        items.Find(z => z.ProfileId.Equals(x.ID)).RelatedTypeId,
+                        items.Find(z => z.ExternalId.Equals(x.ID)).RelatedTypeId,
                         _lookupItemsRelatedType.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList())
                 }).ToList();
-        }
-
-        /// <summary>
-        /// Take two related sets, group them by type and union them, filter them by related type and order them
-        /// </summary>
-        /// <param name="items"></param>
-        /// <param name="itemsProfile"></param>
-        /// <param name="relatedType"></param>
-        /// <returns></returns>
-        protected List<RelatedItemsGroupBy> GroupAndMergeRelatedItems(
-            List<MarketplaceItemRelatedModel> items,
-            List<MarketplaceItemRelatedModel> itemsProfile)
-        {
-            if (items == null && itemsProfile == null)
-            {
-                return new List<RelatedItemsGroupBy>();
-            }
-            //group by both sets and then merge
-            var result = new List<RelatedItemsGroupBy>();
-
-            //convert group to return type
-            if (items?.Count > 0)
-            {
-                var grpItems = items.GroupBy(x => new { ID = x.RelatedType.ID });
-                foreach (var item in grpItems)
-                {
-                    result.Add(new RelatedItemsGroupBy()
-                    {
-                        RelatedType = items.Where(x => x.RelatedType.ID.Equals(item.Key.ID)).FirstOrDefault()?.RelatedType,
-                        Items = items.Where(x => x.RelatedType.ID.Equals(item.Key.ID)).ToList() // item.ToList()
-                    });
-                }
-            }
-
-            //append profiles group to existing group (if present)
-            if (itemsProfile?.Count > 0)
-            {
-                var grpProfile = itemsProfile.GroupBy(x => new { ID = x.RelatedType.ID });
-                foreach (var item in grpProfile)
-                {
-                    var matches = itemsProfile.Where(x => x.RelatedType.ID.Equals(item.Key.ID)).ToList();
-
-                    var existingGroup = result.Find(x => x.RelatedType.ID.Equals(item.Key.ID));
-                    if (existingGroup == null)
-                    {
-                        result.Add(new RelatedItemsGroupBy()
-                        {
-                            RelatedType = matches.FirstOrDefault()?.RelatedType,
-                            Items = matches
-                        });
-                    }
-                    else
-                    {
-                        existingGroup.Items = existingGroup.Items.Union(matches).ToList();
-                    }
-                }
-            }
-
-            //do some ordering
-            result = result
-                .OrderBy(x => x.RelatedType.DisplayOrder)
-                .ThenBy(x => x.RelatedType.Name).ToList();
-            foreach (var g in result)
-            {
-                g.Items = g.Items
-                    .OrderBy(x => x.DisplayName)
-                    .ThenBy(x => x.Name)
-                    .ThenBy(x => x.Namespace)
-                    .ThenBy(x => x.Version)
-                    .ToList();
-            }
-
-            return result;
         }
 
         protected ImageItemSimpleModel MapToModelImageSimple(MongoDB.Bson.BsonObjectId id, List<ImageItemModel> images)
@@ -503,15 +473,6 @@
                 LookupType = new LookupTypeModel() { EnumValue = match.LookupType.EnumValue, Name = match.Name },
                 Name = match.Name
             };
-        }
-
-
-        public virtual void Dispose()
-        {
-            if (_disposed) return;
-            //clean up resources
-            //set flag so we only run dispose once.
-            _disposed = true;
         }
     }
 }

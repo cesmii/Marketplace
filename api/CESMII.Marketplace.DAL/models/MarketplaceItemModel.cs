@@ -79,7 +79,7 @@
 
         public PublisherModel Publisher { get; set; }
 
-        public bool IsFeatured { get; set; }
+        public bool IsFeatured { get; set; } = false;
 
         /// <summary>
         /// Has this been verified by CESMII
@@ -113,7 +113,7 @@
         public string ccEmail2 { get; set; }
 
         /// <summary>
-        /// This will be an indicator that this item is derived from an external data source. 
+        /// This will be an indicator of where this item is source from. 
         /// The value is determined at runtime in the DAL based on where we get the data from.
         /// </summary>
         public string ExternalSourceId { get; set; }
@@ -137,9 +137,6 @@
 
         public virtual MarketplaceItemAnalyticsModel Analytics { get; set; }
 
-    }
-    public class MarketplaceItemModelWithCursor : MarketplaceItemModel
-    {
         public string Cursor { get; set; }
     }
 
@@ -158,10 +155,7 @@
         /// List of items that are related to this item.
         /// </summary>
         public virtual List<ProfileItemRelatedModel> RelatedProfiles { get; set; }
-    }
 
-    public class AdminMarketplaceItemModelWithCursor : AdminMarketplaceItemModel
-    {
         public string Cursor { get; set; }
     }
 

@@ -5,7 +5,14 @@ namespace CESMII.Marketplace.Api.Shared.Models
 {
     public class MarketplaceSearchModel : PagerFilterSimpleModel
     {
-        public string PageCursors { get; set; }
+        /// <summary>
+        /// These are previous cursors used in the same search setting 
+        /// (ie everything stayed same with search except skip value - page changed)
+        /// This will be cleared out when anything else about search is modified 
+        /// (ie page size, search criteria)
+        /// </summary>
+        public List<SourceSearchCursor> CachedCursors { get; set; }
+
         public List<LookupGroupByModel> Filters { get; set; }
 
         /// <summary>

@@ -13,19 +13,24 @@ using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Data.Entities;
-using CESMII.Marketplace.ExternalSources.Models;
+using CESMII.Marketplace.DAL.ExternalSources.Models;
+using Microsoft.Extensions.Configuration;
+using CESMII.Marketplace.Data.Repositories;
 
-namespace CESMII.Marketplace.ExternalSources.DAL
+namespace CESMII.Marketplace.DAL.ExternalSources
 {
     public class BennitResponseEntity: ExternalAbstractEntity
     {
         public string Id { get; set; }
         public string Headline { get; set; }
+        public string Abstract { get; set; }
         public string Experience { get; set; }
         public string Availability { get; set; }
         public string Locations { get; set; }
         public string IsCoach { get; set; }
-        public string ImagePath { get; set; }
+        public string BannerImage { get; set; }
+        public string PortraitImage { get; set; }
+        public DateTime? Updated_At { get; set; }
         public string OrgName { get; set; }
         public string FK_Org_Id { get; set; }
         //properties not yet in data
@@ -71,32 +76,59 @@ namespace CESMII.Marketplace.ExternalSources.DAL
             search
         };
 
-        private readonly MarketplaceItemConfig _configSmProfile;
+        protected ExternalSourceModel _configSmProfile;
         protected List<ImageItemModel> _images;
 
-        public BennitDAL(
-            ExternalSourceModel config,
+        public BennitDAL(ExternalSourceModel config,
+            IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             IHttpApiFactory httpApiFactory,
-            ConfigUtil configUtil,
+            IConfiguration configuration,
+            IDal<ImageItem, ImageItemModel> dalImages,
+            IDal<LookupItem, LookupItemModel> dalLookup,
+            IMongoRepository<MarketplaceItem> repoMarketplace,
+            IMongoRepository<ProfileItem> repoExternalItem
+            ) : base(dalExternalSource, config, httpApiFactory)
+        {
+            this.Init(dalExternalSource, dalImages);
+        }
+
+        public BennitDAL(
+            IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
+            IHttpApiFactory httpApiFactory,
+            IConfiguration configuration,
+            IDal<ImageItem, ImageItemModel> dalImages,
+            IDal<LookupItem, LookupItemModel> dalLookup,
+            IMongoRepository<MarketplaceItem> repoMarketplace,
+            IMongoRepository<ProfileItem> repoExternalItem
+            ) : base(dalExternalSource, "bennit", httpApiFactory)
+        {
+            this.Init(dalExternalSource, dalImages);
+        }
+
+        protected void Init(
+            IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             IDal<ImageItem, ImageItemModel> dalImages
-            ) : base (config, httpApiFactory)
+            )
         {
             //init some stuff we will use during the mapping methods
-            _configSmProfile = configUtil.MarketplaceSettings.SmProfile;
+            //go get the config for this source
+            _configSmProfile = dalExternalSource.Where(x => x.Code.ToLower().Equals("cloudlib")
+                    , null, null, false, true).Data?.FirstOrDefault();
+            if (_configSmProfile == null)
+            {
+                throw new ArgumentNullException($"External Source Config: {"cloudlib"}");
+            }
 
             //get default images
             _images = dalImages.Where(
                 x => x.ID.Equals(_config.DefaultImageBanner?.ID) ||
                 x.ID.Equals(_config.DefaultImageLandscape?.ID) ||
                 x.ID.Equals(_config.DefaultImagePortrait?.ID) ||
-                x.ID.Equals(_configSmProfile.DefaultImageIdLandscape) ||
-                x.ID.Equals(_configSmProfile.DefaultImageIdPortrait) ||
-                x.ID.Equals(_configSmProfile.DefaultImageIdBanner)
+                x.ID.Equals(_configSmProfile.DefaultImageLandscape.ID) ||
+                x.ID.Equals(_configSmProfile.DefaultImagePortrait.ID) ||
+                x.ID.Equals(_configSmProfile.DefaultImageBanner.ID)
                 //|| x.ID.Equals(_config.DefaultImageIdSquare)
                 , null, null, false, false).Data;
-
-            //set some default settings specific for this external source. 
-            config.Publisher.DisplayViewAllLink = false;
         }
 
         public async Task<MarketplaceItemModel> GetById(string id) {
@@ -121,19 +153,21 @@ namespace CESMII.Marketplace.ExternalSources.DAL
             return MapToModel(entity, true);
         }
 
-        public async Task<List<MarketplaceItemModel>> GetManyById(List<string> ids)
+        public async Task<DALResultWithSource<MarketplaceItemModel>> GetManyById(List<string> ids)
         {
             throw new NotSupportedException();
         }
 
-        public async Task<List<MarketplaceItemModel>> GetAll() {
+        public async Task<DALResultWithSource<MarketplaceItemModel>> GetAll() {
             //setting to very high to get all...this is called by admin which needs full list right now for dropdown selection
-            var result = await this.Where(null, 0, 999); 
-            return result.Data;
+            var result = await this.Where(null, new SearchCursor() { PageIndex = 0, Skip = 0, Take = 999 } ); 
+            return result;
         }
 
-        public async Task<DALResult<MarketplaceItemModel>> Where(string query, int? skip = null, int? take = null, string? startCursor = null, string? endCursor = null, bool noTotalCount = false,
-            List<string> ids = null, List<string> processes = null, List<string> verticals = null)
+        public async Task<DALResultWithSource<MarketplaceItemModel>> Where(string query,
+            SearchCursor cursor, 
+            List<string> ids = null, List<string> processes = null, List<string> verticals = null,
+            List<string> exclude = null)
         {
             /*
             //possible future usage
@@ -158,45 +192,64 @@ namespace CESMII.Marketplace.ExternalSources.DAL
             if (!string.IsNullOrEmpty(query)) keywords.Add(query);
             */
 
-            if (string.IsNullOrEmpty(query)) query = "";
+            //business rule - do not return results if query value is not populated. 
+            //they do not want to return all items.
+            if (string.IsNullOrEmpty(query))
+            {
+                cursor.TotalCount = null;
+                return new DALResultWithSource<MarketplaceItemModel>()
+                { Count = 0, Data = new List<MarketplaceItemModel>(), SourceId = _config.ID, Cursor = cursor };
+            }
+            //if (string.IsNullOrEmpty(query)) query = "";
 
             //for now, just support query value. still pass in the other stuff so 
             //we have it for future enhancements. 
             string url = _config.Urls.Find(x => x.Key.ToLower().Equals("search")).Value;
             if (string.IsNullOrEmpty(url)) throw new InvalidOperationException($"External Source|Url 'GetById' is not properly configured.");
 
-            MultipartFormDataContent formData = PrepareFormData(SearchModeEnum.search, query);
+            MultipartFormDataContent formData = PrepareFormData(SearchModeEnum.search, query, cursor.Skip, cursor.Take);
             var response = await base.ExecuteApiCall(PrepareApiConfig(url, formData));
             if (!response.IsSuccess) return null;
 
             //check for error response from server
             if (IsErrorResponse(response.Data))
             {
-                return new DALResult<MarketplaceItemModel>()
-                { Count = 0, Data = new List<MarketplaceItemModel>() };
+                cursor.TotalCount = null;
+                return new DALResultWithSource<MarketplaceItemModel>()
+                { Count = 0, Data = new List<MarketplaceItemModel>(), SourceId = _config.ID, Cursor = cursor };
             }
 
             //no error response, proceed
             var entities = JsonConvert.DeserializeObject<List<BennitResponseEntity>>(response.Data);
 
             //map the data to the final result
-            var result = new DALResult<MarketplaceItemModel>
+            cursor.TotalCount = entities.Count;  //TBD - get total count not just returned count
+            var result = new DALResultWithSource<MarketplaceItemModel>
             {
                 Count = entities.Count,
                 Data = MapToModels(entities, false),
-                SummaryData = null
+                SummaryData = null, 
+                SourceId = _config.ID,
+                Cursor = cursor
             };
 
             return result;
         }
 
-        private MultipartFormDataContent PrepareFormData(SearchModeEnum mode, string value)
+        public async Task<ProfileItemExportModel> Export(string id)
+        {
+            throw new NotSupportedException();
+        }
+
+        private MultipartFormDataContent PrepareFormData(SearchModeEnum mode, string value, int? skip = null, int? take = null)
         {
             var formData = new MultipartFormDataContent();
             //case sensitive
             formData.Add(new StringContent(_config.AccessToken), "partnerkey");
             formData.Add(new StringContent(mode.ToString()), "query");
             formData.Add(new StringContent(value), "value");
+            if (skip.HasValue) formData.Add(new StringContent(skip.ToString()), "skip");
+            if (take.HasValue) formData.Add(new StringContent(take.ToString()), "take");
             return formData;
         }
 
@@ -243,13 +296,13 @@ namespace CESMII.Marketplace.ExternalSources.DAL
                     //ensure this value is always without spaces and is lowercase. 
                     Name = entity.Headline.ToLower().Trim().Replace(" ", "-").Replace("_", "-"),
                     DisplayName = entity.Headline,
-                    Abstract = entity.Experience,   //TBD - trim this down to first 300 characters
+                    Abstract = entity.Abstract,
                     Description = string.IsNullOrEmpty(entity.Experience) ? "" : $"<p>{entity.Experience}</p>",
                     Type = _config.ItemType,
                     AuthorId = null,
                     Created = new DateTime(0),
                     Updated = new DateTime(0),
-                    PublishDate = null,
+                    PublishDate = entity.Updated_At,
                     Version = null,
                     //Type = new LookupItemModel() { ID = entity.TypeId, Name = entity.Type.Name }
                     MetaTags = entity.Skills != null ? entity.Skills.Select(x => x.Skill_Name).ToList() : null,
@@ -261,18 +314,19 @@ namespace CESMII.Marketplace.ExternalSources.DAL
                     //Status = MapToModelLookupItem(entity.StatusId, _lookupItemsAll.Where(x => x.LookupType.EnumValue.Equals(LookupTypeEnum.MarketplaceStatus)).ToList()),
                     //Analytics = MapToModelMarketplaceItemAnalyticsData(entity.ID, _marketplaceItemAnalyticsAll),
                     Publisher = new PublisherModel() {ID = _config.Publisher.ID, Verified = true, Description = _config.Publisher.Description,
-                        CompanyUrl = _config.Publisher.CompanyUrl, Name = _config.Publisher.Name, DisplayName = _config.Publisher.DisplayName
+                        CompanyUrl = _config.Publisher.CompanyUrl, Name = _config.Publisher.Name, DisplayName = _config.Publisher.DisplayName,
+                        DisplayViewAllLink = false
                     },
                     IsActive = true,
                     IsFeatured = false,
                     //populate with values from source if present
-                    ImagePortrait = MapToModelImage( entity.ImagePath, $"{entity.Headline.Replace(" ","-")} - portrait",
+                    ImagePortrait = MapToModelImage( entity.PortraitImage, $"{entity.Headline.Replace(" ","-")} - portrait",
                         _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImagePortrait?.ID))),
-                    ImageBanner = MapToModelImage(entity.ImagePath, $"{entity.Headline.Replace(" ", "-")} - banner", 
+                    ImageBanner = MapToModelImage(entity.BannerImage, $"{entity.Headline.Replace(" ", "-")} - banner", 
                         _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageBanner?.ID))),
-                    ImageLandscape = MapToModelImage(entity.ImagePath, $"{entity.Headline.Replace(" ", "-")} - landscape",
+                    ImageLandscape = MapToModelImage(entity.BannerImage, $"{entity.Headline.Replace(" ", "-")} - landscape",
                         _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageLandscape?.ID))),
-                    ExternalSourceId = _config.Name  //we need to ensure this is unique
+                    ExternalSourceId = _config.ID  //we need to ensure this is unique
                 };
                 //get additional data under certain scenarios
                 if (verbose)
@@ -332,8 +386,8 @@ namespace CESMII.Marketplace.ExternalSources.DAL
                     Name = x.Name,
                     //Type = new LookupItemModel() {  }, // x.Type,
                     Version = null,
-                    ImagePortrait = _images.FirstOrDefault(x => x.ID.Equals(_configSmProfile.DefaultImageIdPortrait)),
-                    ImageLandscape = _images.FirstOrDefault(x => x.ID.Equals(_configSmProfile.DefaultImageIdLandscape)),
+                    ImagePortrait = _images.FirstOrDefault(x => x.ID.Equals(_configSmProfile.DefaultImagePortrait.ID)),
+                    ImageLandscape = _images.FirstOrDefault(x => x.ID.Equals(_configSmProfile.DefaultImageLandscape.ID)),
                     //assumes only one related item per type
                     //TBD - move this to appSettings.
                     RelatedType = type
@@ -356,21 +410,12 @@ namespace CESMII.Marketplace.ExternalSources.DAL
                 Name = x.Name,
                 //Type = new LookupItemModel() {  }, // x.Type,
                 Version = null,
-                ImagePortrait = _images.FirstOrDefault(x => x.ID.Equals(_configSmProfile.DefaultImageIdPortrait)),
-                ImageLandscape = _images.FirstOrDefault(x => x.ID.Equals(_configSmProfile.DefaultImageIdLandscape)),
+                ImagePortrait = _images.FirstOrDefault(x => x.ID.Equals(_configSmProfile.DefaultImagePortrait.ID)),
+                ImageLandscape = _images.FirstOrDefault(x => x.ID.Equals(_configSmProfile.DefaultImageLandscape.ID)),
                 //assumes only one related item per type
                 //TBD - move this to appSettings.
                 RelatedType = type
             }).ToList();
-        }
-
-
-        public virtual void Dispose()
-        {
-            if (_disposed) return;
-            //clean up resources
-            //set flag so we only run dispose once.
-            _disposed = true;
         }
     }
 }

@@ -7,7 +7,7 @@ import { AppSettings } from '../utils/appsettings';
 import { useLoginStatus } from '../components/OnLoginHandler';
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
-import { cleanFileName, generateLogMessageString, getImageUrl, getMarketplaceIconName, scrollTopScreen } from '../utils/UtilityService'
+import { cleanFileName, generateLogMessageString, getImageUrl, getMarketplaceIconName, getRandomArrayIndexes, scrollTopScreen } from '../utils/UtilityService'
 import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
 import { MarketplaceRelatedItems} from '../services/MarketplaceService';
 
@@ -131,8 +131,25 @@ function ExternalSourceEntity() {
         )
     }
 
-    const renderSolutionDetails = () => {
+    const renderMetaTags = (items, limit) => {
+        if (items == null) return;
 
+        if (limit == null) limit = items.length;
+        const randomIndexes = getRandomArrayIndexes(items, limit);
+        if (randomIndexes == null || randomIndexes.length === 0) return;
+        return (
+            randomIndexes.map((i) => {
+                return (
+                    <span key={items[i]} className="metatag badge meta border">
+                        {items[i]}
+                    </span>
+                )
+            })
+        )
+    }
+
+    const renderSolutionDetails = () => {
+        const showPub = false;
         return (
             <>
                 <div className="row" >
@@ -140,9 +157,16 @@ function ExternalSourceEntity() {
                         <div className="mb-3" dangerouslySetInnerHTML={{ __html: item.description }} ></div>
                     </div>
                 </div>
-                {item.publisher?.displayName &&
+                {item.metaTags != null &&
+                    <div className="row pt-2 no-gutters" >
+                        <div className="col-sm-12">
+                            {renderMetaTags(item.metaTags, null)}
+                        </div>
+                    </div>
+                }
+                {(showPub && item.publisher?.displayName) &&
                     <div className="row" >
-                        <div className="col-sm-8">
+                        <div className="col-sm-12">
                             <span className="m-0 mr-2 mb-2 mb-md-0">
                                 <b className="mr-1" >Published By:</b>
                                 <br className="d-block d-md-none" />

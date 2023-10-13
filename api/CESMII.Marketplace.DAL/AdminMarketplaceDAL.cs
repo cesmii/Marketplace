@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
 
     using CESMII.Marketplace.DAL.Models;
+    using CESMII.Marketplace.DAL.ExternalSources;
     using CESMII.Marketplace.Data.Entities;
     using CESMII.Marketplace.Data.Repositories;
     using CESMII.Marketplace.Common;
@@ -28,7 +29,7 @@
         protected List<Publisher> _publishersAll;
         protected IMongoRepository<ImageItemSimple> _repoImages;
         protected List<ImageItemSimple> _imagesAll;
-        protected readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _cloudLibDAL;
+        protected readonly IExternalDAL<MarketplaceItemModel> _cloudLibDAL;
 
         //default type - use if none assigned yet.
         private readonly MongoDB.Bson.BsonObjectId _smItemTypeIdDefault;
@@ -37,7 +38,7 @@
             IMongoRepository<LookupItem> repoLookup, 
             IMongoRepository<Publisher> repoPublisher, 
             IMongoRepository<ImageItemSimple> repoImages,
-            ICloudLibDAL<MarketplaceItemModelWithCursor> cloudLibDAL,
+            IExternalDAL<MarketplaceItemModel> cloudLibDAL,
             ConfigUtil configUtil
             ) : base(repo)
         {
@@ -333,7 +334,7 @@
             if (items == null) return new List<ProfileItemRelatedModel>();
 
             //get the supplemental information that is associated with the related items
-            var matches = _cloudLibDAL.GetManyById(items.Select(x => x.ProfileId).ToList()).Result;
+            var matches = _cloudLibDAL.GetManyById(items.Select(x => x.ExternalId).ToList()).Result.Data;
 
             return !matches.Any() ? new List<ProfileItemRelatedModel>() :
                 matches.Select(x => new ProfileItemRelatedModel
@@ -369,10 +370,10 @@
             List<RelatedProfileItem> relatedItems, string id)
         {
             if (relatedItems == null) return null;
-            if (relatedItems.Find(x => x.ProfileId.Equals(id)) == null) return null;
+            if (relatedItems.Find(x => x.ExternalId.Equals(id)) == null) return null;
 
             return MapToModelLookupItem(
-                relatedItems.Find(x => x.ProfileId.Equals(id)).RelatedTypeId,
+                relatedItems.Find(x => x.ExternalId.Equals(id)).RelatedTypeId,
                 _lookupItemsAll.Where(x => x.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList());
         }
 
@@ -424,7 +425,7 @@
                 .Select(x => new RelatedProfileItem()
                 {
                     //ID = x.ID,
-                    ProfileId = x.RelatedId,
+                    ExternalId = x.RelatedId,
                     RelatedTypeId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedType.ID)),
                 }).ToList();
 

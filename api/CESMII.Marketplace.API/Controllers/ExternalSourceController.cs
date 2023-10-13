@@ -14,18 +14,19 @@ using CESMII.Marketplace.Api.Shared.Extensions;
 using CESMII.Marketplace.Api.Shared.Controllers;
 using CESMII.Marketplace.Api.Shared.Models;
 using CESMII.Common.SelfServiceSignUp.Services;
-using CESMII.Marketplace.ExternalSources.Models;
+using CESMII.Marketplace.DAL.ExternalSources;
+using CESMII.Marketplace.DAL.ExternalSources.Models;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
     [Route("api/[controller]")]
     public class ExternalSourceController : BaseController<ExternalSourceController>
     {
-        private readonly ExternalSources.IExternalSourceFactory<MarketplaceItemModel> _sourceFactory;
+        private readonly IExternalSourceFactory<MarketplaceItemModel> _sourceFactory;
         private readonly IDal<ExternalSource, ExternalSourceModel> _dalExternalSource;
 
         public ExternalSourceController(
-            ExternalSources.IExternalSourceFactory<MarketplaceItemModel> sourceFactory,
+            IExternalSourceFactory<MarketplaceItemModel> sourceFactory,
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             UserDAL dalUser,
             ConfigUtil config, ILogger<ExternalSourceController> logger)
@@ -49,7 +50,7 @@ namespace CESMII.Marketplace.Api.Controllers
             //get external source config, then instantiate object using info in the config by 
             //calling external source factory.
             //get by name - we have to ensure our external sources config data maintains a unique name.
-            var sources = _dalExternalSource.Where(x => x.Name.ToLower().Equals(model.SourceId.ToLower()), null, null, false, false).Data;
+            var sources = _dalExternalSource.Where(x => x.ID.ToLower().Equals(model.SourceId.ToLower()), null, null, false, false).Data;
             if (sources == null || sources.Count == 0)
             {
                 _logger.LogWarning($"ExternalSourceController|GetByID|Invalid source : {model.SourceId}");

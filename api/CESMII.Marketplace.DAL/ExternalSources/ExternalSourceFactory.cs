@@ -9,15 +9,16 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 
-using CESMII.Marketplace.ExternalSources.Models;
+using CESMII.Marketplace.DAL.ExternalSources.Models;
 using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Marketplace.Common;
-using CESMII.Marketplace.ExternalSources.DAL;
+using CESMII.Marketplace.DAL.ExternalSources;
+using CESMII.Marketplace.Data.Repositories;
 
-namespace CESMII.Marketplace.ExternalSources
+namespace CESMII.Marketplace.DAL.ExternalSources
 {
     public interface IExternalSourceFactory<TModel> where TModel : AbstractModel
     {
@@ -59,14 +60,23 @@ namespace CESMII.Marketplace.ExternalSources
                 //initialize scoped services for DI
                 var logger = scope.ServiceProvider.GetService<ILogger<IExternalDAL<TModel>>>();
                 var httpFactory = scope.ServiceProvider.GetService<IHttpApiFactory>();
-                var configUtil = scope.ServiceProvider.GetService<ConfigUtil>();
-                //var dalLookup = scope.ServiceProvider.GetService<IDal<LookupItem, LookupItemModel>>();
                 var dalImages = scope.ServiceProvider.GetService<IDal<ImageItem, ImageItemModel>>();
+                var dalLookup = scope.ServiceProvider.GetService<IDal<LookupItem, LookupItemModel>>();
+                var repoMarketplace = scope.ServiceProvider.GetService<IMongoRepository<MarketplaceItem>>();
+                var repoExternalItem = scope.ServiceProvider.GetService<IMongoRepository<ProfileItem>>();
 
                 try
                 {
                     //instantiate external dal class
-                    return InstantiateItem(model.TypeName, model, httpFactory, configUtil, dalImages);
+                    return InstantiateItem(model.TypeName, 
+                        model, 
+                        _dalExternalSource, 
+                        httpFactory, 
+                        _configuration, 
+                        dalImages, 
+                        dalLookup, 
+                        repoMarketplace, 
+                        repoExternalItem);
                 }
                 catch (Exception e)
                 {

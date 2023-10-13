@@ -11,6 +11,7 @@ using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Api.Shared.Models;
 using CESMII.Marketplace.Api.Shared.Controllers;
 using CESMII.Marketplace.DAL;
+using CESMII.Marketplace.DAL.ExternalSources;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.Api.Shared.Utils;
@@ -23,14 +24,14 @@ namespace CESMII.Marketplace.Api.Controllers
     {
         private readonly IDal<MarketplaceItem, MarketplaceItemModel> _dalMarketplace;
         private readonly IDal<Publisher, PublisherModel> _dalPublisher;
-        private readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _dalCloudLib;
+        private readonly IExternalDAL<MarketplaceItemModel> _dalCloudLib;
         private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
 
         public SystemController(ConfigUtil config, ILogger<SystemController> logger
             ,UserDAL dalUser
             ,IDal<MarketplaceItem, MarketplaceItemModel> dalMarketplace
             ,IDal<Publisher, PublisherModel> dalPublisher
-            ,ICloudLibDAL<MarketplaceItemModelWithCursor> dalCloudLib
+            , IExternalDAL<MarketplaceItemModel> dalCloudLib
             ,IDal<LookupItem, LookupItemModel> dalLookup
             )
             : base(config, logger, dalUser)
@@ -88,7 +89,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 Type = itm.Type.Code,
                 Updated = itm.Updated.HasValue ? itm.Updated.Value : itm.Created
             });
-            var profiles = (await _dalCloudLib.GetAll()).Select(itm => new SiteMapModel
+            var profiles = (await _dalCloudLib.GetAll()).Data.Select(itm => new SiteMapModel
             {
                 ID = itm.ID,
                 Name = itm.Name,

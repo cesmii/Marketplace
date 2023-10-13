@@ -1,4 +1,4 @@
-﻿namespace CESMII.Marketplace.ExternalSources.Models
+﻿namespace CESMII.Marketplace.DAL.ExternalSources.Models
 {
     public class ExternalSourceRequestModel
     {

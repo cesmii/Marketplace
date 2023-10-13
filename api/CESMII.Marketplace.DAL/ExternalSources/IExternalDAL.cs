@@ -4,22 +4,29 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 using CESMII.Marketplace.DAL.Models;
-using CESMII.Marketplace.ExternalSources.Models;
+using CESMII.Marketplace.DAL.ExternalSources.Models;
 
-namespace CESMII.Marketplace.ExternalSources.DAL
+namespace CESMII.Marketplace.DAL.ExternalSources
 {
     public interface IExternalDAL<TModel> : IDisposable where TModel : AbstractModel 
     {
         Task<TModel> GetById(string id);
 
         /// <summary>
+        /// Download the nodeset xml portion of the CloudLib profile
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<ProfileItemExportModel> Export(string id);
+
+        /// <summary>
         /// Get a list of items by passing a list of ids to requestor.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        Task<List<TModel>> GetManyById(List<string> id);
+        Task<DALResultWithSource<TModel>> GetManyById(List<string> id);
 
-        Task<List<TModel>> GetAll();
+        Task<DALResultWithSource<TModel>> GetAll();
 
         /// <summary>
         /// Query is from a free form input box. - This will be appended to a single keywords list
@@ -34,7 +41,7 @@ namespace CESMII.Marketplace.ExternalSources.DAL
         /// <param name="processes"></param>
         /// <param name="verticals"></param>
         /// <returns></returns>
-        Task<DALResult<TModel>> Where(string query, int? skip =null, int? take = null, string startCursor = null, string endCursor = null, bool noTotalCount = false,
-            List<string> ids = null, List<string> processes = null, List<string> verticals = null);
+        Task<DALResultWithSource<TModel>> Where(string query, SearchCursor cursor, 
+            List<string> ids = null, List<string> processes = null, List<string> verticals = null, List<string> exclude = null);
     }
 }

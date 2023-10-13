@@ -20,10 +20,10 @@ namespace CESMII.Marketplace.Api.Controllers
     public class AdminProfileController : BaseController<AdminProfileController>
     {
         //private readonly IDal<MarketplaceItem, AdminMarketplaceItemModel> _dal;
-        private readonly IAdminCloudLibDAL<AdminMarketplaceItemModelWithCursor> _dal;
+        private readonly IAdminCloudLibDAL<AdminMarketplaceItemModel> _dal;
         private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
 
-        public AdminProfileController(IAdminCloudLibDAL<AdminMarketplaceItemModelWithCursor> dal,
+        public AdminProfileController(IAdminCloudLibDAL<AdminMarketplaceItemModel> dal,
             IDal<LookupItem, LookupItemModel> dalLookup,
             UserDAL dalUser,
             ConfigUtil config, ILogger<AdminProfileController> logger)
@@ -35,11 +35,11 @@ namespace CESMII.Marketplace.Api.Controllers
 
         #region Admin UI
         [HttpPost, Route("init")]
-        [ProducesResponseType(200, Type = typeof(AdminMarketplaceItemModelWithCursor))]
+        [ProducesResponseType(200, Type = typeof(AdminMarketplaceItemModel))]
         [ProducesResponseType(400)]
         public IActionResult Init()
         {
-            var result = new AdminMarketplaceItemModelWithCursor();
+            var result = new AdminMarketplaceItemModel();
 
             //pre-populate list of look up items for industry verts and categories
             //TBD - for now, we don't use this. uncomment this if we start capturing profile's verticals, processes
@@ -77,7 +77,7 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("GetByID")]
-        [ProducesResponseType(200, Type = typeof(AdminMarketplaceItemModelWithCursor))]
+        [ProducesResponseType(200, Type = typeof(AdminMarketplaceItemModel))]
         [ProducesResponseType(400)]
         public async Task<IActionResult> GetByID([FromBody] IdStringModel model)
         {
@@ -104,7 +104,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <returns></returns>
         [HttpPost, Route("Upsert")]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
-        public async Task<IActionResult> Upsert([FromBody] AdminMarketplaceItemModelWithCursor model)
+        public async Task<IActionResult> Upsert([FromBody] AdminMarketplaceItemModel model)
         {
             if (model == null)
             {
