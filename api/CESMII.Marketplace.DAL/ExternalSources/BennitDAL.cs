@@ -295,7 +295,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                     ID = entity.Id,
                     //ensure this value is always without spaces and is lowercase. 
                     Name = entity.Headline.ToLower().Trim().Replace(" ", "-").Replace("_", "-"),
-                    DisplayName = entity.Headline,
+                    DisplayName = entity.Headline?.Trim(),
                     Abstract = entity.Abstract,
                     Description = string.IsNullOrEmpty(entity.Experience) ? "" : $"<p>{entity.Experience}</p>",
                     Type = _config.ItemType,
