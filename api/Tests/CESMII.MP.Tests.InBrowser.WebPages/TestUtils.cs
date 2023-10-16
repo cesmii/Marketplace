@@ -24,7 +24,7 @@ namespace Marketplace_InBrowser_Tests
         {
             ChromeOptions options = new ChromeOptions();
             options.AddArguments("--no-sandbox");
-            options.AddArguments("--headless");
+            //options.AddArguments("--headless");
             options.AddArguments("--disable-dev-shm-usage");
             options.AddArguments("--window-size=1920,1080");
             options.AddArguments("--whitelisted-ips=''");     // Allow any connections

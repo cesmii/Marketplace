@@ -15,10 +15,12 @@
         public IJavaScriptExecutor js { get; private set; }
         public TestSuite_LibraryTextQuery()
         {
+            Console.WriteLine("Entering Function TestSuite_LibraryTextQuery()");
             driver = TestUtils.CreateChromeDriver();
             js = (IJavaScriptExecutor)driver;
             driver.Manage().Window.Maximize();
             string strStartUrl = TestUtils.GetStartUrl();
+            Console.WriteLine($"TestSuite_LibraryTextQuery() -- strStartUrl:{strStartUrl}");
             driver.Navigate().GoToUrl(strStartUrl);
             vars = new Dictionary<String, Object>();
         }
@@ -30,10 +32,10 @@
         }
 
 #pragma warning disable xUnit1026 // Theory methods should use all of their parameters
-        //[Theory]
-        //[MemberData(nameof(Marketplace_TestData_TextQuery_Vertical.MyData), MemberType = typeof(Marketplace_TestData_TextQuery_Vertical))]
-        //[MemberData(nameof(Marketplace_TestData_TextQuery_Category.MyData), MemberType = typeof(Marketplace_TestData_TextQuery_Category))]
-        //[MemberData(nameof(Marketplace_TestData_TextQuery_Publisher.MyData), MemberType = typeof(Marketplace_TestData_TextQuery_Publisher))]
+        [Theory]
+        [MemberData(nameof(Marketplace_TestData_TextQuery_Vertical.MyData), MemberType = typeof(Marketplace_TestData_TextQuery_Vertical))]
+        [MemberData(nameof(Marketplace_TestData_TextQuery_Category.MyData), MemberType = typeof(Marketplace_TestData_TextQuery_Category))]
+        [MemberData(nameof(Marketplace_TestData_TextQuery_Publisher.MyData), MemberType = typeof(Marketplace_TestData_TextQuery_Publisher))]
         public void CorrectItemCount_On_EnterItemNameIntoQueryBox(string strTestType, string strWebPageGroup, string strItemName, int iItemIndex, int cExpected, int cMaxItems)
         {
             // Validate incoming parameters

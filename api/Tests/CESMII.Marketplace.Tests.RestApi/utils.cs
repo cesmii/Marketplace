@@ -10,8 +10,9 @@ namespace CESMII.Marketplace.MongoDB
     {
         public static string GetConnection(string strVariable)
         {
+            string strDefault = "http://localhost:5000/api";
             var c = Environment.GetEnvironmentVariable(strVariable);
-            return (c == null) ? "" : c;
+            return (c == null) ? strDefault : c;
         }
 
     }

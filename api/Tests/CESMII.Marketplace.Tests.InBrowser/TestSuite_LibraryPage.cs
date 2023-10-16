@@ -1,4 +1,4 @@
-namespace MyTestForMarketplace
+namespace Marketplace_InBrowser_Tests
 {
     using Marketplace_InBrowser_Tests;
     using OpenQA.Selenium;
@@ -17,7 +17,7 @@ namespace MyTestForMarketplace
             driver = TestUtils.CreateChromeDriver();
             js = (IJavaScriptExecutor)driver;
             driver.Manage().Window.Maximize();
-            string strStartUrl = TestUtils.GetStartUrl();
+            string? strStartUrl = TestUtils.GetStartUrl();
             driver.Navigate().GoToUrl(strStartUrl);
             vars = new Dictionary<String, Object>();
             System.Threading.Thread.Sleep(500);

@@ -32,10 +32,10 @@ namespace Marketplace_InBrowser_Tests
             driver.Quit();
         }
 
-        //[Theory]
-        //[MemberData(nameof(Marketplace_TestData_Checkbox_Vertical.MyData), MemberType = typeof(Marketplace_TestData_Checkbox_Vertical))]
-        //[MemberData(nameof(Marketplace_TestData_Checkbox_Category.MyData), MemberType = typeof(Marketplace_TestData_Checkbox_Category))]
-        //[MemberData(nameof(Marketplace_TestData_Checkbox_Publisher.MyData), MemberType = typeof(Marketplace_TestData_Checkbox_Publisher))]
+        [Theory]
+        [MemberData(nameof(Marketplace_TestData_Checkbox_Vertical.MyData), MemberType = typeof(Marketplace_TestData_Checkbox_Vertical))]
+        [MemberData(nameof(Marketplace_TestData_Checkbox_Category.MyData), MemberType = typeof(Marketplace_TestData_Checkbox_Category))]
+        [MemberData(nameof(Marketplace_TestData_Checkbox_Publisher.MyData), MemberType = typeof(Marketplace_TestData_Checkbox_Publisher))]
         public void CorrectItemCount_On_ClickOnCheckbox(string strTestType, string strWebPageGroup, string strExpectedItemName, int iItemIndex, int cExpected, int cMaxItems)
         {
             // Validate incoming parameters

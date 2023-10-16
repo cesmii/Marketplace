@@ -209,7 +209,7 @@ jobs:
     - name: 17__NodeJS - Create and Start Docker Container for frontend
       run: |
         docker build . -t cesmii-marketplace/node-web-app
-        docker run -d --name=MyNodeJS -p 3000:3000 --network mysubnet1  cesmii-marketplace/node-web-app 
+        docker run -d --name=MyNodeJS -p 3000:3000 --network mysubnet1  -e "REACT_APP_BASE_API_URL=${{env.MARKETPLACE_BRIDGE_CONNECTION}}/api" cesmii-marketplace/node-web-app npm run-script start-in-browser-test
       working-directory: ./frontend
 
     - name: 18__NodeJS - Query Bridge Connection to NodeJS (FrontEnd)
@@ -242,8 +242,9 @@ jobs:
         docker exec -i MySelenium sudo apt-get install -y dotnet-sdk-6.0
 
     - name: 23__In-Browser Testing - Run Test on project (${{env.TEST1_PROJECT_ABSOLUTE}})
-      run: docker exec -i MySelenium sudo dotnet test -e NODEJS=${{env.NODEJS_BRIDGE_CONNECTION}} ${{env.TEST1_PROJECT_ABSOLUTE}}
-
+      run: |
+          docker exec -i MySelenium sudo dotnet test -e NODEJS=${{env.NODEJS_BRIDGE_CONNECTION}} /src/api/Tests/CESMII.MP.Tests.InBrowser.WebPages/CESMII.MP.Tests.InBrowser.WebPages.csproj ;
+          docker exec -i MySelenium sudo dotnet test -e NODEJS=${{env.NODEJS_BRIDGE_CONNECTION}} ${{env.TEST1_PROJECT_ABSOLUTE}} ;
 
 
     # # Testing -- Call into Marketplace Rest Api (call from inside container) - On Github
