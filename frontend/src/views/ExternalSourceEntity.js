@@ -7,11 +7,14 @@ import { AppSettings } from '../utils/appsettings';
 import { useLoginStatus } from '../components/OnLoginHandler';
 import { useLoadingContext, UpdateRecentFileList } from "../components/contexts/LoadingContext";
 import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
-import { cleanFileName, generateLogMessageString, getImageUrl, getMarketplaceIconName, getRandomArrayIndexes, scrollTopScreen } from '../utils/UtilityService'
+import { generateLogMessageString, getImageUrl, getMarketplaceIconName, getRandomArrayIndexes, scrollTopScreen } from '../utils/UtilityService'
 import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
 import { MarketplaceRelatedItems} from '../services/MarketplaceService';
 
 import './styles/MarketplaceEntity.scss';
+import { getViewByPublisherUrl } from '../services/PublisherService';
+import { SvgVisibilityIcon } from '../components/SVGIcon';
+import color from '../components/Constants';
 
 const CLASS_NAME = "ExternalSourceEntity";
 
@@ -149,7 +152,6 @@ function ExternalSourceEntity() {
     }
 
     const renderSolutionDetails = () => {
-        const showPub = false;
         return (
             <>
                 <div className="row" >
@@ -157,21 +159,27 @@ function ExternalSourceEntity() {
                         <div className="mb-3" dangerouslySetInnerHTML={{ __html: item.description }} ></div>
                     </div>
                 </div>
-                {item.metaTags != null &&
-                    <div className="row pt-2 no-gutters" >
-                        <div className="col-sm-12">
-                            {renderMetaTags(item.metaTags, null)}
-                        </div>
-                    </div>
-                }
-                {(showPub && item.publisher?.displayName) &&
+                {(item.publisher?.displayName != null) &&
                     <div className="row" >
                         <div className="col-sm-12">
                             <span className="m-0 mr-2 mb-2 mb-md-0">
                                 <b className="mr-1" >Published By:</b>
                                 <br className="d-block d-md-none" />
-                                {item.publisher.displayName}
+                                <a href={`/publisher/${item.publisher.name}`} >{item.publisher.displayName}</a>
                             </span>
+                            {item.publisher?.allowFilterBy &&
+                                <span className="m-0 mr-2 my-2 mb-md-0 d-flex align-items-center">
+                                    <SvgVisibilityIcon fill={color.link} />
+                                    <a href={getViewByPublisherUrl(loadingProps, item.publisher)} >View all by this publisher</a>
+                                </span>
+                            }
+                        </div>
+                    </div>
+                }
+                {item.metaTags != null &&
+                    <div className="row pt-3 no-gutters" >
+                        <div className="col-sm-12">
+                            {renderMetaTags(item.metaTags, null)}
                         </div>
                     </div>
                 }

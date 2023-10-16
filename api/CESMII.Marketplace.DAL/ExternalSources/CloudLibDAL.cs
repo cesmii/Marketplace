@@ -73,9 +73,6 @@
             //    Microsoft.Extensions.Logging.LoggerFactoryExtensions.CreateLogger<CloudLibWrapper>();
             _cloudLib = new CloudLibWrapper(options, null); //logger not used in CloudLibWrapper
 
-            //set some default settings specific for this external source. 
-            _config.Publisher.DisplayViewAllLink = false;
-
             //init objects to use for related items
             _repoExternalItem = repoExternalItem;
             _repoMarketplace = repoMarketplace;

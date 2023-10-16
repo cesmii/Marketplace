@@ -331,6 +331,7 @@ function AdminPubisherEntity() {
             case "name":
                 item[e.target.id] = e.target.value.toLowerCase();
                 break;
+            case "allowFilterBy":
             case "verified":
                 item[e.target.id] = e.target.checked;
                 break;
@@ -487,11 +488,22 @@ function AdminPubisherEntity() {
                     </div>
                 </div>
                 <div className="row mt-2">
-                    <div className="col-sm-6 col-lg-4">
+                    <div className="col-12">
                         <div className="d-flex h-100">
                             <Form.Group>
                                 <Form.Check className="align-self-end" type="checkbox" id="verified" label="Verified" checked={item.verified}
                                     onChange={onChange} readOnly={isReadOnly} />
+                            </Form.Group>
+                        </div>
+                    </div>
+                </div>
+                <div className="row mt-2">
+                    <div className="col-12">
+                        <div className="d-flex h-100">
+                            <Form.Group>
+                                <Form.Check className="align-self-end" type="checkbox" id="allowFilterBy" label="Allow Filter By" checked={item.allowFilterBy}
+                                    onChange={onChange} readOnly={isReadOnly} />
+                                <span className="small text-muted" >Unchecking 'Allow Filter By' will hide this from being a search filter. This is not common.</span>
                             </Form.Group>
                         </div>
                     </div>

@@ -13,12 +13,13 @@ import MarketplaceItemEntityHeader from './shared/MarketplaceItemEntityHeader';
 import MarketplaceEntitySidebar from './shared/MarketplaceEntitySidebar';
 
 import { convertHtmlToString, generateLogMessageString, getImageUrl, getMarketplaceIconName } from '../utils/UtilityService'
-import { clearSearchCriteria, generateSearchQueryString, MarketplaceRelatedItems, toggleSearchFilterSelected } from '../services/MarketplaceService';
+import { MarketplaceRelatedItems, } from '../services/MarketplaceService';
 import { renderSchemaOrgContentMarketplaceItem } from '../utils/schemaOrgUtil';
 import { SvgVisibilityIcon } from '../components/SVGIcon';
 
 import color from '../components/Constants';
 import './styles/MarketplaceEntity.scss';
+import { getViewByPublisherUrl } from '../services/PublisherService';
 
 const CLASS_NAME = "MarketplaceEntity";
 
@@ -112,18 +113,6 @@ function MarketplaceEntity() {
     //    setIsFavorite(revisedList != null && revisedList.findIndex(x => x.url === history.location.pathname) > -1);
     //};
 
-    const getViewByPublisherUrl = () => {
-
-        //clear out the selected, the query val
-        var criteria = clearSearchCriteria(loadingProps.searchCriteria);
-
-        //loop through filters and their items and find the publisher id
-        toggleSearchFilterSelected(criteria, item.publisher.id);
-
-        //return url that will filter by publisher
-        return `/library?${generateSearchQueryString(criteria, 1)}`;
-    };
-
     const onViewSpecifications = (e) => {
         e.preventDefault();
         window.scrollTo({ top: (_scrollToSpecs.current.getBoundingClientRect().y - 80), behavior: 'smooth' });
@@ -190,7 +179,7 @@ function MarketplaceEntity() {
                             <a href={`/publisher/${item.publisher.name}`} >{item.publisher.displayName}</a></span>
                         <span className="m-0 mr-2 my-2 mb-md-0 d-flex align-items-center">
                             <SvgVisibilityIcon fill={color.link} />
-                            <a href={getViewByPublisherUrl()} >View all by this publisher</a>
+                            <a href={getViewByPublisherUrl(loadingProps, item.publisher)} >View all by this publisher</a>
                         </span>
                     </div>
                     {(item.publisher.socialMediaLinks != null && item.publisher.socialMediaLinks.length > 0) &&

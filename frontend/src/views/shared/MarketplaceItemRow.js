@@ -2,11 +2,12 @@ import React from 'react'
 import { useHistory } from 'react-router-dom'
 import { Button } from 'react-bootstrap'
 
-import { formatItemPublishDate, getImageUrl, getRandomArrayIndexes } from '../../utils/UtilityService';
-import { clearSearchCriteria, generateSearchQueryString, RenderImageBg, toggleSearchFilterSelected } from '../../services/MarketplaceService'
+import { formatItemPublishDate, getRandomArrayIndexes } from '../../utils/UtilityService';
+import { RenderImageBg } from '../../services/MarketplaceService'
 import { useLoadingContext } from '../../components/contexts/LoadingContext'
 import { SvgVisibilityIcon } from '../../components/SVGIcon'
 import color from '../../components/Constants'
+import { getViewByPublisherUrl } from '../../services/PublisherService';
 
 //const CLASS_NAME = "MarketplaceItemRow";
 
@@ -23,18 +24,6 @@ function MarketplaceItemRow(props) { //props are item, showActions
             pathname: `/library/${props.item.name}`,
             state: { id: `${props.item.name}` }
         });
-    };
-
-    const getViewByPublisherUrl = () => {
-
-        //clear out the selected, the query val
-        var criteria = clearSearchCriteria(loadingProps.searchCriteria);
-
-        //loop through filters and their items and find the publisher id
-        toggleSearchFilterSelected(criteria, props.item.publisher.id);
-
-        //return url that will filter by publisher
-        return `/library?${generateSearchQueryString(criteria, 1)}`;
     };
 
     //-------------------------------------------------------------------
@@ -150,10 +139,10 @@ function MarketplaceItemRow(props) { //props are item, showActions
                     <p className="my-4" ><Button variant="secondary" type="button" className="px-4" href={url} >More Info</Button>
                     </p>
                     <p className="mb-2" ><b className="mr-2" >Published By:</b><a href={`/publisher/${props.item.publisher.name}`} >{props.item.publisher.displayName}</a></p>
-                    {props.item.displayViewAllLink &&
+                    {props.item.publisher?.allowFilterBy &&
                         <p className="mb-2 d-flex align-items-center" >
                             <SvgVisibilityIcon fill={color.link} />
-                            <a href={getViewByPublisherUrl()} >View all by this publisher</a>
+                            <a href={getViewByPublisherUrl(loadingProps, props.item.publisher)} >View all by this publisher</a>
                         </p>
                     }
                     {props.item.publishDate != null &&

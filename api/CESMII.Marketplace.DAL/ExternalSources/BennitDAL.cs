@@ -202,7 +202,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
             //for now, just support query value. still pass in the other stuff so 
             //we have it for future enhancements. 
             string url = _config.Urls.Find(x => x.Key.ToLower().Equals("search")).Value;
-            if (string.IsNullOrEmpty(url)) throw new InvalidOperationException($"External Source|Url 'GetById' is not properly configured.");
+            if (string.IsNullOrEmpty(url)) throw new InvalidOperationException($"External Source|Url 'search' is not properly configured.");
 
             MultipartFormDataContent formData = PrepareFormData(SearchModeEnum.search, query, cursor.Skip, cursor.Take);
             var response = await base.ExecuteApiCall(PrepareApiConfig(url, formData));
@@ -313,7 +313,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                     //Analytics = MapToModelMarketplaceItemAnalyticsData(entity.ID, _marketplaceItemAnalyticsAll),
                     Publisher = new PublisherModel() {ID = _config.Publisher.ID, Verified = true, Description = _config.Publisher.Description,
                         CompanyUrl = _config.Publisher.CompanyUrl, Name = _config.Publisher.Name, DisplayName = _config.Publisher.DisplayName,
-                        DisplayViewAllLink = false
+                        AllowFilterBy = _config.Publisher.AllowFilterBy
                     },
                     IsActive = true,
                     IsFeatured = false,

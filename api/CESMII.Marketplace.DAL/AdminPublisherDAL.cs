@@ -156,6 +156,7 @@
                     Name = entity.Name.ToLower().Trim().Replace(" ", "-").Replace("_", "-"),
                     DisplayName = entity.DisplayName,
                     Verified = entity.Verified,
+                    AllowFilterBy = entity.AllowFilterBy,
                     Description = entity.Description,
                     CompanyUrl = entity.CompanyUrl,
                     SocialMediaLinks = entity.SocialMediaLinks?.Select(x => new SocialMediaLinkModel() { Css = x.Css, Icon = x.Icon, Url = x.Url }).ToList(),
@@ -214,6 +215,7 @@
             entity.CompanyUrl = model.CompanyUrl;
             entity.Description = model.Description;
             entity.Verified = model.Verified;
+            entity.AllowFilterBy = model.AllowFilterBy;
             //entity.StatusId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.Status.ID)); ;
             //entity.MetaTags = model.MetaTags;
             entity.Categories = model.Categories

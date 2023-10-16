@@ -656,7 +656,7 @@ namespace CESMII.Marketplace.Api.Controllers
             if (enumVal == LookupTypeEnum.Publisher)
             {
                 return _dalPublisher.Where(x =>
-                                x.IsActive
+                                x.IsActive && x.AllowFilterBy
                                 && (x.Name.ToLower().Contains(query)
                                 || x.DisplayName.ToLower().Contains(query))
                                 , null, null, false, false).Data
