@@ -77,7 +77,7 @@ namespace CESMII.Marketplace.Api.Controllers
             {
                 FeaturedItems = _dal.Where(x => x.IsFeatured && x.IsActive, null, null, false, false).Data,
                 //trim down to 4 most recent 
-                NewItems = _dal.Where(x => x.IsActive, null, 3, false, false,
+                NewItems = _dal.Where(x => x.IsActive, null, 4, false, false,
                 new OrderByExpression<MarketplaceItem>() { Expression = x => x.PublishDate, IsDescending = true }).Data
             };
             //calculate most popular based on analytics counts
@@ -120,8 +120,8 @@ namespace CESMII.Marketplace.Api.Controllers
             var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
             predicates.Add(util.BuildStatusFilterPredicate());
 
-            //trim down to 3 most recent 
-            var result = _dal.Where(predicates, null, 3, false, false,
+            //trim down to 4 most recent 
+            var result = _dal.Where(predicates, null, 4, false, false,
                 new OrderByExpression<MarketplaceItem>() { Expression = x => x.PublishDate, IsDescending = true }).Data;
             return Ok(result);
         }

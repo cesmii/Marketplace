@@ -196,7 +196,7 @@ function PublisherEntity() {
                 </div>
                 <div className="row" >
                     <div className="col-sm-12">
-                        <MarketplaceTileList items={item.marketplaceItems} layout="thumbnail" colCount={2} />
+                        <MarketplaceTileList items={item.marketplaceItems} layout="thumbnail" colCssClass="col-md-6" />
                     </div>
                 </div>
             </>

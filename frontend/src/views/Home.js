@@ -342,7 +342,7 @@ function Home() {
                                 </div>
                             )
                             :
-                            <MarketplaceTileList items={_dataRowsNew} layout="banner" colCount={3} />
+                            <MarketplaceTileList items={_dataRowsNew} layout="banner" colCssClass="col-lg-6" />
                         }
                     </div>
                 </div>
@@ -367,7 +367,7 @@ function Home() {
                                 </div>
                             )
                             :
-                            <MarketplaceTileList items={_dataRowsPopular} layout="thumbnail" colCount={2} />
+                            <MarketplaceTileList items={_dataRowsPopular} layout="thumbnail" colCssClass="col-lg-6" />
                         }
                     </div>
                 </div>
@@ -419,10 +419,10 @@ function Home() {
             </Helmet>
             {renderHeaderRow()}
             <div className="row" >
-                <div className="col-sm-3 order-2 order-sm-1" >
+                <div className="col-md-3 order-2 order-md-1" >
                     <MarketplaceFilter searchCriteria={_searchCriteriaLocal} selectMode="linkable" onItemClick={filterOnItemClick} showLimited={true} />
                 </div>
-                <div className="col-sm-9 mb-4 order-1 order-sm-2" >
+                <div className="col-md-9 mb-4 order-1 order-md-2" >
                     {renderFeatured()}
                     {renderNew()}
                     {renderPopular()}

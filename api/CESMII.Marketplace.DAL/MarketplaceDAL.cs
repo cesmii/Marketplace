@@ -46,7 +46,7 @@
 
             //init some stuff we will use during the mapping methods
             _smItemTypeIdDefault = new MongoDB.Bson.BsonObjectId(
-                MongoDB.Bson.ObjectId.Parse(configUtil.MarketplaceSettings.SmApp.TypeId));
+                MongoDB.Bson.ObjectId.Parse(configUtil.MarketplaceSettings.DefaultItemTypeId));
 
         }
 
@@ -265,7 +265,7 @@
                     Publisher = MapToModelPublisher(entity.PublisherId, _publishersAll),
                     IsActive = entity.IsActive,
                     ImagePortrait = entity.ImagePortraitId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImagePortraitId.ToString()), _imagesAll),
-                    //ImageSquare = entity.ImageSquareId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageSquareId.ToString()), _imagesAll),
+                    ImageBanner = entity.ImageBannerId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageBannerId.ToString()), _imagesAll),
                     ImageLandscape = entity.ImageLandscapeId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageLandscapeId.ToString()), _imagesAll)
                 };
                 //get additional data under certain scenarios
@@ -351,6 +351,7 @@
                             _lookupItemsAll.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.SmItemType)).ToList()),
                     Version = x.Version,
                     ImagePortrait = x.ImagePortraitId == null ? null : MapToModelImageSimple(z => z.ID.Equals(x.ImagePortraitId.ToString()), _imagesAll),
+                    ImageBanner = x.ImageBannerId == null ? null : MapToModelImageSimple(z => z.ID.Equals(x.ImageBannerId.ToString()), _imagesAll),
                     ImageLandscape = x.ImageLandscapeId == null ? null : MapToModelImageSimple(z => z.ID.Equals(x.ImageLandscapeId.ToString()), _imagesAll),
                     //assumes only one related item per type
                     RelatedType = MapToModelLookupItem(items.Find(z => z.MarketplaceItemId.ToString().Equals(x.ID)).RelatedTypeId,
@@ -384,6 +385,7 @@
                     Type = x.Type,
                     Version = x.Version,
                     ImagePortrait = x.ImagePortrait,
+                    ImageBanner = x.ImageBanner,
                     ImageLandscape = x.ImageLandscape,
                     //assumes only one related item per type
                     RelatedType = MapToModelLookupItem(items.Find(z => z.ProfileId.ToString().Equals(x.ID)).RelatedTypeId,

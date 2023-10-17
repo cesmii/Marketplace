@@ -101,8 +101,7 @@
 
         public ImageItemSimpleModel ImagePortrait { get; set; }
         
-        [Obsolete("Retire ImageSquare")]
-        public ImageItemSimpleModel ImageSquare { get; set; }
+        public ImageItemSimpleModel ImageBanner { get; set; }
         public ImageItemSimpleModel ImageLandscape { get; set; }
 
         public virtual List<JobDefinitionSimpleModel> JobDefinitions { get; set; }
@@ -196,6 +195,7 @@
         public virtual LookupItemModel Type { get; set; }
 
         public ImageItemSimpleModel ImagePortrait { get; set; }
+        public ImageItemSimpleModel ImageBanner { get; set; }
 
         public ImageItemSimpleModel ImageLandscape { get; set; }
 

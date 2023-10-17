@@ -465,6 +465,9 @@ namespace NLog.Mongo
             if (string.IsNullOrEmpty(connectionString))
                 throw new NLogConfigurationException("Can not resolve MongoDB ConnectionString. Please make sure the ConnectionString property is set.");
 
+            if (string.IsNullOrEmpty(collectionName))
+                throw new NLogConfigurationException("Collection name is missing. Check collection_name value in nLog.config Mongo target is set.");
+
             // cache mongo collection based on target name.
             var key = new MongoConnectionKey(connectionString, collectionName, databaseName);
             if (_collectionCache.TryGetValue(key, out var mongoCollection))
