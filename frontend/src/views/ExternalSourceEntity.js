@@ -27,7 +27,7 @@ function ExternalSourceEntity() {
     const _scrollToSpecs = useRef(null);
     const _scrollToRelated = useRef(null);
 
-    const { id, sourceId } = useParams();
+    const { id, code } = useParams();
     const [item, setItem] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
@@ -43,7 +43,7 @@ function ExternalSourceEntity() {
 
             var result = null;
             try {
-                const data = { id: id, sourceId: sourceId };
+                const data = { id: id, code: code, isTracking: true };
                 const url = `externalsource/getbyid`;
                 result = await axiosInstance.post(url, data);
             }
@@ -222,7 +222,7 @@ function ExternalSourceEntity() {
                                     : `${item.type.name.replace('SM ', 'Smart Manufacturing ')} Details`
                                 }
                                 </h2>
-                                <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/external/${item.externalSourceId}/${item.id}`} >Request More Info</a>
+                                <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/${item.type.code}/${item.externalSource.code}/${item.id}`} >Request More Info</a>
                             </div>
                         </div>
                         <div id="collapseOne" className="collapse show mb-3" aria-labelledby="headingOne" >

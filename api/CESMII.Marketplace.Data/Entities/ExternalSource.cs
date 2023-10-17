@@ -32,10 +32,6 @@ namespace CESMII.Marketplace.Data.Entities
         public string TypeName { get; set; }
         public string BaseUrl { get; set; }
         public string AccessToken { get; set; }
-        /// <summary>
-        /// List of 1:many urls that may be used in the calling of the API
-        /// </summary>
-        public List<ExternalSourceUrls> Urls { get; set; }
 
         /// <summary>
         /// Field to store settings and structure unique to this external source
@@ -52,10 +48,22 @@ namespace CESMII.Marketplace.Data.Entities
         public BsonObjectId DefaultImageIdLandscape { get; set; }
     }
 
-    public class ExternalSourceUrls
+    public class ExternalSourceSimple
     {
-        public string Key { get; set; }
-        public string Value { get; set; }
+        /// <summary>
+        /// This is the native id of the source item
+        /// </summary>
+        public string ID { get; set; }
+
+        /// <summary>
+        /// This is the source id which defines the source in our data. 
+        /// </summary>
+        public string SourceId { get; set; }
+
+        /// <summary>
+        /// This is a friendly code value (expected to be unique) and nicer for use in urls. 
+        /// </summary>
+        public string Code { get; set; }
     }
 
 }

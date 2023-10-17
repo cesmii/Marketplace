@@ -1,6 +1,7 @@
 ﻿namespace CESMII.Marketplace.Api.Shared.Utils
 {
     using System;
+    using System.Diagnostics;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -15,20 +16,23 @@
     public class MarketplaceUtil
     {
         private readonly IDal<MarketplaceItem, MarketplaceItemModel> _dalMarketplace;
-        private readonly IExternalDAL<MarketplaceItemModel> _dalCloudLib;
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
         private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
+        private readonly IExternalSourceFactory<MarketplaceItemModel> _sourceFactory;
+        private readonly IDal<ExternalSource, ExternalSourceModel> _dalExternalSource;
 
         public MarketplaceUtil(IDal<MarketplaceItem, MarketplaceItemModel> dalMarketplace,
-            IExternalDAL<MarketplaceItemModel> dalCloudLib,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
-            IDal<LookupItem, LookupItemModel> dalLookup
+            IDal<LookupItem, LookupItemModel> dalLookup,
+            IExternalSourceFactory<MarketplaceItemModel> sourceFactory,
+            IDal<ExternalSource, ExternalSourceModel> dalExternalSource
             )
         {
             _dalMarketplace = dalMarketplace;
-            _dalCloudLib = dalCloudLib;
             _dalAnalytics = dalAnalytics;
             _dalLookup = dalLookup;
+            _sourceFactory = sourceFactory;
+            _dalExternalSource = dalExternalSource;
         }
 
         public MarketplaceUtil(IDal<LookupItem, LookupItemModel> dalLookup)
@@ -140,49 +144,16 @@
             }
         }
 
-        public async Task<List<MarketplaceItemModel>> PopularItems()
-        {
-            //get list of popular items in analytics collection
-            //build list of order bys to sort result by most important factors first - this is essentially giving us most popular 
-            var orderBys = new List<OrderByExpression<MarketplaceItemAnalytics>>
-            {
-                new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.DownloadCount, IsDescending = true },
-                new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.PageVisitCount, IsDescending = true },
-                new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.LikeCount, IsDescending = true },
-                new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.ShareCount, IsDescending = true },
-                new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.MoreInfoCount, IsDescending = true },
-                new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.DislikeCount, IsDescending = false }
-            };
-
-            var popularMarketplace = _dalAnalytics.Where(x => string.IsNullOrEmpty(x.CloudLibId), null, 4, false, false, orderBys.ToArray()).Data
-                .Select(x => x.MarketplaceItemId).ToArray();
-            var popularCloudLib = _dalAnalytics.Where(x => !string.IsNullOrEmpty(x.CloudLibId), null, 4, false, false, orderBys.ToArray()).Data
-                .Select(x => x.CloudLibId).ToList();
-
-            //now get the marketplace items with popular rankings
-            //filter our inactive and non-live items
-            var predicatesMarketplace = new List<Func<MarketplaceItem, bool>>
-            {
-                //limit to isActive
-                x => x.IsActive,
-                //limit to publish status of live
-                this.BuildStatusFilterPredicate(),
-                //only get items which are most popular based on previous query of analytics
-                x => popularMarketplace.Any(m => m == x.ID.ToString())
-            };
-
-            var itemsMarketplace = _dalMarketplace.Where(predicatesMarketplace, null, 4, false, false).Data;
-
-            //now get the cloudlib items with popular rankings
-            var itemsCloudLib = await _dalCloudLib.Where(query: null, new SearchCursor() { Skip= 0, Take = 4 },  
-                ids: popularCloudLib, processes: null, verticals: null, exclude: null);
-
-            return itemsMarketplace.Union(itemsCloudLib.Data).ToList();
-
-        }
-
+        /// <summary>
+        /// Parallel code execution - get top 10 items in analytics based on various internal analytics tallies.
+        /// loop over the marketplace items and each external source in a parallel processing manner.
+        /// Make a parallel call to get the data related to the highest ranking items for each source.
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<MarketplaceItemModel>> PopularItemsAsync()
         {
+            //var timer = Stopwatch.StartNew();
+
             //get list of popular items in analytics collection
             //build list of order bys to sort result by most important factors first - this is essentially giving us most popular 
             var orderBys = new List<OrderByExpression<MarketplaceItemAnalytics>>
@@ -195,52 +166,87 @@
                 new OrderByExpression<MarketplaceItemAnalytics>() { Expression = x => x.DislikeCount, IsDescending = false }
             };
 
+            //get top 10 vote getters - regardless of source, then call sources as needed to 
+            //pull back items that made the list. 
+            var popularItems = _dalAnalytics.Where(x => !string.IsNullOrEmpty(x.ID), 
+                null, 10, false, false, orderBys.ToArray()).Data;
+
             //run in parallel
-            //var itemsMarketplace = await PopularItemsMarketplace(orderBys);
-            //var itemsCloudLib = await PopularItemsCloudLib(orderBys);
-            
-            var matchesMarketplaceTask = PopularItemsMarketplace(orderBys);
-            var matchesCloudLibTask = PopularItemsCloudLib(orderBys);
-            await Task.WhenAll(matchesMarketplaceTask, matchesCloudLibTask);
+            var listPopularItemSources = new List<Task>();
+            //add native marketplace task to list for downstream parallel execution
+            listPopularItemSources.Add(PopularItemsMarketplace(popularItems.Where(x => x.ExternalSource == null).ToList()));
+
+            var sources = _dalExternalSource.Where(x => x.Enabled && x.IsActive, null, null, false, false).Data;
+            foreach (var src in sources)
+            {
+                if (!src.Enabled) continue;
+
+                var externalTask = PopularItemsExternalSource(src, 
+                    popularItems.Where(x => x.ExternalSource != null && x.ExternalSource.SourceId == src.ID).ToList());
+                //_ = externalTask.ContinueWith(t => AdvancedSearchLogDurationTime(src.Code, timer.ElapsedMilliseconds - swExternalStart));
+                listPopularItemSources.Add(externalTask);
+            }
+
+            await Task.WhenAll(listPopularItemSources);
 
             //get the tasks results into format we can use
-            var itemsMarketplace = await matchesMarketplaceTask;
-            var itemsCloudLib = await matchesCloudLibTask;
+            var allTasks = Task.WhenAll(listPopularItemSources);
+            //wrap exception handling around the tasks execution so no task exception gets lost
+            try
+            {
+                await allTasks;
+                //AdvancedSearchLogDurationTime("When All", timer.ElapsedMilliseconds - swWhenAllStart);
+            }
+            catch //(Exception ex)
+            {
+                //_logger.LogCritical(ex, $"MarketplaceUtil|PopularItemsAsync|All Tasks Exception|{ex.Message}.");
+                throw allTasks.Exception;
+            }
 
-            return itemsMarketplace.Union(itemsCloudLib).ToList();
+            //loop results and combine into single result
+            var result = new List<MarketplaceItemModel>();
+            foreach (Task<List<MarketplaceItemModel>> t in listPopularItemSources)
+            {
+                var r = await t;
+                result = result.Union(r).ToList();
+            }
 
+            return result.OrderBy(x => x.DisplayName).ToList();
         }
 
-        private Task<List<MarketplaceItemModel>> PopularItemsMarketplace(List<OrderByExpression<MarketplaceItemAnalytics>> orderBys)
+        private async Task<List<MarketplaceItemModel>> PopularItemsMarketplace(List<MarketplaceItemAnalyticsModel> matches)
         {
-            //run in parallel
-            var popularMarketplace = _dalAnalytics.Where(x => string.IsNullOrEmpty(x.CloudLibId), null, 4, false, false, orderBys.ToArray()).Data
-                .Select(x => x.MarketplaceItemId).ToArray();
-
+            var idList = matches.Select(x => x.MarketplaceItemId.ToString()).ToList();
             //now get the marketplace items with popular rankings
             //filter our inactive and non-live items
-            var predicatesMarketplace = new List<Func<MarketplaceItem, bool>>
+            var predicates = new List<Func<MarketplaceItem, bool>>
             {
                 //limit to isActive
                 x => x.IsActive,
                 //limit to publish status of live
                 this.BuildStatusFilterPredicate(),
                 //only get items which are most popular based on previous query of analytics
-                x => popularMarketplace.Any(m => m == x.ID.ToString())
+                x => idList.Any(m => m == x.ID.ToString())
             };
 
-            //run in parallel
-            var itemsMarketplace = _dalMarketplace.Where(predicatesMarketplace, null, 4, false, false).Data;
-            return Task.FromResult(itemsMarketplace.ToList());
+            //run as async task
+            var result = await Task.Run(() =>
+            {
+                return _dalMarketplace.Where(predicates, null, 4, false, false).Data;
+            });
+            return result;
         }
 
-        private async Task<List<MarketplaceItemModel>> PopularItemsCloudLib(List<OrderByExpression<MarketplaceItemAnalytics>> orderBys)
+        private async Task<List<MarketplaceItemModel>> PopularItemsExternalSource(ExternalSourceModel src, List<MarketplaceItemAnalyticsModel> matches)
         {
+            var idList = matches.Select(x => x.ExternalSource.ID).ToList();
+            //now get the external items for this source with popular rankings
+            //the external source DAL implementation may not support the external call of a list of ids,
+            //check the dal if data is not coming back
             //run in parallel
-            var popularCloudLib = _dalAnalytics.Where(x => !string.IsNullOrEmpty(x.CloudLibId), null, 4, false, false, orderBys.ToArray()).Data
-                .Select(x => x.CloudLibId).ToList();
-            //now get the cloudlib items with popular rankings
-            return (await _dalCloudLib.Where(query: null, new SearchCursor() { Skip = 0, Take = 4 }, popularCloudLib, null, null, null)).Data;
+            var dalSource = await _sourceFactory.InitializeSource(src);
+            var result = await dalSource.GetManyById(idList);
+            return result.Data;
         }
 
         /// <summary>
@@ -255,8 +261,11 @@
                 statuses = new List<string>() { "live"};
             }
 
-            var luStatusLive = _dalLookup.GetAll().Where(x => x.LookupType.EnumValue == LookupTypeEnum.MarketplaceStatus &&
-                    statuses.Any(y => y.Equals(x.Code.ToLower()))).Select(x => x.ID).ToList();
+            //var luStatusLive = _dalLookup.GetAll().Where(x => x.LookupType.EnumValue == LookupTypeEnum.MarketplaceStatus &&
+            //        statuses.Any(y => y.Equals(x.Code.ToLower()))).Select(x => x.ID).ToList();
+            var luStatusLive = _dalLookup
+                .Where(x => x.LookupType.EnumValue.Equals(LookupTypeEnum.MarketplaceStatus), null, null, false, false)
+                .Data.Where(x => statuses.Any(y => y.Equals(x.Code.ToLower()))).Select(x => x.ID).ToList();
             return x => luStatusLive.Any(y => y.Equals(x.StatusId.ToString()));
         }
     }

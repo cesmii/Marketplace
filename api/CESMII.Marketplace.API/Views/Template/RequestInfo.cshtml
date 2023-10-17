@@ -26,12 +26,11 @@ else if (Model.Publisher != null)
     </div>
 }
 
-else if (Model.SmProfile != null)
+else if (Model.ExternalItem != null)
 {
     <div>
         <h2>Related To</h2>
-        <p>SM Profile: @Model.SmProfile.DisplayName</p>
-        <p>Namespace: @Model.SmProfile.Namespace</p>
+        <p>@Model.ExternalItem.Type.Name: @Model.ExternalItem.DisplayName</p>
     </div>
 }
 
@@ -61,7 +60,10 @@ else if (Model.SmProfile != null)
         }
     </div>
 }
-<div>
-    <h2>Message</h2>
-    <p>@Model.Description</p>
-</div>
+@if (!string.IsNullOrEmpty(Model.CompanyName))
+{
+    <div>
+        <h2>Message</h2>
+        <p>@Model.Description</p>
+    </div>
+}

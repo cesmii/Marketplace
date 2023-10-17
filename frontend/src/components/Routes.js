@@ -50,12 +50,13 @@ function Routes() {
             <PublicRouteWFilter path="/login/returnUrl=:returnUrl" component={Home} />
             <PublicRouteWFilter exact path="/login" component={Home} />
             {/*<PublicRoute exact path="/about" component={About} />*/}
-            <PublicRoute exact path="/library/:sourceId/:id" component={ExternalSourceEntity} />
+            <PublicRoute exact path="/library/:code/:id" component={ExternalSourceEntity} />
             <PublicRoute exact path="/library/:id" component={MarketplaceEntity} />
-            <PublicRoute exact path="/profile/:id" component={ProfileEntity} />
+            <PublicRoute exact path="/:code/profile/:id" component={ProfileEntity} />
             <PublicRouteWFilter exact path="/library" component={MarketplaceList} />
             <PublicRouteWFilter exact path="/all" component={MarketplaceList} />
             <PublicRoute exact path="/publisher/:id" component={PublisherEntity} />
+            <PublicRoute exact path="/more-info/:itemType/:code/:externalId" component={RequestInfo} />
             <PublicRoute exact path="/more-info/:itemType/:id" component={RequestInfo} />
             <PublicRoute exact path="/request-info/publisher/:publisherId" component={RequestInfo} />
             <PublicRoute exact path="/contact-us/" component={RequestInfo} />

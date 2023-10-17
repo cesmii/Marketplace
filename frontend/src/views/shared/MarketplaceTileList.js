@@ -146,7 +146,7 @@ function MarketplaceTileList(props) {
             else {
                 tile = renderCardThumbnail(itm, isFirst, isLast);
             }
-            const url = itm.type?.code === AppSettings.itemTypeCode.smProfile ? `/profile/${itm.id != null ? itm.id : itm.relatedId}` :
+            const url = itm.type?.code === AppSettings.itemTypeCode.smProfile ? `/${itm.externalSource.code}/profile/${itm.id != null ? itm.id : itm.relatedId}` :
                     `/library/${itm.name}`;
 
             return (

@@ -28,17 +28,17 @@ namespace CESMII.Marketplace.DAL.ExternalSources
 
         public ExternalBaseDAL(
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource, 
-            string externalSourceCodeName,
+            string externalSourceCode,
             IHttpApiFactory httpFactory,
             IMongoRepository<ImageItem> repoImages)
         {
             _dalExternalSource = dalExternalSource;
             //go get the config for this source
-            _config = dalExternalSource.Where(x => x.Code.ToLower().Equals(externalSourceCodeName.ToLower())
+            _config = dalExternalSource.Where(x => x.Code.ToLower().Equals(externalSourceCode.ToLower())
                 , null, null, false, true).Data?.FirstOrDefault();
             if (_config == null)
             {
-                throw new ArgumentNullException($"External Source Config: {externalSourceCodeName}");
+                throw new ArgumentNullException($"External Source Config: {externalSourceCode}");
             }
 
             _httpFactory = httpFactory;

@@ -25,7 +25,7 @@ function RequestInfo() {
 
     //can access this form for specific marketplace item (id) or for a specific publisher (publisherId)
     //TBD - update form to pull publisher info if coming from that angle.
-    const { id, publisherId, type, itemType } = useParams();
+    const { id, publisherId, type, itemType, code, externalId } = useParams();
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_item, setItem] = useState(JSON.parse(JSON.stringify(AppSettings.requestInfoNew)));
     const [_referrerItem, setReferrerItem] = useState(null);
@@ -86,6 +86,9 @@ function RequestInfo() {
             //if (itemType === "profile") {
             //    setItem({ ..._item, smProfile: { id: result.data.id, namespace: result.data.namespace } });
             //}
+            if (itemType != null && itemType === 'profile' && id != null) {
+                setItem({ ..._item, externalItem: result.data.externalSource });
+            }
 
             setLoadingProps({ isLoading: false, message: null });
         }
@@ -101,6 +104,56 @@ function RequestInfo() {
         };
     }, [id, publisherId]);
 
+
+    //EXTERNAL SOURCE SCENARIO - get referrer item
+    useEffect(() => {
+        async function fetchData() {
+            console.log(generateLogMessageString('useEffect||fetchData||externalSource||async', CLASS_NAME));
+            //initialize spinner during loading
+            setLoadingProps({ isLoading: true, message: null });
+
+            var result = null;
+            try {
+                const data = { id: externalId, code: code };
+                const url = `externalsource/getbyid`;
+                result = await axiosInstance.post(url, data);
+            }
+            catch (err) {
+                var msg = 'An error occurred retrieving this external source item.';
+                console.log(generateLogMessageString('useEffect||fetchData||error', CLASS_NAME, 'error'));
+                //console.log(err.response.status);
+                if (err != null && err.response != null && err.response.status === 404) {
+                    msg += ' This external source item was not found.';
+                    history.push('/404');
+                }
+                setLoadingProps({
+                    isLoading: false, message: null, inlineMessages: [
+                        { id: new Date().getTime(), severity: "danger", body: msg, isTimed: false }]
+                });
+            }
+
+            if (result == null) return;
+
+            //convert collection to comma separated list
+            //special handling of meta tags which shows as a concatenated list in an input box
+            result.data.metaTagsConcatenated = result.data == null || result.data.metaTags == null ? "" : result.data.metaTags.join(', ');
+            //set item state value
+            setReferrerItem(result.data);
+            setItem({ ..._item, externalItem: result.data.externalSource });
+
+            setLoadingProps({ isLoading: false, message: null });
+        }
+
+        //fetch referrer data 
+        //only if the path includes sourceCode and externalId
+        if (code != null && externalId != null) {
+            fetchData();
+        }
+
+        //this will execute on unmount
+        return () => {
+        };
+    }, [code, externalId]);
 
     //-------------------------------------------------------------------
     // Trigger get lookup data from server (if necessary)
@@ -380,7 +433,7 @@ function RequestInfo() {
         return (
             <div className="info-panel d-none d-sm-block">
                 <div className="info-section py-3 px-1 rounded">
-                    {id != null &&
+                    {(id != null || (code != null && externalId != null)) &&
                         renderSolutionDetails()
                     }
                     {publisherId != null &&

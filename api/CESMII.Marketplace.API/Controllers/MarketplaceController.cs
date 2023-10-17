@@ -90,8 +90,8 @@ namespace CESMII.Marketplace.Api.Controllers
                 new OrderByExpression<MarketplaceItem>() { Expression = x => x.PublishDate, IsDescending = true }).Data
             };
             //calculate most popular based on analytics counts
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
-            result.PopularItems = await util.PopularItems();
+            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup, _sourceFactory, _dalExternalSource);
+            result.PopularItems = await util.PopularItemsAsync();
 
             return Ok(result);
         }
@@ -107,7 +107,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 x => x.IsFeatured && x.IsActive
             };
             //limit to publish status of live
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dalLookup);
             predicates.Add(util.BuildStatusFilterPredicate());
 
             var result = _dal.Where(predicates, null, null, false, false,
@@ -126,7 +126,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 x => x.IsActive
             };
             //limit to publish status of live
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dalLookup);
             predicates.Add(util.BuildStatusFilterPredicate());
 
             //trim down to 4 most recent 
@@ -141,8 +141,8 @@ namespace CESMII.Marketplace.Api.Controllers
         public async Task<IActionResult> GetPopular()
         {
             //calculate most popular based on analytics counts
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
-            var result = await util.PopularItems();
+            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup, _sourceFactory, _dalExternalSource); 
+            var result = await util.PopularItemsAsync();
             return Ok(result);
         }
         #endregion
@@ -185,7 +185,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 result.Analytics = analytic;
             }
             //get related items
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup, _sourceFactory, _dalExternalSource);
             util.AppendSimilarItems(ref result);
 
             return Ok(result);
@@ -238,7 +238,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 result.Analytics = analytic;
             }
             //get related items
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup, _sourceFactory, _dalExternalSource);
             util.AppendSimilarItems(ref result);
 
             return Ok(result);
@@ -730,7 +730,6 @@ namespace CESMII.Marketplace.Api.Controllers
         {
             _logger.LogWarning($"MarketplaceController|AdvancedSearchMarketplace|Starting...");
             var timer = Stopwatch.StartNew();
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
 
             //lowercase model.query
             model.Query = string.IsNullOrEmpty(model.Query) ? model.Query : model.Query.ToLower();
@@ -751,6 +750,7 @@ namespace CESMII.Marketplace.Api.Controllers
             //limit to publish status of live
             if (liveOnly)
             {
+                var util = new MarketplaceUtil(_dalLookup);
                 var statuses = new List<string>() { "live" };
                 //if user is an admin, let them also see items listed as 'admin only' status
                 if (User.IsInRole("cesmii.marketplace.marketplaceadmin"))
@@ -961,11 +961,11 @@ namespace CESMII.Marketplace.Api.Controllers
                 //some external sources use cursor, others will use skip/take approach
                 //find first and last item for each set and record the index or cursor
                 var first = string.IsNullOrEmpty(item.SourceId) ?
-                    result.Data.Find(x => string.IsNullOrEmpty(x.ExternalSourceId)) :
-                    result.Data.Find(x => !string.IsNullOrEmpty(x.ExternalSourceId) && x.ExternalSourceId.Equals(item.SourceId));
+                    result.Data.Find(x => string.IsNullOrEmpty(x.ExternalSource?.SourceId)) :
+                    result.Data.Find(x => !string.IsNullOrEmpty(x.ExternalSource?.SourceId) && x.ExternalSource?.SourceId == item.SourceId);
                 var last = string.IsNullOrEmpty(item.SourceId) ?
-                    result.Data.FindLast(x => string.IsNullOrEmpty(x.ExternalSourceId)) :
-                    result.Data.FindLast(x => !string.IsNullOrEmpty(x.ExternalSourceId) && x.ExternalSourceId.Equals(item.SourceId));
+                    result.Data.FindLast(x => string.IsNullOrEmpty(x.ExternalSource?.SourceId)) :
+                    result.Data.FindLast(x => !string.IsNullOrEmpty(x.ExternalSource?.SourceId) && x.ExternalSource?.SourceId == item.SourceId);
 
                 //update the cursor boundaries to reflect the cursor post-merge
                 item.Cursor.StartCursor = first == null ? null : first.Cursor;

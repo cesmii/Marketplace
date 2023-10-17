@@ -24,7 +24,7 @@ function ProfileEntity() {
     const _scrollToSpecs = useRef(null);
     const _scrollToRelated = useRef(null);
 
-    const { id } = useParams();
+    const { id, code } = useParams();
     const [item, setItem] = useState({});
     const [isLoading, setIsLoading] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
@@ -40,8 +40,10 @@ function ProfileEntity() {
 
             var result = null;
             try {
-                const data = { id: id, isTracking: true };
-                const url = `profile/getbyid`;
+                const data = { id: id, code: code, isTracking: true };
+                const url = `externalsource/getbyid`;
+                //const data = { id: id, isTracking: true };
+                //const url = `profile/getbyid`;
                 result = await axiosInstance.post(url, data);
             }
             catch (err) {
@@ -197,7 +199,7 @@ function ProfileEntity() {
                                 <h2 className="m-0 mr-2">
                                     Smart Manufacturing Profile Details
                                 </h2>
-                                <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/profile/${item.id}`} >Request More Info</a>
+                                <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/${item.type.code}/${item.externalSource.code}/${item.id}`} >Request More Info</a>
                             </div>
                         </div>
                         <div id="collapseOne" className="collapse show mb-3" aria-labelledby="headingOne" >

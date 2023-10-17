@@ -9,6 +9,7 @@
     using CESMII.Marketplace.Data.Entities;
     using CESMII.Marketplace.Data.Repositories;
     using CESMII.Marketplace.Common.Enums;
+    using CESMII.Marketplace.DAL.ExternalSources;
 
     /// <summary>
     /// Most lookup data is contained in this single entity and differntiated by a lookup type. 
@@ -22,17 +23,24 @@
         protected IMongoRepository<MarketplaceItem> _repoMarketplace;
         protected IMongoRepository<Publisher> _repoPublisher;
         protected IMongoRepository<MarketplaceItemAnalytics> _repoAnalytics;
+        protected readonly IExternalSourceFactory<MarketplaceItemModel> _sourceFactory;
+        protected readonly IDal<ExternalSource, ExternalSourceModel> _dalExternalSource;
 
         public RequestInfoDAL(IMongoRepository<RequestInfo> repo
             , IMongoRepository<LookupItem> repoLookup
             , IMongoRepository<MarketplaceItem> repoMarketplace
             , IMongoRepository<MarketplaceItemAnalytics> repoAnalytics
-            , IMongoRepository<Publisher> repoPublisher) : base(repo)
+            , IMongoRepository<Publisher> repoPublisher
+            , IExternalSourceFactory<MarketplaceItemModel> sourceFactory
+            , IDal<ExternalSource, ExternalSourceModel> dalExternalSource
+            ) : base(repo)
         {
             _repoLookup = repoLookup;
             _repoMarketplace = repoMarketplace;
             _repoAnalytics = repoAnalytics;
             _repoPublisher = repoPublisher;
+            _dalExternalSource = dalExternalSource;
+            _sourceFactory = sourceFactory;
         }
 
         public async Task<string> Add(RequestInfoModel model, string userId)
@@ -66,9 +74,9 @@
                 IncrementMarketplaceAnalytics(new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.MarketplaceItemId)));
             }
 
-            else if (model.SmProfileId.HasValue)
+            else if (model.ExternalSource != null)
             {
-                IncrementSmProfileAnalytics(model.SmProfileId.Value.ToString());
+                await IncrementExternalSourceAnalytics(model.ExternalSource);
             }
 
             //this will add and call saveChanges
@@ -118,8 +126,6 @@
                 x.LookupType.EnumValue == LookupTypeEnum.TaskStatus || x.LookupType.EnumValue == LookupTypeEnum.MembershipStatus).ToList();
 
             return MapToModel(entity, true);
-
-
         }
 
         /// <summary>
@@ -203,7 +209,7 @@
                     PublisherId = entity.PublisherId.ToString(),
                     Publisher = entity.PublisherId.ToString().Equals(Common.Constants.BSON_OBJECTID_EMPTY) ? null :
                         MapToModelPublisher(entity.PublisherId),
-                    SmProfileId = entity.SmProfileId,
+                    ExternalSource = entity.ExternalSource, 
                     RequestType = MapToModelLookupItem(entity.RequestTypeId, _lookupItemsAll),
                     MembershipStatus = MapToModelLookupItem(entity.MembershipStatusId, _lookupItemsAll),
                     FirstName = entity.FirstName,
@@ -229,7 +235,11 @@
                 {
                     result.RequestTypeCode = result.RequestType.Code;
                 }
-
+                if (verbose)
+                {
+                    result.ExternalItem = entity.ExternalSource == null ? null :
+                        MapToModelExternalSourceItem(entity.ExternalSource).Result;
+                }
                 return result;
             }
             else
@@ -293,7 +303,7 @@
             entity.PublisherId = (model.PublisherId == null) ?
                 new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY)) : 
                 new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.PublisherId));
-            entity.SmProfileId = model.SmProfileId;
+            entity.ExternalSource = model.ExternalSource;
             entity.FirstName = model.FirstName;
             entity.LastName = model.LastName;
             entity.CompanyName = model.CompanyName;
@@ -331,23 +341,42 @@
             }
         }
 
-        private void IncrementSmProfileAnalytics(string id)
+        public async Task IncrementExternalSourceAnalytics(ExternalSourceSimple item)
         {
-            //Increment Page Count
-            //Check if MpItem is there if not add a new one then increment count and save
-            var analytic = _repoAnalytics.FindByCondition(x => x.CloudLibId == id).FirstOrDefault();
-
+            //Increment page Count
+            //Check if item is there if not add a new one then increment count and save
+            var analytic = _repoAnalytics.FindByCondition(x =>
+                x.ExternalSource != null && !string.IsNullOrEmpty(x.ExternalSource.SourceId) && !string.IsNullOrEmpty(x.ExternalSource.ID) &&
+                x.ExternalSource.ID == item.ID && x.ExternalSource.SourceId == item.SourceId).FirstOrDefault();
             if (analytic == null)
             {
-                analytic = new MarketplaceItemAnalytics() { CloudLibId = id, MoreInfoCount = 1 };
-                _repoAnalytics.Add(analytic);
+                analytic = new MarketplaceItemAnalytics() { ExternalSource = item, MoreInfoCount = 1 };
+                await _repoAnalytics.AddAsync(analytic);
             }
             else
             {
                 analytic.MoreInfoCount += 1;
-                _repoAnalytics.Update(analytic);
+                await _repoAnalytics.UpdateAsync(analytic);
             }
         }
 
+        private async Task<MarketplaceItemModel> MapToModelExternalSourceItem(ExternalSourceSimple item)
+        {
+            //get the source
+            var src = _dalExternalSource.GetById(item.SourceId);
+            if (src == null)
+            {
+                throw new ArgumentException($"External source not found: SourceId: {item.SourceId}, Code:{item.Code}");
+            }
+
+            //now get the source data 
+            var dalSource = await _sourceFactory.InitializeSource(src);
+            var result = await dalSource.GetById(item.ID);
+            if (result == null)
+            {
+                throw new ArgumentException($"External source item not found: Id: {item.ID}, SourceId: {item.SourceId}, Code:{item.Code}");
+            }
+            return result;
+        }
     }
 }

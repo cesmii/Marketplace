@@ -117,7 +117,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
     //TBD - improve this check
     if (props.item === null || props.item === {}) return null;
     if (props.item.name == null) return null;
-    const url = (!props.item.isExternal ? `/library/${props.item.name}` : `/library/${props.item.externalSourceId.toLowerCase()}/${props.item.id}`)
+    const url = (!props.item.isExternal ? `/library/${props.item.name}` : `/library/${props.item.externalSource.code.toLowerCase()}/${props.item.id}`)
 
     return (
         <>

@@ -176,13 +176,14 @@
                 {
                     ID = entity.ID,
                     MarketplaceItemId = entity.MarketplaceItemId.ToString(),
-                    CloudLibId = entity.CloudLibId,
+                    ExternalSource = entity.ExternalSource,
                     PageVisitCount = entity.PageVisitCount,
                     LikeCount = entity.LikeCount,
                     DislikeCount = entity.DislikeCount,
                     MoreInfoCount = entity.MoreInfoCount,
                     SearchResultCount = entity.ShareCount,
-                    ShareCount = entity.ShareCount
+                    ShareCount = entity.ShareCount,
+                    CloudLibId = entity.CloudLibId
                 };
             }
             else
@@ -197,7 +198,7 @@
             entity.MarketplaceItemId = string.IsNullOrEmpty(model.MarketplaceItemId) ?
                 new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY)) :
                 new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.MarketplaceItemId));
-            entity.CloudLibId = model.CloudLibId;
+            entity.ExternalSource = model.ExternalSource;
             entity.PageVisitCount = model.PageVisitCount;
             entity.LikeCount = model.LikeCount;
             entity.DislikeCount = model.DislikeCount;

@@ -24,16 +24,19 @@ namespace CESMII.Marketplace.Api.Controllers
     {
         private readonly IExternalSourceFactory<MarketplaceItemModel> _sourceFactory;
         private readonly IDal<ExternalSource, ExternalSourceModel> _dalExternalSource;
+        private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
 
         public ExternalSourceController(
             IExternalSourceFactory<MarketplaceItemModel> sourceFactory,
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
+            IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
             UserDAL dalUser,
             ConfigUtil config, ILogger<ExternalSourceController> logger)
             : base(config, logger, dalUser)
         {
             _sourceFactory = sourceFactory;
             _dalExternalSource = dalExternalSource;
+            _dalAnalytics = dalAnalytics;
         }
 
         [HttpPost, Route("GetByID")]
@@ -50,21 +53,21 @@ namespace CESMII.Marketplace.Api.Controllers
             //get external source config, then instantiate object using info in the config by 
             //calling external source factory.
             //get by name - we have to ensure our external sources config data maintains a unique name.
-            var sources = _dalExternalSource.Where(x => x.ID.ToLower().Equals(model.SourceId.ToLower()), null, null, false, false).Data;
+            var sources = _dalExternalSource.Where(x => x.Code.ToLower().Equals(model.Code.ToLower()), null, null, false, false).Data;
             if (sources == null || sources.Count == 0)
             {
-                _logger.LogWarning($"ExternalSourceController|GetByID|Invalid source : {model.SourceId}");
+                _logger.LogWarning($"ExternalSourceController|GetByID|Invalid source : {model.Code}");
                 return BadRequest($"Invalid source id");
             }
             else if (sources.Count > 1)
             {
-                _logger.LogWarning($"ExternalSourceController|GetByID|External Source. Too many matches for {model.SourceId}");
+                _logger.LogWarning($"ExternalSourceController|GetByID|External Source. Too many matches for {model.Code}");
                 return BadRequest($"External Source. Too many matches.");
             }
 
             var src = sources[0];
             if (!src.Enabled) {
-                _logger.LogWarning($"ExternalSourceController|GetByID|External Source. Source not enabled. {model.SourceId}");
+                _logger.LogWarning($"ExternalSourceController|GetByID|External Source. Source not enabled. {model.Code}");
                 return BadRequest($"Invalid source id");
             }
 
@@ -78,37 +81,54 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest($"Item not found.");
             }
 
-            /*
-            //TBD - analytics - future
-            MarketplaceItemAnalyticsModel analytic = null;
-            if (result == null)
-            {
-                _logger.LogWarning($"ExternalSourceController|GetById|No records found matching this ID: {model.ID}");
-                return BadRequest($"No records found matching this ID: {model.ID}");
-            }
-            if (model.IsTracking)
-            {
-                //Increment Page Count
-                //Check if CloudLib item is there if not add a new one then increment count and save
-                analytic = _dalAnalytics.Where(x => x.CloudLibId == model.ID, null, null, false).Data.FirstOrDefault();
-
-                if (analytic == null)
-                {
-                    analytic = new MarketplaceItemAnalyticsModel() { CloudLibId = model.ID, PageVisitCount = 1 };
-                    await _dalAnalytics.Add(analytic, null);
-
-                }
-                else
-                {
-                    analytic.PageVisitCount += 1;
-                    await _dalAnalytics.Update(analytic, model.ID);
-                }
-                result.Analytics = analytic;
-            }
-            */
+            await IncrementAnalytics(result);
 
             return Ok(result);
         }
 
+        /*One time data migration routine. Already run against prod db on 10/17
+        [HttpPost, Route("ConvertAnalytics")]
+        [ProducesResponseType(200, Type = typeof(MarketplaceItemModel))]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> ConvertAnalytics()
+        {
+            //convert analytics to new format
+            var analytics = _dalAnalytics.Where(x =>
+                x.ExternalSource == null && !string.IsNullOrEmpty(x.CloudLibId), null, null, false)
+                .Data;
+            if (analytics == null)
+            {
+            }
+            else
+            {
+                foreach (var a in analytics)
+                {
+                    a.ExternalSource = new ExternalSourceSimple() { ID=a.CloudLibId, SourceId= "6525a74016a01652b87feae9", Code="cloudlib" };
+                    await _dalAnalytics.Update(a, null);
+                }
+            }
+            return Ok(analytics);
+        }
+        */
+
+        private async Task IncrementAnalytics(MarketplaceItemModel item)
+        {
+            //Increment download Count
+            //Check if CloudLib item is there if not add a new one then increment count and save
+            MarketplaceItemAnalyticsModel analytic = _dalAnalytics.Where(x =>
+                x.ExternalSource != null && !string.IsNullOrEmpty(x.ExternalSource.SourceId) && !string.IsNullOrEmpty(x.ExternalSource.ID) &&
+                x.ExternalSource.ID == item.ExternalSource.ID && x.ExternalSource.SourceId == item.ExternalSource.SourceId, null, null, false)
+                .Data.FirstOrDefault();
+            if (analytic == null)
+            {
+                analytic = new MarketplaceItemAnalyticsModel() { ExternalSource = item.ExternalSource, PageVisitCount = 1 };
+                await _dalAnalytics.Add(analytic, null);
+            }
+            else
+            {
+                analytic.PageVisitCount += 1;
+                await _dalAnalytics.Update(analytic, null);
+            }
+        }
     }
 }

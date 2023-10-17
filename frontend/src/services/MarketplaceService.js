@@ -173,13 +173,13 @@ export function RenderImageBg (props) {
     const navigateToMarketplaceItem = (e) => {
         if (props.itemType != null && props.itemType === AppSettings.itemTypeCode.smProfile) {
             history.push({
-                pathname: `/profile/${props.item.id}`,
+                pathname: `/${props.item.externalSource.code}/profile/${props.item.id}`,
                 state: { id: `${props.item.id}` }
             });
         }
         else if (props.item.isExternal) {
             history.push({
-                pathname: `/library/${props.item.externalSourceId.toLowerCase()}/${props.item.id}`,
+                pathname: `/library/${props.item.externalSource.code.toLowerCase()}/${props.item.id}`,
                 state: { id: `${props.item.id}` }
             });
         }

@@ -25,12 +25,16 @@ namespace CESMII.Marketplace.Api.Controllers
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
         private readonly IDal<RequestInfo, RequestInfoModel> _dalRequestInfo;
         private readonly MailRelayService _mailRelayService;
+        private readonly IExternalSourceFactory<MarketplaceItemModel> _sourceFactory;
+        private readonly IDal<ExternalSource, ExternalSourceModel> _dalExternalSource;
 
         public ProfileController(
             IExternalDAL<MarketplaceItemModel> dalCloudLib,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
             IDal<RequestInfo, RequestInfoModel> dalRequestInfo,
             UserDAL dalUser,
+            IExternalSourceFactory<MarketplaceItemModel> sourceFactory,
+            IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             MailRelayService mailRelayService,
             ConfigUtil config, ILogger<ProfileController> logger)
             : base(config, logger, dalUser)
@@ -39,48 +43,8 @@ namespace CESMII.Marketplace.Api.Controllers
             _dalAnalytics = dalAnalytics;
             _dalRequestInfo = dalRequestInfo;
             _mailRelayService = mailRelayService;
-        }
-
-        [HttpPost, Route("GetByID")]
-        [ProducesResponseType(200, Type = typeof(MarketplaceItemModel))]
-        [ProducesResponseType(400)]
-        public async Task<IActionResult> GetByID([FromBody] IdStringWithTrackingModel model)
-        {
-            if (model == null)
-            {
-                _logger.LogWarning($"ProfileController|GetByID|Invalid model (null)");
-                return BadRequest($"Invalid model (null)");
-            }
-
-            var result = await _dalCloudLib.GetById(model.ID);
-
-            MarketplaceItemAnalyticsModel analytic = null;
-            if (result == null)
-            {
-                _logger.LogWarning($"ProfileController|GetById|No records found matching this ID: {model.ID}");
-                return BadRequest($"No records found matching this ID: {model.ID}");
-            }
-            if (model.IsTracking)
-            {
-                //Increment Page Count
-                //Check if CloudLib item is there if not add a new one then increment count and save
-                analytic = _dalAnalytics.Where(x => x.CloudLibId == model.ID, null, null, false).Data.FirstOrDefault();
-
-                if (analytic == null)
-                {
-                    analytic = new MarketplaceItemAnalyticsModel() { CloudLibId = model.ID, PageVisitCount = 1 };
-                    await _dalAnalytics.Add(analytic, null);
-
-                }
-                else
-                {
-                    analytic.PageVisitCount += 1;
-                    await _dalAnalytics.Update(analytic, model.ID);
-                }
-                result.Analytics = analytic;
-            }
-
-            return Ok(result);
+            _dalExternalSource = dalExternalSource;
+            _sourceFactory = sourceFactory;
         }
 
         /// <summary>
@@ -106,6 +70,7 @@ namespace CESMII.Marketplace.Api.Controllers
             return Ok(result);
         }
 
+        //TBD - move this over to external source controller.
         /// <summary>
         /// Download a nodeset xml from CloudLib
         /// </summary>
@@ -127,22 +92,22 @@ namespace CESMII.Marketplace.Api.Controllers
                 );
             }
 
-            if (!model.SmProfileId.HasValue)
+            if (model.ExternalSource == null)
             {
                 _logger.LogWarning($"ProfileController|Export|Invalid model (Missing SM Profile ID)");
                 return Ok(
                     new ResultMessageExportModel()
                     {
                         IsSuccess = false,
-                        Message = "Invalid model (Missing SM Profile ID)"
+                        Message = "Invalid model (Missing SM Profile Info)"
                     }
                 );
             }
 
             //get nodeset to download
-            var smProfile = await _dalCloudLib.Export(model.SmProfileId.ToString());
+            var itemExport = await ExportExternalSourceItem(model.ExternalSource);
 
-            if (smProfile == null)
+            if (itemExport == null)
             {
                 _logger.LogWarning($"ProfileController|GetById|No nodeset data found matching this ID: {model.ID}");
                 return Ok(
@@ -156,13 +121,14 @@ namespace CESMII.Marketplace.Api.Controllers
 
             //Increment download Count
             //Check if CloudLib item is there if not add a new one then increment count and save
-            MarketplaceItemAnalyticsModel analytic = _dalAnalytics.Where(x => !string.IsNullOrEmpty(x.CloudLibId) &&
-                x.CloudLibId.ToString() == model.SmProfileId.ToString(), null, null, false).Data.FirstOrDefault();
+            MarketplaceItemAnalyticsModel analytic = _dalAnalytics.Where(x => 
+                x.ExternalSource != null && !string.IsNullOrEmpty(x.ExternalSource.SourceId) && !string.IsNullOrEmpty(x.ExternalSource.ID) &&
+                x.ExternalSource.ID == model.ExternalSource.ID && x.ExternalSource.SourceId == model.ExternalSource.SourceId, null, null, false)
+                .Data.FirstOrDefault();
             if (analytic == null)
             {
-                analytic = new MarketplaceItemAnalyticsModel() { CloudLibId = model.SmProfileId.ToString(), PageVisitCount = 1, DownloadCount = 1 };
+                analytic = new MarketplaceItemAnalyticsModel() { ExternalSource = model.ExternalSource, PageVisitCount = 1, DownloadCount = 1 };
                 await _dalAnalytics.Add(analytic, null);
-
             }
             else
             {
@@ -184,7 +150,7 @@ namespace CESMII.Marketplace.Api.Controllers
                     model.LastName = uid == null || uid.Length < 1 ? model.LastName : uid[2];
 
                     //save the request info in the DB and notify via email
-                    await SaveRequestInfo(model, smProfile.Item);
+                    await SaveRequestInfo(model, itemExport.Item);
 
                     //encrypt data for repeat scenario
                     model.Uid = PasswordUtils.EncryptString($"{model.Email}{delimiter}{model.FirstName}{delimiter}{model.LastName}", key);
@@ -202,14 +168,14 @@ namespace CESMII.Marketplace.Api.Controllers
             {
                 IsSuccess = true,
                 Message = "",
-                Data = smProfile.NodesetXml,
+                Data = itemExport.Data,
                 //return with result for caching client side. 
                 Uid = model.Uid,
                 Warnings = null
             });
         }
 
-        protected async Task SaveRequestInfo(RequestInfoModel model, MarketplaceItemModel smProfile)
+        protected async Task SaveRequestInfo(RequestInfoModel model, MarketplaceItemModel item)
         {
             var result = await _dalRequestInfo.Add(model, null);
             //error occurs on Add, don't stop download.
@@ -230,7 +196,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 var modelNew = _dalRequestInfo.GetById(result);
 
                 //we are adding a request info with an smprofile, get the associated sm profile.
-                modelNew.SmProfile = smProfile;
+                modelNew.ExternalSource = item.ExternalSource;
 
                 var subject = REQUESTINFO_SUBJECT.Replace("{{RequestType}}", "Download Nodeset Notification");
                 var body = await this.RenderViewAsync("~/Views/Template/RequestInfo.cshtml", modelNew);
@@ -245,6 +211,25 @@ namespace CESMII.Marketplace.Api.Controllers
             {
                 _logger.LogCritical($"ProfileController|Add|RequestInfo Item added (good)|Error: Email send error: {e.Message}.");
             }
+        }
+
+        private async Task<ExternalItemExportModel> ExportExternalSourceItem(ExternalSourceSimple item)
+        {
+            //get the source
+            var src = _dalExternalSource.GetById(item.SourceId);
+            if (src == null)
+            {
+                throw new ArgumentException($"External source not found: SourceId: {item.SourceId}, Code:{item.Code}");
+            }
+
+            //now get the source data 
+            var dalSource = await _sourceFactory.InitializeSource(src);
+            var result = await dalSource.Export(item.ID);
+            if (result == null)
+            {
+                throw new ArgumentException($"External source item not found: Id: {item.ID}, SourceId: {item.SourceId}, Code:{item.Code}");
+            }
+            return result;
         }
     }
 }

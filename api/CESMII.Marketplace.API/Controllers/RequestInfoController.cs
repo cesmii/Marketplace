@@ -24,20 +24,24 @@ namespace CESMII.Marketplace.Api.Controllers
     {
 
         private readonly IDal<RequestInfo, RequestInfoModel> _dal;
-        private readonly IExternalDAL<MarketplaceItemModel> _dalCloudLib;
         private readonly MailRelayService _mailRelayService;
+        private readonly IExternalSourceFactory<MarketplaceItemModel> _sourceFactory;
+        private readonly IDal<ExternalSource, ExternalSourceModel> _dalExternalSource;
 
         public RequestInfoController(
             IDal<RequestInfo, RequestInfoModel> dal,
-            IExternalDAL<MarketplaceItemModel> dalCloudLib,
             UserDAL dalUser,
-            ConfigUtil config, ILogger<RequestInfoController> logger,
+            ConfigUtil config,
+            IExternalSourceFactory<MarketplaceItemModel> sourceFactory,
+            IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
+            ILogger<RequestInfoController> logger,
             MailRelayService mailRelayService)
             : base(config, logger, dalUser)
         {
             _dal = dal;
-            _dalCloudLib = dalCloudLib;
             _mailRelayService = mailRelayService;
+            _sourceFactory = sourceFactory;
+            _dalExternalSource = dalExternalSource;
         }
 
 
@@ -87,12 +91,6 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest($"No records found matching this ID: {model.ID}");
             }
 
-            //if we are getting a request info of smprofile type, then also get the associated sm profile.
-            if (result.SmProfileId.HasValue)
-            {
-                result.SmProfile = await _dalCloudLib.GetById(result.SmProfileId.Value.ToString());
-            }
-
             return Ok(result);
         }
 
@@ -129,15 +127,8 @@ namespace CESMII.Marketplace.Api.Controllers
                 //Don't fail to user submitting request if email send fails, log critical. 
                 try
                 {
-
                     //populate some fields that may not be present on the add model. (request type code, created date). 
                     modelNew = _dal.GetById(result);
-
-                    //if we are adding a request info of smprofile type, then also get the associated sm profile.
-                    if (modelNew.SmProfileId.HasValue)
-                    {
-                        modelNew.SmProfile = await _dalCloudLib.GetById(modelNew.SmProfileId.Value.ToString());
-                    }
 
                     var subject = GetEmailSubject(modelNew);
                     var body = await this.RenderViewAsync(GetRenderViewUrl(modelNew), modelNew);

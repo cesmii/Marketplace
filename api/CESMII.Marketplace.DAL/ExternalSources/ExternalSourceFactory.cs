@@ -81,7 +81,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                 catch (Exception e)
                 {
                     //log complete message to logger and abbreviated message to user. 
-                    _logger.LogCritical(e, $"SourceFactory|InstantiateSource|ExternalSourceId:{model.ID}||ExternalSourceId:{model.TypeName}|Error|{e.Message}");
+                    _logger.LogCritical(e, $"SourceFactory|InstantiateSource|ExternalSourceId:{model.ID}||ExternalSourceType:{model.TypeName}|Error|{e.Message}");
                     throw;
                 }
             }

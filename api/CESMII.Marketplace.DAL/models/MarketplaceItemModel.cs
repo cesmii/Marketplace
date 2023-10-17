@@ -1,6 +1,7 @@
 ﻿namespace CESMII.Marketplace.DAL.Models
 {
     using CESMII.Marketplace.Common.Enums;
+    using CESMII.Marketplace.Data.Entities;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -113,17 +114,16 @@
         public string ccEmail2 { get; set; }
 
         /// <summary>
-        /// This will be an indicator of where this item is source from. 
-        /// The value is determined at runtime in the DAL based on where we get the data from.
+        /// Id, source id and code related to external source. Can be null.
         /// </summary>
-        public string ExternalSourceId { get; set; }
+        public ExternalSourceSimple ExternalSource { get; set; }
 
         /// <summary>
         /// This will be an indicator that this item is derived from an external data source. 
         /// The value is determined at runtime in the DAL based on where we get the data from.
         /// Default to false. 
         /// </summary>
-        public bool IsExternal { get { return (!string.IsNullOrEmpty(ExternalSourceId));  } }
+        public bool IsExternal { get { return (ExternalSource != null && !string.IsNullOrEmpty(ExternalSource.SourceId));  } }
 
         public override string ToString() => $"{DisplayName} {ID}";
 
@@ -212,5 +212,14 @@
     {
         public LookupItemModel RelatedType { get; set; }
         public List<MarketplaceItemRelatedModel> Items { get; set; }
+    }
+
+    /// <summary>
+    /// Extend marketplaceitemmodel for the export scenario.
+    /// </summary>
+    public class ExternalItemExportModel
+    {
+        public MarketplaceItemModel Item { get; set; }
+        public string Data { get; set; }
     }
 }

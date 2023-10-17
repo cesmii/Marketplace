@@ -3,15 +3,6 @@
     using CESMII.Marketplace.Common.Enums;
 
     /// <summary>
-    /// Extend marketplaceitemmodel for the export scenario.
-    /// </summary>
-    public class ProfileItemExportModel
-    {
-        public MarketplaceItemModel Item { get; set; }
-        public string NodesetXml { get; set; }
-    }
-
-    /// <summary>
     /// A profile related marketplace item. Used in the admin tool to make selections
     /// where keeping data small is helpful
     /// </summary>

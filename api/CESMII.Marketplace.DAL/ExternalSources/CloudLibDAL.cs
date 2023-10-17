@@ -101,17 +101,17 @@
             return MapToModelNamespace(entity, entityLocal);
         }
 
-        public async Task<ProfileItemExportModel> Export(string id)
+        public async Task<ExternalItemExportModel> Export(string id)
         {
             var entity = await _cloudLib.DownloadAsync(id);
             if (entity == null) return null;
 
             //return the whole thing because we also email some info to request info and use
             //other data in this entity.
-            var result = new ProfileItemExportModel()
+            var result = new ExternalItemExportModel()
             {
                 Item = MapToModelNamespace(entity, null),
-                NodesetXml = entity.Nodeset?.NodesetXml
+                Data = entity.Nodeset?.NodesetXml
             };
             return result;
         }
@@ -261,7 +261,8 @@
                     ImageBanner = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageBanner.ID)),
                     ImageLandscape = _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageLandscape.ID)),
                     Cursor = entity.Cursor,
-                    ExternalSourceId = _config.ID
+                    //we expect this is unique - per source
+                    ExternalSource = new ExternalSourceSimple() { ID = entity.Node.Identifier.ToString(), SourceId = _config.ID, Code = _config.Code }
                 };
             }
             else
@@ -322,7 +323,8 @@
                         _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageLandscape.ID)) :
                         new ImageItemModel() { Src = entity.IconUrl.ToString() },
                     Updated = entity.Nodeset?.LastModifiedDate,
-                    ExternalSourceId = "cloudlib"  //TBD - update this once we fold this into external source approach
+                    //we expect this is unique - per source
+                    ExternalSource = new ExternalSourceSimple() { ID = entity.Nodeset.Identifier.ToString(), SourceId = _config.ID, Code = _config.Code }
                 };
 
                 //get related data - if any

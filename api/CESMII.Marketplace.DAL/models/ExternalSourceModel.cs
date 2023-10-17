@@ -31,10 +31,6 @@ namespace CESMII.Marketplace.DAL.Models
         public string TypeName { get; set; }
         public string BaseUrl { get; set; }
         public string AccessToken { get; set; }
-        /// <summary>
-        /// List of 1:many urls that may be used in the calling of the API
-        /// </summary>
-        public List<KeyValuePair<string, string>> Urls { get; set; }
 
         /// <summary>
         /// Field to store settings and structure unique to this external source

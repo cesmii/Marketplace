@@ -102,7 +102,7 @@ function ProfileItemRow(props) { //props are item, showActions
                     {props.item.abstract != null &&
                         <div className="mb-0" dangerouslySetInnerHTML={{ __html: props.item.abstract }} ></div>
                     }
-                    <p className="my-4" ><Button variant="secondary" type="button" className="px-4" href={`/profile/${props.item.id}`} >More Info</Button>
+                    <p className="my-4" ><Button variant="secondary" type="button" className="px-4" href={`/${props.item.externalSource.code}/profile/${props.item.id}`} >More Info</Button>
                     </p>
                     {(props.item.namespace != null && props.item.namespace !== '') &&
                         <p className="mb-2" ><b className="mr-2" >Namespace:</b>
@@ -143,7 +143,7 @@ function ProfileItemRow(props) { //props are item, showActions
                         </p>
                     </div>
                     <div className="ml-auto" >
-                        <Button variant="secondary" type="button" className="text-nowrap" href={`/profile/${props.item.id}`} >More Info</Button>
+                        <Button variant="secondary" type="button" className="text-nowrap" href={`${props.item.externalSource.code}/profile/${props.item.id}`} >More Info</Button>
                     </div>
                 </div>
             </div>

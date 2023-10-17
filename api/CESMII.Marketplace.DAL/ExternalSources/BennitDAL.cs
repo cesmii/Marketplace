@@ -60,6 +60,11 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         public string Name { get; set; }
     }
 
+    public class BennitConfigData
+    {
+        public List<KeyValuePair<string, string>> Urls { get; set; }
+    }
+
     public class BennitErrorResponse
     {
         public string Error { get; set; }
@@ -78,6 +83,9 @@ namespace CESMII.Marketplace.DAL.ExternalSources
 
         protected ExternalSourceModel _configSmProfile;
         protected List<ImageItemModel> _images;
+        // Custom implementation of the Data property in the DB. 
+        // This can be unique for each source.
+        protected BennitConfigData _configCustom;
 
         public BennitDAL(ExternalSourceModel config,
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
@@ -125,11 +133,14 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                 _config.DefaultImagePortrait?.ID,
                 _config.DefaultImageBanner?.ID
             }).Result;
+
+            //set up the _config data attribute specifically for the Bennit DAL
+            _configCustom = JsonConvert.DeserializeObject<BennitConfigData>(_config.Data);
         }
 
         public async Task<MarketplaceItemModel> GetById(string id) {
 
-            string url = _config.Urls.Find(x => x.Key.ToLower().Equals("getbyid")).Value;
+            string url = _configCustom.Urls.Find(x => x.Key.ToLower().Equals("getbyid")).Value;
             if (string.IsNullOrEmpty(url)) throw new InvalidOperationException($"External Source|Url 'GetById' is not properly configured.");
 
             MultipartFormDataContent formData = PrepareFormData(SearchModeEnum.detail, id);
@@ -151,7 +162,12 @@ namespace CESMII.Marketplace.DAL.ExternalSources
 
         public async Task<DALResultWithSource<MarketplaceItemModel>> GetManyById(List<string> ids)
         {
-            throw new NotSupportedException();
+            _logger.Log(NLog.LogLevel.Info, $"BennitDAL|GetManyById|Not supported for this data source.");
+            return await Task.Run(() =>
+            {
+                return new DALResultWithSource<MarketplaceItemModel>()
+                { Count = 0, Data = new List<MarketplaceItemModel>(), SourceId = _config.ID, Cursor = null };
+            });
         }
 
         public async Task<DALResultWithSource<MarketplaceItemModel>> GetAll() {
@@ -201,7 +217,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
 
             //for now, just support query value. still pass in the other stuff so 
             //we have it for future enhancements. 
-            string url = _config.Urls.Find(x => x.Key.ToLower().Equals("search")).Value;
+            string url = _configCustom.Urls.Find(x => x.Key.ToLower().Equals("search")).Value;
             if (string.IsNullOrEmpty(url)) throw new InvalidOperationException($"External Source|Url 'search' is not properly configured.");
 
             MultipartFormDataContent formData = PrepareFormData(SearchModeEnum.search, query, cursor.Skip, cursor.Take);
@@ -234,7 +250,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
             return result;
         }
 
-        public async Task<ProfileItemExportModel> Export(string id)
+        public async Task<ExternalItemExportModel> Export(string id)
         {
             throw new NotSupportedException();
         }
@@ -324,7 +340,8 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                         _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageBanner?.ID))),
                     ImageLandscape = MapToModelImage(entity.BannerImage, $"{entity.Headline.Replace(" ", "-")} - landscape",
                         _images.FirstOrDefault(x => x.ID.Equals(_config.DefaultImageLandscape?.ID))),
-                    ExternalSourceId = _config.ID  //we need to ensure this is unique
+                    //we expect this is unique - per source
+                    ExternalSource = new ExternalSourceSimple() { ID = entity.Id, SourceId = _config.ID, Code = _config.Code }
                 };
                 //get additional data under certain scenarios
                 if (verbose)

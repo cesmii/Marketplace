@@ -17,7 +17,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        Task<ProfileItemExportModel> Export(string id);
+        Task<ExternalItemExportModel> Export(string id);
 
         /// <summary>
         /// Get a list of items by passing a list of ids to requestor.
