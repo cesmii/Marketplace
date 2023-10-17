@@ -366,7 +366,7 @@ namespace CESMII.Marketplace.Api.Controllers
             _logger.LogInformation($"MarketplaceController|AdvancedSearchExecuteTasks|Setting up tasks.");
             var mtkplCursor = PrepareSearchCursor(model, null);
 
-            AdvancedSearchLogDurationTime("Prep", timer.ElapsedMilliseconds - 0);
+            //AdvancedSearchLogDurationTime("Prep", timer.ElapsedMilliseconds - 0);
             long swMarketPlaceStart = timer.ElapsedMilliseconds;
             var searchMarketplaceTask = AdvancedSearchMarketplace(model, mtkplCursor, types, keywordTypes, cats, verts, pubs, liveOnly);
             _ = searchMarketplaceTask.ContinueWith(t => AdvancedSearchLogDurationTime("Marketplace", timer.ElapsedMilliseconds - swMarketPlaceStart));
@@ -412,15 +412,14 @@ namespace CESMII.Marketplace.Api.Controllers
             }
 
             //run query calls in parallel
-            long swWhenAllStart = timer.ElapsedMilliseconds;
+            //long swWhenAllStart = timer.ElapsedMilliseconds;
             var allTasks = Task.WhenAll(listSearchExternalSources);
-            //_ = allTasks.ContinueWith(t => durations.Add(new KeyValuePair<string, long>("All Sources", timer.ElapsedMilliseconds - swAllStart)));
             //wrap exception handling around the tasks execution so no task exception gets lost
             try
             {
                 _logger.LogInformation($"MarketplaceController|AdvancedSearch|Await outcome of .whenAll");
                 await allTasks;
-                AdvancedSearchLogDurationTime("When All", timer.ElapsedMilliseconds - swWhenAllStart);
+                //AdvancedSearchLogDurationTime("When All", timer.ElapsedMilliseconds - swWhenAllStart);
             }
             catch (Exception ex)
             {

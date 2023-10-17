@@ -200,6 +200,8 @@ namespace CESMII.Marketplace.Api.Controllers
                 case "sm-profile":
                 case "marketplaceitem":
                     return REQUESTINFO_SUBJECT.Replace("{{RequestType}}", $"Request More Info | {item.RequestType.Name}");
+                case "external-source":
+                    return REQUESTINFO_SUBJECT.Replace("{{RequestType}}", $"Request More Info | {item.ExternalItem.Type.Name}");
                 case "membership":
                 case "contribute":
                 case "request-demo":

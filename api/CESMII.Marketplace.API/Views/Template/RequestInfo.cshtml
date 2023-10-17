@@ -31,6 +31,9 @@ else if (Model.ExternalItem != null)
     <div>
         <h2>Related To</h2>
         <p>@Model.ExternalItem.Type.Name: @Model.ExternalItem.DisplayName</p>
+        @if (!string.IsNullOrEmpty(Model.ExternalItem.Abstract)) {
+            <p>@Model.ExternalItem.Abstract</p>
+        }
     </div>
 }
 

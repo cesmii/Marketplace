@@ -38,13 +38,93 @@ function RequestInfo() {
         caption: 'Request Info', captionDescription: 'Message', requireCompanyInfo: true, showMembershipStatus: false, showIndustry: false
     });
     const [_forceReload, setForceReload] = useState(0); //increment this value to cause a re-init of the page.
+    const [_initialized, setInitialized] = useState(false);
+
+
+    function initRequestInfoItem() {
+
+        //only run once
+        if (_initialized) return _item;
+        setInitialized(true);
+
+        //init to blank object
+        var result = JSON.parse(JSON.stringify(AppSettings.requestInfoNew));
+
+        //itemType - either marketplace or sm profile
+        if (itemType === "app" && id != null) {
+            result.marketplaceItemId = id;
+            result.requestTypeCode = "marketplaceitem";
+            setFormDisplay({
+                ..._formDisplay, caption: 'Request More Info', captionDescription: 'Tell Us About Your Project(s)'
+                , showMembershipStatus: true, showIndustry: true
+            });
+        }
+        //else if (itemType === "profile" && id != null) {
+        //    item.requestTypeCode = "smprofile";
+        //    setFormDisplay({
+        //        ..._formDisplay, caption: 'Request More Info', captionDescription: 'Tell Us About Your Project(s)'
+        //        , showMembershipStatus: true, showIndustry: true
+        //    });
+        //}
+        else if (code != null && externalId != null) {
+            result.requestTypeCode = "external-source";
+            setFormDisplay({
+                ..._formDisplay, caption: 'Request More Info', captionDescription: 'Tell Us About Your Project(s)'
+                , showMembershipStatus: true, showIndustry: true
+            });
+        }
+        else if (publisherId != null) {
+            result.publisherId = publisherId;
+            result.requestTypeCode = "publisher";
+            setFormDisplay({
+                ..._formDisplay, caption: 'Request Info', captionDescription: 'Message'
+                , showMembershipStatus: true, showIndustry: true
+            });
+        }
+        else if (type != null && type === "contribute") {
+            result.requestTypeCode = "contribute";
+            setFormDisplay({
+                ..._formDisplay, caption: 'Contact Us - Become a Publisher', captionDescription: 'Tell Us About Your Project(s)'
+                , requireCompanyInfo: true, showMembershipStatus: true, showIndustry: true
+            });
+        }
+        else if (type != null && type === "membership") {
+            result.requestTypeCode = "membership";
+            setFormDisplay({
+                ..._formDisplay, caption: 'Contact Us - Become a CESMII Member'
+                , requireCompanyInfo: true, showMembershipStatus: true
+            });
+        }
+        else if (type != null && type === "request-demo") {
+            result.requestTypeCode = "request-demo";
+            setFormDisplay({
+                ..._formDisplay, caption: 'Contact Us - Request a Demo'
+                , requireCompanyInfo: true, showMembershipStatus: true, showIndustry: true
+            });
+        }
+        else if (type != null && type === "support") {
+            result.requestTypeCode = "support";
+            setFormDisplay({
+                ..._formDisplay, caption: 'Contact Us - Support'
+                , requireCompanyInfo: false
+            });
+        }
+        else {
+            result.requestTypeCode = "general";
+            setFormDisplay({
+                ..._formDisplay, caption: 'Contact Us'
+                , requireCompanyInfo: false, showMembershipStatus: true, showIndustry: true
+            });
+        }
+        return result;
+    }
 
     //-------------------------------------------------------------------
     // Region: Hooks
     //-------------------------------------------------------------------
     //get referrer item
     useEffect(() => {
-        async function fetchData() {
+        async function fetchData(itm) {
             console.log(generateLogMessageString('useEffect||fetchData||async', CLASS_NAME));
 
             //initialize spinner during loading
@@ -86,16 +166,20 @@ function RequestInfo() {
             //if (itemType === "profile") {
             //    setItem({ ..._item, smProfile: { id: result.data.id, namespace: result.data.namespace } });
             //}
-            if (itemType != null && itemType === 'profile' && id != null) {
-                setItem({ ..._item, externalItem: result.data.externalSource });
-            }
+            //set some data based on this flow
+            itm.externalSource = itemType === 'profile' ? result.data.externalSource : null;
+            //set the state of the item which is a combo of this and the init request info call earlier
+            setItem(itm);
 
             setLoadingProps({ isLoading: false, message: null });
         }
 
-        //fetch referrer data 
+        //init the item object
+
+        //fetch referrer data
         if (id != null || publisherId != null) {
-            fetchData();
+            var itm = initRequestInfoItem();
+            fetchData(itm);
         }
 
         //this will execute on unmount
@@ -107,7 +191,7 @@ function RequestInfo() {
 
     //EXTERNAL SOURCE SCENARIO - get referrer item
     useEffect(() => {
-        async function fetchData() {
+        async function fetchData(itm) {
             console.log(generateLogMessageString('useEffect||fetchData||externalSource||async', CLASS_NAME));
             //initialize spinner during loading
             setLoadingProps({ isLoading: true, message: null });
@@ -139,7 +223,12 @@ function RequestInfo() {
             result.data.metaTagsConcatenated = result.data == null || result.data.metaTags == null ? "" : result.data.metaTags.join(', ');
             //set item state value
             setReferrerItem(result.data);
-            setItem({ ..._item, externalItem: result.data.externalSource });
+            //init to blank object and init some settings based on this flow
+            //set some data based on this flow
+            itm.externalSource = result.data.externalSource;
+            //itm.requestTypeCode = "external-source";
+            //set the state of the item which is a combo of this and the init request info call earlier
+            setItem(itm);
 
             setLoadingProps({ isLoading: false, message: null });
         }
@@ -147,7 +236,8 @@ function RequestInfo() {
         //fetch referrer data 
         //only if the path includes sourceCode and externalId
         if (code != null && externalId != null) {
-            fetchData();
+            var itm = initRequestInfoItem();
+            fetchData(itm);
         }
 
         //this will execute on unmount
@@ -166,84 +256,22 @@ function RequestInfo() {
     }, [loadingProps.lookupDataStatic]);
 
     //-------------------------------------------------------------------
-    // Set caption, request type
+    // Set caption, show/hide fields
     //-------------------------------------------------------------------
     useEffect(() => {
 
-        //init to blank object
-        var item = JSON.parse(JSON.stringify(AppSettings.requestInfoNew));
-
-        //itemType - either marketplace or sm profile
-        if (itemType === "app" && id != null) {
-            item.marketplaceItemId = id;
-            item.requestTypeCode = "marketplaceitem";
-            setFormDisplay({
-                ..._formDisplay, caption: 'Request More Info', captionDescription: 'Tell Us About Your Project(s)'
-                , showMembershipStatus: true, showIndustry: true
-            });
+        //only run once
+        if (!_initialized) {
+            var itm = initRequestInfoItem();
+            //update state
+            setItem(itm);
         }
-        else if (itemType === "profile" && id != null) {
-            item.smProfileId = id;
-            item.requestTypeCode = "smprofile";
-            setFormDisplay({
-                ..._formDisplay, caption: 'Request More Info', captionDescription: 'Tell Us About Your Project(s)'
-                , showMembershipStatus: true, showIndustry: true
-            });
-        }
-        else if (publisherId != null)
-        {
-            item.publisherId = publisherId; 
-            item.requestTypeCode = "publisher";
-            setFormDisplay({
-                ..._formDisplay, caption: 'Request Info', captionDescription: 'Message'
-                , showMembershipStatus: true, showIndustry: true
-            });
-        }
-        else if (type != null && type === "contribute")
-        {
-            item.requestTypeCode = "contribute";
-            setFormDisplay({
-                ..._formDisplay, caption: 'Contact Us - Become a Publisher', captionDescription: 'Tell Us About Your Project(s)'
-                , requireCompanyInfo: true, showMembershipStatus: true, showIndustry: true
-            });
-        }
-        else if (type != null && type === "membership") {
-            item.requestTypeCode = "membership";
-            setFormDisplay({
-                ..._formDisplay, caption: 'Contact Us - Become a CESMII Member'
-                , requireCompanyInfo: true, showMembershipStatus: true
-            });
-        }
-        else if (type != null && type === "request-demo") {
-            item.requestTypeCode = "request-demo";
-            setFormDisplay({
-                ..._formDisplay, caption: 'Contact Us - Request a Demo'
-                , requireCompanyInfo: true, showMembershipStatus: true, showIndustry: true
-            });
-        }
-        else if (type != null && type === "support") {
-            item.requestTypeCode= "support";
-            setFormDisplay({
-                ..._formDisplay, caption: 'Contact Us - Support'
-                , requireCompanyInfo: false
-            });
-        }
-        else {
-            item.requestTypeCode = "general";
-            setFormDisplay({
-                ..._formDisplay, caption: 'Contact Us'
-                , requireCompanyInfo: false, showMembershipStatus: true, showIndustry: true
-            });
-        }
-
-        //update state
-        setItem(item);
 
         //this will execute on unmount
         return () => {
             console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
         };
-    }, [id, publisherId, type, itemType, _forceReload]);
+    }, [type, itemType, _forceReload]);
 
 
     //-------------------------------------------------------------------
