@@ -890,8 +890,7 @@ namespace CESMII.Marketplace.Api.Controllers
                     cursor,
                     ids: null,
                     processes: cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
-                    verticals: verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList(),
-                    exclude: _configUtil.CloudLibSettings?.ExcludedNodeSets);
+                    verticals: verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList());
 
                 //check to see if the CloudLib returned data. 
                 if (cats.Count == 0 && verts.Count == 0 && string.IsNullOrEmpty(query)
@@ -911,8 +910,7 @@ namespace CESMII.Marketplace.Api.Controllers
             var dalSource = await _sourceFactory.InitializeSource(src);
             return await dalSource.Where(model.Query, nextCursor, null,
                 processes: cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
-                verticals: verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList(),
-                null);
+                verticals: verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList());
         }
 
 

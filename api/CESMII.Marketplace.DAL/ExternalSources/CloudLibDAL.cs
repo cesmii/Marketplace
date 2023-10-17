@@ -6,11 +6,10 @@
     using System.Threading.Tasks;
 
     using Microsoft.Extensions.Configuration;
-    using NLog;
+    using Newtonsoft.Json;
 
     using CESMII.Marketplace.Common;
     using CESMII.Marketplace.Common.Enums;
-    using CESMII.Marketplace.Common.Models;
     using CESMII.Marketplace.DAL.Models;
     using CESMII.Marketplace.DAL.ExternalSources.Models;
     using CESMII.Marketplace.Data.Entities;
@@ -24,11 +23,21 @@
     /// </summary>
     public class CloudLibDAL : ExternalBaseDAL<ExternalAbstractEntity, MarketplaceItemModel>, IExternalDAL<MarketplaceItemModel>
     {
+        private class CloudLibConfigData
+        {
+            public UACloudLibClient.Options Settings { get; set; }
+            public List<string> ExcludedNodeSets { get; set; }
+        }
+
         private ICloudLibWrapper _cloudLib;
         protected IMongoRepository<ProfileItem> _repoExternalItem;
         protected IMongoRepository<MarketplaceItem> _repoMarketplace;
         protected List<LookupItemModel> _lookupItemsRelatedType;
         protected List<ImageItemModel> _images;
+        // Custom implementation of the Data property in the DB. 
+        // This can be unique for each source.
+        private CloudLibConfigData _configCustom;
+
 
         public CloudLibDAL(ExternalSourceModel config,
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
@@ -63,12 +72,15 @@
             IMongoRepository<ProfileItem> repoExternalItem
             )
         {
+            //grab Cloud lib url, user name and password and excluded nodeset
+            //TBD - decrypt this data
+            _configCustom = JsonConvert.DeserializeObject<CloudLibConfigData>(_config.Data);
+            _configCustom.Settings.EndPoint = _config.BaseUrl;
+
             //instantiate this way rather than through DI so that the factory does not need to know 
             //about specifics of each external data source
-            var settings = new UACloudLibClient.Options();
-            configuration.GetSection("CloudLibrary").Bind(settings);
             Microsoft.Extensions.Options.IOptions<UACloudLibClient.Options> options =
-                Microsoft.Extensions.Options.Options.Create(settings);
+                Microsoft.Extensions.Options.Options.Create(_configCustom.Settings);
             //Microsoft.Extensions.Logging.ILogger<CloudLibWrapper> log = 
             //    Microsoft.Extensions.Logging.LoggerFactoryExtensions.CreateLogger<CloudLibWrapper>();
             _cloudLib = new CloudLibWrapper(options, null); //logger not used in CloudLibWrapper
@@ -124,8 +136,7 @@
 
         public async Task<DALResultWithSource<MarketplaceItemModel>> Where(string query,
             SearchCursor cursor, 
-            List<string> ids = null, List<string> processes = null, List<string> verticals = null, 
-            List<string> exclude = null)
+            List<string> ids = null, List<string> processes = null, List<string> verticals = null)
         {
             var timer = System.Diagnostics.Stopwatch.StartNew();
             //Note - splitting out each word in query into a separate string in the list
@@ -167,7 +178,7 @@
             {
                 actualTake = Math.Min((cursor.Skip + cursor.Take ?? 100) - (int)result.Count, 100);
                 bMore = false;
-                matches = await _cloudLib.SearchAsync(actualTake, currentCursor, backwards, keywords, exclude, cursor.HasTotalCount,
+                matches = await _cloudLib.SearchAsync(actualTake, currentCursor, backwards, keywords, _configCustom.ExcludedNodeSets, cursor.HasTotalCount,
                     order:
                         new { metadata = new { title = OrderEnum.ASC }, modelUri = OrderEnum.ASC, publicationDate = OrderEnum.DESC });// "{metadata: {title: ASC}, modelUri: ASC, publicationDate: DESC}");
                 if (matches == null || matches.Edges == null) return result;

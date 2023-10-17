@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Net.Http;
-using System.Text;
-using System.Net.Mime;
 
 using Newtonsoft.Json;
 
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Models;
-using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.DAL.ExternalSources.Models;
@@ -60,11 +57,6 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         public string Name { get; set; }
     }
 
-    public class BennitConfigData
-    {
-        public List<KeyValuePair<string, string>> Urls { get; set; }
-    }
-
     public class BennitErrorResponse
     {
         public string Error { get; set; }
@@ -75,6 +67,11 @@ namespace CESMII.Marketplace.DAL.ExternalSources
     /// </summary>
     public class BennitDAL : ExternalBaseDAL<BennitResponseEntity, MarketplaceItemModel> , IExternalDAL<MarketplaceItemModel>
     {
+        private class BennitConfigData
+        {
+            public List<KeyValuePair<string, string>> Urls { get; set; }
+        }
+
         private enum SearchModeEnum
         {
             detail,
@@ -85,7 +82,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         protected List<ImageItemModel> _images;
         // Custom implementation of the Data property in the DB. 
         // This can be unique for each source.
-        protected BennitConfigData _configCustom;
+        private BennitConfigData _configCustom;
 
         public BennitDAL(ExternalSourceModel config,
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
@@ -178,8 +175,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
 
         public async Task<DALResultWithSource<MarketplaceItemModel>> Where(string query,
             SearchCursor cursor, 
-            List<string> ids = null, List<string> processes = null, List<string> verticals = null,
-            List<string> exclude = null)
+            List<string> ids = null, List<string> processes = null, List<string> verticals = null)
         {
             var timer = System.Diagnostics.Stopwatch.StartNew();
             /*

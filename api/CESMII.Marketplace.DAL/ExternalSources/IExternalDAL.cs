@@ -42,6 +42,6 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         /// <param name="verticals"></param>
         /// <returns></returns>
         Task<DALResultWithSource<TModel>> Where(string query, SearchCursor cursor, 
-            List<string> ids = null, List<string> processes = null, List<string> verticals = null, List<string> exclude = null);
+            List<string> ids = null, List<string> processes = null, List<string> verticals = null);
     }
 }
