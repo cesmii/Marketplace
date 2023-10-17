@@ -36,7 +36,7 @@
   "scripts": {
     "start": "react-scripts start",
     "start-dev": "cross-env PORT=3001 react-scripts start",
-    "start-in-browser-test": "cross-env env-cmd -f .env.staging react-scripts start",
+    "start-in-browser-test": "cross-env env-cmd -f .env.inbrowsertest react-scripts start",
     "build": "cross-env GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
     "build:in-browser-test": "cross-env env-cmd -f .env.inbrowsertest npm run-script build",
