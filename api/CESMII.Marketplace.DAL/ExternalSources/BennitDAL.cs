@@ -32,14 +32,17 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         public string FK_Org_Id { get; set; }
         //properties not yet in data
         public List<BennitSkills> Skills { get; set; }
-        //public List<BennitSmProfileLink> RelatedProfiles { get; set; }
+        public List<BennitSmProfileLink> SMProfiles { get; set; }
         //public List<BennitSmProfileLink> Certifications { get; set; }
     }
 
     public class BennitSmProfileLink
     {
         public string Id { get; set; }
-        public string Name { get; set; }
+        public string Profile_Namespace_URI { get; set; }
+        public string Profile_Name { get; set; }
+        public string Profile_Marketplace_Id { get; set; }
+        public string Version { get; set; } = null;
     }
 
     public class BennitSkills
@@ -355,11 +358,11 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                         (string.IsNullOrEmpty(entity.Locations) ? "" : $"<p><b>Locations</b>: {entity.Locations}</p>");
 
                     //map related profiles
-                    /*
-                    var relatedItemsExternal = MapToModelRelatedProfiles(
+                    var relatedItemsExternal = MapToModelExternalItems(
                         new LookupItemModel() { ID = "1", DisplayOrder = 1, Code = "expertise", Name = "Expertise In" },
-                        entity.RelatedItemsExternal);
+                        entity.SMProfiles);
                     //map other related data
+                    /*
                     var relatedCertifications = MapToModelRelatedItems(
                         new LookupItemModel() { ID = "2", DisplayOrder = 2, Code = "certification", Name = "Certifications" },
                         entity.Certifications);
@@ -388,52 +391,31 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         /// <summary>
         /// Map profiles to related items
         /// </summary>
-        protected List<MarketplaceItemRelatedModel> MapToModelRelatedProfiles(LookupItemModel type, List<BennitSmProfileLink> items)
+        protected List<ExternalSourceItemModel> MapToModelExternalItems(LookupItemModel type, List<BennitSmProfileLink> items)
         {
             if (items == null)
             {
-                return new List<MarketplaceItemRelatedModel>();
+                return new List<ExternalSourceItemModel>();
             }
 
-            return items.Select(x => new MarketplaceItemRelatedModel()
+            return items.Select(x => new ExternalSourceItemModel()
                 {
                     RelatedId = x.Id,
-                    Abstract = null,
-                    DisplayName = x.Name,
-                    Description = null,
-                    Name = x.Name,
-                    //Type = new LookupItemModel() {  }, // x.Type,
-                    Version = null,
-                    ImagePortrait = _images.FirstOrDefault(x => x.ID.Equals(_configSmProfile.DefaultImagePortrait.ID)),
-                    ImageLandscape = _images.FirstOrDefault(x => x.ID.Equals(_configSmProfile.DefaultImageLandscape.ID)),
+                    DisplayName = x.Profile_Name,
+                    //Description = x.Description,
+                    Name = x.Profile_Name,
+                    Namespace = x.Profile_Namespace_URI,
+                    Version = x.Version,
                     //assumes only one related item per type
                     //TBD - move this to appSettings.
-                    RelatedType = type
+                    RelatedType = type,
+                    //RelatedType = //items.Find(x => x.ProfileId.Equals(x.ID)) == null ? null :
+                    //        MapToModelLookupItem(
+                    //        items.Find(z => z.ExternalSource.ID.Equals(x.ID)).RelatedTypeId,
+                    //        _lookupItemsRelatedType.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList()),
+                    //TBD - put in Cloud lib source here
+                    ExternalSource = null //x.ExternalSource
                 }).ToList();
-        }
-
-        protected List<MarketplaceItemRelatedModel> MapToModelRelatedItems(LookupItemModel type, List<BennitSmProfileLink> items)
-        {
-            if (items == null)
-            {
-                return new List<MarketplaceItemRelatedModel>();
-            }
-
-            return items.Select(x => new MarketplaceItemRelatedModel()
-            {
-                RelatedId = x.Id,
-                Abstract = null,
-                DisplayName = x.Name,
-                Description = null,
-                Name = x.Name,
-                //Type = new LookupItemModel() {  }, // x.Type,
-                Version = null,
-                ImagePortrait = _images.FirstOrDefault(x => x.ID.Equals(_configSmProfile.DefaultImagePortrait.ID)),
-                ImageLandscape = _images.FirstOrDefault(x => x.ID.Equals(_configSmProfile.DefaultImageLandscape.ID)),
-                //assumes only one related item per type
-                //TBD - move this to appSettings.
-                RelatedType = type
-            }).ToList();
         }
     }
 }
