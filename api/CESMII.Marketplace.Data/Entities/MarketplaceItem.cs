@@ -83,7 +83,7 @@
 
         public List<RelatedItem> RelatedItems { get; set; }
 
-        public List<RelatedProfileItem> RelatedProfiles { get; set; }
+        public List<RelatedExternalItem> RelatedItemsExternal { get; set; }
 
         public List<ActionLink> ActionLinks { get; set; }
 
@@ -141,18 +141,13 @@
     /// It is the profile id and the related type (recommended, required, related)
     /// </summary>
     [BsonIgnoreExtraElements]
-    //TBD - rename collection name once we cutover to this.
-    public class RelatedProfileItem
+    public class RelatedExternalItem
     {
         /// <summary>
-        /// This is the id from the CloudLib
+        /// This is the id of the item (from the native systems), 
+        /// the external source id from our db and the external source code from our db.
         /// </summary>
-        [BsonElement("ProfileId")]  //TBD - rename column name once we cutover to this.
-        public string ExternalId { get; set; }
-        /// <summary>
-        /// This is the id of the external source so we know where to get the data from.
-        /// </summary>
-        public BsonObjectId ExternalSourceId { get; set; }
+        public ExternalSourceSimple ExternalSource { get; set; }
         /// <summary>
         /// This will map to a lookup record for RelatedType
         /// </summary>

@@ -6,20 +6,18 @@
 
     /// <summary>
     /// This is the Mongo DB version of this entity.
-    /// Profile Item is a small subset of data related to SM Profiles from the CloudLib. 
-    /// The sole purpose of this collection is to establish a mechanism to manually establish/relate SM Profiles
-    /// to other marketplace items or SM profiles in the CloudLib. 
+    /// External Item is a small subset of data related to External items from external sources such as the CloudLib. 
+    /// The sole purpose of this collection is to establish a mechanism to manually establish/relate external items
+    /// to other marketplace items or other external items such as sm profiles in the CloudLib. 
     /// </summary>
     //TBD - rename collection name once we cutover to this.
     [BsonIgnoreExtraElements]
     public class ProfileItem : MarketplaceAbstractEntity
     {
         /// <summary>
-        /// Represents the id from the external source system
-        /// Unique. Must have no spaces or special characters.
+        /// Refers to an external item associated with this request info item
         /// </summary>
-        [BsonElement("ProfileId")]  //TBD - rename column name once we cutover to this.
-        public string ExternalId { get; set; }
+        public ExternalSourceSimple ExternalSource { get; set; }
 
         /// <summary>
         /// Represents marketplace items that are marked as related (required, recommended, similar)
@@ -31,6 +29,6 @@
         /// This only uses the CloudLibrary id to associate the items together. 
         /// </summary>
         [BsonElement("RelatedProfiles")]  //TBD - rename column name once we cutover to this.
-        public List<RelatedProfileItem> RelatedExternalItems { get; set; }
+        public List<RelatedExternalItem> RelatedExternalItems { get; set; }
     }
 }

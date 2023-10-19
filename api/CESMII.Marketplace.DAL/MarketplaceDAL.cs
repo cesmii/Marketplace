@@ -287,7 +287,7 @@
                     var relatedItems = MapToModelRelatedItems(entity.RelatedItems).Result;
 
                     //get related profiles from CloudLib
-                    var relatedProfiles = MapToModelRelatedProfiles(entity.RelatedProfiles);
+                    var relatedProfiles = MapToModelRelatedExternalItems(entity.RelatedItemsExternal);
                     
                     //map related items into specific buckets - required, recommended
                     result.RelatedItemsGrouped = GroupAndMergeRelatedItems(relatedItems, relatedProfiles);
@@ -364,11 +364,12 @@
                 }).ToList();
         }
 
+        //TBD - come back to this and re-factor for external sources 
         /// <summary>
         /// Get related items from DB, filter out each group based on required/recommended/related flag
         /// assume all related items in same collection and a type id distinguishes between the types. 
         /// </summary>
-        protected List<MarketplaceItemRelatedModel> MapToModelRelatedProfiles(List<RelatedProfileItem> items)
+        protected List<MarketplaceItemRelatedModel> MapToModelRelatedExternalItems(List<RelatedExternalItem> items)
         {
             if (items == null)
             {
@@ -376,7 +377,7 @@
             }
 
             //get list of profile items associated with this list of ids, call CloudLib to get the supporting info for these
-            var matches = _cloudLibDAL.GetManyById(items.Select(x => x.ExternalId).ToList()).Result.Data;
+            var matches = _cloudLibDAL.GetManyById(items.Select(x => x.ExternalSource?.ID).ToList()).Result.Data;
             return !matches.Any() ? new List<MarketplaceItemRelatedModel>() : 
                 matches.Select(x => new MarketplaceItemRelatedModel()
                 {
@@ -393,9 +394,11 @@
                     ImageBanner = x.ImageBanner,
                     ImageLandscape = x.ImageLandscape,
                     //assumes only one related item per type
-                    RelatedType = MapToModelLookupItem(items.Find(z => z.ExternalId.ToString().Equals(x.ID)).RelatedTypeId,
+                    RelatedType = MapToModelLookupItem(items.Find(z => z.ExternalSource != null && z.ExternalSource.ID.Equals(x.ID)).RelatedTypeId,
                             _lookupItemsAll.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList()),
-                }).ToList();
+                    ExternalSource = x.ExternalSource
+                })
+                .ToList();
         }
 
         /// <summary>

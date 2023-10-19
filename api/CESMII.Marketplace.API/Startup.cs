@@ -116,13 +116,13 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IJobFactory, JobFactory>();
             services.AddScoped<IHttpApiFactory, HttpApiFactory>();
             services.AddScoped<IExternalSourceFactory<MarketplaceItemModel>, ExternalSourceFactory<MarketplaceItemModel>>();
+            services.AddScoped<IExternalSourceFactory<AdminMarketplaceItemModel>, ExternalSourceFactory<AdminMarketplaceItemModel>>();
 
             //Cloud Lib
             services.Configure<Opc.Ua.Cloud.Library.Client.UACloudLibClient.Options>(Configuration.GetSection("CloudLibrary"));
             services.AddSingleton<Opc.Ua.Cloud.Library.Client.UACloudLibClient>();
             services.AddSingleton<ICloudLibWrapper, CloudLibWrapper>();
             services.AddScoped<IExternalDAL<MarketplaceItemModel>, CloudLibDAL>();
-            services.AddScoped<IAdminCloudLibDAL<AdminMarketplaceItemModel>, AdminCloudLibDAL>();
 
             //AAD - no longer need this
             // Add token builder.

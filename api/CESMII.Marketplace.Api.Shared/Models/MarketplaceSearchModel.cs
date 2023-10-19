@@ -1,4 +1,5 @@
 ﻿using CESMII.Marketplace.DAL.Models;
+using CESMII.Marketplace.Data.Entities;
 using System.Collections.Generic;
 
 namespace CESMII.Marketplace.Api.Shared.Models
@@ -29,4 +30,5 @@ namespace CESMII.Marketplace.Api.Shared.Models
         /// <remarks>This is calculated on search in the controller.</remarks>
         public List<LookupItemFilterModel> KeyWordItemTypes { get; set; }
     }
+
 }

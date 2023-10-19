@@ -52,7 +52,7 @@ function Routes() {
             {/*<PublicRoute exact path="/about" component={About} />*/}
             <PublicRoute exact path="/library/:code/:id" component={ExternalSourceEntity} />
             <PublicRoute exact path="/library/:id" component={MarketplaceEntity} />
-            <PublicRoute exact path="/:code/profile/:id" component={ProfileEntity} />
+            <PublicRoute exact path="/profile/:code/:id" component={ProfileEntity} />
             <PublicRouteWFilter exact path="/library" component={MarketplaceList} />
             <PublicRouteWFilter exact path="/all" component={MarketplaceList} />
             <PublicRoute exact path="/publisher/:id" component={PublisherEntity} />
@@ -77,8 +77,8 @@ function Routes() {
             <AdminRoute path="/admin/lookup/:id" component={AdminLookupEntity} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/jobDefinition/list" component={AdminJobDefinitionList} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/jobDefinition/:id" component={AdminJobDefinitionEntity} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/profile/list" component={AdminProfileList} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/profile/:id" component={AdminProfileEntity} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/externalsource/:code/list" component={AdminProfileList} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/externalsource/:code/:id" component={AdminProfileEntity} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/sitemap/generate" component={SitemapGenerator} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/account" component={AccountProfile} />
 

@@ -134,8 +134,6 @@ function RequestInfo() {
             try {
                 var data = { id: id != null ? id : publisherId };
                 var url = id != null ? `marketplace/getbyid` : `publisher/getbyid`;
-                //if profile item, override url
-                if (itemType != null && itemType === 'profile' && id != null) url = `profile/getbyid`;
                 result = await axiosInstance.post(url, data);
                // console.log("Log result ",result);
             }

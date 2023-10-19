@@ -3,13 +3,10 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Text;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
-
-using Newtonsoft.Json;
 
 using CESMII.Marketplace.Api.Shared.Models;
 using CESMII.Marketplace.Api.Shared.Controllers;
@@ -32,7 +29,6 @@ namespace CESMII.Marketplace.Api.Controllers
         private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
         private readonly IDal<Publisher, PublisherModel> _dalPublisher;
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
-        private readonly IExternalDAL<MarketplaceItemModel> _dalCloudLib;
         private readonly IDal<SearchKeyword, SearchKeywordModel> _dalSearchKeyword;
         private readonly IExternalSourceFactory<MarketplaceItemModel> _sourceFactory;
         private readonly IDal<ExternalSource, ExternalSourceModel> _dalExternalSource;
@@ -41,7 +37,6 @@ namespace CESMII.Marketplace.Api.Controllers
             IDal<LookupItem, LookupItemModel> dalLookup,
             IDal<Publisher, PublisherModel> dalPublisher,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
-            IExternalDAL<MarketplaceItemModel> dalCloudLib,
             IDal<SearchKeyword, SearchKeywordModel> dalSearchKeyword,
             UserDAL dalUser,
             IExternalSourceFactory<MarketplaceItemModel> sourceFactory,
@@ -53,7 +48,6 @@ namespace CESMII.Marketplace.Api.Controllers
             _dalPublisher = dalPublisher;
             _dalLookup = dalLookup;
             _dalAnalytics = dalAnalytics;
-            _dalCloudLib = dalCloudLib;
             _dalSearchKeyword = dalSearchKeyword;
 
             _sourceFactory = sourceFactory;
@@ -325,7 +319,7 @@ namespace CESMII.Marketplace.Api.Controllers
         [HttpPost, Route("admin/lookup/related")]
         [Authorize(Roles = "cesmii.marketplace.marketplaceadmin", Policy = nameof(PermissionEnum.UserAzureADMapped))]
         [ProducesResponseType(200, Type = typeof(DALResult<MarketplaceItemModel>))]
-        public async Task<IActionResult> AdminLookupProfiles([FromBody] MarketplaceSearchModel model)
+        public async Task<IActionResult> AdminLookupRelatedItems([FromBody] MarketplaceSearchModel model)
         {
             if (model == null)
             {
@@ -333,11 +327,30 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest($"Invalid model (null)");
             }
 
+            //get list of marketplace items
             var resultItems = _dal.GetAll()
-                .Select(x => new { ID = x.ID, DisplayName = x.DisplayName, Version = x.Version, Namespace = x.Namespace });
-            var resultProfiles = (await _dalCloudLib.GetAll()).Data
-                .Select(x => new { ID = x.ID, DisplayName = x.DisplayName, Version = x.Version, Namespace = x.Namespace });
-            return Ok(new { LookupItems = resultItems, LookupProfiles = resultProfiles });
+                .Select(x => new RelatedLookupModel() { ID = x.ID, DisplayName = x.DisplayName, Version = x.Version, Namespace = x.Namespace, ExternalSource = null });
+
+            //Loop over sources and return a collection of items across sources.
+            //Note some sources may not permit getall.
+            //add external sources tasks (except when calling from admin ui)
+            var sources = _dalExternalSource.Where(x => x.Enabled && x.IsActive, null, null, false, false).Data;
+
+            var resultExternalItems = new List<RelatedLookupModel>(); 
+            foreach (var src in sources)
+            {
+                if (!src.Enabled) continue;
+                var dalSource = await _sourceFactory.InitializeSource(src);
+
+                var itemsExternal = (await dalSource.GetAll()).Data
+                    .Select(x => new RelatedLookupModel() { ID = x.ID, DisplayName = x.DisplayName, Version = x.Version, Namespace = x.Namespace, ExternalSource = x.ExternalSource });
+                resultExternalItems.AddRange(itemsExternal);
+            }
+            resultExternalItems = resultExternalItems
+                .OrderBy(x => x.DisplayName)
+                .ThenBy(x => x.Namespace)
+                .ThenBy(x => x.Version).ToList();
+            return Ok(new { LookupItems = resultItems, LookupExternalItems = resultExternalItems });
         }
 
 
@@ -364,7 +377,7 @@ namespace CESMII.Marketplace.Api.Controllers
 
             //setup marketplace search task - native search of our data
             _logger.LogInformation($"MarketplaceController|AdvancedSearchExecuteTasks|Setting up tasks.");
-            var mtkplCursor = PrepareSearchCursor(model, null);
+            var mtkplCursor = MarketplaceUtil.PrepareSearchCursor(model, null);
 
             //AdvancedSearchLogDurationTime("Prep", timer.ElapsedMilliseconds - 0);
             long swMarketPlaceStart = timer.ElapsedMilliseconds;
@@ -382,7 +395,7 @@ namespace CESMII.Marketplace.Api.Controllers
 
                 foreach (var src in sources)
                 {
-                    if (!src.Enabled) continue;
+                    if (!src.Enabled || string.IsNullOrEmpty(src.TypeName)) continue;
 
                     //see if there are selections for this external source that warrant a search
                     // User driven flag to select only a certain type. Determine if none are selected or if item type of sm service is selected.
@@ -392,19 +405,19 @@ namespace CESMII.Marketplace.Api.Controllers
 
                     //cursor for this specific source - look at cached cursors and return the best cursor 
                     //option or new cursor for new searches
-                    var nextCursor = PrepareSearchCursor(model, src.ID);
+                    var nextCursor = MarketplaceUtil.PrepareSearchCursor(model, src.ID);
 
                     //TBD - temp logic - if the external source is CloudLib, then we still call a somewhat customized 
                     //flow. When time allows, come back and refine so we don't need the custom aspect of the flow. 
                     if (src.Code.ToLower().Equals("cloudlib"))
                     {
-                        var searchCloudLibTask = AdvancedSearchCloudLib(model, nextCursor, keywordTypes, cats, verts, pubs);
+                        var searchCloudLibTask = AdvancedSearchCloudLib(model, src, nextCursor, cats, verts, keywordTypes, pubs);
                         _ = searchCloudLibTask.ContinueWith(t => AdvancedSearchLogDurationTime(src.Code, timer.ElapsedMilliseconds - swExternalStart));
                         listSearchExternalSources.Add(searchCloudLibTask);
                     }
                     else
                     {
-                        var externalTask = AdvancedSearchExternal(model, cats, verts, src, nextCursor);
+                        var externalTask = AdvancedSearchExternal(model, src, nextCursor, cats, verts);
                         _ = externalTask.ContinueWith(t => AdvancedSearchLogDurationTime(src.Code, timer.ElapsedMilliseconds - swExternalStart));
                         listSearchExternalSources.Add(externalTask);
                     }
@@ -465,70 +478,6 @@ namespace CESMII.Marketplace.Api.Controllers
         {
             _logger.LogWarning($"MarketplaceController|{sender}|Duration: {key}: {duration}ms.");
         }
-
-        /// <summary>
-        /// For the next query we execute against each source, we need a search cursor to 
-        /// help the source only pull back the necessary data. When a user pages through the 
-        /// result, the starting point and ending point for the data is determined by the sort order
-        /// but also by the other sources contributions. A page may contain data from multiple sources
-        /// and we need to know how many rows from each source contributed to this page of data. 
-        /// Also, if we have visited this page of data (go from page 2 and back to page 1), re-use that info 
-        /// so that we can limit the extra processing time. 
-        /// </summary>
-        /// <param name="model"></param>
-        /// <param name="sourceId"></param>
-        private static SearchCursor PrepareSearchCursor(MarketplaceSearchModel model, string sourceId)
-        {
-            var pageIndex = model.Skip / model.Take;
-
-            //scenario - new search - no previous cached info
-            //if we enter on page 4 of a new search, we still need to get pages 0-4 because
-            //we won't yet know whether 1st 10 records of any source would contribute to the merged output.
-            if (model.CachedCursors == null)
-                return new SearchCursor()
-                {
-                    Skip = 0, 
-                    Take = model.Skip + model.Take, 
-                    PageIndex = pageIndex
-                };
-
-            //if source is not present, return new cursor
-            var match = model.CachedCursors.Find(x => x.SourceId == sourceId);
-            if (match == null || match.Cursors == null)
-                return new SearchCursor()
-                {
-                    Skip = 0,
-                    Take = model.Skip + model.Take,
-                    PageIndex = pageIndex
-                };
-
-            //find current page cached cursor (ie pageIndex is same). if present, use that cursor.
-            var result = match.Cursors.Find(x => x.PageIndex == pageIndex);
-            if (result != null) return result;
-
-            //else find cached cursor with previous page (ie pageIndex - 1).
-            //If present, use endIndex + 1 (or endCursor) as starting point
-            result = match.Cursors.Find(x => x.PageIndex == pageIndex - 1);
-            if (result != null) {
-                return new SearchCursor()
-                {
-                    StartCursor = result.EndCursor,
-                    EndCursor = null,
-                    Skip = result.Take.Value + 1,
-                    Take = result.Take + 1 + model.Take, 
-                    TotalCount = result.TotalCount
-                };
-            }
-
-            //if we get here, return new cursor
-            return new SearchCursor()
-            {
-                Skip = 0,
-                Take = model.Skip + model.Take,
-                PageIndex = pageIndex
-            };
-        }
-
 
         /// <summary>
         /// Check if we should filter by type
@@ -856,12 +805,13 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         private async Task<DALResultWithSource<MarketplaceItemModel>> AdvancedSearchCloudLib(
-            MarketplaceSearchModel model
-            , SearchCursor cursor
-            , List<LookupItemFilterModel> keywordTypes
-            , List<LookupItemFilterModel> cats
-            , List<LookupItemFilterModel> verts
-            , List<LookupItemFilterModel> pubs
+            MarketplaceSearchModel model,
+            ExternalSourceModel src,
+            SearchCursor nextCursor,
+            List<LookupItemFilterModel> cats,
+            List<LookupItemFilterModel> verts,
+            List<LookupItemFilterModel> keywordTypes,
+            List<LookupItemFilterModel> pubs
             )
         {
             _logger.LogInformation($"MarketplaceController|AdvancedSearchCloudLib|Starting...");
@@ -886,9 +836,8 @@ namespace CESMII.Marketplace.Api.Controllers
             {
                 //NEW: now search CloudLib.
                 _logger.LogTrace($"MarketplaceController|AdvancedSearchCloudLib|calling DAL...");
-                result = await _dalCloudLib.Where(query: query,
-                    cursor,
-                    ids: null,
+                var dalSource = await _sourceFactory.InitializeSource(src);
+                result = await dalSource.Where(model.Query, nextCursor, 
                     processes: cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
                     verticals: verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList());
 
@@ -904,11 +853,17 @@ namespace CESMII.Marketplace.Api.Controllers
             return result;
         }
 
-        private async Task<DALResultWithSource<MarketplaceItemModel>> AdvancedSearchExternal(MarketplaceSearchModel model, List<LookupItemFilterModel> cats, List<LookupItemFilterModel> verts, ExternalSourceModel src, SearchCursor nextCursor)
+        private async Task<DALResultWithSource<MarketplaceItemModel>> AdvancedSearchExternal(
+            MarketplaceSearchModel model,
+            ExternalSourceModel src,
+            SearchCursor nextCursor, 
+            List<LookupItemFilterModel> cats, 
+            List<LookupItemFilterModel> verts
+            )
         {
             //now perform the search(es)
             var dalSource = await _sourceFactory.InitializeSource(src);
-            return await dalSource.Where(model.Query, nextCursor, null,
+            return await dalSource.Where(model.Query, nextCursor, 
                 processes: cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
                 verticals: verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList());
         }

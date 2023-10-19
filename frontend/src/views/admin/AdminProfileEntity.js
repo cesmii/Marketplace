@@ -36,7 +36,7 @@ function AdminProfileEntity() {
     //-------------------------------------------------------------------
     const history = useHistory();
 
-    const { id } = useParams();
+    const { id, code } = useParams();
     //var pageMode = //state is not always present. If user types a url or we use an href link, state is null. history.location.state.viewMode;
     //see logic below for how we calculate.
     const [mode, setMode] = useState(initPageMode());
@@ -45,7 +45,7 @@ function AdminProfileEntity() {
     const [isReadOnly, setIsReadOnly] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_isValid, setIsValid] = useState({
-        profileId: true, relatedItems: true, relatedProfiles: true, relatedItemsMinCount: true
+        externalId: true, relatedItems: true, relatedItemsExternal: true, relatedItemsMinCount: true
     });
     const [_error, setError] = useState({ show: false, message: null, caption: null });
     const [_refreshItem, setRefreshItem] = useState(null);  //trigger a retrieval of data on select of profile id - new mode.
@@ -64,22 +64,22 @@ function AdminProfileEntity() {
 
         var result = null;
         try {
-            var data = { id: val };
-            var url = `admin/profile/getbyid`
+            var data = { id: val, code: code };
+            var url = `admin/externalsource/getbyid`
             result = await axiosInstance.post(url, data);
         }
         catch (err) {
-            var msg = 'An error occurred retrieving this profile item.';
+            var msg = 'An error occurred retrieving this external item.';
             console.log(generateLogMessageString('useEffect||fetchData||error', CLASS_NAME, 'error'));
             //console.log(err.response.status);
             if (err != null && err.response != null && err.response.status === 404) {
-                msg += ' This profile item was not found.';
+                msg += ' This item was not found.';
                 history.push('/404');
             }
             //403 error - user may be allowed to log in but not permitted to perform the API call they are attempting
             else if (err != null && err.response != null && err.response.status === 403) {
                 console.log(generateLogMessageString('useEffect||fetchData||Permissions error - 403', CLASS_NAME, 'error'));
-                msg += ' You are not permitted to edit profile items.';
+                msg += ' You are not permitted to edit external items.';
                 history.goBack();
             }
             setLoadingProps({
@@ -114,15 +114,15 @@ function AdminProfileEntity() {
 
         var result = null;
         try {
-            var url = `admin/profile/init`
-            result = await axiosInstance.post(url);
+            var url = `admin/externalsource/init`
+            result = await axiosInstance.post(url, code);
         }
         catch (err) {
-            var msg = 'An error occurred retrieving the blank profile item.';
+            var msg = 'An error occurred retrieving the blank external item.';
             console.log(generateLogMessageString('useEffect||fetchDataAdd||error', CLASS_NAME, 'error'));
             //console.log(err.response.status);
             if (err != null && err.response != null && err.response.status === 404) {
-                msg += ' A problem occurred with the add profile item screen.';
+                msg += ' A problem occurred with the add external item screen.';
                 history.push('/404');
             }
             setLoadingProps({
@@ -149,17 +149,17 @@ function AdminProfileEntity() {
     useEffect(() => {
         //fetch our data 
         // for view/edit modes
-        if ((id != null && id.toString() !== 'new')) {
+        if (id != null && id.toString() !== 'new' && code != null) {
             fetchData(id);
         }
-        else {
+        else if (id.toString() === 'new' && code != null) {
             fetchDataAdd();
         }
 
         //this will execute on unmount
         return () => {
         };
-    }, [id]);
+    }, [id, code]);
 
     useEffect(() => {
         //fetch our data 
@@ -250,9 +250,9 @@ function AdminProfileEntity() {
     //-------------------------------------------------------------------
     // Region: Validation
     //-------------------------------------------------------------------
-    const validateForm_profileId = (e) => {
+    const validateForm_externalId = (e) => {
         var isValid = e.target.value.toString() !== "-1";
-        setIsValid({ ..._isValid, profileId: isValid });
+        setIsValid({ ..._isValid, externalId: isValid });
     };
 
 
@@ -311,16 +311,16 @@ function AdminProfileEntity() {
             item.relatedItems.filter(x => x.relatedId === "-1" || x.relatedType?.id === "-1").length === 0;
     };
 
-    const validateForm_relatedProfiles = () => {
-        return item.relatedProfiles == null ||
-            item.relatedProfiles.filter(x => x.relatedId === "-1" || x.relatedType?.id === "-1").length === 0;
+    const validateForm_relatedItemsExternal = () => {
+        return item.relatedItemsExternal == null ||
+            item.relatedItemsExternal.filter(x => x.relatedId === "-1" || x.relatedType?.id === "-1").length === 0;
     };
 
     //must have at least one item to save (for now)
     const validateForm_relatedItemsMinCount = () => {
         const countRelatedItems = item.relatedItems == null ? 0 : item.relatedItems.length;
-        const countRelatedProfiles = item.relatedProfiles == null ? 0 : item.relatedProfiles.length;
-        return countRelatedItems + countRelatedProfiles > 0;
+        const countrelatedItemsExternal = item.relatedItemsExternal == null ? 0 : item.relatedItemsExternal.length;
+        return countRelatedItems + countrelatedItemsExternal > 0;
     };
     
     ////update state for when search click happens
@@ -340,13 +340,13 @@ function AdminProfileEntity() {
         _isValid.images.imageSquare = true; //item.imageSquare != null && item.imageSquare.id.toString() !== "-1";
         _isValid.images.imageLandscape = item.imageLandscape != null && item.imageLandscape.id.toString() !== "-1";
         */
-        _isValid.profileId = item.id != null && item.id.toString() !== "-1";
+        _isValid.externalId = item.id != null && item.id.toString() !== "-1";
         _isValid.relatedItems = validateForm_relatedItems();
-        _isValid.relatedProfiles = validateForm_relatedProfiles();
+        _isValid.relatedItemsExternal = validateForm_relatedItemsExternal();
         _isValid.relatedItemsMinCount = validateForm_relatedItemsMinCount();
 
         setIsValid(JSON.parse(JSON.stringify(_isValid)));
-        return (_isValid.profileId && _isValid.relatedItems && _isValid.relatedProfiles && _isValid.relatedItemsMinCount );
+        return (_isValid.externalId && _isValid.relatedItems && _isValid.relatedItemsExternal && _isValid.relatedItemsMinCount );
     }
 
     //-------------------------------------------------------------------
@@ -365,7 +365,7 @@ function AdminProfileEntity() {
         if (!isSuccess) return;
 
         //navigate to the list view
-        history.push('/admin/profile/list');
+        history.push('/admin/externalsource/list');
     };
 
     const onSave = () => {
@@ -388,19 +388,19 @@ function AdminProfileEntity() {
 
         //perform insert call
         console.log(generateLogMessageString(`handleOnSave||${mode}`, CLASS_NAME));
-        var url = `admin/profile/upsert`;
+        var url = `admin/externalsource/upsert`;
         axiosInstance.post(url, item)
             .then(resp => {
                 if (resp.data.isSuccess) {
                     //hide a spinner, show a message
                     setLoadingProps({
                         isLoading: false, message: null, inlineMessages: [
-                            { id: new Date().getTime(), severity: "success", body: `Profile item was saved`, isTimed: true }
+                            { id: new Date().getTime(), severity: "success", body: `Item was saved`, isTimed: true }
                         ]
                     });
 
                     //now redirect to profile item on front end
-                    history.push(`/admin/profile/${resp.data.data}`);
+                    history.push(`/admin/externalsource/${code}/${resp.data.data}`);
                 }
                 else {
                     //update spinner, messages
@@ -427,7 +427,7 @@ function AdminProfileEntity() {
             });
     };
 
-    const onChangeProfileId = (e) => {
+    const onChangeExternalId = (e) => {
         //console.log(generateLogMessageString(`onEntityChange||e:${e.target}`, CLASS_NAME));
 
         //note you must update the state value for the input to be read only. It is not enough to simply have the onChange handler.
@@ -448,7 +448,7 @@ function AdminProfileEntity() {
         }
         //update the state
         setItem(JSON.parse(JSON.stringify(item)));
-        validateForm_profileId(e);
+        validateForm_externalId(e);
     }
 
     const onItemSelectIndustryVertical = (vert) => {
@@ -497,12 +497,13 @@ function AdminProfileEntity() {
         setIsValid({ ..._isValid, relatedItemsMinCount: validateForm_relatedItemsMinCount })
     }
 
-    const onChangeRelatedProfile = (currentId, arg) => {
-        console.log(generateLogMessageString('onChangeRelatedProfile', CLASS_NAME));
-        var match = item.relatedProfiles.find(x => x.relatedId === currentId);
+    const onChangeRelatedItemExternal = (currentId, arg) => {
+        console.log(generateLogMessageString('onChangeRelatedItemExternal', CLASS_NAME));
+        var match = item.relatedItemsExternal.find(x => x.relatedId === currentId);
         match.relatedId = arg.relatedId;
         match.displayName = arg.displayName;
         match.relatedType = arg.relatedType;
+        match.externalSource = arg.externalSource;
         setItem(JSON.parse(JSON.stringify(item)));
         setIsValid({ ..._isValid, relatedItemsMinCount: validateForm_relatedItemsMinCount })
     }
@@ -514,19 +515,20 @@ function AdminProfileEntity() {
         //Depending on how we are adding (single row or multiple rows), the id generation will be different. Both need 
         //a starting point negative id
         var id = (-1) * (item.relatedItems == null ? 1 : item.relatedItems.length + 1);
-
+        if (item.relatedItems == null) item.relatedItems = [];
         item.relatedItems.push({ relatedId: id, relatedType: { id: "-1" } });
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
-    const onAddRelatedProfile = () => {
-        console.log(generateLogMessageString('onAddRelatedProfile', CLASS_NAME));
+    const onAddRelatedItemExternal = () => {
+        console.log(generateLogMessageString('onAddRelatedItemExternal', CLASS_NAME));
         //we need to be aware of newly added rows and those will be signified by a negative -id. 
         //Once saved server side, these will be issued ids from db.
         //Depending on how we are adding (single row or multiple rows), the id generation will be different. Both need 
         //a starting point negative id
-        var id = (-1) * (item.relatedProfiles == null ? 1 : item.relatedProfiles.length + 1);
-        item.relatedProfiles.push({ relatedId: id, relatedType: { id: "-1" } });
+        var id = (-1) * (item.relatedItemsExternal == null ? 1 : item.relatedItemsExternal.length + 1);
+        if (item.relatedItemsExternal == null) item.relatedItemsExternal = [];
+        item.relatedItemsExternal.push({ relatedId: id, relatedType: { id: "-1" }, externalSource: null });
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
@@ -538,9 +540,9 @@ function AdminProfileEntity() {
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
-    const onDeleteRelatedProfile = (id) => {
-        console.log(generateLogMessageString('onDeleteRelatedProfile', CLASS_NAME));
-        item.relatedProfiles = item.relatedProfiles.filter(x => x.relatedId !== id);
+    const onDeleteRelatedItemExternal = (id) => {
+        console.log(generateLogMessageString('onDeleteRelatedItemExternal', CLASS_NAME));
+        item.relatedItemsExternal = item.relatedItemsExternal.filter(x => x.relatedId !== id);
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
@@ -581,7 +583,7 @@ function AdminProfileEntity() {
         );
     }
 
-    const renderProfileSelect = () => {
+    const renderExternalItemSelect = () => {
 
         if (id !== 'new') return;
 
@@ -599,8 +601,8 @@ function AdminProfileEntity() {
         return (
             <Form.Group className="mb-0">
                 <Form.Control id="id" as="select" value={item.id == null ? "-1" : item.id}
-                    className={`minimal pr-5 ${!_isValid.profileId ? 'invalid-field' : ''}`}
-                    onChange={onChangeProfileId} onBlur={validateForm_profileId} >
+                    className={`minimal pr-5 ${!_isValid.externalId ? 'invalid-field' : ''}`}
+                    onChange={onChangeExternalId} onBlur={validateForm_externalId} >
                     <option key="-1|Select One" value="-1" >--Select One--</option>
                     {options}
                 </Form.Control>
@@ -613,7 +615,7 @@ function AdminProfileEntity() {
         if (mode.toLowerCase() !== "view") {
             return (
                 <>
-                    <Button variant="text-solo" className="ml-1" href="/admin/profile/list" >Cancel</Button>
+                    <Button variant="text-solo" className="ml-1" href={`/admin/externalsource/${code}/list`} >Cancel</Button>
                     <Button variant="secondary" type="button" className="ml-2" onClick={onSave} >Save</Button>
                     {id !== "new" &&
                         renderMoreDropDown()
@@ -649,9 +651,9 @@ function AdminProfileEntity() {
     const renderValidationSummary = () => {
 
         let summary = [];
-        if (!_isValid.profileId) summary.push('Profile is required.');
+        if (!_isValid.externalId) summary.push('External item is required.');
         if (!validateForm_relatedItems()) summary.push('Related Items - Select item and set related type.');
-        if (!validateForm_relatedProfiles()) summary.push('Related Profiles - Select item and set related type.');
+        if (!validateForm_relatedItemsExternal()) summary.push('Related Profiles - Select item and set related type.');
         if (!_isValid.relatedItemsMinCount) summary.push('Related Items - At least one related item or one related profile is required.');
         if (summary.length == 0) return null;
 
@@ -683,10 +685,10 @@ function AdminProfileEntity() {
                 <div className="row">
                     <div className="col-12">
                         <hr className="my-3" />
-                        <AdminRelatedItemList caption="Related SM Profiles" captionAdd="Add Related SM Profile"
-                            items={item.relatedProfiles} itemsLookup={_itemsLookup?.lookupProfiles?.filter(x => x.id !== item.id)}
-                            type={AppSettings.itemTypeCode.smProfile} onChangeItem={onChangeRelatedProfile}
-                            onAdd={onAddRelatedProfile} onDelete={onDeleteRelatedProfile} />
+                        <AdminRelatedItemList caption="Related External Items" captionAdd="Add Related External Item"
+                            items={item.relatedItemsExternal} itemsLookup={_itemsLookup?.lookupExternalItems?.filter(x => x.id !== item.id)}
+                            type={AppSettings.itemTypeCode.smProfile} onChangeItem={onChangeRelatedItemExternal}
+                            onAdd={onAddRelatedItemExternal} onDelete={onDeleteRelatedItemExternal} />
                     </div>
                 </div>
             </>
@@ -700,13 +702,13 @@ function AdminProfileEntity() {
                     <div className="row">
                         <div className="col-md-9">
                             <Form.Group>
-                                <Form.Label>Select Profile*</Form.Label>
-                                {!_isValid.profileId &&
+                                <Form.Label>Select External Item*</Form.Label>
+                                {!_isValid.externalId &&
                                     <span className="invalid-field-message inline">
                                         Required
                                     </span>
                                 }
-                                {renderProfileSelect()}
+                                {renderExternalItemSelect()}
                             </Form.Group>
                         </div>
                     </div>
@@ -833,7 +835,7 @@ function AdminProfileEntity() {
         return (
             <>
                 <h1 className="m-0 mr-2">
-                    Profile item
+                    External item ({code})
                 </h1>
                 <div className="ml-auto d-flex align-items-center" >
                     {renderButtons()}
@@ -887,7 +889,7 @@ function AdminProfileEntity() {
     const renderSubTitle = () => {
         if (mode === "new" || mode === "copy") return;
         return (
-            <a className="px-2 btn btn-text-solo align-items-center auto-width ml-auto justify-content-end d-flex" href={`/profile/${item.name}`} ><i className="material-icons">visibility</i>View</a>
+            <a className="px-2 btn btn-text-solo align-items-center auto-width ml-auto justify-content-end d-flex" href={`/profile/${code}/${item.name}`} ><i className="material-icons">visibility</i>View</a>
         );
     }
 
@@ -918,10 +920,10 @@ function AdminProfileEntity() {
             <OnDeleteConfirm
                 item={_itemDelete}
                 onDeleteComplete={onDeleteComplete}
-                urlDelete={`admin/profile/delete`}
+                urlDelete={`admin/externalsource/delete`}
                 caption='Remove Related Items'
-                confirmMessage={`You are about to remove all related items and related profiles from '${_itemDelete?.displayName}'. This action cannot be undone.`}
-                successMessage='Related items and related profiles were removed.'
+                confirmMessage={`You are about to remove all related items from '${_itemDelete?.displayName}'. This action cannot be undone.`}
+                successMessage='Related items were removed.'
                 errorMessage='An error occurred removing relationships'
             />
             {renderErrorMessage()}

@@ -42,8 +42,6 @@ function ProfileEntity() {
             try {
                 const data = { id: id, code: code, isTracking: true };
                 const url = `externalsource/getbyid`;
-                //const data = { id: id, isTracking: true };
-                //const url = `profile/getbyid`;
                 result = await axiosInstance.post(url, data);
             }
             catch (err) {
@@ -80,13 +78,15 @@ function ProfileEntity() {
         }
 
         //fetch our data 
-        fetchData();
+        if (id != null && code != null) {
+            fetchData();
+        }
 
         //this will execute on unmount
         return () => {
             console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
         };
-    }, [id]);
+    }, [id, code]);
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
@@ -102,7 +102,7 @@ function ProfileEntity() {
         //add a row to download messages and this will kick off download
         var msgs = loadingProps.downloadItems || [];
         //msgs.push({ profileId: p.id, fileName: cleanFileName(p.namespace || p.displayName), immediateDownload: true });
-        msgs.push({ requestInfo: req, fileName: cleanFileName(req.smProfile.namespace || req.smProfile.displayName), immediateDownload: true });
+        msgs.push({ requestInfo: req, fileName: cleanFileName(req.externalItem.namespace || req.externalItem.displayName), immediateDownload: true });
         setLoadingProps({ downloadItems: JSON.parse(JSON.stringify(msgs)) });
         scrollTopScreen();
     }

@@ -1,5 +1,7 @@
 ﻿namespace CESMII.Marketplace.DAL.ExternalSources
 {
+    using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
 
@@ -11,12 +13,10 @@
 
     using Opc.Ua.Cloud.Library.Client;
 
-    public class CloudLibDAL : CloudLibBaseDAL<ExternalAbstractEntity, MarketplaceItemModel>, IExternalDAL<MarketplaceItemModel>
+    public class AdminCloudLibDAL : CloudLibBaseDAL<ExternalAbstractEntity, AdminMarketplaceItemModel>, IAdminExternalDAL<AdminMarketplaceItemModel>
     {
-        //do nothing, all stuff handled in CloudLibBaseDAL for now. 
-        //Adding wrapper around it so that generic types can be used for each DAL using this same base. 
 
-        public CloudLibDAL(ExternalSourceModel config,
+        public AdminCloudLibDAL(ExternalSourceModel config,
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             IHttpApiFactory httpApiFactory,
             IMongoRepository<ImageItem> repoImages,
@@ -27,30 +27,71 @@
         {
         }
 
-        public CloudLibDAL(
-            IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
-            IHttpApiFactory httpApiFactory,
-            IMongoRepository<ImageItem> repoImages,
-            IDal<LookupItem, LookupItemModel> dalLookup,
-            IMongoRepository<MarketplaceItem> repoMarketplace,
-            IMongoRepository<ProfileItem> repoExternalItem
-            ) : base(dalExternalSource, httpApiFactory, repoImages, dalLookup, repoMarketplace, repoExternalItem)
+        //------------------------------------------------------
+        //Most of the base get methods are executed in the base dal
+        //------------------------------------------------------
+        public override async Task<DALResultWithSource<AdminMarketplaceItemModel>> Where(string query,
+            SearchCursor cursor, List<string> processes = null, List<string> verticals = null)
         {
+            throw new NotSupportedException();
         }
 
-        public override async Task<ExternalItemExportModel> Export(string id)
-        {
-            var entity = await _cloudLib.DownloadAsync(id);
-            if (entity == null) return null;
 
-            //return the whole thing because we also email some info to request info and use
-            //other data in this entity.
-            var result = new ExternalItemExportModel()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<string> Add(AdminMarketplaceItemModel model, string userId)
+        {
+            throw new NotImplementedException("Use Update method instead");
+        }
+
+        /// <summary>
+        /// This is only updating or adding data into the local Mongo DB. The bulk of the profile data is 
+        /// read only and comes from the Cloud Lib. The only data being udpated is related marketplace items
+        /// and related profile items.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        public async Task<int> Upsert(AdminMarketplaceItemModel model, string userId)
+        {
+            ProfileItem entity = _repoExternalItem.FindByCondition(x => 
+                x.ExternalSource.ID == model.ExternalSource.ID && x.ExternalSource.SourceId == model.ExternalSource.SourceId).FirstOrDefault();
+            bool isAdd = entity == null;
+            if (entity == null)
             {
-                Item = MapToModelNamespace(entity, null),
-                Data = entity.Nodeset?.NodesetXml
-            };
-            return result;
+                entity = new ProfileItem()
+                {
+                    ID = "",
+                    ExternalSource = model.ExternalSource,
+                    IsActive = true,
+                    Created = DateTime.UtcNow,
+                    CreatedById = MongoDB.Bson.ObjectId.Parse(userId)
+                };
+            }
+            this.MapToEntity(ref entity, model);
+            entity.Updated = DateTime.UtcNow;
+            entity.UpdatedById = MongoDB.Bson.ObjectId.Parse(userId);
+
+            if (isAdd)
+                await _repoExternalItem.AddAsync(entity);
+            else
+                await _repoExternalItem.UpdateAsync(entity);
+            return 1;
+        }
+
+        public async Task<int> Delete(ExternalSourceSimple source, string userId)
+        {
+            ProfileItem entity = _repoExternalItem.FindByCondition(x =>
+                x.ExternalSource.ID == source.ID && x.ExternalSource.SourceId == source.SourceId).FirstOrDefault();
+            if (entity == null) return 0;
+            await _repoExternalItem.Delete(entity);
+            return 1;
         }
 
         /// <summary>
@@ -58,12 +99,12 @@
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        protected override MarketplaceItemModel MapToModelNodesetResult(GraphQlNodeAndCursor<Nodeset> entity)
+        protected override AdminMarketplaceItemModel MapToModelNodesetResult(GraphQlNodeAndCursor<Nodeset> entity)
         {
             if (entity != null && entity.Node != null)
             {
                 //map results to a format that is common with marketplace items
-                return new MarketplaceItemModel()
+                return new AdminMarketplaceItemModel()
                 {
                     ID = entity.Node.Identifier.ToString(),
                     Name = entity.Node.Identifier.ToString(),  //in marketplace items, name is used for navigation in friendly url
@@ -89,6 +130,7 @@
             {
                 return null;
             }
+
         }
 
         /// <summary>
@@ -97,7 +139,7 @@
         /// <param name="entity"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        protected override MarketplaceItemModel MapToModelNamespace(UANameSpace entity, ProfileItem entityLocal)
+        protected override AdminMarketplaceItemModel MapToModelNamespace(UANameSpace entity, ProfileItem entityLocal)
         {
             if (entity != null)
             {
@@ -106,7 +148,7 @@
                 //if (entity.Category != null) metatags.Add(entity.Category.Name);
 
                 //map results to a format that is common with marketplace items
-                var result = new MarketplaceItemModel()
+                var result = new AdminMarketplaceItemModel()
                 {
                     ID = entity.Nodeset.Identifier.ToString(),
                     Name = entity.Nodeset.Identifier.ToString(),  //in marketplace items, name is used for navigation in friendly url
@@ -146,10 +188,10 @@
                     var relatedItems = MapToModelRelatedItems(entityLocal?.RelatedItems).Result;
 
                     //get related profiles from CloudLib
-                    var relatedExternalItems = MapToModelRelatedExternalItems(entityLocal?.RelatedExternalItems);
+                    var relatedProfiles = MapToModelRelatedExternalItems(entityLocal?.RelatedExternalItems);
 
                     //map related items into specific buckets - required, recommended
-                    result.RelatedItemsGrouped = base.GroupAndMergeRelatedItems(relatedItems, relatedExternalItems);
+                    result.RelatedItemsGrouped = base.GroupAndMergeRelatedItems(relatedItems, relatedProfiles);
                 }
                 return result;
             }
@@ -159,6 +201,28 @@
             }
 
         }
+
+        protected void MapToEntity(ref ProfileItem entity, AdminMarketplaceItemModel model)
+        {
+            //ensure this value is always without spaces and is lowercase. 
+            //replace child collection of items - ids are preserved
+            entity.RelatedItems = model.RelatedItems
+                .Where(x => x.RelatedType != null) //only include selected rows
+                .Select(x => new RelatedItem()
+                {
+                    MarketplaceItemId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedId)),
+                    RelatedTypeId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedType.ID)),
+                }).ToList();
+            //replace child collection of items - ids are preserved
+            entity.RelatedExternalItems = model.RelatedItemsExternal
+                .Where(x => x.RelatedType != null) //only include selected rows
+                .Select(x => new RelatedExternalItem()
+                {
+                    //ID = x.ID,
+                    ExternalSource = x.ExternalSource,
+                    RelatedTypeId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedType.ID)),
+                }).ToList();
+        }
+
     }
-    
 }

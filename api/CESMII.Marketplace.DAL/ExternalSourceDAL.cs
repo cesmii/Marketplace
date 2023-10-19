@@ -208,6 +208,7 @@
                     DefaultImageBanner = entity.DefaultImageIdBanner == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.DefaultImageIdBanner.ToString()), _imagesAll),
                     DefaultImageLandscape = entity.DefaultImageIdLandscape == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.DefaultImageIdLandscape.ToString()), _imagesAll),
                     TypeName = entity.TypeName,
+                    AdminTypeName = entity.AdminTypeName,
                     IsActive = entity.IsActive
                 };
 
@@ -228,6 +229,7 @@
             entity.AccessToken = model.AccessToken;
             entity.BaseUrl = model.BaseUrl;
             entity.Enabled = model.Enabled;
+            entity.AdminTypeName = model.AdminTypeName;
             entity.TypeName = model.TypeName;
             //TBD - encrypt/decrypt this data by uncommenting the line below.
             entity.Data = model.Data;

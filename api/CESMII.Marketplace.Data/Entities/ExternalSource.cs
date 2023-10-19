@@ -27,9 +27,13 @@ namespace CESMII.Marketplace.Data.Entities
         public BsonObjectId ItemTypeId { get; set; }
         public BsonObjectId PublisherId { get; set; }
         /// <summary>
-        /// This is the .NET type to instantiate for this external source. 
+        /// This is the .NET type to instantiate for this external source DAL. 
         /// </summary>
         public string TypeName { get; set; }
+        /// <summary>
+        /// This is the .NET type to instantiate for this external source admin DAL. 
+        /// </summary>
+        public string AdminTypeName { get; set; }
         public string BaseUrl { get; set; }
         public string AccessToken { get; set; }
 
@@ -58,6 +62,7 @@ namespace CESMII.Marketplace.Data.Entities
         /// <summary>
         /// This is the source id which defines the source in our data. 
         /// </summary>
+        [BsonRepresentation(BsonType.ObjectId)]
         public string SourceId { get; set; }
 
         /// <summary>
@@ -65,5 +70,4 @@ namespace CESMII.Marketplace.Data.Entities
         /// </summary>
         public string Code { get; set; }
     }
-
 }

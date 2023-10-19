@@ -67,7 +67,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
     /// </summary>
     public class BennitDAL : ExternalBaseDAL<BennitResponseEntity, MarketplaceItemModel> , IExternalDAL<MarketplaceItemModel>
     {
-        private class BennitConfigData
+        protected class BennitConfigData
         {
             public List<KeyValuePair<string, string>> Urls { get; set; }
         }
@@ -82,13 +82,12 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         protected List<ImageItemModel> _images;
         // Custom implementation of the Data property in the DB. 
         // This can be unique for each source.
-        private BennitConfigData _configCustom;
+        protected BennitConfigData _configCustom;
 
         public BennitDAL(ExternalSourceModel config,
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             IHttpApiFactory httpApiFactory,
             IMongoRepository<ImageItem> repoImages,
-            IConfiguration configuration,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
             IMongoRepository<ProfileItem> repoExternalItem
@@ -101,7 +100,6 @@ namespace CESMII.Marketplace.DAL.ExternalSources
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             IHttpApiFactory httpApiFactory,
             IMongoRepository<ImageItem> repoImages,
-            IConfiguration configuration,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
             IMongoRepository<ProfileItem> repoExternalItem
@@ -157,7 +155,17 @@ namespace CESMII.Marketplace.DAL.ExternalSources
             return MapToModel(entity, true);
         }
 
-        public async Task<DALResultWithSource<MarketplaceItemModel>> GetManyById(List<string> ids)
+        public async Task<DALResultWithSource<MarketplaceItemModel>> GetRelatedItems()
+        {
+            _logger.Log(NLog.LogLevel.Info, $"BennitDAL|GetRelatedItems|Not supported for this data source.");
+            return await Task.Run(() =>
+            {
+                return new DALResultWithSource<MarketplaceItemModel>()
+                { Count = 0, Data = new List<MarketplaceItemModel>(), SourceId = _config.ID, Cursor = null };
+            });
+        }
+
+        public async Task<DALResultWithSource<MarketplaceItemModel>> GetManyById(List<string> ids = null)
         {
             _logger.Log(NLog.LogLevel.Info, $"BennitDAL|GetManyById|Not supported for this data source.");
             return await Task.Run(() =>
@@ -174,8 +182,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         }
 
         public async Task<DALResultWithSource<MarketplaceItemModel>> Where(string query,
-            SearchCursor cursor, 
-            List<string> ids = null, List<string> processes = null, List<string> verticals = null)
+            SearchCursor cursor, List<string> processes = null, List<string> verticals = null)
         {
             var timer = System.Diagnostics.Stopwatch.StartNew();
             /*
@@ -349,9 +356,9 @@ namespace CESMII.Marketplace.DAL.ExternalSources
 
                     //map related profiles
                     /*
-                    var relatedProfiles = MapToModelRelatedProfiles(
+                    var relatedItemsExternal = MapToModelRelatedProfiles(
                         new LookupItemModel() { ID = "1", DisplayOrder = 1, Code = "expertise", Name = "Expertise In" },
-                        entity.RelatedProfiles);
+                        entity.RelatedItemsExternal);
                     //map other related data
                     var relatedCertifications = MapToModelRelatedItems(
                         new LookupItemModel() { ID = "2", DisplayOrder = 2, Code = "certification", Name = "Certifications" },

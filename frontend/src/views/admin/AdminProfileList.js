@@ -68,20 +68,21 @@ function AdminProfileList() {
             //show a spinner
             setLoadingProps({ isLoading: true, message: null });
 
-            var url = `admin/profile/search`;
+            var url = `admin/externalsource/search`;
             console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
 
             //get copy of search criteria structure from session storage
             var criteria = JSON.parse(JSON.stringify(loadingProps.searchCriteria));
             criteria = clearSearchCriteria(criteria);
             criteria = { ...criteria, Query: _pager.searchVal, Skip: (_pager.currentPage - 1) * _pager.pageSize, Take: _pager.pageSize };
+            //append external source indicator
             await axiosInstance.post(url, criteria).then(result => {
                 if (result.status === 200) {
 
                     //set state on fetch of data
                     setDataRows({
                         ..._dataRows,
-                        all: result.data
+                        all: result.data.data
                     });
 
                     //hide a spinner
@@ -231,7 +232,7 @@ function AdminProfileList() {
             </Helmet>
             <div className="row py-2 pb-4">
                 <div className="col-sm-9">
-                    <h1>Admin | Profile Items</h1>
+                    <h1>Admin | External Items</h1>
                 </div>
                 <div className="col-sm-3 d-flex align-items-center" >
                     <HeaderSearch filterVal={_pager.searchVal == null ? null : _pager.searchVal} onSearch={handleOnSearchChange} searchMode="standard" />
@@ -243,10 +244,10 @@ function AdminProfileList() {
                     {(_dataRows.itemCount != null && _dataRows.itemCount > 0) ?
                         <>
                             <span className="px-2 ml-auto font-weight-bold">{_dataRows.itemCount}{_dataRows.itemCount === 1 ? ' item' : ' items'}</span>
-                            <a className="btn btn-icon-outline circle primary" href={`/admin/profile/new`} ><i className="material-icons">add</i></a>
+                            <a className="btn btn-icon-outline circle primary" href={`/admin/externalsource/new`} ><i className="material-icons">add</i></a>
                         </>
                         :
-                        <a className="btn btn-icon-outline circle ml-auto primary" href={`/admin/profile/new`} ><i className="material-icons">add</i></a>
+                        <a className="btn btn-icon-outline circle ml-auto primary" href={`/admin/externalsource/new`} ><i className="material-icons">add</i></a>
                     }
                 </div>
             </div>
@@ -263,10 +264,10 @@ function AdminProfileList() {
             <OnDeleteConfirm
                 item={_itemDelete}
                 onDeleteComplete={onDeleteComplete}
-                urlDelete={`admin/profile/delete`}
+                urlDelete={`admin/externalsource/delete`}
                 caption='Remove Related Items'
-                confirmMessage={`You are about to remove all related items and related profiles from '${_itemDelete?.displayName}'. This action cannot be undone.`}
-                successMessage='Related items and related profiles were removed.'
+                confirmMessage={`You are about to remove all related items from '${_itemDelete?.displayName}'. This action cannot be undone.`}
+                successMessage='Related items were removed.'
                 errorMessage='An error occurred removing relationships'
             />
             {renderErrorMessage()}

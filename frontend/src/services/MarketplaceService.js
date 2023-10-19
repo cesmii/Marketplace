@@ -173,7 +173,7 @@ export function RenderImageBg (props) {
     const navigateToMarketplaceItem = (e) => {
         if (props.itemType != null && props.itemType === AppSettings.itemTypeCode.smProfile) {
             history.push({
-                pathname: `/${props.item.externalSource.code}/profile/${props.item.id}`,
+                pathname: `/profile/${props.item.externalSource.code}/${props.item.id}`,
                 state: { id: `${props.item.id}` }
             });
         }

@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 using CESMII.Marketplace.DAL.Models;
-using CESMII.Marketplace.DAL.ExternalSources.Models;
 
 namespace CESMII.Marketplace.DAL.ExternalSources
 {
-    public interface IExternalDAL<TModel> : IDisposable where TModel : AbstractModel 
+    public interface IExternalDAL<TModel> : IDisposable where TModel : AbstractModel
     {
         Task<TModel> GetById(string id);
 
@@ -24,7 +22,14 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        Task<DALResultWithSource<TModel>> GetManyById(List<string> id);
+        Task<DALResultWithSource<TModel>> GetManyById(List<string> ids);
+
+        /// <summary>
+        /// Get Related Items - look in local db and pull out list of ids of related
+        /// external data, then go and get the related items from the external source. 
+        /// </summary>
+        /// <returns></returns>
+        Task<DALResultWithSource<TModel>> GetRelatedItems();
 
         Task<DALResultWithSource<TModel>> GetAll();
 
@@ -41,7 +46,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         /// <param name="processes"></param>
         /// <param name="verticals"></param>
         /// <returns></returns>
-        Task<DALResultWithSource<TModel>> Where(string query, SearchCursor cursor, 
-            List<string> ids = null, List<string> processes = null, List<string> verticals = null);
+        Task<DALResultWithSource<TModel>> Where(string query, SearchCursor cursor,
+            List<string> processes = null, List<string> verticals = null);
     }
 }

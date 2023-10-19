@@ -154,7 +154,7 @@
         /// <summary>
         /// List of items that are related to this item.
         /// </summary>
-        public virtual List<ProfileItemRelatedModel> RelatedProfiles { get; set; }
+        public virtual List<ExternalSourceItemModel> RelatedItemsExternal { get; set; }
 
         public string Cursor { get; set; }
     }
@@ -205,6 +205,7 @@
         public ImageItemSimpleModel ImageLandscape { get; set; }
 
         public LookupItemModel RelatedType { get; set; }
+        public ExternalSourceSimple ExternalSource { get; set; }
     }
 
 

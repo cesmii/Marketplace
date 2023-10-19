@@ -26,9 +26,13 @@ namespace CESMII.Marketplace.DAL.Models
         public string Code { get; set; }
 
         /// <summary>
-        /// This is the .NET type to instantiate for this external source. 
+        /// This is the .NET type to instantiate for this external source DAL. 
         /// </summary>
         public string TypeName { get; set; }
+        /// <summary>
+        /// This is the .NET type to instantiate for this external source admin DAL. 
+        /// </summary>
+        public string AdminTypeName { get; set; }
         public string BaseUrl { get; set; }
         public string AccessToken { get; set; }
 

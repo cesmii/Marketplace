@@ -12,6 +12,7 @@
     using CESMII.Marketplace.DAL.Models;
     using CESMII.Marketplace.Data.Extensions;
     using CESMII.Marketplace.Common.Enums;
+    using CESMII.Marketplace.Api.Shared.Models;
 
     public class MarketplaceUtil
     {
@@ -124,7 +125,7 @@
 
 
             //now combine auto matches with manual matches (if there are any manual matches)
-            var similarGroup = item.RelatedItemsGrouped.Find(x => x.RelatedType.Code.ToLower().Equals("similar"));
+            RelatedItemsGroupBy similarGroup = item.RelatedItemsGrouped.Find(x => x.RelatedType.Code.ToLower().Equals("similar"));
             if (similarGroup != null)
             {
                 similarGroup.Items = similarGroup.Items == null ? autoMatches : similarGroup.Items.Union(autoMatches).ToList();
@@ -133,15 +134,27 @@
             {
                 var similarType = _dalLookup.Where(x => x.LookupType.EnumValue == LookupTypeEnum.RelatedType, null, null, false).Data
                                         .Find(x => (x.Code == null ? "" : x.Code).ToLower().Equals("similar"));
-                if (similarType != null)
+                //should not happen but data could be removed
+                if (similarType == null)
                 {
-                    item.RelatedItemsGrouped.Add(new RelatedItemsGroupBy()
-                    {
-                        RelatedType = similarType,
-                        Items = autoMatches
-                    });
+                    throw new InvalidOperationException("Missing lookup data - Related Type - Similar");
                 }
+                //create new similar group
+                similarGroup = new RelatedItemsGroupBy()
+                {
+                    RelatedType = similarType,
+                    Items = autoMatches
+                };
+                item.RelatedItemsGrouped.Add(similarGroup);
             }
+
+            //final sort
+            similarGroup.Items = similarGroup.Items
+                .OrderBy(x => x.DisplayName)
+                .ThenBy(x => x.Name)
+                .ThenBy(x => x.Namespace)
+                .ThenBy(x => x.Version)
+                .ToList();
         }
 
         /// <summary>
@@ -268,5 +281,70 @@
                 .Data.Where(x => statuses.Any(y => y.Equals(x.Code.ToLower()))).Select(x => x.ID).ToList();
             return x => luStatusLive.Any(y => y.Equals(x.StatusId.ToString()));
         }
+
+        /// <summary>
+        /// For the next query we execute against each source, we need a search cursor to 
+        /// help the source only pull back the necessary data. When a user pages through the 
+        /// result, the starting point and ending point for the data is determined by the sort order
+        /// but also by the other sources contributions. A page may contain data from multiple sources
+        /// and we need to know how many rows from each source contributed to this page of data. 
+        /// Also, if we have visited this page of data (go from page 2 and back to page 1), re-use that info 
+        /// so that we can limit the extra processing time. 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="sourceId"></param>
+        public static SearchCursor PrepareSearchCursor(MarketplaceSearchModel model, string sourceId)
+        {
+            var pageIndex = model.Skip / model.Take;
+
+            //scenario - new search - no previous cached info
+            //if we enter on page 4 of a new search, we still need to get pages 0-4 because
+            //we won't yet know whether 1st 10 records of any source would contribute to the merged output.
+            if (model.CachedCursors == null)
+                return new SearchCursor()
+                {
+                    Skip = 0,
+                    Take = model.Skip + model.Take,
+                    PageIndex = pageIndex
+                };
+
+            //if source is not present, return new cursor
+            var match = model.CachedCursors.Find(x => x.SourceId == sourceId);
+            if (match == null || match.Cursors == null)
+                return new SearchCursor()
+                {
+                    Skip = 0,
+                    Take = model.Skip + model.Take,
+                    PageIndex = pageIndex
+                };
+
+            //find current page cached cursor (ie pageIndex is same). if present, use that cursor.
+            var result = match.Cursors.Find(x => x.PageIndex == pageIndex);
+            if (result != null) return result;
+
+            //else find cached cursor with previous page (ie pageIndex - 1).
+            //If present, use endIndex + 1 (or endCursor) as starting point
+            result = match.Cursors.Find(x => x.PageIndex == pageIndex - 1);
+            if (result != null)
+            {
+                return new SearchCursor()
+                {
+                    StartCursor = result.EndCursor,
+                    EndCursor = null,
+                    Skip = result.Take.Value + 1,
+                    Take = result.Take + 1 + model.Take,
+                    TotalCount = result.TotalCount
+                };
+            }
+
+            //if we get here, return new cursor
+            return new SearchCursor()
+            {
+                Skip = 0,
+                Take = model.Skip + model.Take,
+                PageIndex = pageIndex
+            };
+        }
+
     }
 }
