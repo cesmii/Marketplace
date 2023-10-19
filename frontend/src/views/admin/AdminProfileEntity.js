@@ -64,8 +64,8 @@ function AdminProfileEntity() {
 
         var result = null;
         try {
-            var data = { id: val, code: code };
-            var url = `admin/externalsource/getbyid`
+            const data = { id: val, code: code };
+            const url = `admin/externalsource/getbyid`
             result = await axiosInstance.post(url, data);
         }
         catch (err) {
@@ -114,8 +114,9 @@ function AdminProfileEntity() {
 
         var result = null;
         try {
-            var url = `admin/externalsource/init`
-            result = await axiosInstance.post(url, code);
+            const data = { id: code };
+            const url = `admin/externalsource/init`
+            result = await axiosInstance.post(url, data);
         }
         catch (err) {
             var msg = 'An error occurred retrieving the blank external item.';
@@ -161,6 +162,7 @@ function AdminProfileEntity() {
         };
     }, [id, code]);
 
+    //
     useEffect(() => {
         //fetch our data 
         //for new mode when user selects a profile from ddl

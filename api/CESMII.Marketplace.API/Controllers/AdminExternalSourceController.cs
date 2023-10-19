@@ -40,9 +40,9 @@ namespace CESMII.Marketplace.Api.Controllers
         [HttpPost, Route("init")]
         [ProducesResponseType(200, Type = typeof(AdminMarketplaceItemModel))]
         [ProducesResponseType(400)]
-        public IActionResult Init(string code)
+        public IActionResult Init([FromBody] IdStringModel model)
         {
-            code = code.ToLower();
+            var code = model.ID.ToLower();
             //get external source config, then instantiate object using info in the config by 
             //calling external source factory.
             //get by name - we have to ensure our external sources config data maintains a unique name.
@@ -254,6 +254,23 @@ namespace CESMII.Marketplace.Api.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Admin Lookup list of sources to use when adding an external source relationship
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost, Route("lookup/sources")]
+        [ProducesResponseType(200, Type = typeof(List<ExternalSourceSimple>))]
+        public IActionResult LookupSources()
+        {
+            //Admin external source DAL - gets only the items that have related items in local db. 
+            var result = _dalExternalSource.Where(x => x.Enabled && x.IsActive, null, null, false, false)
+                .Data
+                .Select(x => new LookupItemModel() { 
+                    ID = x.ID, Name = x.Name, Code = x.Code
+                });
+            return Ok(result);
+        }
         #endregion
 
         private async Task<DALResultWithSource<AdminMarketplaceItemModel>> AdvancedSearchExternal(
