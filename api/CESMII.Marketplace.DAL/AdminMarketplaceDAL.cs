@@ -269,7 +269,7 @@
                 if (verbose)
                 {
                     result.RelatedItems = MapToModelRelatedItems(entity.RelatedItems).Result;
-                    result.RelatedItemsExternal = MapToModelRelatedProfiles(entity.RelatedItemsExternal);
+                    result.RelatedItemsExternal = MapToModelRelatedExternalItems(entity.RelatedItemsExternal);
                     //map action links to model
                     result.ActionLinks = entity.ActionLinks;
                 }
@@ -330,7 +330,7 @@
         /// for this entity.
         /// The idea is we return the entire lookup list and mark selected those items appearing selected. 
         /// </summary>
-        protected List<ExternalSourceItemModel> MapToModelRelatedProfiles(List<RelatedExternalItem> items)
+        protected List<ExternalSourceItemModel> MapToModelRelatedExternalItems(List<RelatedExternalItem> items)
         {
             if (items == null) return new List<ExternalSourceItemModel>();
 

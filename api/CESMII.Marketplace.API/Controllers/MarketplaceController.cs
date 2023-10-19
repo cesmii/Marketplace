@@ -319,7 +319,7 @@ namespace CESMII.Marketplace.Api.Controllers
         [HttpPost, Route("admin/lookup/related")]
         [Authorize(Roles = "cesmii.marketplace.marketplaceadmin", Policy = nameof(PermissionEnum.UserAzureADMapped))]
         [ProducesResponseType(200, Type = typeof(DALResult<MarketplaceItemModel>))]
-        public async Task<IActionResult> AdminLookupRelatedItems([FromBody] MarketplaceSearchModel model)
+        public async Task<IActionResult> AdminLookupRelatedItems([FromBody] RelatedSearchModel model)
         {
             if (model == null)
             {
@@ -334,7 +334,12 @@ namespace CESMII.Marketplace.Api.Controllers
             //Loop over sources and return a collection of items across sources.
             //Note some sources may not permit getall.
             //add external sources tasks (except when calling from admin ui)
-            var sources = _dalExternalSource.Where(x => x.Enabled && x.IsActive, null, null, false, false).Data;
+            //get all if code is null, else get one
+            var sources = (string.IsNullOrEmpty(model.Code)) ?
+                //should be multiple sources returned
+                _dalExternalSource.Where(x => x.Enabled && x.IsActive, null, null, false, false).Data :
+                //should only be one source returned
+                _dalExternalSource.Where(x => x.Enabled && x.Code.ToLower().Equals(model.Code.ToLower()), null, null, false, false).Data ;
 
             var resultExternalItems = new List<RelatedLookupModel>(); 
             foreach (var src in sources)
@@ -352,7 +357,6 @@ namespace CESMII.Marketplace.Api.Controllers
                 .ThenBy(x => x.Version).ToList();
             return Ok(new { LookupItems = resultItems, LookupExternalItems = resultExternalItems });
         }
-
 
         /// <summary>
         /// Search for marketplace items matching criteria passed in. This is an advanced search and the front end

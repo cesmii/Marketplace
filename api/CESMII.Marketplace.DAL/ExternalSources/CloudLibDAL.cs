@@ -1,15 +1,17 @@
 ﻿namespace CESMII.Marketplace.DAL.ExternalSources
 {
     using System.Linq;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
+
+    using Opc.Ua.Cloud.Library.Client;
 
     using CESMII.Marketplace.Common;
     using CESMII.Marketplace.DAL.Models;
     using CESMII.Marketplace.DAL.ExternalSources.Models;
     using CESMII.Marketplace.Data.Entities;
     using CESMII.Marketplace.Data.Repositories;
-
-    using Opc.Ua.Cloud.Library.Client;
+    using CESMII.Marketplace.Common.Enums;
 
     public class CloudLibDAL : CloudLibBaseDAL<ExternalAbstractEntity, MarketplaceItemModel>, IExternalDAL<MarketplaceItemModel>
     {
@@ -159,6 +161,42 @@
             }
 
         }
+
+        /// <summary>
+        /// Get related items from DB, filter out each group based on required/recommended/related flag
+        /// assume all related items in same collection and a type id distinguishes between the types. 
+        /// </summary>
+        protected List<MarketplaceItemRelatedModel> MapToModelRelatedExternalItems(List<RelatedExternalItem> items)
+        {
+            if (items == null)
+            {
+                return new List<MarketplaceItemRelatedModel>();
+            }
+
+            //get list of profile items associated with this list of ids, call CloudLib to get the supporting info for these
+            var matches = this.GetManyById(items.Select(x => x.ExternalSource?.ID).ToList()).Result.Data;
+            return !matches.Any() ? new List<MarketplaceItemRelatedModel>() :
+                matches.Select(x => new MarketplaceItemRelatedModel()
+                {
+                    RelatedId = x.ID,
+                    Abstract = x.Abstract,
+                    DisplayName = x.DisplayName,
+                    Description = x.Description,
+                    Name = x.Name,
+                    Namespace = x.Namespace,
+                    Type = x.Type,
+                    Version = x.Version,
+                    ImagePortrait = x.ImagePortrait,
+                    ImageLandscape = x.ImageLandscape,
+                    //assumes only one related item per type
+                    RelatedType = //items.Find(x => x.ProfileId.Equals(x.ID)) == null ? null :
+                        MapToModelLookupItem(
+                        items.Find(z => z.ExternalSource.ID.Equals(x.ID)).RelatedTypeId,
+                        _lookupItemsRelatedType.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList()),
+                    ExternalSource = x.ExternalSource
+                }).ToList();
+        }
+
     }
-    
+
 }

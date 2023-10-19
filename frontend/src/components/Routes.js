@@ -77,7 +77,7 @@ function Routes() {
             <AdminRoute path="/admin/lookup/:id" component={AdminLookupEntity} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/jobDefinition/list" component={AdminJobDefinitionList} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/jobDefinition/:id" component={AdminJobDefinitionEntity} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/externalsource/:code/list" component={AdminProfileList} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/externalsource/list" component={AdminProfileList} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/externalsource/:code/:id" component={AdminProfileEntity} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/sitemap/generate" component={SitemapGenerator} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/account" component={AccountProfile} />

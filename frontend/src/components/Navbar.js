@@ -103,7 +103,7 @@ function Navbar() {
                             <Dropdown.Divider />
                             <Dropdown.Item eventKey="4" href="/admin/library/list">Manage Marketplace Items</Dropdown.Item>
                             <Dropdown.Item eventKey="5" href="/admin/publisher/list">Manage Publishers</Dropdown.Item>
-                            <Dropdown.Item eventKey="6" href="/admin/externalsource/cloudlib/list">Manage External Relationships</Dropdown.Item>
+                            <Dropdown.Item eventKey="6" href="/admin/externalsource/list">Manage External Relationships</Dropdown.Item>
                             <Dropdown.Item eventKey="7" href="/admin/lookup/list">Manage Lookup Items</Dropdown.Item>
                             <Dropdown.Item eventKey="8" href="/admin/images/list">Manage Stock Images</Dropdown.Item>
                             <Dropdown.Item eventKey="9" href="/admin/requestinfo/list">Manage Request Info Inquiries</Dropdown.Item>

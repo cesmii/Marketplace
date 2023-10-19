@@ -226,17 +226,18 @@ function AdminMarketplaceEntity() {
     //-------------------------------------------------------------------
     useEffect(() => {
         // Load lookup data upon certain triggers in the background
-        async function fetchData(url) {
+        async function fetchData() {
             //show a spinner
             setLoadingProps({ isLoading: true, message: null });
 
+            const url = `marketplace/admin/lookup/related`;
             console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
 
             //get copy of search criteria structure from session storage
             var criteria = JSON.parse(JSON.stringify(loadingProps.searchCriteria));
             criteria = clearSearchCriteria(criteria);
             criteria = { ...criteria, Query: null, Skip: 0, Take: 999 };
-            await axiosInstance.post(url, criteria).then(result => {
+            await axiosInstance.post(url, { criteria: criteria, src: null }).then(result => {
                 if (result.status === 200) {
 
                     //set state on fetch of data
@@ -272,7 +273,7 @@ function AdminMarketplaceEntity() {
 
         //go get the data.
         if (_loadLookupData == null || _loadLookupData === true) {
-            fetchData(`marketplace/admin/lookup/related`);
+            fetchData();
         }
 
         //this will execute on unmount

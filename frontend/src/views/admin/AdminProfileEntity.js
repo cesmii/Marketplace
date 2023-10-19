@@ -50,7 +50,7 @@ function AdminProfileEntity() {
     const [_error, setError] = useState({ show: false, message: null, caption: null });
     const [_refreshItem, setRefreshItem] = useState(null);  //trigger a retrieval of data on select of profile id - new mode.
 
-    const [_itemsLookup, setItemsLookup] = useState([]);  //profile items 
+    const [_itemsLookup, setItemsLookup] = useState([]);  //external items 
     const [_loadLookupData, setLoadLookupData] = useState(null);
     const [_itemDelete, setItemDelete] = useState(null);
 
@@ -181,17 +181,18 @@ function AdminProfileEntity() {
     //-------------------------------------------------------------------
     useEffect(() => {
         // Load lookup data upon certain triggers in the background
-        async function fetchData(url) {
+        async function fetchData() {
             //show a spinner
             setLoadingProps({ isLoading: true, message: null });
 
+            const url = `marketplace/admin/lookup/related`;
             console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
 
             //get copy of search criteria structure from session storage
             var criteria = JSON.parse(JSON.stringify(loadingProps.searchCriteria));
             criteria = clearSearchCriteria(criteria);
             criteria = { ...criteria, Query: null, Skip: 0, Take: 999 };
-            await axiosInstance.post(url, criteria).then(result => {
+            await axiosInstance.post(url, { criteria: criteria, src: null }).then(result => {
                 if (result.status === 200) {
 
                     //set state on fetch of data
@@ -227,7 +228,7 @@ function AdminProfileEntity() {
 
         //go get the data.
         if (_loadLookupData == null || _loadLookupData === true) {
-            fetchData(`marketplace/admin/lookup/related`);
+            fetchData();
         }
 
         //this will execute on unmount
@@ -590,14 +591,16 @@ function AdminProfileEntity() {
         if (id !== 'new') return;
 
         //until lookup data arrives, show label
-        if (_itemsLookup == null || _itemsLookup?.lookupProfiles == null ) return;
+        if (_itemsLookup == null || _itemsLookup?.lookupExternalItems == null ) return;
 
-        //show drop down list
-        const options = _itemsLookup?.lookupProfiles.map((itm) => {
-            const version = itm.version == null ? '' : ' v.' + itm.version; 
-            const displayName = `${itm.displayName}` +
-                `${(itm.namespace != null && itm.namespace !== '') ? ' (' + itm.namespace + version + ')' : ''}`;
-            return (<option key={itm.id} value={itm.id} >{displayName}</option>)
+        //show drop down list - filter out by source code
+        const options = _itemsLookup?.lookupExternalItems.map((itm) => {
+            if (itm?.externalSource?.code.toLowerCase() === code.toLowerCase()) {
+                const version = itm.version == null ? '' : ' v.' + itm.version;
+                const displayName = `${itm.displayName}` +
+                    `${(itm.namespace != null && itm.namespace !== '') ? ' (' + itm.namespace + version + ')' : ''}`;
+                return (<option key={itm.id} value={itm.id} >{displayName}</option>)
+            }
         });
 
         return (
@@ -617,7 +620,7 @@ function AdminProfileEntity() {
         if (mode.toLowerCase() !== "view") {
             return (
                 <>
-                    <Button variant="text-solo" className="ml-1" href={`/admin/externalsource/${code}/list`} >Cancel</Button>
+                    <Button variant="text-solo" className="ml-1" href={`/admin/externalsource/list`} >Cancel</Button>
                     <Button variant="secondary" type="button" className="ml-2" onClick={onSave} >Save</Button>
                     {id !== "new" &&
                         renderMoreDropDown()
@@ -674,7 +677,7 @@ function AdminProfileEntity() {
         return (
             <>
                 {!_isValid.relatedItemsMinCount &&
-                    <p class="mb-1 text-danger">At least one related item or one related profile is required.</p>
+                    <p class="mb-1 text-danger">At least one related item is required.</p>
                 }
                 <div className="row mt-2">
                     <div className="col-12">
@@ -718,16 +721,18 @@ function AdminProfileEntity() {
                 {item?.id != null &&
                     <>
                     <div className="row">
-                        <div className="col-md-9">
-                            <Form.Group>
-                                <Form.Label>Namespace</Form.Label>
-                                <Form.Control id="namespace" className="minimal pr-5" value={item.namespace == null ? '' : item.namespace} readOnly={isReadOnly} />
-                            </Form.Group>
-                        </div>
+                        {item.namespace != null &&
+                            <div className="col-md-9">
+                                <Form.Group>
+                                    <Form.Label>Namespace</Form.Label>
+                                    <Form.Control id="namespace" className="minimal pr-5" value={item.namespace == null ? '' : item.namespace} readOnly={isReadOnly} />
+                                </Form.Group>
+                            </div>
+                        }
                         <div className="col-md-3">
                             {(item.id != null && item.id !== "-1") && 
                                 <Form.Group>
-                                    <Form.Label>Cloud Lib Id</Form.Label>
+                                    <Form.Label>External Id</Form.Label>
                                     <Form.Control id="id" className="minimal pr-5" value={item.id} readOnly={isReadOnly} />
                                 </Form.Group>
                             }

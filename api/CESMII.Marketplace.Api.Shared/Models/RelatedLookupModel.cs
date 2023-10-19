@@ -10,4 +10,14 @@ namespace CESMII.Marketplace.Api.Shared.Models
         public string Namespace { get; set; }
         public ExternalSourceSimple ExternalSource { get; set; }
     }
+
+    public class RelatedSearchModel
+    {
+        public MarketplaceSearchModel Criteria { get; set; }
+        /// <summary>
+        /// External Source code
+        /// </summary>
+        public string Code { get; set; }
+    }
+
 }
