@@ -33,15 +33,24 @@
     "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
-      // "DockerfileRunArguments": "--network host",
+      // "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
+      // Use this for testing....
+      "launchUrl": "http://localhost:5000/swagger",
+      // Use this for testing....
+      "DockerfileRunArguments": "--network mysubnet1 -p 5000:80",
+
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "EnableCloudlibSearch": "false"
       },
+      "dotnetRunMessages": true,
       "publishAllPorts": true,
-      "useSSL": true,
-      "sslPort": 5001
+      "applicationUrl": "http://localhost:5000",
+      "useSSL": false
+      // For Test, we only use HTTP, not HTTPS
+      // "useSSL": true,
+      // "sslPort": 5001
+
     }
   },
   "$schema": "http://json.schemastore.org/launchsettings.json",
