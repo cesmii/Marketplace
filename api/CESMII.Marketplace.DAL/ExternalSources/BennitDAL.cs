@@ -127,9 +127,9 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                 _config.DefaultImageBanner?.ID,
                 _config.DefaultImageLandscape?.ID,
                 _config.DefaultImagePortrait?.ID,
-                _config.DefaultImageBanner?.ID,
-                _config.DefaultImagePortrait?.ID,
-                _config.DefaultImageBanner?.ID
+                _configSmProfile.DefaultImageBanner?.ID,
+                _configSmProfile.DefaultImageLandscape?.ID,
+                _configSmProfile.DefaultImagePortrait?.ID
             }).Result;
 
             //set up the _config data attribute specifically for the Bennit DAL
@@ -358,7 +358,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                         (string.IsNullOrEmpty(entity.Locations) ? "" : $"<p><b>Locations</b>: {entity.Locations}</p>");
 
                     //map related profiles
-                    var relatedItemsExternal = MapToModelExternalItems(
+                    var relatedItemsExternal = MapToModelRelatedExternalItems(
                         new LookupItemModel() { ID = "1", DisplayOrder = 1, Code = "expertise", Name = "Expertise In" },
                         entity.SMProfiles);
                     //map other related data
@@ -366,10 +366,9 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                     var relatedCertifications = MapToModelRelatedItems(
                         new LookupItemModel() { ID = "2", DisplayOrder = 2, Code = "certification", Name = "Certifications" },
                         entity.Certifications);
-
-                    //map related items into specific buckets
-                    result.RelatedItemsGrouped = GroupAndMergeRelatedItems(relatedProfiles, relatedCertifications);
                     */
+                    //map related items into specific buckets
+                    result.RelatedItemsGrouped = GroupAndMergeRelatedItems(relatedItemsExternal, null); //relatedCertifications);
                 }
                 return result;
             }
@@ -391,33 +390,33 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         /// <summary>
         /// Map profiles to related items
         /// </summary>
-        protected List<ExternalSourceItemModel> MapToModelExternalItems(LookupItemModel type, List<BennitSmProfileLink> items)
+        protected List<MarketplaceItemRelatedModel> MapToModelRelatedExternalItems(LookupItemModel type, List<BennitSmProfileLink> items)
         {
             if (items == null || items.Count == 0)
             {
-                return new List<ExternalSourceItemModel>();
+                return new List<MarketplaceItemRelatedModel>();
             }
 
-            //get the external source for the Cloudlib so we can set up proper links
-            var externalSource = _dalExternalSource.Where(x => x.Code.ToLower().Equals("cloudlib"), null, null).Data.FirstOrDefault();
-
-            return items.Select(x => new ExternalSourceItemModel()
+            //get list of profile items associated with this list of ids, call CloudLib to get the supporting info for these
+            return items.Select(x => new MarketplaceItemRelatedModel()
                 {
                     RelatedId = x.Id,
+                    //Abstract = x.Abstract,
                     DisplayName = x.Profile_Name,
                     //Description = x.Description,
                     Name = x.Profile_Name,
                     Namespace = x.Profile_Namespace_URI,
+                    Type = _configSmProfile.ItemType,
                     Version = x.Version,
+                    ImagePortrait = _images.FirstOrDefault(x => x.ID.Equals(_configSmProfile.DefaultImagePortrait.ID)),
+                    ImageLandscape = _images.FirstOrDefault(x => x.ID.Equals(_configSmProfile.DefaultImageLandscape.ID)),
                     //assumes only one related item per type
-                    //TBD - move this to appSettings.
                     RelatedType = type,
                     //RelatedType = //items.Find(x => x.ProfileId.Equals(x.ID)) == null ? null :
-                    //        MapToModelLookupItem(
-                    //        items.Find(z => z.ExternalSource.ID.Equals(x.ID)).RelatedTypeId,
-                    //        _lookupItemsRelatedType.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList()),
-                    //put in Cloud lib source here
-                    ExternalSource = new ExternalSourceSimple() { Code = externalSource?.Code, ID = x.Id, SourceId = externalSource?.ID }
+                    //    MapToModelLookupItem(
+                    //    items.Find(z => z.ExternalSource.ID.Equals(x.ID)).RelatedTypeId,
+                    //    _lookupItemsRelatedType.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList()),
+                    ExternalSource = new ExternalSourceSimple() { Code = _configSmProfile?.Code, ID = x.Id, SourceId = _configSmProfile?.ID }
                 }).ToList();
         }
     }
