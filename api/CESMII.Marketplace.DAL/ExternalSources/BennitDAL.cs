@@ -393,10 +393,13 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         /// </summary>
         protected List<ExternalSourceItemModel> MapToModelExternalItems(LookupItemModel type, List<BennitSmProfileLink> items)
         {
-            if (items == null)
+            if (items == null || items.Count == 0)
             {
                 return new List<ExternalSourceItemModel>();
             }
+
+            //get the external source for the Cloudlib so we can set up proper links
+            var externalSource = _dalExternalSource.Where(x => x.Code.ToLower().Equals("cloudlib"), null, null).Data.FirstOrDefault();
 
             return items.Select(x => new ExternalSourceItemModel()
                 {
@@ -413,8 +416,8 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                     //        MapToModelLookupItem(
                     //        items.Find(z => z.ExternalSource.ID.Equals(x.ID)).RelatedTypeId,
                     //        _lookupItemsRelatedType.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList()),
-                    //TBD - put in Cloud lib source here
-                    ExternalSource = null //x.ExternalSource
+                    //put in Cloud lib source here
+                    ExternalSource = new ExternalSourceSimple() { Code = externalSource?.Code, ID = x.Id, SourceId = externalSource?.ID }
                 }).ToList();
         }
     }
