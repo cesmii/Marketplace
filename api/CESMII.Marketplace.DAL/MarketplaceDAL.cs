@@ -37,16 +37,47 @@
             ConfigUtil configUtil
             ) : base(repo)
         {
-            _repoLookup = repoLookup;
-            _repoPublisher = repoPublisher;
-            _repoAnalytics = repoAnalytics;
-            _repoImages = repoImages;
-            _repoJobDefinition = repoJobDefinition;
-            _cloudLibDAL = cloudLibDAL;
 
-            //init some stuff we will use during the mapping methods
-            _smItemTypeIdDefault = new MongoDB.Bson.BsonObjectId(
-                MongoDB.Bson.ObjectId.Parse(configUtil.MarketplaceSettings.DefaultItemTypeId));
+            // Getting a crash when this is called. All this is temporary -- replace Nov 20, 2023
+            // Wrapping it up with tests and a try...catch block to see if that helps figure out why.
+
+            //_repoLookup = repoLookup;
+            //_repoPublisher = repoPublisher;
+            //_repoAnalytics = repoAnalytics;
+            //_repoImages = repoImages;
+            //_repoJobDefinition = repoJobDefinition;
+            //_cloudLibDAL = cloudLibDAL;
+
+            //// init some stuff we will use during the mapping methods
+            //_smItemTypeIdDefault = new MongoDB.Bson.BsonObjectId(
+            //    MongoDB.Bson.ObjectId.Parse(configUtil.MarketplaceSettings.DefaultItemTypeId));
+            try
+            {
+                if (repoLookup != null)
+                _repoLookup = repoLookup;
+
+                if (repoPublisher != null)
+                    _repoPublisher = repoPublisher;
+
+                if (repoAnalytics != null)
+                    _repoAnalytics = repoAnalytics;
+
+                if (repoImages != null)
+                    _repoImages = repoImages;
+
+                if (repoJobDefinition != null)
+                    _repoJobDefinition = repoJobDefinition;
+
+                if (configUtil.MarketplaceSettings.EnableCloudLibSearch && cloudLibDAL != null)
+                    _cloudLibDAL = cloudLibDAL;
+
+                // init some stuff we will use during the mapping methods
+
+                if (configUtil == null || configUtil.MarketplaceSettings == null || configUtil.MarketplaceSettings.DefaultItemTypeId == null)
+                    _smItemTypeIdDefault = new MongoDB.Bson.BsonObjectId(
+                        MongoDB.Bson.ObjectId.Parse(configUtil.MarketplaceSettings.DefaultItemTypeId));
+            }
+            catch { }
 
         }
 

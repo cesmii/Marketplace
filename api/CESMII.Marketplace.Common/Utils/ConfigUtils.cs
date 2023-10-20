@@ -88,14 +88,24 @@
         {
             get
             {
-                var result = new MarketplaceConfig();
+                var settings = new MarketplaceConfig();
+
+                var c = _configuration.GetSection("MarketplaceSettings");
+                c.Bind(settings);
 
                 // Allow an override in support of unit test environment.
                 string? strEnableCloudLibSearch = Environment.GetEnvironmentVariable("EnableCloudLibSearch");
                 if (bool.TryParse(strEnableCloudLibSearch, out bool bResult))
-                    result.EnableCloudLibSearch = bResult;
-                _configuration.GetSection("MarketplaceSettings").Bind(result);
-                return result;
+                    settings.EnableCloudLibSearch = bResult;
+
+                Console.WriteLine($"::notice::MarketplaceSettings.EnableCloudLibSearch={settings.EnableCloudLibSearch}");
+                string strValue = (settings.DefaultItemTypeId == null) ? "null" : settings.DefaultItemTypeId;
+                Console.WriteLine($"::notice::MarketplaceSettings.DefaultItemTypeId={strValue}");
+
+                strValue = (settings.SmProfile == null) ? null : "Not Null!";
+                Console.WriteLine($"::notice::MarketplaceSettings.SmProfile={strValue}");
+
+                return settings;
             }
         }
 

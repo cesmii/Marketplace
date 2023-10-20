@@ -8,18 +8,21 @@ namespace CESMII.Marketplace.RestApi
     public class TestSuite_MarketplaceAPI
     {
         [Fact]
-        public void MarketItemsAvailable_On_RestCall()
+        public void LookupItemsAvailable_On_RestCall()
         {
-            string strHostHttps; 
+            string strHostHttps = "http://localhost:5000/api"; 
             HttpClient client = new HttpClient();
 
-            strHostHttps = utils.GetConnection("MARKETPLACE_URL1");   // We expect to find a value like this http://localhost:5000/api
+            string strTemp = utils.GetConnection("MARKETPLACE_URL1");   // We expect to find a value like this http://localhost:5000/api
+            if (!string.IsNullOrEmpty(strTemp) )
+                strHostHttps = strTemp;
+
             Assert.NotNull(strHostHttps);
 
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 
-            var items = GetFirstItem(client, $"{strHostHttps}/Marketplace/All");
+            var items = GetFirstItem(client, $"{strHostHttps}/Lookup/All");
 
             Assert.NotNull(items);
 

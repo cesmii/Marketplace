@@ -81,7 +81,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 new OrderByExpression<MarketplaceItem>() { Expression = x => x.PublishDate, IsDescending = true }).Data
             };
             //calculate most popular based on analytics counts
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup, _configUtil);
             result.PopularItems = await util.PopularItems();
 
             return Ok(result);
@@ -98,7 +98,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 x => x.IsFeatured && x.IsActive
             };
             //limit to publish status of live
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup, _configUtil);
             predicates.Add(util.BuildStatusFilterPredicate());
 
             var result = _dal.Where(predicates, null, null, false, false,
@@ -117,7 +117,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 x => x.IsActive
             };
             //limit to publish status of live
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup, _configUtil);
             predicates.Add(util.BuildStatusFilterPredicate());
 
             //trim down to 4 most recent 
@@ -132,7 +132,7 @@ namespace CESMII.Marketplace.Api.Controllers
         public async Task<IActionResult> GetPopular()
         {
             //calculate most popular based on analytics counts
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup, _configUtil);
             var result = await util.PopularItems();
             return Ok(result);
         }
@@ -176,7 +176,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 result.Analytics = analytic;
             }
             //get related items
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup, _configUtil);
             util.AppendSimilarItems(ref result);
 
             return Ok(result);
@@ -229,7 +229,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 result.Analytics = analytic;
             }
             //get related items
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup, _configUtil);
             util.AppendSimilarItems(ref result);
 
             return Ok(result);
@@ -282,7 +282,9 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest($"Invalid model (null)");
             }
 
-            return await AdvancedSearch(model, true, true);
+            bool bIncludeCloud = _configUtil.MarketplaceSettings.EnableCloudLibSearch;
+
+            return await AdvancedSearch(model, bIncludeCloud, true);
         }
 
         /// <summary>
@@ -339,7 +341,7 @@ namespace CESMII.Marketplace.Api.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         private async Task<IActionResult> AdvancedSearch([FromBody] MarketplaceSearchModel model
-            , bool includeCloudLib = true, bool liveOnly = true)
+            , bool bIncludeCloudLib = true, bool liveOnly = true)
         {
             var timer = Stopwatch.StartNew();
             //init and then flags set by user or system will determine which of the following get applied
@@ -404,7 +406,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 (types.Any(x => x.Selected && x.Code.ToLower().Equals(_configUtil.MarketplaceSettings.SmProfile.Code.ToLower())) ||
                  keywordTypes.Any(x => x.Selected && x.Code.ToLower().Equals(_configUtil.MarketplaceSettings.SmProfile.Code.ToLower())));
             //Skip over this in certain scenarios. ie. admin section
-            if (_configUtil.MarketplaceSettings.EnableCloudLibSearch && includeCloudLib && includeSmProfileTypes)
+            if (_configUtil.MarketplaceSettings.EnableCloudLibSearch && bIncludeCloudLib && includeSmProfileTypes)
             {
 
                 var startCursor = ParseCursor(model?.PageCursors);
@@ -704,7 +706,7 @@ namespace CESMII.Marketplace.Api.Controllers
         {
             _logger.LogInformation($"MarketplaceController|AdvancedSearchMarketplace|Starting...");
             var timer = Stopwatch.StartNew();
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup, _configUtil);
 
             //lowercase model.query
             model.Query = string.IsNullOrEmpty(model.Query) ? model.Query : model.Query.ToLower();

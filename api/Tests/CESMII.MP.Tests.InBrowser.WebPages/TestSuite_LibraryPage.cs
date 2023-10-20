@@ -58,7 +58,8 @@ namespace Marketplace_InBrowser_Tests
         public void FoundClearAllButton_On_NavigateToLibraryPage()
         {
             // Make sure text search box can be found.
-            IWebElement? iwe = TestUtils.TryFindElement(driver, ".ml-sm-auto");
+            // Used to be ".ml-sm-auto" but nos is ".ml-md-auto". Okay.
+            IWebElement? iwe = TestUtils.TryFindElement(driver, ".ml-md-auto");
             Assert.True(iwe != null);
 
             string strValue = iwe.Text;

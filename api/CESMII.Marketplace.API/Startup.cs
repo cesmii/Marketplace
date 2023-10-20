@@ -60,22 +60,13 @@ namespace CESMII.Marketplace.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //MongoDB approach
+            // MongoDB approach
             services.Configure<MongoDBConfig>(Configuration);
 
-            string strConnectionString = Environment.GetEnvironmentVariable("MARKETPLACE_MONGODB_CONNECTIONSTRING");
-            string strDatabase = Environment.GetEnvironmentVariable("MARKETPLACE_MONGODB_DATABASE");
+            // In a test environment, init database from environment variables
+            string strConnectionString = FetchConnectionString();
 
-            // In a test environment, we get connection string from the environment
-            if (!string.IsNullOrEmpty(strConnectionString))
-            {
-                Configuration["MongoDBSettings:ConnectionString"] = strConnectionString;
-            }
-
-            if (!string.IsNullOrEmpty(strDatabase))
-            {
-                Configuration["MongoDBSettings:DatabaseName"] = strDatabase;
-            }
+            string strDatabase = FetchDatabaseName();
 
             string strCollection = Configuration["MongoDBSettings:NLogCollectionName"];
             NLog.Mongo.MongoTarget.SetNLogMongoOverrides(strConnectionString: strConnectionString,
@@ -141,18 +132,11 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IHttpApiFactory, HttpApiFactory>();
 
             //Cloud Lib
-            //var xx = Configuration.GetSection("CloudLibrary");
-            //if (xx.)
             services.Configure<Opc.Ua.Cloud.Library.Client.UACloudLibClient.Options>(Configuration.GetSection("CloudLibrary"));
             services.AddSingleton<Opc.Ua.Cloud.Library.Client.UACloudLibClient>();
             services.AddSingleton<ICloudLibWrapper, CloudLibWrapper>();
             services.AddScoped<ICloudLibDAL<MarketplaceItemModelWithCursor>, CloudLibDAL>();
             services.AddScoped<IAdminCloudLibDAL<AdminMarketplaceItemModelWithCursor>, AdminCloudLibDAL>();
-
-            //AAD - no longer need this
-            // Add token builder.
-            //var configUtil = new ConfigUtil(Configuration);
-            //services.AddTransient(provider => new TokenUtils(configUtil));
 
             services.AddControllers();
 
@@ -259,6 +243,36 @@ namespace CESMII.Marketplace.Api
 
             Github.Write_If(bGithubWorkflowLog, "::notice::Startup-ConfigureServices - Completed.");
             _logger.Info("Startup-ConfigureServices - Completed.");
+        }
+
+        private string FetchDatabaseName()
+        {
+            string strDatabase = Environment.GetEnvironmentVariable("MARKETPLACE_MONGODB_DATABASE");
+            if (!string.IsNullOrEmpty(strDatabase))
+            {
+                Configuration["MongoDBSettings:DatabaseName"] = strDatabase;
+            }
+            else
+            {
+                strDatabase = Configuration["MongoDBSettings:DatabaseName"];
+            }
+
+            return strDatabase;
+        }
+
+        private string FetchConnectionString()
+        {
+            string strConnectionString = Environment.GetEnvironmentVariable("MARKETPLACE_MONGODB_CONNECTIONSTRING");
+            if (!string.IsNullOrEmpty(strConnectionString))
+            {
+                Configuration["MongoDBSettings:ConnectionString"] = strConnectionString;
+            }
+            else
+            {
+                strConnectionString = Configuration["MongoDBSettings:ConnectionString"];
+            }
+
+            return strConnectionString;
         }
 
 
