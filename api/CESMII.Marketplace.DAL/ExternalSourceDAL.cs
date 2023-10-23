@@ -209,7 +209,8 @@
                     DefaultImageLandscape = entity.DefaultImageIdLandscape == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.DefaultImageIdLandscape.ToString()), _imagesAll),
                     TypeName = entity.TypeName,
                     AdminTypeName = entity.AdminTypeName,
-                    IsActive = entity.IsActive
+                    IsActive = entity.IsActive,
+                    FailOnException = entity.FailOnException
                 };
 
                 return result;
@@ -240,15 +241,16 @@
             //entity.DefaultImageIdPortrait = MongoDB.Bson.ObjectId.Parse(model.ItemType.ID);
             //entity.DefaultImageIdLandscape = MongoDB.Bson.ObjectId.Parse(model.ItemType.ID);
             entity.PublisherId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.Publisher.ID));
-    }
+            entity.FailOnException = model.FailOnException;
+        }
 
-    /// <summary>
-    ///When mapping the results, we also get related data. For efficiency, get the look up data now and then
-    ///mapToModel will apply to each item properly.
-    ///get list of marketplace items
-    /// </summary>
-    /// <param name="itemTypeIds"></param>
-    protected async Task GetDependentData(
+        /// <summary>
+        ///When mapping the results, we also get related data. For efficiency, get the look up data now and then
+        ///mapToModel will apply to each item properly.
+        ///get list of marketplace items
+        /// </summary>
+        /// <param name="itemTypeIds"></param>
+        protected async Task GetDependentData(
         List<MongoDB.Bson.BsonObjectId> itemTypeIds, 
         List<MongoDB.Bson.BsonObjectId> publisherIds,
         List<MongoDB.Bson.BsonObjectId> imageIds)

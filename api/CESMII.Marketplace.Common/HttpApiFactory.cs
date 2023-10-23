@@ -105,7 +105,8 @@ namespace CESMII.Marketplace.Common
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"HttpApiFactory||Run||An Error occurred: {ex.Message}");
+                var msg = $"HttpApiFactory.Run||{config.BaseAddress}{config.Url}||Action:{config.Method}||An error occurred calling API: {ex.Message}";
+                _logger.LogError(ex, msg);
                 throw;
             }
             finally

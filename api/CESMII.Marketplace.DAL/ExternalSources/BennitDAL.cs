@@ -227,7 +227,27 @@ namespace CESMII.Marketplace.DAL.ExternalSources
             if (string.IsNullOrEmpty(url)) throw new InvalidOperationException($"External Source|Url 'search' is not properly configured.");
 
             MultipartFormDataContent formData = PrepareFormData(SearchModeEnum.search, query, cursor.Skip, cursor.Take);
-            var response = await base.ExecuteApiCall(PrepareApiConfig(url, formData));
+            //wrap in try/catch so we can isolate a failed API call
+            HttpResponseModel response;
+            try
+            {
+                response = await base.ExecuteApiCall(PrepareApiConfig(url, formData));
+            }
+            catch (Exception ex)
+            {
+                //log the details of the query for easier troubleshooting
+                var msg = $"BennitDAL.Where||{_config.BaseUrl}{url}||Query:{query}||Skip:{cursor.Skip}||Take:{cursor.Take}||{ex.Message}";
+                _logger.Log(NLog.LogLevel.Error, ex, msg);
+                //return an empty result if we should not fail the whole search because this one area had issue.
+                if (!_config.FailOnException)
+                {
+                    return new DALResultWithSource<MarketplaceItemModel>()
+                    { Count = 0, Data = new List<MarketplaceItemModel>(), SourceId = _config.ID, Cursor = cursor };
+                }
+                //else we should stop the whole search and throw the caught exception 
+                throw;
+            }
+
             if (!response.IsSuccess) return null;
 
             //check for error response from server

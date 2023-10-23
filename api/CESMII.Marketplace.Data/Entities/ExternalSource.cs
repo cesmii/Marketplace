@@ -50,6 +50,13 @@ namespace CESMII.Marketplace.Data.Entities
         public BsonObjectId DefaultImageIdPortrait { get; set; }
         public BsonObjectId DefaultImageIdBanner { get; set; }
         public BsonObjectId DefaultImageIdLandscape { get; set; }
+
+        /// <summary>
+        /// If an exception occurs when calling the external API, should we stop the whole search. 
+        /// If false, we log exception but do not fail the search.
+        /// </summary>
+        /// <remarks>Note this does not apply when trying to get an individual record</remarks>
+        public virtual bool FailOnException { get; set; } = false;
     }
 
     public class ExternalSourceSimple
@@ -69,5 +76,6 @@ namespace CESMII.Marketplace.Data.Entities
         /// This is a friendly code value (expected to be unique) and nicer for use in urls. 
         /// </summary>
         public string Code { get; set; }
+
     }
 }

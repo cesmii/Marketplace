@@ -50,5 +50,11 @@ namespace CESMII.Marketplace.DAL.Models
         public ImageItemSimpleModel DefaultImageBanner { get; set; }
         public ImageItemSimpleModel DefaultImageLandscape { get; set; }
         public virtual bool IsActive { get; set; }
+        /// <summary>
+        /// If an exception occurs when calling the external API, should we stop the whole search. 
+        /// If false, we log exception but do not fail the search.
+        /// </summary>
+        /// <remarks>Note this does not apply when trying to get an individual record</remarks>
+        public virtual bool FailOnException { get; set; }
     }
 }

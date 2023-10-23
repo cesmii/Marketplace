@@ -167,9 +167,29 @@
             {
                 actualTake = Math.Min((cursor.Skip + cursor.Take ?? 100) - (int)result.Count, 100);
                 bMore = false;
-                matches = await _cloudLib.SearchAsync(actualTake, currentCursor, backwards, keywords, _configCustom.ExcludedNodeSets, cursor.HasTotalCount,
-                    order:
-                        new { metadata = new { title = OrderEnum.ASC }, modelUri = OrderEnum.ASC, publicationDate = OrderEnum.DESC });// "{metadata: {title: ASC}, modelUri: ASC, publicationDate: DESC}");
+
+                //wrap in try/catch so we can isolate a failed API call
+                try
+                {
+                    matches = await _cloudLib.SearchAsync(actualTake, currentCursor, backwards, keywords, _configCustom.ExcludedNodeSets, cursor.HasTotalCount,
+                        order:
+                            new { metadata = new { title = OrderEnum.ASC }, modelUri = OrderEnum.ASC, publicationDate = OrderEnum.DESC });// "{metadata: {title: ASC}, modelUri: ASC, publicationDate: DESC}");
+                }
+                catch (Exception ex)
+                {
+                    //log the details of the query for easier troubleshooting
+                    var msg = $"CloudLibDAL.Where||{_configCustom.Settings.EndPoint}||Query:{query}||Skip:{cursor.Skip}||Take:{cursor.Take}||{ex.Message}";
+                    _logger.Log(NLog.LogLevel.Error, ex, msg);
+                    //return an empty result if we should not fail the whole search because this one area had issue.
+                    if (!_config.FailOnException)
+                    {
+                        return new DALResultWithSource<TModel>()
+                        { Count = 0, Data = new List<TModel>(), SourceId = _config.ID, Cursor = cursor };
+                    }
+                    //else we should stop the whole search and throw the caught exception 
+                    throw;
+                }
+
                 if (matches == null || matches.Edges == null) return result;
 
                 result.Data.AddRange(MapToModelsNodesetResult(matches.Edges));
