@@ -1,9 +1,9 @@
 ﻿namespace Marketplace_InBrowser_Tests
 {
-    using Marketplace_InBrowser_Tests;
+    //using Marketplace_InBrowser_Tests;
     using OpenQA.Selenium;
-    using OpenQA.Selenium.Chrome;
-    using OpenQA.Selenium.DevTools.V112.ServiceWorker;
+    //using OpenQA.Selenium.Chrome;
+    //using OpenQA.Selenium.DevTools.V112.ServiceWorker;
     using System;
     using System.Collections.Generic;
     using Xunit;

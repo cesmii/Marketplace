@@ -9,9 +9,9 @@ namespace MP_TestGenerator
         {
             IConfigurationRoot config = CreateConfiguration();
 
-            string strConnection = config["MongoDBSnapshot2023-07-19:ConnectionString"];
-            string strDatabase = config["MongoDBSnapshot2023-07-19:DatabaseName"];
-            string strOutputFilePath = (args.Length > 0) ? args[0] : "C:\\CESMII.Testing\\MP\\Marketplace_TestData.cs";
+            string strConnection = "mongodb://testuser:password@localhost:27017"; //config["MongoDBSnapshot2023-07-19:ConnectionString"];
+            string strDatabase = "test"; // config["MongoDBSnapshot2023-07-19:DatabaseName"];
+            string strOutputFilePath = (args.Length > 0) ? args[0] : "C:\\CESMII\\Marketplace_TestData.cs";
 
             return (strConnection, strDatabase, strOutputFilePath);
         }

@@ -18,6 +18,8 @@ namespace CESMII.Marketplace.MongoDB
 
         public TestSuite_MongoDB()
         {
+            // strConnection = "mongodb://testuser:password@localhost:27017"; // utils.GetEnvString("MARKETPLACE_MONGODB_CONNECTIONSTRING");
+            // strDatabase = "test"; // utils.GetEnvString("MARKETPLACE_MONGODB_DATABASE");
             strConnection = utils.GetEnvString("MARKETPLACE_MONGODB_CONNECTIONSTRING");
             strDatabase = utils.GetEnvString("MARKETPLACE_MONGODB_DATABASE");
         }

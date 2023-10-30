@@ -458,45 +458,46 @@ namespace NLog.Mongo
             if (_defaultLogEvent.TimeStamp < timestamp)
                 _defaultLogEvent.TimeStamp = timestamp;
 
-            string connectionString = _connectionString != null ? RenderLogEvent(_connectionString, _defaultLogEvent) : string.Empty;
-            string collectionName = _collectionName != null ? RenderLogEvent(_collectionName, _defaultLogEvent) : string.Empty;
-            string databaseName = _databaseName != null ? RenderLogEvent(_databaseName, _defaultLogEvent) : string.Empty;
+            string strConnectionString = _connectionString != null ? RenderLogEvent(_connectionString, _defaultLogEvent) : string.Empty;
+            string strCollectionName = _collectionName != null ? RenderLogEvent(_collectionName, _defaultLogEvent) : string.Empty;
+            string strDatabaseName = _databaseName != null ? RenderLogEvent(_databaseName, _defaultLogEvent) : string.Empty;
 
-            if (string.IsNullOrEmpty(connectionString))
+            if (string.IsNullOrEmpty(strConnectionString))
                 throw new NLogConfigurationException("Can not resolve MongoDB ConnectionString. Please make sure the ConnectionString property is set.");
 
-            if (string.IsNullOrEmpty(collectionName))
+            if (string.IsNullOrEmpty(strCollectionName))
                 throw new NLogConfigurationException("Collection name is missing. Check collection_name value in nLog.config Mongo target is set.");
 
             // cache mongo collection based on target name.
-            var key = new MongoConnectionKey(connectionString, collectionName, databaseName);
+            var key = new MongoConnectionKey(strConnectionString, strCollectionName, strDatabaseName);
             if (_collectionCache.TryGetValue(key, out var mongoCollection))
                 return mongoCollection;
 
             return _collectionCache.GetOrAdd(key, k =>
             {
                 // create collection
-                var mongoUrl = new MongoUrl(connectionString);
+                var mongoUrl = new MongoUrl(strConnectionString);
 
-                databaseName = !string.IsNullOrEmpty(databaseName) ? databaseName : (mongoUrl.DatabaseName ?? "NLog");
-                collectionName = !string.IsNullOrEmpty(collectionName) ? collectionName : "Log";
+                strDatabaseName = !string.IsNullOrEmpty(strDatabaseName) ? strDatabaseName : (mongoUrl.DatabaseName ?? "NLog");
+                strCollectionName = !string.IsNullOrEmpty(strCollectionName) ? strCollectionName : "Log";
 
-                string strLogConnecting = $"Connecting to MongoDB collection {collectionName} in database {databaseName}";
+                string strLogConnecting = $"Connecting to MongoDB collection {strCollectionName} in database {strDatabaseName}";
                 InternalLogger.Info(strLogConnecting);
 
                 bool bGithubWorkflowLog = Github.QueryEnvironmentBool("MARKETPLACE_GITHUB_WORKFLOW_COMMANDS", false);
+                Github.Write_If(bGithubWorkflowLog, $"::notice::Mongo Connection String - {strConnectionString}.");
                 Github.Write_If(bGithubWorkflowLog, $"::notice::MongoTarget - {strLogConnecting}.");
 
                 var client = new MongoClient(mongoUrl);
 
                 // Database name overrides connection string
-                var database = client.GetDatabase(databaseName);
+                var database = client.GetDatabase(strDatabaseName);
 
                 if (CappedCollectionSize.HasValue)
                 {
                     try
                     {
-                        string strLogChecking = $"Checking for existing MongoDB collection {collectionName} in database {databaseName}";
+                        string strLogChecking = $"Checking for existing MongoDB collection {strCollectionName} in database {strDatabaseName}";
                         InternalLogger.Debug(strLogChecking);
                         Github.Write_If(bGithubWorkflowLog, $"::notice::MongoTarget - {strLogChecking}.");
 
@@ -505,7 +506,7 @@ namespace NLog.Mongo
                         if (!listCollections.Contains("app_log"))
                         {
                             database.CreateCollection("app_log");
-                            string strCreatingCollection = $"Creating collection {collectionName} in database {databaseName}";
+                            string strCreatingCollection = $"Creating collection {strCollectionName} in database {strDatabaseName}";
                             InternalLogger.Debug(strCreatingCollection);
                             Github.Write_If(bGithubWorkflowLog, $"::notice::MongoTarget - {strCreatingCollection}.");
                         }
@@ -513,16 +514,16 @@ namespace NLog.Mongo
                     catch (Exception ex)
                     {
                         bErrorIgnoreAllLogRequests = true;
-                        string strError = $"Unable to access collection {collectionName} in database {databaseName}";
+                        string strError = $"Unable to access collection {strCollectionName} in database {strDatabaseName}";
                         InternalLogger.Debug(strError);
                         Github.Write_If(bGithubWorkflowLog, $"::error file=MongoTarget.cs,line=503::MongoTarget - {strError}. Exception: {ex.Message}");
                         return null;
                     }
 
-                    var filterOptions = new ListCollectionNamesOptions { Filter = new BsonDocument("name", collectionName) };
+                    var filterOptions = new ListCollectionNamesOptions { Filter = new BsonDocument("name", strCollectionName) };
                     if (!database.ListCollectionNames(filterOptions).Any())
                     {
-                        string strCreatingCollection = $"Creating new MongoDB collection {collectionName} in database {databaseName}";
+                        string strCreatingCollection = $"Creating new MongoDB collection {strCollectionName} in database {strDatabaseName}";
                         InternalLogger.Debug(strCreatingCollection);
                         Github.Write_If(bGithubWorkflowLog, $"::notice::MongoTarget - {strCreatingCollection}");
 
@@ -534,12 +535,12 @@ namespace NLog.Mongo
                             MaxDocuments = CappedCollectionMaxItems
                         };
 
-                        database.CreateCollection(collectionName, options);
+                        database.CreateCollection(strCollectionName, options);
                     }
                 }
 
-                var collection = database.GetCollection<BsonDocument>(collectionName);
-                InternalLogger.Debug("Retrieved MongoDB collection {0} from database {1}", collectionName, databaseName);
+                var collection = database.GetCollection<BsonDocument>(strCollectionName);
+                InternalLogger.Debug("Retrieved MongoDB collection {0} from database {1}", strCollectionName, strDatabaseName);
                 return collection;
             });
         }

@@ -1,6 +1,7 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Remote;
+using Xunit;
 using static System.Net.WebRequestMethods;
 
 namespace Marketplace_InBrowser_Tests

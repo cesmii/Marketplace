@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "IgnoreLinesWith": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\CESMII\\Test001.txt \"Please\" \"Cannot\""
+    }
+  }
+}

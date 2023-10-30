@@ -1,6 +1,7 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Remote;
+using Xunit;
 using static System.Net.WebRequestMethods;
 
 namespace Marketplace_InBrowser_Tests
@@ -10,8 +11,8 @@ namespace Marketplace_InBrowser_Tests
         public static string? GetStartUrl()
         {
             // The web page address within the MyNodeJS Docker container
-            // string? strBaseUrl = "http://localhost"; // :3000/library?p=1&t=10";
-            string? strBaseUrl = "http://172.18.0.4"; // :3000/library?p=1&t=10";
+            string? strBaseUrl = "http://localhost"; // :3000/library?p=1&t=10";
+            // string? strBaseUrl = "http://172.24.0.4"; // :3000/library?p=1&t=10";
             string? strTempUrl = Environment.GetEnvironmentVariable("NODEJS");
             if ( !string.IsNullOrEmpty(strTempUrl))
                 strBaseUrl = strTempUrl;
