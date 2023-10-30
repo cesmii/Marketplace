@@ -209,7 +209,9 @@
                     PublisherId = entity.PublisherId.ToString(),
                     Publisher = entity.PublisherId.ToString().Equals(Common.Constants.BSON_OBJECTID_EMPTY) ? null :
                         MapToModelPublisher(entity.PublisherId),
-                    ExternalSource = entity.ExternalSource, 
+                    ExternalSource = entity.ExternalSource == null ? null : 
+                        new ExternalSourceSimpleInfo(){ Code = entity.ExternalSource.Code, ID = entity.ExternalSource.ID, 
+                        SourceId = entity.ExternalSource.SourceId }, 
                     RequestType = MapToModelLookupItem(entity.RequestTypeId, _lookupItemsAll),
                     MembershipStatus = MapToModelLookupItem(entity.MembershipStatusId, _lookupItemsAll),
                     FirstName = entity.FirstName,
@@ -237,8 +239,19 @@
                 }
                 if (verbose)
                 {
-                    result.ExternalItem = entity.ExternalSource == null ? null :
-                        MapToModelExternalSourceItem(entity.ExternalSource).Result;
+                    //get the source
+                    if (entity.ExternalSource != null)
+                    {
+                        var src = _dalExternalSource.GetById(entity.ExternalSource.SourceId);
+                        if (src == null)
+                        {
+                            throw new ArgumentException($"External source not found: SourceId: {entity.ExternalSource.SourceId}, Code:{entity.ExternalSource.Code}");
+                        }
+
+                        result.ExternalItem = entity.ExternalSource == null ? null :
+                            MapToModelExternalSourceItem(entity.ExternalSource.ID, src).Result;
+                        result.ExternalSource.Name = src.Name;
+                    }
                 }
                 return result;
             }
@@ -303,7 +316,8 @@
             entity.PublisherId = (model.PublisherId == null) ?
                 new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY)) : 
                 new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.PublisherId));
-            entity.ExternalSource = model.ExternalSource;
+            entity.ExternalSource = model.ExternalSource == null ? null : new ExternalSourceSimple()
+                { Code = model.ExternalSource.Code, ID = model.ExternalSource.ID, SourceId = model.ExternalSource.SourceId };
             entity.FirstName = model.FirstName;
             entity.LastName = model.LastName;
             entity.CompanyName = model.CompanyName;
@@ -360,21 +374,14 @@
             }
         }
 
-        private async Task<MarketplaceItemModel> MapToModelExternalSourceItem(ExternalSourceSimple item)
+        private async Task<MarketplaceItemModel> MapToModelExternalSourceItem(string id, ExternalSourceModel item)
         {
-            //get the source
-            var src = _dalExternalSource.GetById(item.SourceId);
-            if (src == null)
-            {
-                throw new ArgumentException($"External source not found: SourceId: {item.SourceId}, Code:{item.Code}");
-            }
-
             //now get the source data 
-            var dalSource = await _sourceFactory.InitializeSource(src);
-            var result = await dalSource.GetById(item.ID);
+            var dalSource = await _sourceFactory.InitializeSource(item);
+            var result = await dalSource.GetById(id);
             if (result == null)
             {
-                throw new ArgumentException($"External source item not found: Id: {item.ID}, SourceId: {item.SourceId}, Code:{item.Code}");
+                throw new ArgumentException($"External source item not found: Id: {id}, SourceId: {item.ID}, Code:{item.Code}");
             }
             return result;
         }

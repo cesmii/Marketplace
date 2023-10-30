@@ -23,7 +23,7 @@ namespace CESMII.Marketplace.DAL.Models
         /// <summary>
         /// This is only populated if this request info is associated with a particular external source item
         /// </summary>
-        public Data.Entities.ExternalSourceSimple ExternalSource { get; set; }
+        public Data.Entities.ExternalSourceSimpleInfo ExternalSource { get; set; }
 
         /// <summary>
         /// This is only populated if the external source data is populated. 

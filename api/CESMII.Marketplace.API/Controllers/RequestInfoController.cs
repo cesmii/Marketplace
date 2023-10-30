@@ -201,7 +201,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 case "marketplaceitem":
                     return REQUESTINFO_SUBJECT.Replace("{{RequestType}}", $"Request More Info | {item.RequestType.Name}");
                 case "external-source":
-                    return REQUESTINFO_SUBJECT.Replace("{{RequestType}}", $"Request More Info | {item.ExternalItem.Type.Name}");
+                    return REQUESTINFO_SUBJECT.Replace("{{RequestType}}", $"Request More Info | {item.ExternalItem.Type.Name} ({item.ExternalSource.Name})");
                 case "membership":
                 case "contribute":
                 case "request-demo":
@@ -219,9 +219,9 @@ namespace CESMII.Marketplace.Api.Controllers
             {
                 case "marketplaceitem":
                     return "~/Views/Template/MoreInfoRequest.cshtml";
-
                 case "publisher":
                 case "sm-profile":
+                case "external-source":
                     return "~/Views/Template/RequestInfo.cshtml";
                 default:
                     return "~/Views/Template/ContactUs.cshtml";

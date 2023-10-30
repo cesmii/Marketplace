@@ -78,4 +78,15 @@ namespace CESMII.Marketplace.Data.Entities
         public string Code { get; set; }
 
     }
+
+    /// <summary>
+    /// External Source Simple with a little more info
+    /// </summary>
+    public class ExternalSourceSimpleInfo : ExternalSourceSimple
+    {
+        /// <summary>
+        /// This is the name for descriptive purposes. 
+        /// </summary>
+        public string Name { get; set; }
+    }
 }

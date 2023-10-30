@@ -264,7 +264,8 @@ namespace CESMII.Marketplace.Api.Controllers
                 var modelNew = _dalRequestInfo.GetById(result);
 
                 //we are adding a request info with an smprofile, get the associated sm profile.
-                modelNew.ExternalSource = item.ExternalSource;
+                modelNew.ExternalSource = new ExternalSourceSimpleInfo() 
+                { Code = item.ExternalSource.Code, ID = item.ExternalSource.ID, SourceId = item.ExternalSource.SourceId };
 
                 var subject = REQUESTINFO_SUBJECT.Replace("{{RequestType}}", "Download Nodeset Notification");
                 var body = await this.RenderViewAsync("~/Views/Template/RequestInfo.cshtml", modelNew);

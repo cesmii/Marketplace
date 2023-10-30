@@ -6,7 +6,14 @@
 
 <div>
     <h1>Request Info Item</h1>
-    <p>Request Type: @Model.RequestType.Name</p>
+    @if (Model.ExternalSource == null)
+    {
+        <p>Request Type: @Model.RequestType.Name</p>
+    }
+    else
+    {
+        <p>External Item Source: @Model.ExternalSource.Name</p>
+    }
     <p>Submitted: @Model.Created.ToString("MM-dd-yyyy hh:mm")</p>
 </div>
 
@@ -42,7 +49,10 @@ else if (Model.ExternalItem != null)
     <p>First Name: @Model.FirstName</p>
     <p>Last Name: @Model.LastName</p>
     <p>Email: @Model.Email</p>
+    @if (Model.Phone != null)
+    {
     <p>Phone: @Model.Phone</p>
+    }
     @if (Model.MembershipStatus != null)
     {
     <p>Membership Status: @Model.MembershipStatus.Name</p>
@@ -63,7 +73,7 @@ else if (Model.ExternalItem != null)
         }
     </div>
 }
-@if (!string.IsNullOrEmpty(Model.CompanyName))
+@if (!string.IsNullOrEmpty(Model.Description))
 {
     <div>
         <h2>Message</h2>
