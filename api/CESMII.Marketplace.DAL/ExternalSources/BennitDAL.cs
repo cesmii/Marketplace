@@ -11,7 +11,6 @@ using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.DAL.ExternalSources.Models;
-using Microsoft.Extensions.Configuration;
 using CESMII.Marketplace.Data.Repositories;
 
 namespace CESMII.Marketplace.DAL.ExternalSources
@@ -72,6 +71,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
     {
         protected class BennitConfigData
         {
+            public string AccessToken { get; set; }
             public List<KeyValuePair<string, string>> Urls { get; set; }
         }
 
@@ -285,7 +285,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         {
             var formData = new MultipartFormDataContent();
             //case sensitive
-            formData.Add(new StringContent(_config.AccessToken), "partnerkey");
+            formData.Add(new StringContent(_configCustom.AccessToken), "partnerkey");
             formData.Add(new StringContent(mode.ToString()), "query");
             formData.Add(new StringContent(value), "value");
             if (skip.HasValue) formData.Add(new StringContent(skip.ToString()), "skip");

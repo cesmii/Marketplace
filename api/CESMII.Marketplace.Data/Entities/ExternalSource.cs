@@ -35,7 +35,6 @@ namespace CESMII.Marketplace.Data.Entities
         /// </summary>
         public string AdminTypeName { get; set; }
         public string BaseUrl { get; set; }
-        public string AccessToken { get; set; }
 
         /// <summary>
         /// Field to store settings and structure unique to this external source
