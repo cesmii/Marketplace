@@ -12,10 +12,10 @@ import { MarketplaceBreadcrumbs } from './shared/MarketplaceBreadcrumbs';
 import { SvgVisibilityIcon } from "../components/SVGIcon";
 import color from "../components/Constants";
 import SocialMedia from "../components/SocialMedia";
-import { clearSearchCriteria, generateSearchQueryString, toggleSearchFilterSelected } from '../services/MarketplaceService';
 import MarketplaceTileList from './shared/MarketplaceTileList';
 import PublisherEntitySidebar from './shared/PublisherEntitySidebar';
 import { renderSchemaOrgContentPublisher } from '../utils/schemaOrgUtil';
+import { getViewByPublisherUrl } from '../services/PublisherService';
 
 const CLASS_NAME = "PublisherEntity";
 
@@ -95,18 +95,6 @@ function PublisherEntity() {
         history.goBack();
     };
 
-    const getViewByPublisherUrl = () => {
-
-        //clear out the selected, the query val
-        var criteria = clearSearchCriteria(loadingProps.searchCriteria);
-
-        //loop through filters and their items and find the publisher id
-        toggleSearchFilterSelected(criteria, item.id);
-
-        //return url that will filter by publisher
-        return `/library?${generateSearchQueryString(criteria, 1)}`;
-    };
-
     //-------------------------------------------------------------------
     // Region: Render Helpers
     //-------------------------------------------------------------------
@@ -170,13 +158,17 @@ function PublisherEntity() {
                     <div className="col-sm-6" >
                         <span className="material-icons-outlined d-flex align-items-left"><i className="material-icons mr-1" style={{ color: color.selectedBg }}>language</i><a href={item.companyUrl} className="a-text">Website </a></span>
                     </div>
-                    <div className="col-sm-6" >
-                        <span className="d-flex justify-content-end"><SocialMedia items={item.socialMediaLinks} /> </span>
-                    </div>
-                    <div className="col-sm-12 d-flex align-items-center">
-                        <SvgVisibilityIcon fill={color.link} />
-                        <a href={getViewByPublisherUrl()} >View all by this publisher</a>
-                    </div>
+                    {item.socialMediaLinks != null &&
+                        <div className="col-sm-6" >
+                            <span className="d-flex justify-content-end"><SocialMedia items={item.socialMediaLinks} /> </span>
+                        </div>
+                    }
+                    {item.allowFilterBy &&
+                        <div className="col-sm-12 d-flex align-items-center">
+                            <SvgVisibilityIcon fill={color.link} />
+                            <a href={getViewByPublisherUrl(loadingProps, item)} >View all by this publisher</a>
+                        </div>
+                    }
                 </div>
 
             </>

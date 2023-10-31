@@ -25,6 +25,11 @@
 
         public bool Verified { get; set; }
 
+        /// <summary>
+        /// Some publishers may not want to have all of their data searched by publisher. This flag prevents that.
+        /// </summary>
+        public bool AllowFilterBy { get; set; }
+
         public string Description { get; set; }
 
         public string CompanyUrl { get; set; }
@@ -34,7 +39,6 @@
         public List<MarketplaceItemModel> MarketplaceItems { get; set; }
 
         public virtual bool IsActive { get; set; }
-
     }
 
     public class PublisherModel : PublisherModelBase

@@ -128,6 +128,7 @@
                     Name = entity.Name.ToLower().Trim().Replace(" ", "-").Replace("_", "-"),
                     DisplayName = entity.DisplayName,
                     Verified = entity.Verified,
+                    AllowFilterBy = entity.AllowFilterBy,
                     Description = entity.Description,
                     CompanyUrl = entity.CompanyUrl,
                     SocialMediaLinks = entity.SocialMediaLinks?.Select(x => new SocialMediaLinkModel() { Css = x.Css, Icon = x.Icon, Url = x.Url }).ToList(),

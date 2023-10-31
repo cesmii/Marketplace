@@ -2,11 +2,12 @@ import React from 'react'
 import { useHistory } from 'react-router-dom'
 import { Button } from 'react-bootstrap'
 
-import { formatItemPublishDate, getImageUrl, getRandomArrayIndexes } from '../../utils/UtilityService';
-import { clearSearchCriteria, generateSearchQueryString, RenderImageBg, toggleSearchFilterSelected } from '../../services/MarketplaceService'
+import { formatItemPublishDate, getRandomArrayIndexes } from '../../utils/UtilityService';
+import { RenderImageBg } from '../../services/MarketplaceService'
 import { useLoadingContext } from '../../components/contexts/LoadingContext'
 import { SvgVisibilityIcon } from '../../components/SVGIcon'
 import color from '../../components/Constants'
+import { getViewByPublisherUrl } from '../../services/PublisherService';
 
 //const CLASS_NAME = "MarketplaceItemRow";
 
@@ -23,18 +24,6 @@ function MarketplaceItemRow(props) { //props are item, showActions
             pathname: `/library/${props.item.name}`,
             state: { id: `${props.item.name}` }
         });
-    };
-
-    const getViewByPublisherUrl = () => {
-
-        //clear out the selected, the query val
-        var criteria = clearSearchCriteria(loadingProps.searchCriteria);
-
-        //loop through filters and their items and find the publisher id
-        toggleSearchFilterSelected(criteria, props.item.publisher.id);
-
-        //return url that will filter by publisher
-        return `/library?${generateSearchQueryString(criteria, 1)}`;
     };
 
     //-------------------------------------------------------------------
@@ -128,6 +117,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
     //TBD - improve this check
     if (props.item === null || props.item === {}) return null;
     if (props.item.name == null) return null;
+    const url = (!props.item.isExternal ? `/library/${props.item.name}` : `/library/${props.item.externalSource.code.toLowerCase()}/${props.item.id}`)
 
     return (
         <>
@@ -139,21 +129,25 @@ function MarketplaceItemRow(props) { //props are item, showActions
                     <div className="d-flex align-items-center mb-2" >
                         <h2 className="mb-0" >{props.item.displayName}
                         </h2>
-                        {(props.isAuthorized) &&
+                        {(props.isAuthorized && !props.item.isExternal) &&
                             <a className="btn btn-icon-outline circle ml-auto" href={`/admin/library/${props.item.id}`} ><i className="material-icons">edit</i></a>
                         }
                     </div>
                     {props.item.abstract != null &&
                         <div className="mb-0" dangerouslySetInnerHTML={{ __html: props.item.abstract }} ></div>
                     }
-                    <p className="my-4" ><Button variant="secondary" type="button" className="px-4" href={`/library/${props.item.name}`} >More Info</Button>
+                    <p className="my-4" ><Button variant="secondary" type="button" className="px-4" href={url} >More Info</Button>
                     </p>
                     <p className="mb-2" ><b className="mr-2" >Published By:</b><a href={`/publisher/${props.item.publisher.name}`} >{props.item.publisher.displayName}</a></p>
-                    <p className="mb-2 d-flex align-items-center" >
-                        <SvgVisibilityIcon fill={color.link} />
-                        <a href={getViewByPublisherUrl()} >View all by this publisher</a>
-                    </p>
-                    <p className="mb-3" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
+                    {props.item.publisher?.allowFilterBy &&
+                        <p className="mb-2 d-flex align-items-center" >
+                            <SvgVisibilityIcon fill={color.link} />
+                            <a href={getViewByPublisherUrl(loadingProps, props.item.publisher)} >View all by this publisher</a>
+                        </p>
+                    }
+                    {props.item.publishDate != null &&
+                        <p className="mb-3" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
+                    }
                     <div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>
                     <div className="d-none d-lg-inline" >{renderCategoryItem(props.item)}</div>
                     <div className="d-none d-lg-inline" >{renderMetaTagItem(props.item)}</div>

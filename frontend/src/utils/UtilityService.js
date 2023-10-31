@@ -319,11 +319,18 @@ export function getProfileIconName(item) {
 export function getImageUrl(item)
 {
     if (item == null) return '';
+    //if item has src, return that as the url
+    if (item.src != null) return item.src;
+    return `${AppSettings.BASE_API_URL}/image/${item.id}`
+}
+
+export function getImageUrlAdmin(item) {
+    if (item == null) return '';
     return `${AppSettings.BASE_API_URL}/image/${item.id}`
 }
 
 export function getImageAlt(item) {
-    if (item == null) return '';
+    if (item == null || item.fileName == null) return '';
     return item.fileName.replace(/.jpeg/g, "").replace(/.jpg/g, "").replace(/.png/g, "").replace(/.gif/g, "").replace(/.bmp/g, "");
 }
 
