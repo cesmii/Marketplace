@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Net.Mail;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
@@ -138,20 +140,27 @@ namespace CESMII.Marketplace.Api.Controllers
 
                     if (strRequestType == "marketplaceitem")
                     {
-                        bool[] abSendTo = new bool[3];
-                        abSendTo[0] = true;
-                        abSendTo[1] = false;
-                        abSendTo[2] = false;
+                        var listTo = new List<MailAddress>() {
+                            new MailAddress(modelNew.Email, $"{modelNew.FirstName} {modelNew.LastName}")
+                        };
+                        //TBD - eventually convert this to a list instead of adding 2 fixed items
+                        var listCC = new List<MailAddress>() { };
+                        if (!string.IsNullOrEmpty(modelNew.MarketplaceItem.ccEmail1))
+                            listCC.Add(new MailAddress(modelNew.MarketplaceItem.ccEmail1, modelNew.MarketplaceItem.ccName1));
+                        if (!string.IsNullOrEmpty(modelNew.MarketplaceItem.ccEmail2))
+                            listCC.Add(new MailAddress(modelNew.MarketplaceItem.ccEmail2, modelNew.MarketplaceItem.ccName2));
+                        //remove nulls
+                        listCC = listCC.Where(x => !string.IsNullOrEmpty(x.Address)).ToList();
 
-                        string[] astrEmail = new string[3];
-                        astrEmail[0] = modelNew.Email;
-                        astrEmail[1] = modelNew.MarketplaceItem.ccEmail1;
-                        astrEmail[2] = modelNew.MarketplaceItem.ccEmail2;
-
-                        string[] astrName = new string[3];
-                        astrName[0] = $"{modelNew.FirstName} {modelNew.LastName}";
-                        astrName[1] = modelNew.MarketplaceItem.ccName1;
-                        astrName[2] = modelNew.MarketplaceItem.ccName2;
+                        //still need to send it to send to MailToAddress at CESMII
+                        var additionalEmails = _mailConfig.ToAddresses.Where(x => !listCC.Any() || listCC.Any(y => x != y.Address)).ToList();
+                        if (additionalEmails.Any())
+                        {
+                            foreach (var email in additionalEmails) 
+                            {
+                                listCC.Add(new MailAddress(email, null));
+                            }
+                        }
 
                         // Add target email addresses to the support request.
                         modelNew.ccEmail1 = modelNew.MarketplaceItem.ccEmail1;
@@ -160,7 +169,8 @@ namespace CESMII.Marketplace.Api.Controllers
                         modelNew.ccName2 = modelNew.MarketplaceItem.ccName2;
                         bUpdateNeeded = true;
 
-                        bEmailSuccess = await EmailRequestInfo(subject, body, _mailRelayService, astrEmail, astrName, abSendTo);
+                        bEmailSuccess = await EmailRequestInfo(subject, body, _mailRelayService, 
+                            listTo, listCC);
                     }
                     else
                     {
