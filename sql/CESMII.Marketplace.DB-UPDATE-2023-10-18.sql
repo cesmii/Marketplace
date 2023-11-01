@@ -135,3 +135,8 @@ db.MarketplaceItemAnalytics.find({ 'CloudLibId': { $exists: 1 } })
 );
 
 
+//-----------------------------------------------------------------------------------------
+// ProfleItem
+// Rename collection to reflect broader usage
+//-----------------------------------------------------------------------------------------
+db.getCollection('ProfileItem').aggregate( [ $out: "ExternalItem" }]);

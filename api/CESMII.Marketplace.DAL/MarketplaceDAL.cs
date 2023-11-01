@@ -287,7 +287,7 @@
                     var relatedItems = MapToModelRelatedItems(entity.RelatedItems).Result;
 
                     //get related profiles from CloudLib
-                    var relatedProfiles = MapToModelRelatedExternalItems(entity.RelatedItemsExternal);
+                    var relatedProfiles = MapToModelRelatedItemsExternal(entity.RelatedItemsExternal);
                     
                     //map related items into specific buckets - required, recommended
                     result.RelatedItemsGrouped = GroupAndMergeRelatedItems(relatedItems, relatedProfiles);
@@ -369,7 +369,7 @@
         /// Get related items from DB, filter out each group based on required/recommended/related flag
         /// assume all related items in same collection and a type id distinguishes between the types. 
         /// </summary>
-        protected List<MarketplaceItemRelatedModel> MapToModelRelatedExternalItems(List<RelatedExternalItem> items)
+        protected List<MarketplaceItemRelatedModel> MapToModelRelatedItemsExternal(List<RelatedExternalItem> items)
         {
             if (items == null)
             {

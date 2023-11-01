@@ -23,7 +23,7 @@
             IMongoRepository<ImageItem> repoImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
-            IMongoRepository<ProfileItem> repoExternalItem
+            IMongoRepository<ExternalItem> repoExternalItem
             ) : base(config, dalExternalSource, httpApiFactory, repoImages, dalLookup, repoMarketplace, repoExternalItem)
         {
         }
@@ -61,12 +61,12 @@
         /// <exception cref="NotImplementedException"></exception>
         public async Task<int> Upsert(AdminMarketplaceItemModel model, string userId)
         {
-            ProfileItem entity = _repoExternalItem.FindByCondition(x => 
+            ExternalItem entity = _repoExternalItem.FindByCondition(x => 
                 x.ExternalSource.ID == model.ExternalSource.ID && x.ExternalSource.SourceId == model.ExternalSource.SourceId).FirstOrDefault();
             bool isAdd = entity == null;
             if (entity == null)
             {
-                entity = new ProfileItem()
+                entity = new ExternalItem()
                 {
                     ID = "",
                     ExternalSource = model.ExternalSource,
@@ -88,7 +88,7 @@
 
         public async Task<int> Delete(ExternalSourceSimple source, string userId)
         {
-            ProfileItem entity = _repoExternalItem.FindByCondition(x =>
+            ExternalItem entity = _repoExternalItem.FindByCondition(x =>
                 x.ExternalSource.ID == source.ID && x.ExternalSource.SourceId == source.SourceId).FirstOrDefault();
             if (entity == null) return 0;
             await _repoExternalItem.Delete(entity);
@@ -140,7 +140,7 @@
         /// <param name="entity"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        protected override AdminMarketplaceItemModel MapToModelNamespace(UANameSpace entity, ProfileItem entityLocal)
+        protected override AdminMarketplaceItemModel MapToModelNamespace(UANameSpace entity, ExternalItem entityLocal)
         {
             if (entity != null)
             {
@@ -189,7 +189,7 @@
                     result.RelatedItems = MapToModelRelatedItems(entityLocal?.RelatedItems).Result;
 
                     //get related profiles from CloudLib
-                    result.RelatedItemsExternal = MapToModelRelatedExternalItems(entityLocal?.RelatedExternalItems);
+                    result.RelatedItemsExternal = MapToModelRelatedItemsExternal(entityLocal?.RelatedItemsExternal);
                 }
                 return result;
             }
@@ -200,7 +200,7 @@
 
         }
 
-        protected void MapToEntity(ref ProfileItem entity, AdminMarketplaceItemModel model)
+        protected void MapToEntity(ref ExternalItem entity, AdminMarketplaceItemModel model)
         {
             //ensure this value is always without spaces and is lowercase. 
             //replace child collection of items - ids are preserved
@@ -212,7 +212,7 @@
                     RelatedTypeId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedType.ID)),
                 }).ToList();
             //replace child collection of items - ids are preserved
-            entity.RelatedExternalItems = model.RelatedItemsExternal
+            entity.RelatedItemsExternal = model.RelatedItemsExternal
                 .Where(x => x.RelatedType != null) //only include selected rows
                 .Select(x => new RelatedExternalItem()
                 {
@@ -226,7 +226,7 @@
         /// Get related items from DB, filter out each group based on required/recommended/related flag
         /// assume all related items in same collection and a type id distinguishes between the types. 
         /// </summary>
-        protected List<ExternalSourceItemModel> MapToModelRelatedExternalItems(List<RelatedExternalItem> items)
+        protected List<ExternalSourceItemModel> MapToModelRelatedItemsExternal(List<RelatedExternalItem> items)
         {
             if (items == null)
             {

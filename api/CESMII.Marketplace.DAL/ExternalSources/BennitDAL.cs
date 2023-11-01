@@ -93,7 +93,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
             IMongoRepository<ImageItem> repoImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
-            IMongoRepository<ProfileItem> repoExternalItem
+            IMongoRepository<ExternalItem> repoExternalItem
             ) : base(dalExternalSource, config, httpApiFactory, repoImages)
         {
             this.Init(dalExternalSource);
@@ -105,7 +105,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
             IMongoRepository<ImageItem> repoImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
-            IMongoRepository<ProfileItem> repoExternalItem
+            IMongoRepository<ExternalItem> repoExternalItem
             ) : base(dalExternalSource, "bennit", httpApiFactory, repoImages)
         {
             this.Init(dalExternalSource);
@@ -378,7 +378,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                         (string.IsNullOrEmpty(entity.Locations) ? "" : $"<p><b>Locations</b>: {entity.Locations}</p>");
 
                     //map related profiles
-                    var relatedItemsExternal = MapToModelRelatedExternalItems(
+                    var relatedItemsExternal = MapToModelRelatedItemsExternal(
                         new LookupItemModel() { ID = "1", DisplayOrder = 1, Code = "expertise", Name = "Expertise In" },
                         entity.SMProfiles);
                     //map other related data
@@ -410,7 +410,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         /// <summary>
         /// Map profiles to related items
         /// </summary>
-        protected List<MarketplaceItemRelatedModel> MapToModelRelatedExternalItems(LookupItemModel type, List<BennitSmProfileLink> items)
+        protected List<MarketplaceItemRelatedModel> MapToModelRelatedItemsExternal(LookupItemModel type, List<BennitSmProfileLink> items)
         {
             if (items == null || items.Count == 0)
             {
