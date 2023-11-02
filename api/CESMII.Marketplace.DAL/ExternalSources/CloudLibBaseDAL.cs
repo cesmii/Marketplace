@@ -33,7 +33,7 @@
 
         protected ICloudLibWrapper _cloudLib;
         //TBD - update this to use ExternalItem
-        protected IMongoRepository<ProfileItem> _repoExternalItem;
+        protected IMongoRepository<ExternalItem> _repoExternalItem;
         protected IMongoRepository<MarketplaceItem> _repoMarketplace;
         protected List<LookupItemModel> _lookupItemsRelatedType;
         protected List<ImageItemModel> _images;
@@ -48,7 +48,7 @@
             IMongoRepository<ImageItem> repoImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
-            IMongoRepository<ProfileItem> repoExternalItem
+            IMongoRepository<ExternalItem> repoExternalItem
             ) : base(dalExternalSource, config, httpApiFactory, repoImages)
         {
             this.Init(dalLookup, repoMarketplace, repoExternalItem);
@@ -60,7 +60,7 @@
             IMongoRepository<ImageItem> repoImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
-            IMongoRepository<ProfileItem> repoExternalItem
+            IMongoRepository<ExternalItem> repoExternalItem
             ) : base(dalExternalSource, "cloudlib", httpApiFactory, repoImages)
         {
             this.Init(dalLookup, repoMarketplace, repoExternalItem);
@@ -69,7 +69,7 @@
         protected void Init(
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
-            IMongoRepository<ProfileItem> repoExternalItem
+            IMongoRepository<ExternalItem> repoExternalItem
             )
         {
             //grab Cloud lib url, user name and password and excluded nodeset
@@ -294,7 +294,7 @@
         /// <param name="entity"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        protected virtual TModel MapToModelNamespace(UANameSpace entity, ProfileItem entityLocal)
+        protected virtual TModel MapToModelNamespace(UANameSpace entity, ExternalItem entityLocal)
         {
             //implement in derived classes
             return null;

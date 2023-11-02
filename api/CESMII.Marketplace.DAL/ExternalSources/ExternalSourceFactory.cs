@@ -56,7 +56,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                 var repoImages = scope.ServiceProvider.GetService<IMongoRepository<ImageItem>>();
                 var dalLookup = scope.ServiceProvider.GetService<IDal<LookupItem, LookupItemModel>>();
                 var repoMarketplace = scope.ServiceProvider.GetService<IMongoRepository<MarketplaceItem>>();
-                var repoExternalItem = scope.ServiceProvider.GetService<IMongoRepository<ProfileItem>>();
+                var repoExternalItem = scope.ServiceProvider.GetService<IMongoRepository<ExternalItem>>();
 
                 try
                 {
@@ -91,7 +91,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                 var repoImages = scope.ServiceProvider.GetService<IMongoRepository<ImageItem>>();
                 var dalLookup = scope.ServiceProvider.GetService<IDal<LookupItem, LookupItemModel>>();
                 var repoMarketplace = scope.ServiceProvider.GetService<IMongoRepository<MarketplaceItem>>();
-                var repoExternalItem = scope.ServiceProvider.GetService<IMongoRepository<ProfileItem>>();
+                var repoExternalItem = scope.ServiceProvider.GetService<IMongoRepository<ExternalItem>>();
 
                 try
                 {

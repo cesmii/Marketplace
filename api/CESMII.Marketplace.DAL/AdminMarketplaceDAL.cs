@@ -269,7 +269,7 @@
                 if (verbose)
                 {
                     result.RelatedItems = MapToModelRelatedItems(entity.RelatedItems).Result;
-                    result.RelatedItemsExternal = MapToModelRelatedExternalItems(entity.RelatedItemsExternal);
+                    result.RelatedItemsExternal = MapToModelRelatedItemsExternal(entity.RelatedItemsExternal);
                     //map action links to model
                     result.ActionLinks = entity.ActionLinks;
                 }
@@ -330,7 +330,7 @@
         /// for this entity.
         /// The idea is we return the entire lookup list and mark selected those items appearing selected. 
         /// </summary>
-        protected List<ExternalSourceItemModel> MapToModelRelatedExternalItems(List<RelatedExternalItem> items)
+        protected List<ExternalSourceItemModel> MapToModelRelatedItemsExternal(List<RelatedExternalItem> items)
         {
             if (items == null) return new List<ExternalSourceItemModel>();
 
@@ -348,7 +348,7 @@
                     Namespace = x.Namespace,
                     Version = x.Version,
                     //assumes only one related item per type
-                    RelatedType = MapToModelRelatedExternalItemsRelatedType(items, x.ID),
+                    RelatedType = MapToModelRelatedItemsExternalRelatedType(items, x.ID),
                     ExternalSource = x.ExternalSource
                 })
                 .OrderBy(x => x.RelatedType.DisplayOrder)
@@ -374,7 +374,7 @@
         /// <param name="relatedItems"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        private LookupItemModel MapToModelRelatedExternalItemsRelatedType(
+        private LookupItemModel MapToModelRelatedItemsExternalRelatedType(
             List<RelatedExternalItem> relatedItems, string id)
         {
             if (relatedItems == null) return null;

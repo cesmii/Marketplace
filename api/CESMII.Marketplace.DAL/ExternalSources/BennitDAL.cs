@@ -11,7 +11,6 @@ using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.DAL.ExternalSources.Models;
-using Microsoft.Extensions.Configuration;
 using CESMII.Marketplace.Data.Repositories;
 
 namespace CESMII.Marketplace.DAL.ExternalSources
@@ -72,6 +71,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
     {
         protected class BennitConfigData
         {
+            public string AccessToken { get; set; }
             public List<KeyValuePair<string, string>> Urls { get; set; }
         }
 
@@ -93,7 +93,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
             IMongoRepository<ImageItem> repoImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
-            IMongoRepository<ProfileItem> repoExternalItem
+            IMongoRepository<ExternalItem> repoExternalItem
             ) : base(dalExternalSource, config, httpApiFactory, repoImages)
         {
             this.Init(dalExternalSource);
@@ -105,7 +105,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
             IMongoRepository<ImageItem> repoImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
-            IMongoRepository<ProfileItem> repoExternalItem
+            IMongoRepository<ExternalItem> repoExternalItem
             ) : base(dalExternalSource, "bennit", httpApiFactory, repoImages)
         {
             this.Init(dalExternalSource);
@@ -285,7 +285,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         {
             var formData = new MultipartFormDataContent();
             //case sensitive
-            formData.Add(new StringContent(_config.AccessToken), "partnerkey");
+            formData.Add(new StringContent(_configCustom.AccessToken), "partnerkey");
             formData.Add(new StringContent(mode.ToString()), "query");
             formData.Add(new StringContent(value), "value");
             if (skip.HasValue) formData.Add(new StringContent(skip.ToString()), "skip");
@@ -378,7 +378,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                         (string.IsNullOrEmpty(entity.Locations) ? "" : $"<p><b>Locations</b>: {entity.Locations}</p>");
 
                     //map related profiles
-                    var relatedItemsExternal = MapToModelRelatedExternalItems(
+                    var relatedItemsExternal = MapToModelRelatedItemsExternal(
                         new LookupItemModel() { ID = "1", DisplayOrder = 1, Code = "expertise", Name = "Expertise In" },
                         entity.SMProfiles);
                     //map other related data
@@ -410,7 +410,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         /// <summary>
         /// Map profiles to related items
         /// </summary>
-        protected List<MarketplaceItemRelatedModel> MapToModelRelatedExternalItems(LookupItemModel type, List<BennitSmProfileLink> items)
+        protected List<MarketplaceItemRelatedModel> MapToModelRelatedItemsExternal(LookupItemModel type, List<BennitSmProfileLink> items)
         {
             if (items == null || items.Count == 0)
             {

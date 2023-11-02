@@ -24,7 +24,7 @@
             IMongoRepository<ImageItem> repoImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
-            IMongoRepository<ProfileItem> repoExternalItem
+            IMongoRepository<ExternalItem> repoExternalItem
             ) : base(config, dalExternalSource, httpApiFactory, repoImages, dalLookup, repoMarketplace, repoExternalItem)
         {
         }
@@ -35,7 +35,7 @@
             IMongoRepository<ImageItem> repoImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
-            IMongoRepository<ProfileItem> repoExternalItem
+            IMongoRepository<ExternalItem> repoExternalItem
             ) : base(dalExternalSource, httpApiFactory, repoImages, dalLookup, repoMarketplace, repoExternalItem)
         {
         }
@@ -99,7 +99,7 @@
         /// <param name="entity"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        protected override MarketplaceItemModel MapToModelNamespace(UANameSpace entity, ProfileItem entityLocal)
+        protected override MarketplaceItemModel MapToModelNamespace(UANameSpace entity, ExternalItem entityLocal)
         {
             if (entity != null)
             {
@@ -148,10 +148,10 @@
                     var relatedItems = MapToModelRelatedItems(entityLocal?.RelatedItems).Result;
 
                     //get related profiles from CloudLib
-                    var relatedExternalItems = MapToModelRelatedExternalItems(entityLocal?.RelatedExternalItems);
+                    var relatedItemsExternal = MapToModelRelatedItemsExternal(entityLocal?.RelatedItemsExternal);
 
                     //map related items into specific buckets - required, recommended
-                    result.RelatedItemsGrouped = base.GroupAndMergeRelatedItems(relatedItems, relatedExternalItems);
+                    result.RelatedItemsGrouped = base.GroupAndMergeRelatedItems(relatedItems, relatedItemsExternal);
                 }
                 return result;
             }
@@ -166,7 +166,7 @@
         /// Get related items from DB, filter out each group based on required/recommended/related flag
         /// assume all related items in same collection and a type id distinguishes between the types. 
         /// </summary>
-        protected List<MarketplaceItemRelatedModel> MapToModelRelatedExternalItems(List<RelatedExternalItem> items)
+        protected List<MarketplaceItemRelatedModel> MapToModelRelatedItemsExternal(List<RelatedExternalItem> items)
         {
             if (items == null)
             {

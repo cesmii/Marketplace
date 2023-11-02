@@ -81,7 +81,7 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IMongoRepository<ImageItem>, MongoRepository<ImageItem>>();
             services.AddScoped<IMongoRepository<ImageItemSimple>, MongoRepository<ImageItemSimple>>();
             services.AddScoped<IMongoRepository<SearchKeyword>, MongoRepository<SearchKeyword>>();
-            services.AddScoped<IMongoRepository<ProfileItem>, MongoRepository<ProfileItem>>();
+            services.AddScoped<IMongoRepository<ExternalItem>, MongoRepository<ExternalItem>>();
             services.AddScoped<IMongoRepository<ExternalSource>, MongoRepository<ExternalSource>>();
 
             //stock tables

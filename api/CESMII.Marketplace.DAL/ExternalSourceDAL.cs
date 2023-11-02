@@ -196,7 +196,6 @@
                     },
                     Name = entity.Name,
                     Code = entity.Code,
-                    AccessToken = entity.AccessToken,
                     BaseUrl = entity.BaseUrl,
                     Enabled = entity.Enabled,
                     //TBD - encrypt/decrypt this data by uncommenting the line below.
@@ -227,7 +226,6 @@
             entity.ItemTypeId = MongoDB.Bson.ObjectId.Parse(model.ItemType.ID);
             entity.Name = model.Name;
             entity.Code = model.Code;
-            entity.AccessToken = model.AccessToken;
             entity.BaseUrl = model.BaseUrl;
             entity.Enabled = model.Enabled;
             entity.AdminTypeName = model.AdminTypeName;
