@@ -260,10 +260,13 @@
             var filterPubs = MongoDB.Driver.Builders<Publisher>.Filter.In(x => x.ID, publisherIds.Select(y => y.ToString()));
             _publishersAll = await _repoPublisher.AggregateMatchAsync(filterPubs);
 
-            var filterImages = MongoDB.Driver.Builders<ImageItemSimple>.Filter.In(x => x.ID, imageIds.Select(y => y.ToString()));
-            var fieldList = new List<string>()
+            if (imageIds.Any(x => x != null))
+            {
+                var filterImages = MongoDB.Driver.Builders<ImageItemSimple>.Filter.In(x => x.ID, imageIds.Where(x => x != null).Select(y => y.ToString()));
+                var fieldList = new List<string>()
                 { nameof(ImageItemSimple.MarketplaceItemId), nameof(ImageItemSimple.FileName), nameof(ImageItemSimple.Type)};
-            _imagesAll = await _repoImages.AggregateMatchAsync(filterImages, fieldList);
+                _imagesAll = await _repoImages.AggregateMatchAsync(filterImages, fieldList);
+            }
 
         }
     }

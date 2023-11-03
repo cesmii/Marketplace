@@ -217,7 +217,8 @@ export function getUserPreferences() {
         requestInfoPreferences: { pageSize: AppSettings.PageSize },
         lookupPreferences: { pageSize: AppSettings.PageSize },
         publisherPreferences: { pageSize: AppSettings.PageSize },
-        jobDefinitionPreferences: { pageSize: AppSettings.PageSize }
+        jobDefinitionPreferences: { pageSize: AppSettings.PageSize },
+        externalSourcePreferences: { pageSize: AppSettings.PageSize }
     };
 
     var item = JSON.parse(result);
@@ -229,6 +230,7 @@ export function getUserPreferences() {
     if (item.lookupPreferences == null || item.lookupPreferences.pageSize == null) item.lookupPreferences = { pageSize: AppSettings.PageSize };
     if (item.publisherPreferences == null || item.publisherPreferences.pageSize == null) item.publisherPreferences = { pageSize: AppSettings.PageSize };
     if (item.jobDefinitionPreferences == null || item.jobDefinitionPreferences.pageSize == null) item.jobDefinitionPreferences = { pageSize: AppSettings.PageSize };
+    if (item.externalSourcePreferences == null || item.externalSourcePreferences.pageSize == null) item.externalSourcePreferences = { pageSize: AppSettings.PageSize };
     if (needsUpdate) localStorage.setItem('userPreferences', JSON.stringify(item));
 
     return item;

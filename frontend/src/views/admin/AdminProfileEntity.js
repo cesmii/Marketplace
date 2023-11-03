@@ -65,7 +65,7 @@ function AdminProfileEntity() {
         var result = null;
         try {
             const data = { id: val, code: code };
-            const url = `admin/externalsource/getbyid`
+            const url = `admin/relateditem/getbyid`
             result = await axiosInstance.post(url, data);
         }
         catch (err) {
@@ -115,7 +115,7 @@ function AdminProfileEntity() {
         var result = null;
         try {
             const data = { id: code };
-            const url = `admin/externalsource/init`
+            const url = `admin/relateditem/init`
             result = await axiosInstance.post(url, data);
         }
         catch (err) {
@@ -368,7 +368,7 @@ function AdminProfileEntity() {
         if (!isSuccess) return;
 
         //navigate to the list view
-        history.push('/admin/externalsource/list');
+        history.push('/admin/relateditem/list');
     };
 
     const onSave = () => {
@@ -391,7 +391,7 @@ function AdminProfileEntity() {
 
         //perform insert call
         console.log(generateLogMessageString(`handleOnSave||${mode}`, CLASS_NAME));
-        var url = `admin/externalsource/upsert`;
+        var url = `admin/relateditem/upsert`;
         axiosInstance.post(url, item)
             .then(resp => {
                 if (resp.data.isSuccess) {
@@ -403,7 +403,7 @@ function AdminProfileEntity() {
                     });
 
                     //now redirect to profile item on front end
-                    history.push(`/admin/externalsource/${code}/${resp.data.data}`);
+                    history.push(`/admin/relateditem/${code}/${resp.data.data}`);
                 }
                 else {
                     //update spinner, messages
@@ -620,7 +620,7 @@ function AdminProfileEntity() {
         if (mode.toLowerCase() !== "view") {
             return (
                 <>
-                    <Button variant="text-solo" className="ml-1" href={`/admin/externalsource/list`} >Cancel</Button>
+                    <Button variant="text-solo" className="ml-1" href={`/admin/relateditem/list`} >Cancel</Button>
                     <Button variant="secondary" type="button" className="ml-2" onClick={onSave} >Save</Button>
                     {id !== "new" &&
                         renderMoreDropDown()
@@ -927,7 +927,7 @@ function AdminProfileEntity() {
             <OnDeleteConfirm
                 item={_itemDelete}
                 onDeleteComplete={onDeleteComplete}
-                urlDelete={`admin/externalsource/delete`}
+                urlDelete={`admin/relateditem/delete`}
                 caption='Remove Related Items'
                 confirmMessage={`You are about to remove all related items from '${_itemDelete?.displayName}'. This action cannot be undone.`}
                 successMessage='Related items were removed.'

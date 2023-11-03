@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Helmet } from "react-helmet"
-import { Dropdown } from 'react-bootstrap';
 import axiosInstance from "../../services/AxiosService";
 
 import { AppSettings } from '../../utils/appsettings'
@@ -9,16 +8,14 @@ import GridPager from '../../components/GridPager'
 import { useLoadingContext } from "../../components/contexts/LoadingContext";
 
 import HeaderSearch from '../../components/HeaderSearch';
+import { getExternalSourcePreferences, setExternalSourcePreferencesPageSize } from '../../services/ExternalSourceService';
+import AdminExternalSourceRow from './shared/AdminExternalSourceRow';
 import ConfirmationModal from '../../components/ConfirmationModal';
-import { clearSearchCriteria, getMarketplacePreferences, setMarketplacePageSize } from '../../services/MarketplaceService';
-import AdminProfileRow from './shared/AdminProfileRow';
 import color from '../../components/Constants';
-import OnDeleteConfirm from '../../components/OnDeleteConfirm';
-import { SVGIcon } from '../../components/SVGIcon';
 
-const CLASS_NAME = "AdminProfileList";
+const CLASS_NAME = "AdminExternalSourceList";
 
-function AdminProfileList() {
+function AdminExternalSourceList() {
 
     //-------------------------------------------------------------------
     // Region: Initialization
@@ -27,13 +24,11 @@ function AdminProfileList() {
     const [_dataRows, setDataRows] = useState({
         all: [], itemCount: 0, listView: true
     });
-    const _marketplacePreferences = getMarketplacePreferences();
-    const [_pager, setPager] = useState({ currentPage: 1, pageSize: _marketplacePreferences.pageSize, searchVal: null });
+    const _preferences = getExternalSourcePreferences();
+    const [_pager, setPager] = useState({ currentPage: 1, pageSize: _preferences.pageSize, searchVal: null });
     const { loadingProps, setLoadingProps } = useLoadingContext();
+    const [_deleteModal, setDeleteModal] = useState({ show: false, items: null });
     const [_error, setError] = useState({ show: false, message: null, caption: null });
-    const [_itemDelete, setItemDelete] = useState(null);
-    const [_itemsLookupSources, setItemsLookupSources] = useState([]);  //profile items 
-    const [_loadLookupSources, setLoadLookupSources] = useState(null);
 
     const caption = 'Admin';
 
@@ -41,9 +36,6 @@ function AdminProfileList() {
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
     const handleOnSearchChange = (val) => {
-        //raised from header nav
-        //console.log(generateLogMessageString('handleOnSearchChange||Search value: ' + val, CLASS_NAME));
-
         //this will trigger a fetch from the API to pull the data for the filtered criteria
         setPager({ ..._pager, currentPage: 1, searchVal: val });
     };
@@ -55,12 +47,11 @@ function AdminProfileList() {
         setPager({ ..._pager, currentPage: currentPage, pageSize: pageSize });
 
         //scroll screen to top of grid on page change
-        ////scroll a bit higher than the top edge so we get some of the header in the view
+        //scroll a bit higher than the top edge so we get some of the header in the view
         window.scrollTo({ top: (_scrollToRef.current.offsetTop - 120), behavior: 'smooth' });
-        //scrollToRef.current.scrollIntoView();
 
         //preserve choice in local storage
-        setMarketplacePageSize(pageSize);
+        setExternalSourcePreferencesPageSize(pageSize);
     };
 
 
@@ -72,21 +63,17 @@ function AdminProfileList() {
             //show a spinner
             setLoadingProps({ isLoading: true, message: null });
 
-            var url = `admin/relateditem/search`;
+            var url = `admin/externalSource/search`;
             console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
 
-            //get copy of search criteria structure from session storage
-            var criteria = JSON.parse(JSON.stringify(loadingProps.searchCriteria));
-            criteria = clearSearchCriteria(criteria);
-            criteria = { ...criteria, Query: _pager.searchVal, Skip: (_pager.currentPage - 1) * _pager.pageSize, Take: _pager.pageSize };
-            //append related item indicator
-            await axiosInstance.post(url, criteria).then(result => {
+            var data = { Query: _pager.searchVal, Skip: (_pager.currentPage - 1) * _pager.pageSize, Take: _pager.pageSize };
+            await axiosInstance.post(url, data).then(result => {
                 if (result.status === 200) {
 
                     //set state on fetch of data
                     setDataRows({
                         ..._dataRows,
-                        all: result.data.data
+                        all: result.data.data, itemCount: result.data.count
                     });
 
                     //hide a spinner
@@ -116,88 +103,70 @@ function AdminProfileList() {
 
         fetchData();
 
-        //this will execute on unmount
-        return () => {
-            //console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
-        };
-        //type passed so that any change to this triggers useEffect to be called again
     }, [_pager]);
-
-    //-------------------------------------------------------------------
-    // Trigger get related items lookups - all mktplace items, all profiles.
-    //-------------------------------------------------------------------
-    useEffect(() => {
-        // Load lookup data upon certain triggers in the background
-        async function fetchData() {
-
-            console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
-
-            //get copy of search criteria structure from session storage
-            var url = `admin/relateditem/lookup/sources`;
-            await axiosInstance.post(url).then(result => {
-                if (result.status === 200) {
-
-                    //set state on fetch of data
-                    setItemsLookupSources(result.data);
-                    setLoadLookupSources(false);
-
-                } else {
-                    setLoadingProps({
-                        isLoading: false, message: null, inlineMessages: [
-                            { id: new Date().getTime(), severity: "danger", body: 'An error occurred retrieving related item lookups.', isTimed: true }]
-                    });
-                }
-                setLoadLookupSources(false);
-
-            }).catch(e => {
-                if ((e.response && e.response.status === 401) || e.toString().indexOf('Network Error') > -1) {
-                    //do nothing, this is handled in routes.js using common interceptor
-                    //setAuthTicket(null); //the call of this will clear the current user and the token
-                }
-                else {
-                    setLoadingProps({
-                        isLoading: false, message: null, inlineMessages: [
-                            { id: new Date().getTime(), severity: "danger", body: 'An error occurred retrieving related item lookups.', isTimed: true }]
-                    });
-                }
-                setLoadLookupSources(false);
-            });
-        }
-
-        //go get the data.
-        if (_loadLookupSources == null || _loadLookupSources === true) {
-            fetchData();
-        }
-
-        //this will execute on unmount
-        return () => {
-            //
-        };
-    }, [_loadLookupSources]);
 
     //-------------------------------------------------------------------
     // Region: Event Handling - delete item
     //-------------------------------------------------------------------
-    const onDeleteItem = (itm) => {
+    const onDeleteItem = (img) => {
         console.log(generateLogMessageString('onDeleteItem', CLASS_NAME));
-        setItemDelete(itm);
+        setDeleteModal({ show: true, item: img });
     };
 
-    const onDeleteComplete = (isSuccess, itm) => {
-        console.log(generateLogMessageString('onDeleteComplete', CLASS_NAME));
+    const onDeleteConfirm = () => {
+        console.log(generateLogMessageString('onDeleteConfirm', CLASS_NAME));
 
-        setItemDelete(null);
+        //show a spinner
+        setLoadingProps({ isLoading: true, message: "" });
 
-        if (!isSuccess) return;
+        //perform delete call
+        var data = { id: _deleteModal.item.id };
+        var url = `admin/externalSource/delete`;
+        axiosInstance.post(url, data)  //api allows one or many
+            .then(result => {
 
-        //remove the item from view. 
-        var i = _dataRows.all.findIndex(x => x.id === itm.id);
-        if (i >= 0) {
-            _dataRows.all.splice(i, 1)
-            setDataRows({
-                ..._dataRows, all: _dataRows.all, itemCount: _dataRows.itemCount - 1
+                if (result.data.isSuccess) {
+                    //hide a spinner, show a message
+                    setLoadingProps({
+                        isLoading: false, message: null, inlineMessages: [
+                            {
+                                id: new Date().getTime(), severity: "success", body: `Item was deleted`, isTimed: true
+                            }
+                        ],
+                    });
+                    //remove the item from view. 
+                    var i = _dataRows.all.findIndex(x => x.id === _deleteModal.item.id);
+                    if (i >= 0) {
+                        _dataRows.all.splice(i, 1)
+                        setDataRows({
+                            ..._dataRows, all: _dataRows.all, itemCount: _dataRows.itemCount - 1
+                        });
+                    }
+
+                    setDeleteModal({ show: false, item: null });
+                }
+                else {
+                    //update spinner, messages
+                    setError({ show: true, caption: 'Delete Item Error', message: `An error occurred deleting this item: ${result.data.message}` });
+                    setLoadingProps({ isLoading: false, message: null });
+                    setDeleteModal({ show: false, item: null });
+                }
+            })
+            .catch(error => {
+                //hide a spinner, show a message
+                setError({ show: true, caption: 'Delete Item Error', message: `An error occurred deleting this item.` });
+                setLoadingProps({ isLoading: false, message: null });
+
+                console.log(generateLogMessageString('deleteItem||error||' + JSON.stringify(error), CLASS_NAME, 'error'));
+                console.log(error);
+                //scroll back to top
+                window.scroll({
+                    top: 0,
+                    left: 0,
+                    behavior: 'smooth',
+                });
+                setDeleteModal({ show: false, item: null });
             });
-        }
     };
 
     //-------------------------------------------------------------------
@@ -213,16 +182,16 @@ function AdminProfileList() {
 
     //render pagination ui
     const renderPagination = () => {
-        if (_dataRows == null || _dataRows.all?.length === 0) return;
+        if (_dataRows == null || _dataRows.all.length === 0) return;
         return <GridPager currentPage={_pager.currentPage} pageSize={_pager.pageSize} itemCount={_dataRows.itemCount} onChangePage={onChangePage}
-                    pageSizeOptions={AppSettings.PageSizeOptions.Admin}/>
+            pageSizeOptions={AppSettings.PageSizeOptions.Admin} />
     }
 
     const renderItemsGridHeader = () => {
         if ((_dataRows.all == null || _dataRows.all.length === 0)) return;
         return (
             <thead>
-                <AdminProfileRow key="header" item={null} isHeader={true} cssClass="admin-item-row" />
+                <AdminExternalSourceRow key="header" item={null} isHeader={true} cssClass="admin-item-row" />
             </thead>
         )
     }
@@ -242,9 +211,11 @@ function AdminProfileList() {
         }
         if ((_dataRows.all == null || _dataRows.all.length === 0)) return;
 
+        var grpName = "";
+        var toggleShaded = true;
         const mainBody = _dataRows.all.map((item) => {
             return (
-                <AdminProfileRow key={item.id} item={item} cssClass={`admin-item-row`} onDeleteItem={onDeleteItem} />
+                <AdminExternalSourceRow key={item.id} item={item} cssClass={`admin-item-row`} onDeleteItem = { onDeleteItem } />
             );
         });
 
@@ -268,7 +239,6 @@ function AdminProfileList() {
                     cancel={{
                         caption: "OK",
                         callback: () => {
-                            //console.log(generateLogMessageString(`onErrorMessageOK`, CLASS_NAME));
                             setError({ show: false, caption: null, message: null });
                         },
                         buttonVariant: 'danger'
@@ -277,35 +247,31 @@ function AdminProfileList() {
         );
     };
 
-    const renderAddSourceDropdown = () => {
-        if (_itemsLookupSources == null || _itemsLookupSources.length === 0) return;
+    //render the delete modal when show flag is set to true
+    //callbacks are tied to each button click to proceed or cancel
+    const renderDeleteConfirmation = () => {
 
-        if (_itemsLookupSources.length === 1) {
-            const src = _itemsLookupSources[0];
-            return (
-                <a className="btn btn-icon-outline circle primary ml-auto" href={`/admin/relateditem/${src.code}/new`} ><i className="material-icons">add</i></a>
-            )
-        };
+        if (!_deleteModal.show) return;
 
-        //allow for add of multiple different types of sources
-        const options = _itemsLookupSources.map((src) => {
-            return (
-                <Dropdown.Item key={src.id} href={`/admin/relateditem/${src.code}/new`} >Add '{src.name}' Relationship</Dropdown.Item>
-            )
-        });
+        var message = `You are about to delete '${_deleteModal.item.name}'. This action cannot be undone. Are you sure?`;
+        var captionModal = `Delete Item`;
 
         return (
-            <Dropdown className="action-menu icon-dropdown ml-auto" onClick={(e) => e.stopPropagation()} >
-                <Dropdown.Toggle drop="left">
-                    <SVGIcon name="more-vert" size="24" fill={color.shark} />
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                    {options}
-                </Dropdown.Menu>
-            </Dropdown>
+            <>
+                <ConfirmationModal showModal={_deleteModal.show} caption={captionModal} message={message}
+                    icon={{ name: "warning", color: color.trinidad }}
+                    confirm={{ caption: "Delete", callback: onDeleteConfirm, buttonVariant: "danger" }}
+                    cancel={{
+                        caption: "Cancel",
+                        callback: () => {
+                            console.log(generateLogMessageString(`onDeleteCancel`, CLASS_NAME));
+                            setDeleteModal({ show: false, item: null });
+                        },
+                        buttonVariant: null
+                    }} />
+            </>
         );
-    }
-
+    };
 
     //-------------------------------------------------------------------
     // Region: Render final output
@@ -317,7 +283,7 @@ function AdminProfileList() {
             </Helmet>
             <div className="row py-2 pb-4">
                 <div className="col-sm-9">
-                    <h1>Admin | External Items</h1>
+                    <h1>Admin | External Sources</h1>
                 </div>
                 <div className="col-sm-3 d-flex align-items-center" >
                     <HeaderSearch filterVal={_pager.searchVal == null ? null : _pager.searchVal} onSearch={handleOnSearchChange} searchMode="standard" />
@@ -329,10 +295,10 @@ function AdminProfileList() {
                     {(_dataRows.itemCount != null && _dataRows.itemCount > 0) ?
                         <>
                             <span className="px-2 ml-auto font-weight-bold">{_dataRows.itemCount}{_dataRows.itemCount === 1 ? ' item' : ' items'}</span>
-                            {renderAddSourceDropdown()}
+                            <a className="btn btn-icon-outline circle primary" href={`/admin/externalSource/new`} ><i className="material-icons">add</i></a>
                         </>
                         :
-                        renderAddSourceDropdown()
+                        <a className="btn btn-icon-outline circle ml-auto hl-blue" href={`/admin/externalSource/new`} ><i className="material-icons">add</i></a>
                     }
                 </div>
             </div>
@@ -346,18 +312,10 @@ function AdminProfileList() {
                     {renderPagination()}
                 </div>
             </div>
-            <OnDeleteConfirm
-                item={_itemDelete}
-                onDeleteComplete={onDeleteComplete}
-                urlDelete={`admin/relateditem/delete`}
-                caption='Remove Related Items'
-                confirmMessage={`You are about to remove all related items from '${_itemDelete?.displayName}'. This action cannot be undone.`}
-                successMessage='Related items were removed.'
-                errorMessage='An error occurred removing relationships'
-            />
+            {renderDeleteConfirmation()}
             {renderErrorMessage()}
         </>
     )
 }
 
-export default AdminProfileList;
+export default AdminExternalSourceList;

@@ -28,6 +28,8 @@ import AdminJobDefinitionList from '../views/admin/AdminJobDefinitionList'
 import AdminJobDefinitionEntity from '../views/admin/AdminJobDefinitionEntity'
 import AdminProfileEntity from '../views/admin/AdminProfileEntity'
 import AdminProfileList from '../views/admin/AdminProfileList'
+import AdminExternalSourceList from '../views/admin/AdminExternalSourceList'
+import AdminExternalSourceEntity from '../views/admin/AdminExternalSourceEntity'
 import SitemapGenerator from '../views/admin/SitemapGenerator'
 import AccountProfile from '../views/AccountProfile'
 import LoginSuccess from '../views/LoginSuccess'
@@ -76,9 +78,13 @@ function Routes() {
             <AdminRoute path="/admin/lookup/copy/:parentId" component={AdminLookupEntity} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/lookup/:id" component={AdminLookupEntity} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/jobDefinition/list" component={AdminJobDefinitionList} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/jobDefinition/copy/:parentid" component={AdminJobDefinitionEntity} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/jobDefinition/:id" component={AdminJobDefinitionEntity} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/externalsource/list" component={AdminProfileList} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/externalsource/:code/:id" component={AdminProfileEntity} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/relateditem/list" component={AdminProfileList} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/relateditem/:code/:id" component={AdminProfileEntity} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/externalsource/list" component={AdminExternalSourceList} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/externalsource/copy/:parentId" component={AdminExternalSourceEntity} roles={[AppSettings.AADAdminRole]} />
+            <AdminRoute path="/admin/externalsource/:id" component={AdminExternalSourceEntity} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/sitemap/generate" component={SitemapGenerator} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/account" component={AccountProfile} />
 
