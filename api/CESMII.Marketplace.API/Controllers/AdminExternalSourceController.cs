@@ -79,7 +79,8 @@ namespace CESMII.Marketplace.Api.Controllers
             result.TypeName = "";
             result.BaseUrl = "";
             result.Code = "";
-            result.Data = "";
+            result.Enabled = true;
+            result.Data = "{}";
             return Ok(result);
         }
 

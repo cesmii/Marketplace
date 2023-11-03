@@ -277,7 +277,7 @@ function AdminExternalSourceEntity() {
                             }
                         ]
                     });
-                    history.push('/admin/externalsource');
+                    history.push('/admin/externalsource/list');
                 }
                 else {
                     //update spinner, messages
