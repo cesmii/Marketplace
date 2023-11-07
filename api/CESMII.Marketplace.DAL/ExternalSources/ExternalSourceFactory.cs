@@ -62,8 +62,8 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                 {
                     //instantiate external dal class
                     return InstantiateItem(model.TypeName,
-                        model,
                         _configuration,
+                        model,
                         _dalExternalSource,
                         httpFactory,
                         repoImages,
@@ -98,8 +98,8 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                 {
                     //instantiate external dal class
                     return InstantiateAdminItem(model.AdminTypeName,
-                        model,
                         _configuration,
+                        model,
                         _dalExternalSource,
                         httpFactory,
                         repoImages,

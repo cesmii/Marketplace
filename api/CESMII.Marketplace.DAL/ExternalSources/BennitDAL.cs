@@ -135,10 +135,8 @@ namespace CESMII.Marketplace.DAL.ExternalSources
             }).Result;
 
             //set up the _config data attribute specifically for the Bennit DAL
-            //decrypt this data
-            var dataDecrypted = !string.IsNullOrEmpty(_config.Data) ?
-                    PasswordUtils.DecryptString(_config.Data, base._encryptDecryptKey) : null;
-            _configCustom = JsonConvert.DeserializeObject<BennitConfigData>(dataDecrypted);
+            //data already decrypted in DAL, just convert to object.
+            _configCustom = JsonConvert.DeserializeObject<BennitConfigData>(_config.Data);
         }
 
         public async Task<MarketplaceItemModel> GetById(string id) {
