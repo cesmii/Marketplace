@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Threading.Tasks;
 
+    using Microsoft.Extensions.Configuration;
     using Newtonsoft.Json;
 
     using CESMII.Marketplace.Common;
@@ -42,26 +43,27 @@
         protected CloudLibConfigData _configCustom;
 
 
-        public CloudLibBaseDAL(ExternalSourceModel config,
+        public CloudLibBaseDAL(IConfiguration configuration, 
+            ExternalSourceModel config,
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             IHttpApiFactory httpApiFactory,
             IMongoRepository<ImageItem> repoImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
             IMongoRepository<ExternalItem> repoExternalItem
-            ) : base(dalExternalSource, config, httpApiFactory, repoImages)
+            ) : base(configuration, dalExternalSource, config, httpApiFactory, repoImages)
         {
             this.Init(dalLookup, repoMarketplace, repoExternalItem);
         }
 
-        public CloudLibBaseDAL(
+        public CloudLibBaseDAL(IConfiguration configuration,
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             IHttpApiFactory httpApiFactory,
             IMongoRepository<ImageItem> repoImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
             IMongoRepository<ExternalItem> repoExternalItem
-            ) : base(dalExternalSource, "cloudlib", httpApiFactory, repoImages)
+            ) : base(configuration, dalExternalSource, "cloudlib", httpApiFactory, repoImages)
         {
             this.Init(dalLookup, repoMarketplace, repoExternalItem);
         }
@@ -73,7 +75,7 @@
             )
         {
             //grab Cloud lib url, user name and password and excluded nodeset
-            //TBD - decrypt this data
+            //data already decrypted in DAL, just convert to object.
             _configCustom = JsonConvert.DeserializeObject<CloudLibConfigData>(_config.Data);
             _configCustom.Settings.EndPoint = _config.BaseUrl;
 

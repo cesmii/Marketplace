@@ -198,10 +198,8 @@
                     Code = entity.Code,
                     BaseUrl = entity.BaseUrl,
                     Enabled = entity.Enabled,
-                    //TBD - encrypt/decrypt this data by uncommenting the line below.
-                    Data = entity.Data,
-                    //Data = !string.IsNullOrEmpty(entity.Data) ? 
-                    //        PasswordUtils.DecryptString(entity.Data, _encryptDecryptKey) : null,
+                    Data = !string.IsNullOrEmpty(entity.Data) ? 
+                            PasswordUtils.DecryptString(entity.Data, _encryptDecryptKey) : null,
                     Publisher = MapToModelPublisher(entity.PublisherId, _publishersAll),
                     DefaultImagePortrait = entity.DefaultImageIdPortrait == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.DefaultImageIdPortrait.ToString()), _imagesAll),
                     DefaultImageBanner = entity.DefaultImageIdBanner == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.DefaultImageIdBanner.ToString()), _imagesAll),
@@ -230,10 +228,8 @@
             entity.Enabled = model.Enabled;
             entity.AdminTypeName = model.AdminTypeName;
             entity.TypeName = model.TypeName;
-            //TBD - encrypt/decrypt this data by uncommenting the line below.
-            entity.Data = model.Data;
             //save/encrypt json data unique to this source
-            //entity.Data = PasswordUtils.EncryptString(model.Data, _encryptDecryptKey);
+            entity.Data = PasswordUtils.EncryptString(model.Data, _encryptDecryptKey);
             //TBD - save default images
             //entity.DefaultImageIdBanner = MongoDB.Bson.ObjectId.Parse(model.ItemType.ID);
             //entity.DefaultImageIdPortrait = MongoDB.Bson.ObjectId.Parse(model.ItemType.ID);

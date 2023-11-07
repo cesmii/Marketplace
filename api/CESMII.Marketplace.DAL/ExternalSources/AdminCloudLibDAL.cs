@@ -5,6 +5,7 @@
     using System.Linq;
     using System.Threading.Tasks;
 
+    using Microsoft.Extensions.Configuration;
     using Opc.Ua.Cloud.Library.Client;
 
     using CESMII.Marketplace.Common;
@@ -17,14 +18,15 @@
     public class AdminCloudLibDAL : CloudLibBaseDAL<ExternalAbstractEntity, AdminMarketplaceItemModel>, IAdminExternalDAL<AdminMarketplaceItemModel>
     {
 
-        public AdminCloudLibDAL(ExternalSourceModel config,
+        public AdminCloudLibDAL(IConfiguration configuration, 
+            ExternalSourceModel config,
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             IHttpApiFactory httpApiFactory,
             IMongoRepository<ImageItem> repoImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
             IMongoRepository<ExternalItem> repoExternalItem
-            ) : base(config, dalExternalSource, httpApiFactory, repoImages, dalLookup, repoMarketplace, repoExternalItem)
+            ) : base(configuration, config, dalExternalSource, httpApiFactory, repoImages, dalLookup, repoMarketplace, repoExternalItem)
         {
         }
 

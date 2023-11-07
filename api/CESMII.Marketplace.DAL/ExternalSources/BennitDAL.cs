@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Net.Http;
 
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 using CESMII.Marketplace.Common;
@@ -87,26 +88,27 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         // This can be unique for each source.
         protected BennitConfigData _configCustom;
 
-        public BennitDAL(ExternalSourceModel config,
+        public BennitDAL(IConfiguration configuration, 
+            ExternalSourceModel config,
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             IHttpApiFactory httpApiFactory,
             IMongoRepository<ImageItem> repoImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
             IMongoRepository<ExternalItem> repoExternalItem
-            ) : base(dalExternalSource, config, httpApiFactory, repoImages)
+            ) : base(configuration, dalExternalSource, config, httpApiFactory, repoImages)
         {
             this.Init(dalExternalSource);
         }
 
-        public BennitDAL(
+        public BennitDAL(IConfiguration configuration,
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             IHttpApiFactory httpApiFactory,
             IMongoRepository<ImageItem> repoImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
             IMongoRepository<ExternalItem> repoExternalItem
-            ) : base(dalExternalSource, "bennit", httpApiFactory, repoImages)
+            ) : base(configuration, dalExternalSource, "bennit", httpApiFactory, repoImages)
         {
             this.Init(dalExternalSource);
         }
@@ -133,7 +135,10 @@ namespace CESMII.Marketplace.DAL.ExternalSources
             }).Result;
 
             //set up the _config data attribute specifically for the Bennit DAL
-            _configCustom = JsonConvert.DeserializeObject<BennitConfigData>(_config.Data);
+            //decrypt this data
+            var dataDecrypted = !string.IsNullOrEmpty(_config.Data) ?
+                    PasswordUtils.DecryptString(_config.Data, base._encryptDecryptKey) : null;
+            _configCustom = JsonConvert.DeserializeObject<BennitConfigData>(dataDecrypted);
         }
 
         public async Task<MarketplaceItemModel> GetById(string id) {

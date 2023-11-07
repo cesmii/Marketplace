@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using System.Net.Http.Headers;
 
+using Microsoft.Extensions.Configuration;
 using NLog;
 
 using CESMII.Marketplace.Common;
@@ -21,17 +22,21 @@ namespace CESMII.Marketplace.DAL.ExternalSources
         protected bool _disposed = false;
         protected static readonly Logger _logger = LogManager.GetCurrentClassLogger();
         protected readonly IDal<ExternalSource, ExternalSourceModel> _dalExternalSource;
+        protected readonly IConfiguration _configuration;
         protected readonly ExternalSourceModel _config;
         protected readonly IHttpApiFactory _httpFactory;
         protected readonly IMongoRepository<ImageItem> _repoImages;
         protected readonly string _baseAddress;
+        // Put this key in this in the following config setting location: PasswordSettings.EncryptionSettings.EncryptDecryptKey
+        protected string _encryptDecryptKey;
 
-        public ExternalBaseDAL(
+        public ExternalBaseDAL(IConfiguration configuration,
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource, 
             string externalSourceCode,
             IHttpApiFactory httpFactory,
             IMongoRepository<ImageItem> repoImages)
         {
+            _configuration = configuration;
             _dalExternalSource = dalExternalSource;
             //go get the config for this source
             _config = dalExternalSource.Where(x => x.Code.ToLower().Equals(externalSourceCode.ToLower())
@@ -43,19 +48,26 @@ namespace CESMII.Marketplace.DAL.ExternalSources
 
             _httpFactory = httpFactory;
             _repoImages = repoImages;
+
+            var configUtil = new ConfigUtil(_configuration);
+            _encryptDecryptKey = configUtil.PasswordConfigSettings.EncryptionSettings.EncryptDecryptKey;
         }
 
-        public ExternalBaseDAL(
+        public ExternalBaseDAL(IConfiguration configuration,
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             ExternalSourceModel config,
             IHttpApiFactory httpFactory,
             IMongoRepository<ImageItem> repoImages)
         {
+            _configuration= configuration;
             //go get the config for this source
             _dalExternalSource = dalExternalSource;
             _config = config;
             _httpFactory = httpFactory;
             _repoImages = repoImages;
+
+            var configUtil = new ConfigUtil(_configuration);
+            _encryptDecryptKey = configUtil.PasswordConfigSettings.EncryptionSettings.EncryptDecryptKey;
         }
 
         protected async Task<HttpResponseModel> ExecuteApiCall(HttpApiConfig config)
