@@ -257,9 +257,19 @@
             //the external source DAL implementation may not support the external call of a list of ids,
             //check the dal if data is not coming back
             //run in parallel
-            var dalSource = await _sourceFactory.InitializeSource(src);
-            var result = await dalSource.GetManyById(idList);
-            return result.Data;
+            try
+            {
+                var dalSource = await _sourceFactory.InitializeSource(src);
+                var result = await dalSource.GetManyById(idList);
+                return result.Data;
+            }
+            catch (ExternalSourceInitException ex)
+            {
+                //skipping this external source - this will happen if external source factory cannot find the type noted in the external source model.
+                //the factory will log the issue, don't cause the other searches to fail due to bad configuration
+                //of a source. 
+                return new List<MarketplaceItemModel>();
+            }
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Runtime.Serialization;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -62,6 +63,7 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                 {
                     //instantiate external dal class
                     return InstantiateItem(model.TypeName,
+                        _configuration,
                         model,
                         _dalExternalSource,
                         httpFactory,
@@ -93,24 +95,16 @@ namespace CESMII.Marketplace.DAL.ExternalSources
                 var repoMarketplace = scope.ServiceProvider.GetService<IMongoRepository<MarketplaceItem>>();
                 var repoExternalItem = scope.ServiceProvider.GetService<IMongoRepository<ExternalItem>>();
 
-                try
-                {
-                    //instantiate external dal class
-                    return InstantiateAdminItem(model.AdminTypeName,
-                        model,
-                        _dalExternalSource,
-                        httpFactory,
-                        repoImages,
-                        dalLookup,
-                        repoMarketplace,
-                        repoExternalItem);
-                }
-                catch (Exception e)
-                {
-                    //log complete message to logger and abbreviated message to user. 
-                    _logger.LogCritical(e, $"SourceFactory|InstantiateSource|ExternalSourceId:{model.ID}||ExternalSourceType:{model.TypeName}|Error|{e.Message}");
-                    throw;
-                }
+                //instantiate external dal class
+                return InstantiateAdminItem(model.AdminTypeName,
+                    _configuration,
+                    model,
+                    _dalExternalSource,
+                    httpFactory,
+                    repoImages,
+                    dalLookup,
+                    repoMarketplace,
+                    repoExternalItem);
             }
         }
 
@@ -123,8 +117,9 @@ namespace CESMII.Marketplace.DAL.ExternalSources
             var itemType = Type.GetType(typeName);
             if (itemType == null)
             {
-                _logger.LogWarning($"SourceFactory|InstantiateItem|Could not find external source class: {typeName}");
-                throw new ArgumentException($"Invalid external source instance class {typeName}");
+                var msg = $"SourceFactory|InstantiateItem|Could not find external source class: {typeName}";
+                _logger.LogCritical(msg);
+                throw new ExternalSourceInitException(msg);
             }
 
             return (IExternalDAL<TModel>)Activator.CreateInstance(itemType, args);
@@ -139,11 +134,32 @@ namespace CESMII.Marketplace.DAL.ExternalSources
             var itemType = Type.GetType(typeName);
             if (itemType == null)
             {
-                _logger.LogWarning($"SourceFactory|InstantiateAdminItem|Could not find external source class: {typeName}");
-                throw new ArgumentException($"Invalid external source instance class {typeName}");
+                var msg = $"SourceFactory|InstantiateAdminItem|Could not find external source class: {typeName}";
+                _logger.LogCritical(msg);
+                throw new ExternalSourceInitException(msg);
             }
 
             return (IAdminExternalDAL<TModel>)Activator.CreateInstance(itemType, args);
+        }
+    }
+
+    [Serializable]
+    public class ExternalSourceInitException : Exception
+    {
+        public ExternalSourceInitException()
+        {
+        }
+
+        public ExternalSourceInitException(string? message) : base(message)
+        {
+        }
+
+        public ExternalSourceInitException(string? message, Exception? innerException) : base(message, innerException)
+        {
+        }
+
+        protected ExternalSourceInitException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
         }
     }
 

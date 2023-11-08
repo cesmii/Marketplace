@@ -182,8 +182,7 @@
                     DislikeCount = entity.DislikeCount,
                     MoreInfoCount = entity.MoreInfoCount,
                     SearchResultCount = entity.ShareCount,
-                    ShareCount = entity.ShareCount,
-                    CloudLibId = entity.CloudLibId
+                    ShareCount = entity.ShareCount
                 };
             }
             else

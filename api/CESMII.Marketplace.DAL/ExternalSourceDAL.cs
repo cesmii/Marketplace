@@ -198,10 +198,8 @@
                     Code = entity.Code,
                     BaseUrl = entity.BaseUrl,
                     Enabled = entity.Enabled,
-                    //TBD - encrypt/decrypt this data by uncommenting the line below.
-                    Data = entity.Data,
-                    //Data = !string.IsNullOrEmpty(entity.Data) ? 
-                    //        PasswordUtils.DecryptString(entity.Data, _encryptDecryptKey) : null,
+                    Data = !string.IsNullOrEmpty(entity.Data) ? 
+                            PasswordUtils.DecryptString(entity.Data, _encryptDecryptKey) : null,
                     Publisher = MapToModelPublisher(entity.PublisherId, _publishersAll),
                     DefaultImagePortrait = entity.DefaultImageIdPortrait == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.DefaultImageIdPortrait.ToString()), _imagesAll),
                     DefaultImageBanner = entity.DefaultImageIdBanner == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.DefaultImageIdBanner.ToString()), _imagesAll),
@@ -230,14 +228,18 @@
             entity.Enabled = model.Enabled;
             entity.AdminTypeName = model.AdminTypeName;
             entity.TypeName = model.TypeName;
-            //TBD - encrypt/decrypt this data by uncommenting the line below.
-            entity.Data = model.Data;
             //save/encrypt json data unique to this source
-            //entity.Data = PasswordUtils.EncryptString(model.Data, _encryptDecryptKey);
-            //TBD - save default images
-            //entity.DefaultImageIdBanner = MongoDB.Bson.ObjectId.Parse(model.ItemType.ID);
-            //entity.DefaultImageIdPortrait = MongoDB.Bson.ObjectId.Parse(model.ItemType.ID);
-            //entity.DefaultImageIdLandscape = MongoDB.Bson.ObjectId.Parse(model.ItemType.ID);
+            entity.Data = PasswordUtils.EncryptString(model.Data, _encryptDecryptKey);
+            //save default images
+            entity.DefaultImageIdPortrait = model.DefaultImagePortrait == null ?
+                MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY) :
+                MongoDB.Bson.ObjectId.Parse(model.DefaultImagePortrait.ID);
+            entity.DefaultImageIdBanner = model.DefaultImageBanner == null ?
+                MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY) :
+                MongoDB.Bson.ObjectId.Parse(model.DefaultImageBanner.ID);
+            entity.DefaultImageIdLandscape = model.DefaultImageLandscape == null ?
+                MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY) :
+                MongoDB.Bson.ObjectId.Parse(model.DefaultImageLandscape.ID);
             entity.PublisherId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.Publisher.ID));
             entity.FailOnException = model.FailOnException;
         }
@@ -260,10 +262,13 @@
             var filterPubs = MongoDB.Driver.Builders<Publisher>.Filter.In(x => x.ID, publisherIds.Select(y => y.ToString()));
             _publishersAll = await _repoPublisher.AggregateMatchAsync(filterPubs);
 
-            var filterImages = MongoDB.Driver.Builders<ImageItemSimple>.Filter.In(x => x.ID, imageIds.Select(y => y.ToString()));
-            var fieldList = new List<string>()
+            if (imageIds.Any(x => x != null))
+            {
+                var filterImages = MongoDB.Driver.Builders<ImageItemSimple>.Filter.In(x => x.ID, imageIds.Where(x => x != null).Select(y => y.ToString()));
+                var fieldList = new List<string>()
                 { nameof(ImageItemSimple.MarketplaceItemId), nameof(ImageItemSimple.FileName), nameof(ImageItemSimple.Type)};
-            _imagesAll = await _repoImages.AggregateMatchAsync(filterImages, fieldList);
+                _imagesAll = await _repoImages.AggregateMatchAsync(filterImages, fieldList);
+            }
 
         }
     }

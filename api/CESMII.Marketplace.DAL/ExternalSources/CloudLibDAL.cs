@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
+    using Microsoft.Extensions.Configuration;
     using Opc.Ua.Cloud.Library.Client;
 
     using CESMII.Marketplace.Common;
@@ -18,25 +19,26 @@
         //do nothing, all stuff handled in CloudLibBaseDAL for now. 
         //Adding wrapper around it so that generic types can be used for each DAL using this same base. 
 
-        public CloudLibDAL(ExternalSourceModel config,
+        public CloudLibDAL(IConfiguration configuration, 
+            ExternalSourceModel config,
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             IHttpApiFactory httpApiFactory,
             IMongoRepository<ImageItem> repoImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
             IMongoRepository<ExternalItem> repoExternalItem
-            ) : base(config, dalExternalSource, httpApiFactory, repoImages, dalLookup, repoMarketplace, repoExternalItem)
+            ) : base(configuration, config, dalExternalSource, httpApiFactory, repoImages, dalLookup, repoMarketplace, repoExternalItem)
         {
         }
 
-        public CloudLibDAL(
+        public CloudLibDAL(IConfiguration configuration,
             IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             IHttpApiFactory httpApiFactory,
             IMongoRepository<ImageItem> repoImages,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IMongoRepository<MarketplaceItem> repoMarketplace,
             IMongoRepository<ExternalItem> repoExternalItem
-            ) : base(dalExternalSource, httpApiFactory, repoImages, dalLookup, repoMarketplace, repoExternalItem)
+            ) : base(configuration, dalExternalSource, httpApiFactory, repoImages, dalLookup, repoMarketplace, repoExternalItem)
         {
         }
 

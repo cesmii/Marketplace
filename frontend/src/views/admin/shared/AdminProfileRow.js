@@ -54,7 +54,7 @@ function AdminProfileRow(props) { //props are item, showActions
         <>
             <tr className={`mx-0 my-1 p-0 py-1 ${cssClass}`}>
                 <td className="py-2 pl-2" >
-                    <a className="btn btn-icon-outline circle mr-2" href={`/admin/externalsource/${props.item.externalSource.code}/${props.item.id}`} ><i className="material-icons">edit</i></a>
+                    <a className="btn btn-icon-outline circle mr-2" href={`/admin/relateditem/${props.item.externalSource.code}/${props.item.id}`} ><i className="material-icons">edit</i></a>
                 </td>
                 <td className="py-2 align-text-top" >
                     {props.item.displayName}

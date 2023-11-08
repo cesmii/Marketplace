@@ -15,8 +15,6 @@
         /// Refers to an external item associated with this request info item
         /// </summary>
         public ExternalSourceSimple ExternalSource { get; set; }
-        [Obsolete("Going away in next release. Converting over to ExternalSource.")]
-        public string CloudLibId { get; set; }
         public string Url { get; set; }
         public int PageVisitCount { get; set; }
         public int SearchResultCount { get; set; }

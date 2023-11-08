@@ -939,7 +939,6 @@ function AdminMarketplaceEntity() {
         if (!_isValid.displayName) summary.push('Display name is required.');
         if (!_isValid.abstract) summary.push('Abstract is required.');
         if (!_isValid.description) summary.push('Description is required.');
-        if (!_isValid.abstract) summary.push('Abstract is required.');
         if (!_isValid.status) summary.push('Status is required.');
         if (!_isValid.type) summary.push('Type is required.');
         if (!_isValid.publisher) summary.push('Publisher is required.');
@@ -1156,7 +1155,7 @@ function AdminMarketplaceEntity() {
                     </div>
                 </div>
                 <div className="row mt-2">
-                    <div className="col-md-4">
+                    <div className="col-md-6">
                         {renderPublisher()}
                     </div>
                     <div className="col-md-4">
