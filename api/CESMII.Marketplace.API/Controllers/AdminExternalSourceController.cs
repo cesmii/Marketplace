@@ -129,9 +129,6 @@ namespace CESMII.Marketplace.Api.Controllers
             result.AdminTypeName = $"{result.AdminTypeName} (Copy)";
             result.TypeName = $"{result.TypeName} (Copy)";
             result.Code = "";
-            result.DefaultImageBanner = null;
-            result.DefaultImageLandscape = null;
-            result.DefaultImagePortrait = null;
 
             return Ok(result);
         }

@@ -345,11 +345,21 @@ namespace CESMII.Marketplace.Api.Controllers
             foreach (var src in sources)
             {
                 if (!src.Enabled) continue;
-                var dalSource = await _sourceFactory.InitializeSource(src);
+                try
+                {
+                    var dalSource = await _sourceFactory.InitializeSource(src);
 
-                var itemsExternal = (await dalSource.GetAll()).Data
-                    .Select(x => new RelatedLookupModel() { ID = x.ID, DisplayName = x.DisplayName, Version = x.Version, Namespace = x.Namespace, ExternalSource = x.ExternalSource });
-                resultExternalItems.AddRange(itemsExternal);
+                    var itemsExternal = (await dalSource.GetAll()).Data
+                        .Select(x => new RelatedLookupModel() { ID = x.ID, DisplayName = x.DisplayName, Version = x.Version, Namespace = x.Namespace, ExternalSource = x.ExternalSource });
+                    resultExternalItems.AddRange(itemsExternal);
+                }
+                catch (ExternalSourceInitException ex)
+                {
+                    //skipping this external source - this will happen if external source factory cannot find the type noted in the external source model.
+                    //the factory will log the issue, don't cause the other searches to fail due to bad configuration
+                    //of a source. 
+                    _logger.LogWarning(ex, $"MarketplaceController|AdminLookup|Skipping external source '{src.Name}' - improper configuration: {src.TypeName}");
+                }
             }
             resultExternalItems = resultExternalItems
                 .OrderBy(x => x.DisplayName)
@@ -865,11 +875,23 @@ namespace CESMII.Marketplace.Api.Controllers
             List<LookupItemFilterModel> verts
             )
         {
-            //now perform the search(es)
-            var dalSource = await _sourceFactory.InitializeSource(src);
-            return await dalSource.Where(model.Query, nextCursor, 
-                processes: cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
-                verticals: verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList());
+            try
+            {
+                //now perform the search(es)
+                var dalSource = await _sourceFactory.InitializeSource(src);
+                return await dalSource.Where(model.Query, nextCursor,
+                    processes: cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
+                    verticals: verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList());
+            }
+            catch (ExternalSourceInitException ex)
+            {
+                //skipping this external source - this will happen if external source factory cannot find the type noted in the external source model.
+                //the factory will log the issue, don't cause the other searches to fail due to bad configuration
+                //of a source. 
+                _logger.LogWarning(ex, $"MarketplaceController|AdvancedSearchExternal|Skipping external source '{src.Name}' - improper configuration: {src.TypeName}");
+                return new DALResultWithSource<MarketplaceItemModel>()
+                { Count = 0, Cursor = nextCursor, Data = new List<MarketplaceItemModel>(), SourceId = src.ID };
+            }
         }
 
 

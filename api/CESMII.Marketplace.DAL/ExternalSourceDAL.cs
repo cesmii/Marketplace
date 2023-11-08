@@ -230,10 +230,16 @@
             entity.TypeName = model.TypeName;
             //save/encrypt json data unique to this source
             entity.Data = PasswordUtils.EncryptString(model.Data, _encryptDecryptKey);
-            //TBD - save default images
-            //entity.DefaultImageIdBanner = MongoDB.Bson.ObjectId.Parse(model.ItemType.ID);
-            //entity.DefaultImageIdPortrait = MongoDB.Bson.ObjectId.Parse(model.ItemType.ID);
-            //entity.DefaultImageIdLandscape = MongoDB.Bson.ObjectId.Parse(model.ItemType.ID);
+            //save default images
+            entity.DefaultImageIdPortrait = model.DefaultImagePortrait == null ?
+                MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY) :
+                MongoDB.Bson.ObjectId.Parse(model.DefaultImagePortrait.ID);
+            entity.DefaultImageIdBanner = model.DefaultImageBanner == null ?
+                MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY) :
+                MongoDB.Bson.ObjectId.Parse(model.DefaultImageBanner.ID);
+            entity.DefaultImageIdLandscape = model.DefaultImageLandscape == null ?
+                MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY) :
+                MongoDB.Bson.ObjectId.Parse(model.DefaultImageLandscape.ID);
             entity.PublisherId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.Publisher.ID));
             entity.FailOnException = model.FailOnException;
         }

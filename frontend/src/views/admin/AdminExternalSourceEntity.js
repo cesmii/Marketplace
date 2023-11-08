@@ -6,6 +6,7 @@ import axiosInstance from "../../services/AxiosService";
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import Dropdown from 'react-bootstrap/Dropdown'
+import { Card, Nav, Tab } from 'react-bootstrap';
 
 import JSONInput from 'react-json-editor-ajrm';
 import locale from 'react-json-editor-ajrm/locale/en';
@@ -37,10 +38,12 @@ function AdminExternalSourceEntity() {
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_isValid, setIsValid] = useState({
         name: true, code: true, itemType: true, publisher: true, typeName: true, typeNameFormat: true, adminTypeNameFormat: true,
-        dataFormat: true, marketplaceItem: true
+        images: { defaultImagePortrait: true, defaultImageBanner: true, defaultImageLandscape: true }, dataFormat: true
     });
     const [_deleteModal, setDeleteModal] = useState({ show: false, items: null });
     const [_error, setError] = useState({ show: false, message: null, caption: null });
+    const [_refreshImageData, setRefreshImageData] = useState(true);
+    const [_imageRows, setImageRows] = useState([]);
 
     var caption = 'External Source';
 
@@ -149,6 +152,41 @@ function AdminExternalSourceEntity() {
     // Region: hooks
     // useEffect - get static lookup data
     //-------------------------------------------------------------------
+    useEffect(() => {
+        // Load lookup data upon certain triggers in the background
+        async function fetchImageData() {
+
+            var url = `image/all`;
+            console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
+
+            await axiosInstance.post(url, { id: id }).then(result => {
+                if (result.status === 200) {
+                    setImageRows(result.data);
+                } else {
+                    setImageRows(null);
+                }
+                setRefreshImageData(false);
+            }).catch(e => {
+                if (e.response && e.response.status === 401) {
+                }
+                else {
+                    console.log(generateLogMessageString('useEffect||fetchData||' + JSON.stringify(e), CLASS_NAME, 'error'));
+                    console.log(e);
+                    setRefreshImageData(false);
+                }
+            });
+        };
+
+        if (_refreshImageData) {
+            //console.log(generateLogMessageString('useEffect||refreshLookupData||Trigger fetch', CLASS_NAME));
+            fetchImageData();
+        }
+
+        //this will execute on unmount
+        return () => {
+            //console.log(generateLogMessageString('useEffect||refreshLookupData||Cleanup', CLASS_NAME));
+        };
+    }, [id, _refreshImageData]);
 
     //-------------------------------------------------------------------
     // Region: 
@@ -221,12 +259,13 @@ function AdminExternalSourceEntity() {
 
     //validate all images
     const validateForm_image = (e) => {
+        console.log('validateForm_image');
         var isValid = e.target.value.toString() !== "-1";
         setIsValid({
             ..._isValid, images: {
-                "imagePortrait": e.target.id === "imagePortrait" ? isValid : _isValid.images.imagePortrait,
-                "imageBanner": true, //e.target.id === "imageBanner" ? isValid : _isValid.images.imageBanner,
-                "imageLandscape": e.target.id === "imageLandscape" ? isValid : _isValid.images.imageLandscape
+                "defaultImagePortrait": e.target.id === "defaultImagePortrait" ? isValid : _isValid.images.defaultImagePortrait,
+                "defaultImageBanner": e.target.id === "defaultImageBanner" ? isValid : _isValid.images.defaultImageBanner,
+                "defaultImageLandscape": e.target.id === "defaultImageLandscape" ? isValid : _isValid.images.defaultImageLandscape
             }
         });
     };
@@ -237,15 +276,20 @@ function AdminExternalSourceEntity() {
 
         _isValid.name = _item.name != null && _item.name.trim().length > 0;
         _isValid.code = _item.code != null && _item.code.trim().length > 0;
-        _isValid.typeName = _item.name != null && _item.typeName.trim().length > 0;
+        _isValid.itemType = _item.itemType != null && _item.itemType.id.toString() !== "-1";
         _isValid.publisher = _item.publisher != null && _item.publisher.id.toString() !== "-1";
+        _isValid.typeName = _item.name != null && _item.typeName.trim().length > 0;
         _isValid.typeNameFormat = validate_TypeName(_item.typeName);
         _isValid.adminTypeNameFormat = validate_TypeName(_item.adminTypeName);
+        _isValid.images.defaultImagePortrait = _item.defaultImagePortrait != null && _item.defaultImagePortrait.id.toString() !== "-1";
+        _isValid.images.defaultImageBanner = _item.defaultImageBanner != null && _item.defaultImageBanner.id.toString() !== "-1";
+        _isValid.images.defaultImageLandscape = _item.defaultImageLandscape != null && _item.defaultImageLandscape.id.toString() !== "-1";
         //use the value checked when we onBlur from the json editor. This will be the most up to date indicator: _isValid.dataFormat =
 
         setIsValid(JSON.parse(JSON.stringify(_isValid)));
-        return (_isValid.name && _isValid.typeName && _isValid.publisher && _isValid.typeNameFormat &&
-            _isValid.dataFormat && _isValid.marketplaceItem);
+        return (_isValid.name && _isValid.code && _isValid.itemType && _isValid.publisher && _isValid.typeName && _isValid.typeNameFormat && _isValid.adminTypeNameFormat &&
+            _isValid.dataFormat && _isValid.images.defaultImagePortrait && _isValid.images.defaultImageBanner && _isValid.images.defaultImageLandscape 
+            );
     }
 
     //-------------------------------------------------------------------
@@ -306,7 +350,7 @@ function AdminExternalSourceEntity() {
     const onCancel = () => {
         //raised from header nav
         console.log(generateLogMessageString('onCancel', CLASS_NAME));
-        history.goBack();
+        history.push('/admin/externalsource/list');
     };
 
     const onSave = () => {
@@ -587,54 +631,69 @@ function AdminExternalSourceEntity() {
         );
     };
 
-    const renderForm = () => {
+    const renderImageSelection = (fieldName, caption, infoText) => {
+        //show readonly input for view mode
+        if (isReadOnly) {
+            return (
+                <Form.Group>
+                    <Form.Label>{caption}</Form.Label>
+                    <Form.Control id={fieldName} type="" value={_item[fieldName] != null ? _item[fieldName].fileName : ""} readOnly={isReadOnly} />
+                </Form.Group>
+            )
+        }
+        if (_imageRows == null) return;
+
+        //show drop down list for edit, copy mode
+        const options = _imageRows.map((img) => {
+            return (<option key={img.id} value={img.id} >{img.fileName}</option>)
+        });
+
+        return (
+            <Form.Group>
+                <Form.Label>{caption}</Form.Label>
+                {!_isValid.images[fieldName] &&
+                    <span className="invalid-field-message inline">
+                        Required
+                    </span>
+                }
+                <Form.Control id={fieldName} as="select" className={(!_isValid.images[fieldName] ? 'invalid-field minimal pr-5' : 'minimal pr-5')} value={_item[fieldName] == null ? "-1" : _item[fieldName].id}
+                    onBlur={validateForm_image} onChange={onChangeImageSelect} >
+                    <option key="-1|Select One" value="-1" >--Select One--</option>
+                    {options}
+                </Form.Control>
+                {infoText != null &&
+                    <span className="small text-muted">
+                        {infoText}
+                    </span>
+                }
+            </Form.Group>
+        )
+    };
+
+    const renderImagesInfo = () => {
         return (
             <>
-                <div className="row">
-                    <div className="col-md-6">
-                        <Form.Group>
-                            <Form.Label>Name</Form.Label>
-                            {!_isValid.name &&
-                                <span className="invalid-field-message inline">
-                                    Required
-                                </span>
-                            }
-                            <Form.Control id="name" className={(!_isValid.name ? 'invalid-field minimal pr-5' : 'minimal pr-5')} type="" placeholder={`Enter unique name`}
-                                value={_item.name == null ? '' : _item.name} onBlur={validateForm_name} onChange={onChange} readOnly={isReadOnly} />
-                        </Form.Group>
-                    </div>
-                    <div className="col-md-6">
-                        <Form.Group>
-                            <Form.Label>Code</Form.Label>
-                            {!_isValid.code &&
-                                <span className="invalid-field-message inline">
-                                    Required
-                                </span>
-                            }
-                            <Form.Control id="code" className={(!_isValid.code ? 'invalid-field minimal pr-5' : 'minimal pr-5')} type="" placeholder={`Enter unique code`}
-                                value={_item.code == null ? '' : _item.code} onBlur={validateForm_code} onChange={onChange} readOnly={isReadOnly || (id != null && id.toString() !== 'new')} />
-                        </Form.Group>
-                    </div>
-                    <div className="col-md-6">
-                        <span className="small text-muted" >This is a friendly name associated with this type of data. It is not displayed in the system.</span>
-                    </div>
-                    <div className="col-md-6">
-                        <span className="small text-muted" >This code plays a key role in the system and should be unique across external sources. This will factor into navigation and be a key for finding this source.</span>
-                    </div>
-                </div>
                 <div className="row mt-2">
-                    <div className="col-md-6">
-                        {renderPublisher()}
+                    <div className="col-12">
+                        <h3 className="mb-4">Image Selection</h3>
                     </div>
                     <div className="col-md-6">
-                        {renderItemType()}
+                        {renderImageSelection("defaultImagePortrait", "Portrait Image", "Recommended aspect ratio 3:4. Used by: Home page ('Featured Solution' banner image, 'Popular' items tiles), Library page (result tiles)")}
                     </div>
                     <div className="col-md-6">
+                        {renderImageSelection("defaultImageBanner", "Banner Image", "Recommended aspect ratio 1:3.5. Used when displaying marketplace item image on small screens. Suggest minimum size of 150px x 350px.")}
                     </div>
                     <div className="col-md-6">
-                        <span className="small text-muted" >The items from this API are associated with this item type.</span>
+                        {renderImageSelection("defaultImageLandscape", "Landscape Image", "Recommended: 320px w by 180px h (16:9) Used by: Home page ('New' items tiles), Marketplace item page (banner image, 'Related' items tiles)")}
                     </div>
                 </div>
+            </>
+        );
+    };
+
+    const renderGeneralInfo = () => {
+        return (
+            <>
                 <div className="row">
                     <div className="col-md-12">
                         <Form.Group>
@@ -688,19 +747,6 @@ function AdminExternalSourceEntity() {
                     </div>
                 </div>
                 <div className="row">
-                    <div className="col-sm-6 col-lg-4">
-                        <div className="d-flex h-100">
-                            <Form.Group>
-                                <Form.Check className="align-self-end" type="checkbox" id="enabled" label="Enabled" checked={_item.enabled}
-                                    onChange={onChange} readOnly={isReadOnly} />
-                            </Form.Group>
-                        </div>
-                    </div>
-                    <div className="col-md-12 pb-2">
-                        <span className="small text-muted" >Checking this value will cause this item to be included in searches within the marketplace.</span>
-                    </div>
-                </div>
-                <div className="row">
                     <div className="col-md-12">
                         <Form.Group>
                             <Form.Label>Data (JSON structure)</Form.Label>
@@ -735,6 +781,144 @@ function AdminExternalSourceEntity() {
             </>
         )
     }
+
+    const renderValidationSummary = () => {
+
+        /*
+            const [_isValid, setIsValid] = useState({
+                images: { imagePortrait: true, imageBanner: true, imageLandscape: true },
+                dataFormat: true
+            });
+
+         */
+        let summary = [];
+        if (!_isValid.name) summary.push('Name is required.');
+        if (!_isValid.code) summary.push('Code is required.');
+        if (!_isValid.publisher) summary.push('Publisher is required.');
+        if (!_isValid.itemType) summary.push('Item Type is required.');
+        if (!_isValid.typeName) summary.push('Type Name is required.');
+        if (!_isValid.typeNameFormat) summary.push('Type Name format is invalid.');
+        if (!_isValid.adminTypeNameFormat) summary.push('Admin Type Name format is invalid.');
+        if (!_isValid.images.defaultImagePortrait) summary.push('Portrait image is required.');
+        if (!_isValid.images.defaultImageBanner) summary.push('Banner image is required.');
+        if (!_isValid.images.defaultImageLandscape) summary.push('Landscape image is required.');
+        if (!_isValid.dataFormat) summary.push('Data (JSON structure) format is invalid.');
+        if (summary.length == 0) return null;
+
+        let content = summary.map(function (x, i) {
+            return i > 0 ? (<span key={i} ><br />{x}</span>) : (<span key={i} >{x}</span>);
+        });
+
+        return (
+            <div className="alert alert-danger w-100">
+                {content}
+            </div>
+        );
+    };
+
+    const renderCommonInfo = () => {
+        return (
+            <>
+                <div className="row">
+                    <div className="col-md-6">
+                        <Form.Group>
+                            <Form.Label>Name</Form.Label>
+                            {!_isValid.name &&
+                                <span className="invalid-field-message inline">
+                                    Required
+                                </span>
+                            }
+                            <Form.Control id="name" className={(!_isValid.name ? 'invalid-field minimal pr-5' : 'minimal pr-5')} type="" placeholder={`Enter unique name`}
+                                value={_item.name == null ? '' : _item.name} onBlur={validateForm_name} onChange={onChange} readOnly={isReadOnly} />
+                        </Form.Group>
+                    </div>
+                    <div className="col-md-6">
+                        <Form.Group>
+                            <Form.Label>Code</Form.Label>
+                            {!_isValid.code &&
+                                <span className="invalid-field-message inline">
+                                    Required
+                                </span>
+                            }
+                            <Form.Control id="code" className={(!_isValid.code ? 'invalid-field minimal pr-5' : 'minimal pr-5')} type="" placeholder={`Enter unique code`}
+                                value={_item.code == null ? '' : _item.code} onBlur={validateForm_code} onChange={onChange} readOnly={isReadOnly || (id != null && id.toString() !== 'new')} />
+                        </Form.Group>
+                    </div>
+                    <div className="col-md-6">
+                        <span className="small text-muted" >This is a friendly name associated with this type of data. It is not displayed in the system.</span>
+                    </div>
+                    <div className="col-md-6">
+                        <span className="small text-muted" >This code plays a key role in the system and should be unique across external sources. This will factor into navigation and be a key for finding this source.</span>
+                    </div>
+                </div>
+                <div className="row mt-2">
+                    <div className="col-md-6">
+                        {renderPublisher()}
+                    </div>
+                    <div className="col-md-6">
+                        {renderItemType()}
+                    </div>
+                    <div className="col-md-6">
+                    </div>
+                    <div className="col-md-6">
+                        <span className="small text-muted" >The items from this API are associated with this item type.</span>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-sm-6 col-lg-4">
+                        <div className="d-flex h-100">
+                            <Form.Group>
+                                <Form.Check className="align-self-end" type="checkbox" id="enabled" label="Enabled" checked={_item.enabled}
+                                    onChange={onChange} readOnly={isReadOnly} />
+                            </Form.Group>
+                        </div>
+                    </div>
+                    <div className="col-md-12 pb-2">
+                        <span className="small text-muted" >Checking this value will cause this item to be included in searches within the marketplace.</span>
+                    </div>
+                </div>
+            </>
+            );
+    }
+
+    const tabListener = (eventKey) => {
+    }
+
+    const renderTabbedForm = () => {
+        return (
+            <Tab.Container id="admin-externalsource-entity" defaultActiveKey="general" onSelect={tabListener} >
+                <Nav variant="pills" className="row mt-1 px-2 pr-md-3">
+                    <Nav.Item className="col-sm-3 rounded p-0 pl-2" >
+                        <Nav.Link eventKey="general" className="text-center text-md-left p-1 px-2 h-100" >
+                            <span className="headline-3">General</span>
+                        </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item className="col-sm-3 rounded p-0 px-md-0" >
+                        <Nav.Link eventKey="images" className="text-center text-md-left p-1 px-2 h-100" >
+                            <span className="headline-3">Images</span>
+                        </Nav.Link>
+                    </Nav.Item>
+                </Nav>
+
+                <Tab.Content>
+                    <Tab.Pane eventKey="general">
+                        <Card className="">
+                            <Card.Body className="pt-3">
+                                {renderGeneralInfo()}
+                            </Card.Body>
+                        </Card>
+                    </Tab.Pane>
+                    <Tab.Pane eventKey="images">
+                        <Card className="">
+                            <Card.Body className="pt-3">
+                                {renderImagesInfo()}
+                            </Card.Body>
+                        </Card>
+                    </Tab.Pane>
+                </Tab.Content>
+            </Tab.Container>
+        );
+    };
 
     const renderHeaderRow = () => {
         return (
@@ -776,8 +960,10 @@ function AdminExternalSourceEntity() {
             <Form noValidate>
                 {renderHeaderRow()}
                 <div className="row" >
-                    <div className="col-sm-9 mb-4 mx-auto" >
-                        {renderForm()}
+                    <div className="col-sm-9 mb-4 mx-auto tab-container" >
+                        {renderValidationSummary()}
+                        {renderCommonInfo()}
+                        {renderTabbedForm()}
                     </div>
                 </div>
             </Form>
