@@ -6,7 +6,14 @@
 
 <div>
     <h1>Request Info Item</h1>
-    <p>Request Type: @Model.RequestType.Name</p>
+    @if (Model.ExternalSource == null)
+    {
+        <p>Request Type: @Model.RequestType.Name</p>
+    }
+    else
+    {
+        <p>External Item Source: @Model.ExternalSource.Name</p>
+    }
     <p>Submitted: @Model.Created.ToString("MM-dd-yyyy hh:mm")</p>
 </div>
 
@@ -26,12 +33,14 @@ else if (Model.Publisher != null)
     </div>
 }
 
-else if (Model.SmProfile != null)
+else if (Model.ExternalItem != null)
 {
     <div>
         <h2>Related To</h2>
-        <p>SM Profile: @Model.SmProfile.DisplayName</p>
-        <p>Namespace: @Model.SmProfile.Namespace</p>
+        <p>@Model.ExternalItem.Type.Name: @Model.ExternalItem.DisplayName</p>
+        @if (!string.IsNullOrEmpty(Model.ExternalItem.Abstract)) {
+            <p>@Model.ExternalItem.Abstract</p>
+        }
     </div>
 }
 
@@ -40,7 +49,10 @@ else if (Model.SmProfile != null)
     <p>First Name: @Model.FirstName</p>
     <p>Last Name: @Model.LastName</p>
     <p>Email: @Model.Email</p>
+    @if (Model.Phone != null)
+    {
     <p>Phone: @Model.Phone</p>
+    }
     @if (Model.MembershipStatus != null)
     {
     <p>Membership Status: @Model.MembershipStatus.Name</p>
@@ -61,7 +73,10 @@ else if (Model.SmProfile != null)
         }
     </div>
 }
-<div>
-    <h2>Message</h2>
-    <p>@Model.Description</p>
-</div>
+@if (!string.IsNullOrEmpty(Model.Description))
+{
+    <div>
+        <h2>Message</h2>
+        <p>@Model.Description</p>
+    </div>
+}

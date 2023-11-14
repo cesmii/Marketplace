@@ -3,13 +3,10 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Text;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
-
-using Newtonsoft.Json;
 
 using CESMII.Marketplace.Api.Shared.Models;
 using CESMII.Marketplace.Api.Shared.Controllers;
@@ -20,7 +17,8 @@ using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Marketplace.Api.Shared.Utils;
-using CESMII.Marketplace.Api.Shared.Extensions;
+using CESMII.Marketplace.DAL.ExternalSources;
+
 
 namespace CESMII.Marketplace.Api.Controllers
 {
@@ -31,15 +29,18 @@ namespace CESMII.Marketplace.Api.Controllers
         private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
         private readonly IDal<Publisher, PublisherModel> _dalPublisher;
         private readonly IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> _dalAnalytics;
-        private readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _dalCloudLib;
         private readonly IDal<SearchKeyword, SearchKeywordModel> _dalSearchKeyword;
+        private readonly IExternalSourceFactory<MarketplaceItemModel> _sourceFactory;
+        private readonly IDal<ExternalSource, ExternalSourceModel> _dalExternalSource;
+
         public MarketplaceController(IDal<MarketplaceItem, MarketplaceItemModel> dal,
             IDal<LookupItem, LookupItemModel> dalLookup,
             IDal<Publisher, PublisherModel> dalPublisher,
             IDal<MarketplaceItemAnalytics, MarketplaceItemAnalyticsModel> dalAnalytics,
-            ICloudLibDAL<MarketplaceItemModelWithCursor> dalCloudLib,
             IDal<SearchKeyword, SearchKeywordModel> dalSearchKeyword,
             UserDAL dalUser,
+            IExternalSourceFactory<MarketplaceItemModel> sourceFactory,
+            IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
             ConfigUtil config, ILogger<MarketplaceController> logger)
             : base(config, logger, dalUser)
         {
@@ -47,8 +48,10 @@ namespace CESMII.Marketplace.Api.Controllers
             _dalPublisher = dalPublisher;
             _dalLookup = dalLookup;
             _dalAnalytics = dalAnalytics;
-            _dalCloudLib = dalCloudLib;
             _dalSearchKeyword = dalSearchKeyword;
+
+            _sourceFactory = sourceFactory;
+            _dalExternalSource = dalExternalSource; 
         }
 
         [HttpGet, Route("All")]
@@ -81,8 +84,8 @@ namespace CESMII.Marketplace.Api.Controllers
                 new OrderByExpression<MarketplaceItem>() { Expression = x => x.PublishDate, IsDescending = true }).Data
             };
             //calculate most popular based on analytics counts
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
-            result.PopularItems = await util.PopularItems();
+            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup, _sourceFactory, _dalExternalSource);
+            result.PopularItems = await util.PopularItemsAsync();
 
             return Ok(result);
         }
@@ -98,7 +101,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 x => x.IsFeatured && x.IsActive
             };
             //limit to publish status of live
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dalLookup);
             predicates.Add(util.BuildStatusFilterPredicate());
 
             var result = _dal.Where(predicates, null, null, false, false,
@@ -117,7 +120,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 x => x.IsActive
             };
             //limit to publish status of live
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dalLookup);
             predicates.Add(util.BuildStatusFilterPredicate());
 
             //trim down to 4 most recent 
@@ -132,8 +135,8 @@ namespace CESMII.Marketplace.Api.Controllers
         public async Task<IActionResult> GetPopular()
         {
             //calculate most popular based on analytics counts
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
-            var result = await util.PopularItems();
+            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup, _sourceFactory, _dalExternalSource); 
+            var result = await util.PopularItemsAsync();
             return Ok(result);
         }
         #endregion
@@ -176,7 +179,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 result.Analytics = analytic;
             }
             //get related items
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup, _sourceFactory, _dalExternalSource);
             util.AppendSimilarItems(ref result);
 
             return Ok(result);
@@ -229,7 +232,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 result.Analytics = analytic;
             }
             //get related items
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
+            var util = new MarketplaceUtil(_dal, _dalAnalytics, _dalLookup, _sourceFactory, _dalExternalSource);
             util.AppendSimilarItems(ref result);
 
             return Ok(result);
@@ -316,7 +319,7 @@ namespace CESMII.Marketplace.Api.Controllers
         [HttpPost, Route("admin/lookup/related")]
         [Authorize(Roles = "cesmii.marketplace.marketplaceadmin", Policy = nameof(PermissionEnum.UserAzureADMapped))]
         [ProducesResponseType(200, Type = typeof(DALResult<MarketplaceItemModel>))]
-        public async Task<IActionResult> AdminLookupProfiles([FromBody] MarketplaceSearchModel model)
+        public async Task<IActionResult> AdminLookupRelatedItems([FromBody] RelatedSearchModel model)
         {
             if (model == null)
             {
@@ -324,13 +327,46 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest($"Invalid model (null)");
             }
 
+            //get list of marketplace items
             var resultItems = _dal.GetAll()
-                .Select(x => new { ID = x.ID, DisplayName = x.DisplayName, Version = x.Version, Namespace = x.Namespace });
-            var resultProfiles = (await _dalCloudLib.GetAll())
-                .Select(x => new { ID = x.ID, DisplayName = x.DisplayName, Version = x.Version, Namespace = x.Namespace });
-            return Ok(new { LookupItems = resultItems, LookupProfiles = resultProfiles });
-        }
+                .Select(x => new RelatedLookupModel() { ID = x.ID, DisplayName = x.DisplayName, Version = x.Version, Namespace = x.Namespace, ExternalSource = null });
 
+            //Loop over sources and return a collection of items across sources.
+            //Note some sources may not permit getall.
+            //add external sources tasks (except when calling from admin ui)
+            //get all if code is null, else get one
+            var sources = (string.IsNullOrEmpty(model.Code)) ?
+                //should be multiple sources returned
+                _dalExternalSource.Where(x => x.Enabled && x.IsActive, null, null, false, false).Data :
+                //should only be one source returned
+                _dalExternalSource.Where(x => x.Enabled && x.Code.ToLower().Equals(model.Code.ToLower()), null, null, false, false).Data ;
+
+            var resultExternalItems = new List<RelatedLookupModel>(); 
+            foreach (var src in sources)
+            {
+                if (!src.Enabled) continue;
+                try
+                {
+                    var dalSource = await _sourceFactory.InitializeSource(src);
+
+                    var itemsExternal = (await dalSource.GetAll()).Data
+                        .Select(x => new RelatedLookupModel() { ID = x.ID, DisplayName = x.DisplayName, Version = x.Version, Namespace = x.Namespace, ExternalSource = x.ExternalSource });
+                    resultExternalItems.AddRange(itemsExternal);
+                }
+                catch (ExternalSourceInitException ex)
+                {
+                    //skipping this external source - this will happen if external source factory cannot find the type noted in the external source model.
+                    //the factory will log the issue, don't cause the other searches to fail due to bad configuration
+                    //of a source. 
+                    _logger.LogWarning(ex, $"MarketplaceController|AdminLookup|Skipping external source '{src.Name}' - improper configuration: {src.TypeName}");
+                }
+            }
+            resultExternalItems = resultExternalItems
+                .OrderBy(x => x.DisplayName)
+                .ThenBy(x => x.Namespace)
+                .ThenBy(x => x.Version).ToList();
+            return Ok(new { LookupItems = resultItems, LookupExternalItems = resultExternalItems });
+        }
 
         /// <summary>
         /// Search for marketplace items matching criteria passed in. This is an advanced search and the front end
@@ -338,12 +374,11 @@ namespace CESMII.Marketplace.Api.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private async Task<IActionResult> AdvancedSearch([FromBody] MarketplaceSearchModel model
-            , bool includeCloudLib = true, bool liveOnly = true)
+        private async Task<IActionResult> AdvancedSearch(MarketplaceSearchModel model
+            , bool includeExternalSources = true, bool liveOnly = true)
         {
             var timer = Stopwatch.StartNew();
             //init and then flags set by user or system will determine which of the following get applied
-
 
             //extract selected items within a list of items
             var cats = model.Filters.Count == 0 ? new List<LookupItemFilterModel>() : model.Filters.FirstOrDefault(x => x.EnumValue == LookupTypeEnum.Process).Items.Where(x => x.Selected).ToList();
@@ -354,170 +389,95 @@ namespace CESMII.Marketplace.Api.Controllers
             //then alter the item type filters or the model.filters for those items
             var keywordTypes = PrepareKeywordTypeSelections(model);
 
-            /* Comment this out. 
-            //  Changing the value of the model.Query is causing problems because it is removing results. 
-            //  Example: "CNC L" query gets changed to "CNC" and then an item like CNC Lab is no longer found.
-            //  The splitting of the query into individual terms also breaks other conventions we are using in the 
-            //  expected behavior.
-            //  There is publisher filtering downstream.
+            //setup marketplace search task - native search of our data
+            _logger.LogInformation($"MarketplaceController|AdvancedSearchExecuteTasks|Setting up tasks.");
+            var mtkplCursor = MarketplaceUtil.PrepareSearchCursor(model, null);
+
+            //AdvancedSearchLogDurationTime("Prep", timer.ElapsedMilliseconds - 0);
+            long swMarketPlaceStart = timer.ElapsedMilliseconds;
+            var searchMarketplaceTask = AdvancedSearchMarketplace(model, mtkplCursor, types, keywordTypes, cats, verts, pubs, liveOnly);
+            _ = searchMarketplaceTask.ContinueWith(t => AdvancedSearchLogDurationTime("Marketplace", timer.ElapsedMilliseconds - swMarketPlaceStart));
+
+            var listSearchExternalSources = new List<Task>();
+            //add native marketplace task to list for downstream parallel execution
+            listSearchExternalSources.Add(searchMarketplaceTask);
             
-            // Check for publishers in the query string
-            if (!string.IsNullOrEmpty(model.Query))
+            //add external sources tasks (except when calling from admin ui)
+            if (includeExternalSources)
             {
-                bool bAnyAdded = false;
-                StringBuilder sbNewQuery = new StringBuilder();
-                List<PublisherModel> pubAll = _dalPublisher.GetAll(false);
-                var astrWords = model.Query.Split(new char[] { ' ', ',', '.', '\t' }, StringSplitOptions.RemoveEmptyEntries);
-                if (astrWords.Length > 0)
+                var sources = _dalExternalSource.Where(x => x.Enabled && x.IsActive, null, null, false, false).Data;
+
+                foreach (var src in sources)
                 {
-                    foreach (string strItem in astrWords)
+                    if (!src.Enabled || string.IsNullOrEmpty(src.TypeName)) continue;
+
+                    //see if there are selections for this external source that warrant a search
+                    // User driven flag to select only a certain type. Determine if none are selected or if item type of sm service is selected.
+                    if (!IsTypeIncluded(src.ItemType.Code, types, keywordTypes)) continue;
+
+                    long swExternalStart = timer.ElapsedMilliseconds;
+
+                    //cursor for this specific source - look at cached cursors and return the best cursor 
+                    //option or new cursor for new searches
+                    var nextCursor = MarketplaceUtil.PrepareSearchCursor(model, src.ID);
+
+                    //TBD - temp logic - if the external source is CloudLib, then we still call a somewhat customized 
+                    //flow. When time allows, come back and refine so we don't need the custom aspect of the flow. 
+                    if (src.Code.ToLower().Equals("cloudlib"))
                     {
-                        bool bItemFound = false;
-                        foreach (PublisherModel pm in pubAll)
-                        {
-                            if (pm.DisplayName.Contains(strItem))
-                            {
-                                pubs.Add(new LookupItemFilterModel() { Code = null, DisplayOrder = 999, ID = pm.ID.ToString(), IsActive = pm.IsActive, Name = pm.DisplayName, Selected = true });
-                                bAnyAdded = true;
-                                bItemFound = true;
-                            }
-                        }
-
-                        if (!bItemFound)
-                            sbNewQuery.Append($"{strItem} ");
-                    }
-
-                    // If we found any publishers, update the query minus the publisher name.
-                    if (bAnyAdded)
-                        model.Query = sbNewQuery.ToString().Trim();
-                }
-            }
-            */
-
-            // Any type (Apps or Hardware) but not Profiles
-            // User driven flag to select only a certain type. Determine if none are selected or if item type of sm app is selected.
-            DALResult<MarketplaceItemModel> result;
-
-            // SM Profiles
-            // User driven flag to select only a certain type. Determine if none are selected or if item type of sm profile is selected.
-            var includeSmProfileTypes = (!types.Any(x => x.Selected) && !keywordTypes.Any(x => x.Selected)) ||
-                (types.Any(x => x.Selected && x.Code.ToLower().Equals(_configUtil.MarketplaceSettings.SmProfile.Code.ToLower())) ||
-                 keywordTypes.Any(x => x.Selected && x.Code.ToLower().Equals(_configUtil.MarketplaceSettings.SmProfile.Code.ToLower())));
-            //Skip over this in certain scenarios. ie. admin section
-            if (_configUtil.MarketplaceSettings.EnableCloudLibSearch && includeCloudLib && includeSmProfileTypes)
-            {
-
-                var startCursor = ParseCursor(model?.PageCursors);
-                //int skip = model.Skip;
-                MarketplaceSearchModel adjustedModel = new MarketplaceSearchModel { Skip = model.Skip, Take = model.Take, Filters = model.Filters, ItemTypes = model.ItemTypes, Query = model.Query, PageCursors = model.PageCursors };
-                int mergeSkip = model.Skip;
-                if (startCursor != null)
-                {
-                    // Provided start cursor didn't match requested offset: look if we have an alternate one cached
-                    var bestStartCursor = startCursor.GetBestCursorForOffset(model.Skip);
-                    if (bestStartCursor != null)
-                    {
-                        //startCursor.Offset = newStartCursor.Offset;
-                        //startCursor.MarketPlaceOffset = newStartCursor.MarketPlaceOffset;
-                        //startCursor.CloudLibCursor = newStartCursor.CloudLibCursor;
-                        startCursor.CurrentCursor = bestStartCursor;
-                        adjustedModel.PageCursors = JsonConvert.SerializeObject(startCursor);
-                        adjustedModel.Skip = bestStartCursor?.Offset ?? 0;
-                        mergeSkip = model.Skip - bestStartCursor?.Offset ?? 0;
-                        adjustedModel.Take = model.Take + mergeSkip;
+                        var searchCloudLibTask = AdvancedSearchCloudLib(model, src, nextCursor, cats, verts, keywordTypes, pubs);
+                        _ = searchCloudLibTask.ContinueWith(t => AdvancedSearchLogDurationTime(src.Code, timer.ElapsedMilliseconds - swExternalStart));
+                        listSearchExternalSources.Add(searchCloudLibTask);
                     }
                     else
                     {
-                        // Didn't find one: do a full query from start
-                        adjustedModel.PageCursors = null;
+                        var externalTask = AdvancedSearchExternal(model, src, nextCursor, cats, verts);
+                        _ = externalTask.ContinueWith(t => AdvancedSearchLogDurationTime(src.Code, timer.ElapsedMilliseconds - swExternalStart));
+                        listSearchExternalSources.Add(externalTask);
                     }
                 }
-
-                //var endCursor = ParseCursor(model?.EndCursor);
-                //if (startCursor == null &&  endCursor != null && endCursor.Offset != model.Skip + model.Take)
-                //{
-                //    // Provided end cursor didn't match requested offset: look for an alternate cursor
-                //    adjustedModel.EndCursor = null;
-                //    var newStartCursor = endCursor.GetBestCursorForOffset(model.Skip);
-                //    if (newStartCursor != null)
-                //    {
-                //        endCursor.Offset = newStartCursor.Offset;
-                //        endCursor.MarketPlaceOffset = newStartCursor.MarketPlaceOffset;
-                //        endCursor.CloudLibCursor = newStartCursor.CloudLibCursor;
-
-                //        adjustedModel.StartCursor = JsonConvert.SerializeObject(endCursor);
-                //        adjustedModel.EndCursor = null;
-                //        adjustedModel.Skip = newStartCursor?.Offset ?? 0;
-                //        mergeSkip = model.Skip - newStartCursor?.Offset ?? 0;
-                //        adjustedModel.Take = model.Take + mergeSkip;
-                //    }
-                //}
-
-                _logger.LogInformation($"MarketplaceController|AdvancedSearch|Setting up tasks.");
-                long swMarketPlaceStarted = timer.ElapsedMilliseconds;
-                var searchMarketplaceTask = Task.Run(() =>
-                {
-                    return AdvancedSearchMarketplace(adjustedModel, types, keywordTypes, cats, verts, pubs, liveOnly);
-                });
-                long swMarketPlaceFinished = 0;
-                _ = searchMarketplaceTask.ContinueWith(t => swMarketPlaceFinished = swMarketPlaceFinished == 0 ? timer.ElapsedMilliseconds : swMarketPlaceFinished);
-
-                long swCloudLibStarted = timer.ElapsedMilliseconds;
-                var searchCloudLibTask = AdvancedSearchCloudLib(adjustedModel, keywordTypes, cats, verts, pubs);
-                long swCloudLibFinished = 0;
-                _ = searchCloudLibTask.ContinueWith(t => swCloudLibFinished = swCloudLibFinished == 0 ? timer.ElapsedMilliseconds : swCloudLibFinished);
-                //run in parallel
-                long swWaitStarted = timer.ElapsedMilliseconds;
-                var allTasks = Task.WhenAll(searchMarketplaceTask, searchCloudLibTask);
-
-                //wrap exception handling around the tasks execution so no task exception gets lost
-                try
-                {
-                    _logger.LogInformation($"MarketplaceController|AdvancedSearch|Await outcome of .whenAll");
-                    await allTasks;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogCritical(ex, $"MarketplaceController|AdvancedSearch|All Tasks Exception|{ex.Message}.");
-                    throw allTasks.Exception;
-                }
-
-                long swWaitFinished = timer.ElapsedMilliseconds;
-                swMarketPlaceFinished = swMarketPlaceFinished == 0 ? timer.ElapsedMilliseconds : swMarketPlaceFinished;
-                swCloudLibFinished = swCloudLibFinished == 0 ? timer.ElapsedMilliseconds : swCloudLibFinished;
-
-                //get the tasks results into format we can use
-                _logger.LogInformation($"MarketplaceController|AdvancedSearch|Executing tasks using await...");
-                var resultSearchMarketplace = await searchMarketplaceTask;
-                var resultSearchCloudLib = await searchCloudLibTask;
-
-                long mergeStarted = timer.ElapsedMilliseconds;
-                _logger.LogInformation($"MarketplaceController|AdvancedSearch|Unifying results...");
-
-                //unify the results, sort, handle paging
-                result = MergeSortPageSearchedItems(resultSearchMarketplace, resultSearchCloudLib, adjustedModel, model, mergeSkip);
-                long mergeFinished = timer.ElapsedMilliseconds;
-                _logger.LogWarning($"MarketplaceController|AdvancedSearch|Duration: {timer.ElapsedMilliseconds}ms. (Marketplace: {swMarketPlaceFinished - swMarketPlaceStarted} ms. CloudLib {swCloudLibFinished - swCloudLibStarted}. MPS: {swMarketPlaceStarted}. ClStart: {swCloudLibStarted}). WaitS/F: {swWaitStarted}/{swWaitFinished}. Merge S/F: {mergeStarted}/{mergeFinished}");
             }
-            else
+
+            //run query calls in parallel
+            //long swWhenAllStart = timer.ElapsedMilliseconds;
+            var allTasks = Task.WhenAll(listSearchExternalSources);
+            //wrap exception handling around the tasks execution so no task exception gets lost
+            try
             {
-                long swMarketPlaceStarted = timer.ElapsedMilliseconds;
-                result = await AdvancedSearchMarketplace(model, types, keywordTypes, cats, verts, pubs, liveOnly);
-                //because we wait to page, sort till after in the combined (Cloud and marketplace) scenario, we need to do same here. 
-                //now page the data. 
-                result.Data = result.Data?
-                    // The sources are ordered and merged in order: no need to re-order
-                    //.OrderBy(x => x.IsFeatured)
-                    //.ThenBy(x => x.DisplayName)
-                    .Skip(model.Skip)
-                    .Take(model.Take)
-                    .ToList();
-
-                long swMarketPlaceFinished = timer.ElapsedMilliseconds;
-                _logger.LogWarning($"MarketplaceController|AdvancedSearch|Duration: {timer.ElapsedMilliseconds}ms. (Marketplace: {swMarketPlaceFinished - swMarketPlaceStarted} ms.");
+                _logger.LogInformation($"MarketplaceController|AdvancedSearch|Await outcome of .whenAll");
+                await allTasks;
+                //AdvancedSearchLogDurationTime("When All", timer.ElapsedMilliseconds - swWhenAllStart);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, $"MarketplaceController|AdvancedSearch|All Tasks Exception|{ex.Message}.");
+                throw allTasks.Exception;
             }
 
-            //_logger.LogWarning($"MarketplaceController|AdvancedSearch|Duration: { timer.ElapsedMilliseconds}ms.");
+            long swWaitFinished = timer.ElapsedMilliseconds;
+
+            //get the tasks results into format we can use
+            _logger.LogInformation($"MarketplaceController|AdvancedSearch|Executing tasks using await...");
+
+            var resultSearches = new List<DALResultWithSource<MarketplaceItemModel>>();
+            foreach (Task<DALResultWithSource<MarketplaceItemModel>> t in listSearchExternalSources)
+            {
+                var r = await t;
+                resultSearches.Add(r);
+            }
+
+            long mergeStarted = timer.ElapsedMilliseconds;
+            _logger.LogInformation($"MarketplaceController|AdvancedSearch|Unifying results...");
+
+            //unify the results, sort, handle paging
+            long swMergeStart = timer.ElapsedMilliseconds;
+            var result = MergeSortPageSearchedItems(model, resultSearches);
+            //AdvancedSearchLogDurationTime("Merge", timer.ElapsedMilliseconds - swMergeStart);
+
+            //report total duration
+            AdvancedSearchLogDurationTime("Search Total", timer.ElapsedMilliseconds);
+
+            //_logger.LogWarning($"MarketplaceController|AdvancedSearch|Duration: {timer.ElapsedMilliseconds}ms. (Marketplace: {swMarketPlaceFinish - swMarketPlaceStart} ms. CloudLib {swCloudLibFinished - swCloudLibStarted}. MPS: {swMarketPlaceStart}. ClStart: {swCloudLibStarted}). WaitS/F: {swAllStart}/{swWaitFinished}. Merge S/F: {mergeStarted}/{mergeFinished}");
 
             if (result == null)
             {
@@ -525,6 +485,32 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest($"No records found matching the search criteria.");
             }
             return Ok(result);
+
+        }
+
+        private void AdvancedSearchLogDurationTime(string key, long duration, string sender = "AdvancedSearch")
+        {
+            _logger.LogWarning($"MarketplaceController|{sender}|Duration: {key}: {duration}ms.");
+        }
+
+        /// <summary>
+        /// Check if we should filter by type
+        /// Check if the type is selected - inspect the types list
+        /// check if the user entered a value that is a reserved keyword that makes the type selected. 
+        /// </summary>
+        /// <param name="types"></param>
+        /// <param name="keywordTypes"></param>
+        /// <returns></returns>
+        private bool IsTypeIncluded(string typeCode, List<LookupItemFilterModel> types, List<LookupItemFilterModel> keywordTypes)
+        {
+            //nothing is selected meaning everything is selected
+            if (!types.Any(x => x.Selected) && !keywordTypes.Any(x => x.Selected)) return true;
+            //of the selected types, the typeId passed in is a selected type
+            if (types.Any(x => x.Selected && x.Code.ToLower().Equals(typeCode.ToLower()))) return true;
+            //of the selected keywords, the typeId passed in is a selected type
+            if (keywordTypes.Any(x => x.Selected && x.Code.ToLower().Equals(typeCode.ToLower()))) return true;
+            //if we get here, false
+            return false;
         }
 
         /// <summary>
@@ -632,7 +618,7 @@ namespace CESMII.Marketplace.Api.Controllers
             if (enumVal == LookupTypeEnum.Publisher)
             {
                 return _dalPublisher.Where(x =>
-                                x.IsActive
+                                x.IsActive && x.AllowFilterBy
                                 && (x.Name.ToLower().Contains(query)
                                 || x.DisplayName.ToLower().Contains(query))
                                 , null, null, false, false).Data
@@ -694,7 +680,9 @@ namespace CESMII.Marketplace.Api.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private async Task<DALResult<MarketplaceItemModel>> AdvancedSearchMarketplace([FromBody] MarketplaceSearchModel model
+        private async Task<DALResultWithSource<MarketplaceItemModel>> AdvancedSearchMarketplace(
+            MarketplaceSearchModel model
+            , SearchCursor cursor
             , List<LookupItemFilterModel> types
             , List<LookupItemFilterModel> keywordTypes
             , List<LookupItemFilterModel> cats
@@ -702,9 +690,8 @@ namespace CESMII.Marketplace.Api.Controllers
             , List<LookupItemFilterModel> pubs
             , bool liveOnly = true)
         {
-            _logger.LogInformation($"MarketplaceController|AdvancedSearchMarketplace|Starting...");
+            _logger.LogWarning($"MarketplaceController|AdvancedSearchMarketplace|Starting...");
             var timer = Stopwatch.StartNew();
-            var util = new MarketplaceUtil(_dal, _dalCloudLib, _dalAnalytics, _dalLookup);
 
             //lowercase model.query
             model.Query = string.IsNullOrEmpty(model.Query) ? model.Query : model.Query.ToLower();
@@ -725,6 +712,7 @@ namespace CESMII.Marketplace.Api.Controllers
             //limit to publish status of live
             if (liveOnly)
             {
+                var util = new MarketplaceUtil(_dalLookup);
                 var statuses = new List<string>() { "live" };
                 //if user is an admin, let them also see items listed as 'admin only' status
                 if (User.IsInRole("cesmii.marketplace.marketplaceadmin"))
@@ -803,71 +791,24 @@ namespace CESMII.Marketplace.Api.Controllers
             _logger.LogTrace($"MarketplaceController|AdvancedSearchMarketplace|calling DAL...");
             var result = await Task.Run(() =>
             {
-                var cursors = ParseCursor(model.PageCursors);
-                bool haveTotalCount = cursors?.TotalItemCount > 0;
-
-                var startOffset = cursors?.CurrentCursor?.MarketPlaceOffset;
-                int? skip;
-                int take;
-                if (startOffset == null)
-                {
-                    skip = null;
-                    take = model.Skip + model.Take;
-                }
-                else
-                {
-                    take = model.Take;
-                    skip = startOffset.Value;
-                    if (skip < 0)
-                    {
-                        take += skip.Value;
-                        skip = 0;
-                    }
-                }
-                return predicates.Count == 0 && skip == null
-                    ? _dal.GetAllPaged(null, null, !haveTotalCount, false)
-                    : _dal.Where(predicates, skip, take, !haveTotalCount, false,
+                //retrun from task.run
+                var res = predicates.Count == 0 && cursor.Skip == 0
+                    ? _dal.GetAllPaged(null, null, !cursor.HasTotalCount, false)
+                    : _dal.Where(predicates, cursor.Skip, cursor.Take, !cursor.HasTotalCount, false,
                             new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
                             new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName });
+
+                AdvancedSearchLogDurationTime("Duration", timer.ElapsedMilliseconds, sender: "AdvancedSearchMarketplace");
+                cursor.TotalCount = (int)res.Count;
+                return new DALResultWithSource<MarketplaceItemModel>()
+                {
+                    Data = res.Data,
+                    Count = res.Count,
+                    SummaryData = res.SummaryData,
+                    SourceId = null,
+                    Cursor = cursor
+                };
             });
-
-            // Special handling for processes, industry verticals, and publishers. If the search box contains a
-            // term in one of these three categories, the corresponding market items are added to the list of
-            // items to include. 
-
-            // We do it as a separate query because the initial marketplace query already has an abundance of logic and 
-            // and complexity and it was not working to add in additional logic.
-
-            // First -- run the searches.
-            /*
-            var matchesProcesses = Task.Run(() =>
-            {
-                return PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Process, liveOnly ? util.BuildStatusFilterPredicate() : null);
-            });
-            var matchesVerts = Task.Run(() =>
-            {
-                return PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.IndustryVertical, liveOnly ? util.BuildStatusFilterPredicate() : null);
-            });
-
-            var matchesPublishers = Task.Run(() =>
-            {
-                return PrepareAdvancedSearchFiltersSelections(model, LookupTypeEnum.Publisher, liveOnly ? util.BuildStatusFilterPredicate() : null);
-            });
-
-
-            // Second - grab the results.
-            var itemsProcesses = await matchesProcesses;
-            var itemsVerts = await matchesVerts; 
-            var itemsPublishers = await matchesPublishers;
-
-            // Third - Join the results together.
-            //if (itemsProcesses.Any()) result.Data = result.Data.UnionBy(itemsProcesses, x=> x.ID).ToList();
-            //if (itemsVerts.Any()) result.Data = result.Data.UnionBy(itemsVerts, x => x.ID).ToList();
-            //if (itemsPublishers.Any()) result.Data = result.Data.UnionBy(itemsPublishers, x => x.ID).ToList();
-            */
-            //result.Count = result.Data.Count;
-
-            _logger.LogWarning($"MarketplaceController|AdvancedSearchMarketplace|Duration: { timer.ElapsedMilliseconds}ms.");
             return result;
         }
 
@@ -877,11 +818,14 @@ namespace CESMII.Marketplace.Api.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private async Task<DALResult<MarketplaceItemModelWithCursor>> AdvancedSearchCloudLib([FromBody] MarketplaceSearchModel model
-            , List<LookupItemFilterModel> keywordTypes
-            , List<LookupItemFilterModel> cats
-            , List<LookupItemFilterModel> verts
-            , List<LookupItemFilterModel> pubs
+        private async Task<DALResultWithSource<MarketplaceItemModel>> AdvancedSearchCloudLib(
+            MarketplaceSearchModel model,
+            ExternalSourceModel src,
+            SearchCursor nextCursor,
+            List<LookupItemFilterModel> cats,
+            List<LookupItemFilterModel> verts,
+            List<LookupItemFilterModel> keywordTypes,
+            List<LookupItemFilterModel> pubs
             )
         {
             _logger.LogInformation($"MarketplaceController|AdvancedSearchCloudLib|Starting...");
@@ -898,41 +842,18 @@ namespace CESMII.Marketplace.Api.Controllers
                 query = "";
             }
 
-
-            var result = new DALResult<MarketplaceItemModelWithCursor>();
+            var result = new DALResultWithSource<MarketplaceItemModel>();
             //if publishers is a filter, then we skip CloudLib for now because search is trying to only show 
             //items for that publisher. In future, remove this once we store our own metadata. 
             //only search CloudLib if no publisher filter
             if (pubs.Count == 0)
             {
-                int skip;
-                int take;
-                var startCursor = ParseCursor(model.PageCursors);
-                if (startCursor == null)
-                {
-                    // Fall back to getting everything
-                    // Because we are merging multiple sources and don't preserve individual cursors for each source, we have to always start from the beginning
-                    skip = 0;
-                    take = model.Skip + model.Take;
-                }
-                else
-                {
-                    // Start from cursor, no need to skip
-                    skip = 0;
-                    take = model.Take;
-                }
                 //NEW: now search CloudLib.
                 _logger.LogTrace($"MarketplaceController|AdvancedSearchCloudLib|calling DAL...");
-                result = await _dalCloudLib.Where(query: query,
-                    skip: skip,
-                    take: take,
-                    startCursor: startCursor?.CurrentCursor?.CloudLibCursor,
-                    endCursor: null,
-                    noTotalCount: startCursor?.TotalItemCount > 0, // Don't need to request total item count again, improves performance
-                    ids: null,
+                var dalSource = await _sourceFactory.InitializeSource(src);
+                result = await dalSource.Where(model.Query, nextCursor, 
                     processes: cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
-                    verticals: verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList(),
-                    exclude: _configUtil.CloudLibSettings?.ExcludedNodeSets);
+                    verticals: verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList());
 
                 //check to see if the CloudLib returned data. 
                 if (cats.Count == 0 && verts.Count == 0 && string.IsNullOrEmpty(query)
@@ -942,242 +863,127 @@ namespace CESMII.Marketplace.Api.Controllers
                 }
             }
 
-            _logger.LogInformation($"MarketplaceController|AdvancedSearchCloudLib|Duration: {timer.ElapsedMilliseconds}ms.");
+            AdvancedSearchLogDurationTime("Duration", timer.ElapsedMilliseconds, sender: "AdvancedSearchCloudLib");
             return result;
+        }
+
+        private async Task<DALResultWithSource<MarketplaceItemModel>> AdvancedSearchExternal(
+            MarketplaceSearchModel model,
+            ExternalSourceModel src,
+            SearchCursor nextCursor, 
+            List<LookupItemFilterModel> cats, 
+            List<LookupItemFilterModel> verts
+            )
+        {
+            try
+            {
+                //now perform the search(es)
+                var dalSource = await _sourceFactory.InitializeSource(src);
+                return await dalSource.Where(model.Query, nextCursor,
+                    processes: cats.Count == 0 ? null : cats.Select(x => x.Name.ToLower()).ToList(),
+                    verticals: verts.Count == 0 ? null : verts.Select(x => x.Name.ToLower()).ToList());
+            }
+            catch (ExternalSourceInitException ex)
+            {
+                //skipping this external source - this will happen if external source factory cannot find the type noted in the external source model.
+                //the factory will log the issue, don't cause the other searches to fail due to bad configuration
+                //of a source. 
+                _logger.LogWarning(ex, $"MarketplaceController|AdvancedSearchExternal|Skipping external source '{src.Name}' - improper configuration: {src.TypeName}");
+                return new DALResultWithSource<MarketplaceItemModel>()
+                { Count = 0, Cursor = nextCursor, Data = new List<MarketplaceItemModel>(), SourceId = src.ID };
+            }
         }
 
 
         /// <summary>
-        /// Because we are unifying two sources of information from separate sources, we need to wait on paging 
+        /// Because we are unifying multiple sources of information from separate sources, we need to wait on paging 
         /// and do not do this at the DB level. We have to get the filtered set of info and then apply a sort 
         /// and then the page. 
         /// </summary>
-        /// <param name="set1"></param>
-        /// <param name="set2"></param>
         /// <param name="model"></param>
         /// <returns></returns>
-        private static DALResult<MarketplaceItemModel> MergeSortPageSearchedItems(DALResult<MarketplaceItemModel> set1, DALResult<MarketplaceItemModelWithCursor> set2,
-            MarketplaceSearchModel adjustedModel, MarketplaceSearchModel originalModel, int mergeSkip)
+        private static DALResultWithCursors<MarketplaceItemModel> MergeSortPageSearchedItems(
+            MarketplaceSearchModel model, 
+            List<DALResultWithSource<MarketplaceItemModel>> sets)
         {
-            //add protection for null data set possibility
-            if (set1.Data == null) set1.Data = new List<MarketplaceItemModel>();
-            if (set2.Data == null) set2.Data = new List<MarketplaceItemModelWithCursor>();
+            var pageIndex = model.Skip / model.Take;
 
-            //get count before paging
-            var totalCount = set1.Count + set2.Count;
-            //sort 2nd set but always put it after the regular marketplace items.  
-            //set2 = set2.OrderByDescending(x => x.IsFeatured).ThenBy(x => x.DisplayName).ToList();
-            //combine the data, get the total count
+            //if current cursors is null or skip == 0, start fresh
+            //if current cursors not null and skip != null, then we assume we are paging and we need previous cursor
+            //  to inform next cursor
 
-            // Assume both inputs are ordered: merge while preserving order
-
-            string firstCloudLibCursor;
-            string lastCloudLibCursor;
-            int firstMarketPlaceOffset;
-            int lastMarketPlaceOffset;
-            List<MarketplaceItemModel> combined;
-            //Cursor endCursor = null;
-            var startCursor = ParseCursor(adjustedModel.PageCursors);
-            if (startCursor?.TotalItemCount > 0)
+            //union results into one set, order set and then find min/max of each source type.
+            List<MarketplaceItemModel> resultData = new List<MarketplaceItemModel>();
+            foreach (var item in sets)
             {
-                totalCount = startCursor.TotalItemCount;
+                if (item.Data != null) resultData = resultData.Union(item.Data).ToList();
             }
-            //if (adjustedModel.EndCursor == null || (endCursor = ParseCursor(adjustedModel.EndCursor)) == null)
-            {
-                int i1 = 0, i2 = 0;
-                firstCloudLibCursor = startCursor?.CurrentCursor?.CloudLibCursor;
-                lastCloudLibCursor = firstCloudLibCursor;
-                firstMarketPlaceOffset = startCursor?.CurrentCursor?.MarketPlaceOffset ?? 0;
-                lastMarketPlaceOffset = firstMarketPlaceOffset;
-                int toSkip = mergeSkip; // model.Skip; // startCursor == null ? model.Skip : 0; // With cursor we already have the right starting point
-                combined = new List<MarketplaceItemModel>();
-                bool bCloudLibAdded = false;
-                int processed = 0;
+            //now order, then filter
+            //new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
+            //new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName });
+            var result = new DALResultWithCursors<MarketplaceItemModel>() { 
+                Count = sets.Sum(x => x.Count),
+                //for now, order by display name rather than featured/display name
+                Data = resultData
+                    //.OrderByDescending(x => x.IsFeatured)
+                    //.ThenBy(x => x.DisplayName)
+                    .OrderBy(x => x.DisplayName)
+                    .Skip(model.Skip)
+                    .Take(model.Take).ToList(),
+                CachedCursors = model.CachedCursors == null ? new List<SourceSearchCursor>() : model.CachedCursors
+            };
 
-                while ((i1 < set1.Data.Count || i2 < set2.Data.Count)
-                         && combined.Count < originalModel.Take)
+            //now revise cursors for each source based on this filtering
+            foreach (var item in sets)
+            {
+                //some external sources use cursor, others will use skip/take approach
+                //find first and last item for each set and record the index or cursor
+                var first = string.IsNullOrEmpty(item.SourceId) ?
+                    result.Data.Find(x => string.IsNullOrEmpty(x.ExternalSource?.SourceId)) :
+                    result.Data.Find(x => !string.IsNullOrEmpty(x.ExternalSource?.SourceId) && x.ExternalSource?.SourceId == item.SourceId);
+                var last = string.IsNullOrEmpty(item.SourceId) ?
+                    result.Data.FindLast(x => string.IsNullOrEmpty(x.ExternalSource?.SourceId)) :
+                    result.Data.FindLast(x => !string.IsNullOrEmpty(x.ExternalSource?.SourceId) && x.ExternalSource?.SourceId == item.SourceId);
+
+                //update the cursor boundaries to reflect the cursor post-merge
+                item.Cursor.StartCursor = first == null ? null : first.Cursor;
+                item.Cursor.Skip = first == null ? 0 : resultData.IndexOf(first);
+                item.Cursor.EndCursor = last == null ? null : last.Cursor;
+                item.Cursor.Take = last == null ? 0 :
+                    resultData.IndexOf(last) - item.Cursor.Skip;
+                item.Cursor.PageIndex = pageIndex;
+
+                //either update an existing cursor or add a new one
+                var cursorMatch = result.CachedCursors.Find(x => x.SourceId == item.SourceId); //source id can be null
+                if (cursorMatch == null)
                 {
-                    if (i2 >= set2.Data?.Count || (i1 < set1.Data.Count && Compare(set1.Data[i1], set2.Data[i2]) <= 0))
+                    cursorMatch = new SourceSearchCursor()
                     {
-                        if (toSkip <= 0)
-                        {
-                            combined.Add(set1.Data[i1]);
-                        }
-                        else
-                        {
-                            firstMarketPlaceOffset++;
-                        }
-                        lastMarketPlaceOffset++;
-                        i1++;
+                        SourceId = item.SourceId,
+                        Cursors = new List<SearchCursor>() { item.Cursor },
+                    };
+                    result.CachedCursors.Add(cursorMatch);
+                }
+                else
+                {
+                    //now find the cursor in the list of the cursors for this source
+                    // and append/update this cursor
+                    var cachedMatch = cursorMatch.Cursors.Find(x => x.PageIndex == pageIndex);
+                    if (cachedMatch != null)
+                    {
+                        cachedMatch.StartCursor = item.Cursor.StartCursor;
+                        cachedMatch.Skip = item.Cursor.Skip;
+                        cachedMatch.EndCursor = item.Cursor.EndCursor;
+                        cachedMatch.Take = item.Cursor.Take;
                     }
                     else
                     {
-                        if (toSkip <= 0)
-                        {
-                            combined.Add(set2.Data[i2]);
-                            lastCloudLibCursor = set2.Data[i2].Cursor;
-                            if (!bCloudLibAdded)
-                            {
-                                firstCloudLibCursor = lastCloudLibCursor;
-                                bCloudLibAdded = true;
-                            }
-                        }
-                        else
-                        {
-                            firstCloudLibCursor = set2.Data[i2].Cursor;
-                        }
-                        i2++;
+                        cursorMatch.Cursors.Add(item.Cursor);
                     }
-                    toSkip--;
-                    if (processed % originalModel.Take == originalModel.Take - 1)
-                    {
-                        // we've reached the end of a page boundary: remember the cursor and offsets for the NEXT page
-                        if (startCursor == null)
-                        {
-                            startCursor = new Cursor { OtherCursors = new List<CursorEntry>() };
-                        }
-                        var offset = adjustedModel.Skip + /*originalModel.Skip - mergeSkip + */processed + 1;
-                        if (startCursor.OtherCursors == null)
-                        {
-                            startCursor.OtherCursors = new List<CursorEntry>();
-                        }
-                        if (!startCursor.OtherCursors.Any(c => c.Offset == offset))
-                        {
-                            startCursor.OtherCursors.Add(new CursorEntry { Offset = offset, MarketPlaceOffset = lastMarketPlaceOffset, CloudLibCursor = bCloudLibAdded ? lastCloudLibCursor : firstCloudLibCursor });
-                        }
-                    }
-                    processed++;
-                };
-            }
-            //else
-            //{
-            //    // merge from the end, assuming we fetched the previous <Take> items from marketplace
-            //    int i1 = (int)set1.Data.Count - 1;
-            //    int i2 = (int)set2.Data.Count - 1;
-            //    lastCloudLibCursor = i2 >= 0 ? set2.Data[i2].Cursor : endCursor.CurrentCursor.CloudLibCursor;
-            //    firstCloudLibCursor = lastCloudLibCursor;
-            //    lastMarketPlaceOffset = endCursor.CurrentCursor.MarketPlaceOffset;
-            //    firstMarketPlaceOffset = lastMarketPlaceOffset;
-
-            //    combined = new List<MarketplaceItemModel>();
-            //    while ((i1 >= 0 || i2 >= 0)
-            //            && combined.Count < originalModel.Take)
-            //    {
-            //        if (i2 < 0 || (i1 >= 0 && Compare(set1.Data[i1], set2.Data[i2]) >= 0))
-            //        {
-            //            combined.Insert(0, set1.Data[i1]);
-            //            firstMarketPlaceOffset--;
-            //            i1--;
-            //        }
-            //        else
-            //        {
-            //            combined.Insert(0, set2.Data[i2]);
-            //            firstCloudLibCursor = set2.Data[i2].Cursor;
-            //            i2--;
-            //        }
-            //    };
-            //}
-
-            var cursor = GetCursors(originalModel.Skip, combined.Count, totalCount, firstMarketPlaceOffset, lastMarketPlaceOffset, firstCloudLibCursor, lastCloudLibCursor, startCursor);
-
-            return new DALResult<MarketplaceItemModel>()
-            {
-                Count = totalCount,
-                PageCursors = JsonConvert.SerializeObject(cursor),
-                Data = combined
-            };
-        }
-
-        public class CursorEntry
-        {
-            public int Offset { get; set; }
-            public int MarketPlaceOffset { get; set; }
-            public string CloudLibCursor { get; set; }
-            public override string ToString() => $"{Offset} {MarketPlaceOffset} {CloudLibCursor}";
-        }
-        public class Cursor
-        {
-            public CursorEntry CurrentCursor { get; set; }
-            public int TotalItemCount { get; set; }
-            public List<CursorEntry> OtherCursors { get; set; }
-
-            public CursorEntry GetBestCursorForOffset(int offset)
-            {
-                if (CurrentCursor.Offset == offset)
-                {
-                    return CurrentCursor;
                 }
-                var otherCursor = OtherCursors.Where(c => c.Offset <= offset).MaxBy(c => c.Offset);
-                return otherCursor;
             }
+            return result;
         }
-
-        private static Cursor GetCursors(int skip, int count, long totalCount, int firstMarketPlaceOffset, int lastMarketPlaceOffset, string firstCloudLibCursor, string lastCloudLibCursor, Cursor previousCursor)
-        {
-            var cursor = previousCursor ?? new Cursor();
-            if (cursor.OtherCursors == null)
-            {
-                cursor.OtherCursors = new List<CursorEntry>();
-            }
-            if (firstCloudLibCursor != lastCloudLibCursor && count > 0 && !cursor.OtherCursors.Any(c => c.Offset == skip + count))
-            {
-                cursor.OtherCursors.Add(new CursorEntry { Offset = skip + count, MarketPlaceOffset = lastMarketPlaceOffset, CloudLibCursor = lastCloudLibCursor });
-            }
-            if (cursor.CurrentCursor == null)
-            {
-                cursor.CurrentCursor = new CursorEntry();
-            }
-            cursor.CurrentCursor.Offset = skip;
-            cursor.CurrentCursor.MarketPlaceOffset = firstMarketPlaceOffset;
-            cursor.CurrentCursor.CloudLibCursor = firstCloudLibCursor;
-            cursor.TotalItemCount = (int)totalCount;
-            return cursor;
-        }
-
-        private static Cursor ParseCursor(string cursorString)
-        {
-            if (cursorString == null)
-            {
-                return null;
-            }
-            try
-            {
-                var cursor = Newtonsoft.Json.JsonConvert.DeserializeObject<Cursor>(cursorString);
-                return cursor;
-            }
-            catch (Exception)
-            {
-            }
-            return null;
-            //if (cursor == null)
-            //{
-            //    return null;
-            //}
-            //var parts = cursor.Split(';');
-            //if (parts.Length != 3 ||  !int.TryParse(cursor.Split(';')[1], out var marketPlaceOffset))
-            //{
-            //    throw new Exception($"Invalid cursor");
-            //}
-            //return marketPlaceOffset;
-        }
-        //private static string GetCloudLibCursorFromCombinedCursor(string cursor)
-        //{
-        //    string cloudLibCursor;
-        //    if (cursor == null)
-        //    {
-        //        cloudLibCursor = null;
-        //    }
-        //    else
-        //    {
-        //        var parts = cursor.Split(';');
-        //        if (parts.Length != 3 || parts[2] == null)
-        //        {
-        //            throw new Exception($"Invalid cursor");
-        //        }
-        //        cloudLibCursor = parts[2];
-        //    }
-        //    return cloudLibCursor;
-        //}
 
         private static int Compare(MarketplaceItemModel m1, MarketplaceItemModel m2)
         {

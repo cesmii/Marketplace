@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Net.Http;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -14,7 +15,6 @@ using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Common.SelfServiceSignUp.Services;
-
 
 namespace CESMII.Marketplace.JobManager.Jobs
 {
@@ -113,7 +113,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             var config = new HttpApiConfig()
             {
                 Url = configData.AuthorizeConfig.Url,
-                Body = JsonConvert.SerializeObject(configData.AuthorizeConfig.Body)
+                Body = new StringContent(JsonConvert.SerializeObject(configData.AuthorizeConfig.Body))
             };
 
             string responseRaw = await _httpFactory.Run(config);
@@ -174,7 +174,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             var config = new HttpApiConfig()
             {
                 Url = configData.CreateCustomerConfig.Url,
-                Body = JsonConvert.SerializeObject(configData.CreateCustomerConfig.Body),
+                Body = new StringContent(JsonConvert.SerializeObject(configData.CreateCustomerConfig.Body)),
                 //this requires an Authorization header with only the auth token as value
                 AuthToken = new KeyValuePair<string, string>("", token)
             };

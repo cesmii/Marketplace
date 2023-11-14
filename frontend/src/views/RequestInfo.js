@@ -25,7 +25,7 @@ function RequestInfo() {
 
     //can access this form for specific marketplace item (id) or for a specific publisher (publisherId)
     //TBD - update form to pull publisher info if coming from that angle.
-    const { id, publisherId, type, itemType } = useParams();
+    const { id, publisherId, type, itemType, code, externalId } = useParams();
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_item, setItem] = useState(JSON.parse(JSON.stringify(AppSettings.requestInfoNew)));
     const [_referrerItem, setReferrerItem] = useState(null);
@@ -38,13 +38,93 @@ function RequestInfo() {
         caption: 'Request Info', captionDescription: 'Message', requireCompanyInfo: true, showMembershipStatus: false, showIndustry: false
     });
     const [_forceReload, setForceReload] = useState(0); //increment this value to cause a re-init of the page.
+    const [_initialized, setInitialized] = useState(false);
+
+
+    function initRequestInfoItem() {
+
+        //only run once
+        if (_initialized) return _item;
+        setInitialized(true);
+
+        //init to blank object
+        var result = JSON.parse(JSON.stringify(AppSettings.requestInfoNew));
+
+        //itemType - either marketplace or sm profile
+        if (itemType === "app" && id != null) {
+            result.marketplaceItemId = id;
+            result.requestTypeCode = "marketplaceitem";
+            setFormDisplay({
+                ..._formDisplay, caption: 'Request More Info', captionDescription: 'Tell Us About Your Project(s)'
+                , showMembershipStatus: true, showIndustry: true
+            });
+        }
+        //else if (itemType === "profile" && id != null) {
+        //    item.requestTypeCode = "smprofile";
+        //    setFormDisplay({
+        //        ..._formDisplay, caption: 'Request More Info', captionDescription: 'Tell Us About Your Project(s)'
+        //        , showMembershipStatus: true, showIndustry: true
+        //    });
+        //}
+        else if (code != null && externalId != null) {
+            result.requestTypeCode = "external-source";
+            setFormDisplay({
+                ..._formDisplay, caption: 'Request More Info', captionDescription: 'Tell Us About Your Project(s)'
+                , showMembershipStatus: true, showIndustry: true
+            });
+        }
+        else if (publisherId != null) {
+            result.publisherId = publisherId;
+            result.requestTypeCode = "publisher";
+            setFormDisplay({
+                ..._formDisplay, caption: 'Request Info', captionDescription: 'Message'
+                , showMembershipStatus: true, showIndustry: true
+            });
+        }
+        else if (type != null && type === "contribute") {
+            result.requestTypeCode = "contribute";
+            setFormDisplay({
+                ..._formDisplay, caption: 'Contact Us - Become a Publisher', captionDescription: 'Tell Us About Your Project(s)'
+                , requireCompanyInfo: true, showMembershipStatus: true, showIndustry: true
+            });
+        }
+        else if (type != null && type === "membership") {
+            result.requestTypeCode = "membership";
+            setFormDisplay({
+                ..._formDisplay, caption: 'Contact Us - Become a CESMII Member'
+                , requireCompanyInfo: true, showMembershipStatus: true
+            });
+        }
+        else if (type != null && type === "request-demo") {
+            result.requestTypeCode = "request-demo";
+            setFormDisplay({
+                ..._formDisplay, caption: 'Contact Us - Request a Demo'
+                , requireCompanyInfo: true, showMembershipStatus: true, showIndustry: true
+            });
+        }
+        else if (type != null && type === "support") {
+            result.requestTypeCode = "support";
+            setFormDisplay({
+                ..._formDisplay, caption: 'Contact Us - Support'
+                , requireCompanyInfo: false
+            });
+        }
+        else {
+            result.requestTypeCode = "general";
+            setFormDisplay({
+                ..._formDisplay, caption: 'Contact Us'
+                , requireCompanyInfo: false, showMembershipStatus: true, showIndustry: true
+            });
+        }
+        return result;
+    }
 
     //-------------------------------------------------------------------
     // Region: Hooks
     //-------------------------------------------------------------------
     //get referrer item
     useEffect(() => {
-        async function fetchData() {
+        async function fetchData(itm) {
             console.log(generateLogMessageString('useEffect||fetchData||async', CLASS_NAME));
 
             //initialize spinner during loading
@@ -54,8 +134,6 @@ function RequestInfo() {
             try {
                 var data = { id: id != null ? id : publisherId };
                 var url = id != null ? `marketplace/getbyid` : `publisher/getbyid`;
-                //if profile item, override url
-                if (itemType != null && itemType === 'profile' && id != null) url = `profile/getbyid`;
                 result = await axiosInstance.post(url, data);
                // console.log("Log result ",result);
             }
@@ -86,13 +164,20 @@ function RequestInfo() {
             //if (itemType === "profile") {
             //    setItem({ ..._item, smProfile: { id: result.data.id, namespace: result.data.namespace } });
             //}
+            //set some data based on this flow
+            itm.externalSource = itemType === 'profile' ? result.data.externalSource : null;
+            //set the state of the item which is a combo of this and the init request info call earlier
+            setItem(itm);
 
             setLoadingProps({ isLoading: false, message: null });
         }
 
-        //fetch referrer data 
+        //init the item object
+
+        //fetch referrer data
         if (id != null || publisherId != null) {
-            fetchData();
+            var itm = initRequestInfoItem();
+            fetchData(itm);
         }
 
         //this will execute on unmount
@@ -101,6 +186,62 @@ function RequestInfo() {
         };
     }, [id, publisherId]);
 
+
+    //EXTERNAL SOURCE SCENARIO - get referrer item
+    useEffect(() => {
+        async function fetchData(itm) {
+            console.log(generateLogMessageString('useEffect||fetchData||externalSource||async', CLASS_NAME));
+            //initialize spinner during loading
+            setLoadingProps({ isLoading: true, message: null });
+
+            var result = null;
+            try {
+                const data = { id: externalId, code: code };
+                const url = `externalsource/getbyid`;
+                result = await axiosInstance.post(url, data);
+            }
+            catch (err) {
+                var msg = 'An error occurred retrieving this external source item.';
+                console.log(generateLogMessageString('useEffect||fetchData||error', CLASS_NAME, 'error'));
+                //console.log(err.response.status);
+                if (err != null && err.response != null && err.response.status === 404) {
+                    msg += ' This external source item was not found.';
+                    history.push('/404');
+                }
+                setLoadingProps({
+                    isLoading: false, message: null, inlineMessages: [
+                        { id: new Date().getTime(), severity: "danger", body: msg, isTimed: false }]
+                });
+            }
+
+            if (result == null) return;
+
+            //convert collection to comma separated list
+            //special handling of meta tags which shows as a concatenated list in an input box
+            result.data.metaTagsConcatenated = result.data == null || result.data.metaTags == null ? "" : result.data.metaTags.join(', ');
+            //set item state value
+            setReferrerItem(result.data);
+            //init to blank object and init some settings based on this flow
+            //set some data based on this flow
+            itm.externalSource = result.data.externalSource;
+            //itm.requestTypeCode = "external-source";
+            //set the state of the item which is a combo of this and the init request info call earlier
+            setItem(itm);
+
+            setLoadingProps({ isLoading: false, message: null });
+        }
+
+        //fetch referrer data 
+        //only if the path includes sourceCode and externalId
+        if (code != null && externalId != null) {
+            var itm = initRequestInfoItem();
+            fetchData(itm);
+        }
+
+        //this will execute on unmount
+        return () => {
+        };
+    }, [code, externalId]);
 
     //-------------------------------------------------------------------
     // Trigger get lookup data from server (if necessary)
@@ -113,84 +254,22 @@ function RequestInfo() {
     }, [loadingProps.lookupDataStatic]);
 
     //-------------------------------------------------------------------
-    // Set caption, request type
+    // Set caption, show/hide fields
     //-------------------------------------------------------------------
     useEffect(() => {
 
-        //init to blank object
-        var item = JSON.parse(JSON.stringify(AppSettings.requestInfoNew));
-
-        //itemType - either marketplace or sm profile
-        if (itemType === "app" && id != null) {
-            item.marketplaceItemId = id;
-            item.requestTypeCode = "marketplaceitem";
-            setFormDisplay({
-                ..._formDisplay, caption: 'Request More Info', captionDescription: 'Tell Us About Your Project(s)'
-                , showMembershipStatus: true, showIndustry: true
-            });
+        //only run once
+        if (!_initialized) {
+            var itm = initRequestInfoItem();
+            //update state
+            setItem(itm);
         }
-        else if (itemType === "profile" && id != null) {
-            item.smProfileId = id;
-            item.requestTypeCode = "smprofile";
-            setFormDisplay({
-                ..._formDisplay, caption: 'Request More Info', captionDescription: 'Tell Us About Your Project(s)'
-                , showMembershipStatus: true, showIndustry: true
-            });
-        }
-        else if (publisherId != null)
-        {
-            item.publisherId = publisherId; 
-            item.requestTypeCode = "publisher";
-            setFormDisplay({
-                ..._formDisplay, caption: 'Request Info', captionDescription: 'Message'
-                , showMembershipStatus: true, showIndustry: true
-            });
-        }
-        else if (type != null && type === "contribute")
-        {
-            item.requestTypeCode = "contribute";
-            setFormDisplay({
-                ..._formDisplay, caption: 'Contact Us - Become a Publisher', captionDescription: 'Tell Us About Your Project(s)'
-                , requireCompanyInfo: true, showMembershipStatus: true, showIndustry: true
-            });
-        }
-        else if (type != null && type === "membership") {
-            item.requestTypeCode = "membership";
-            setFormDisplay({
-                ..._formDisplay, caption: 'Contact Us - Become a CESMII Member'
-                , requireCompanyInfo: true, showMembershipStatus: true
-            });
-        }
-        else if (type != null && type === "request-demo") {
-            item.requestTypeCode = "request-demo";
-            setFormDisplay({
-                ..._formDisplay, caption: 'Contact Us - Request a Demo'
-                , requireCompanyInfo: true, showMembershipStatus: true, showIndustry: true
-            });
-        }
-        else if (type != null && type === "support") {
-            item.requestTypeCode= "support";
-            setFormDisplay({
-                ..._formDisplay, caption: 'Contact Us - Support'
-                , requireCompanyInfo: false
-            });
-        }
-        else {
-            item.requestTypeCode = "general";
-            setFormDisplay({
-                ..._formDisplay, caption: 'Contact Us'
-                , requireCompanyInfo: false, showMembershipStatus: true, showIndustry: true
-            });
-        }
-
-        //update state
-        setItem(item);
 
         //this will execute on unmount
         return () => {
             console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
         };
-    }, [id, publisherId, type, itemType, _forceReload]);
+    }, [type, itemType, _forceReload]);
 
 
     //-------------------------------------------------------------------
@@ -380,7 +459,7 @@ function RequestInfo() {
         return (
             <div className="info-panel d-none d-sm-block">
                 <div className="info-section py-3 px-1 rounded">
-                    {id != null &&
+                    {(id != null || (code != null && externalId != null)) &&
                         renderSolutionDetails()
                     }
                     {publisherId != null &&

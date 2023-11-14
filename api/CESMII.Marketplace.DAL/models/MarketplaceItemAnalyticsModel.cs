@@ -12,9 +12,9 @@
     {
         public string MarketplaceItemId { get; set; }
         /// <summary>
-        /// Id of SM Profile from CloudLib
+        /// Refers to an external item associated with this request info item
         /// </summary>
-        public string CloudLibId { get; set; }
+        public ExternalSourceSimple ExternalSource { get; set; }
         public string Url { get; set; }
         public int PageVisitCount { get; set; }
         public int SearchResultCount { get; set; }
@@ -24,5 +24,6 @@
         public int ShareCount { get; set; }
 
         public int DownloadCount { get; set; }
+
     }
 }

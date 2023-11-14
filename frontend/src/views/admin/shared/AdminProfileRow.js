@@ -36,6 +36,9 @@ function AdminProfileRow(props) { //props are item, showActions
                     <th className="py-2 d-none d-sm-table-cell align-text-top" >
                         Namespace / Version / Publish Date
                     </th>
+                    <th className="py-2" >
+                        Source
+                    </th>
                     <th className="py-2 pr-2 text-right" >
                         Remove Relationships
                     </th>
@@ -51,12 +54,12 @@ function AdminProfileRow(props) { //props are item, showActions
         <>
             <tr className={`mx-0 my-1 p-0 py-1 ${cssClass}`}>
                 <td className="py-2 pl-2" >
-                    <a className="btn btn-icon-outline circle mr-2" href={`/admin/profile/${props.item.id}`} ><i className="material-icons">edit</i></a>
+                    <a className="btn btn-icon-outline circle mr-2" href={`/admin/relateditem/${props.item.externalSource.code}/${props.item.id}`} ><i className="material-icons">edit</i></a>
                 </td>
                 <td className="py-2 align-text-top" >
                     {props.item.displayName}
                     <br/>
-                    <a href={`/profile/${props.item.name}`} >View in Library</a>
+                    <a href={`/profile/${props.item.externalSource.code}/${props.item.name}`} >View in Library</a>
                 </td>
                 <td className="py-2 d-none d-sm-table-cell align-text-top" >
                     {props.item.namespace}
@@ -72,6 +75,9 @@ function AdminProfileRow(props) { //props are item, showActions
                         Publish Date: {formatItemPublishDate(props.item)}
                         </>
                     }
+                </td>
+                <td className="py-2" >
+                    {props.item.externalSource.code}
                 </td>
                 <td className="py-2 pr-2 text-right" >
                     <button className="btn btn-icon-outline circle ml-auto" title="Remove Related Items & Profiles" onClick={onDeleteItem} ><i className="material-icons">close</i></button>

@@ -27,6 +27,11 @@ namespace CESMII.Marketplace.Data.Entities
 
         public bool Verified { get; set; }
 
+        /// <summary>
+        /// Some publishers may not want to have all of their data searched by publisher. This flag prevents that.
+        /// </summary>
+        public bool AllowFilterBy { get; set; } = true;
+
         public string Description { get; set; }
 
         public string CompanyUrl { get; set; }

@@ -336,15 +336,19 @@ function MarketplaceList() {
     // Region: Render helpers
     //-------------------------------------------------------------------
     const renderHeaderRow = () => {
+        //adjust the search input width based on the number of sm types
+        const headerSearchColCss = _criteria?.itemTypes == null || _criteria.itemTypes.length <= 4 ? 'col-md-4' :
+            _criteria.itemTypes.length <= 7 ? 'col-md-10 col-xl-3' : 'col-md-10';
+
         return (
-            <div className="row py-2 pb-4">
-                <div className="col-sm-3 mb-2 mb-sm-0">
-                    {renderTitleBlock("Library", null, null)}
+            <div className="row py-2 pb-4 no-gutters">
+                <div className="col-md-auto">
+                    <h1 className="d-block d-sm-flex mt-2 mr-0 mr-sm-3 mb-2 mb-sm-0">{caption}</h1>
                 </div>
-                <div className="col-lg-4">
-                    <HeaderSearch filterVal={_criteria == null ? null : _criteria.query} onSearch={handleOnSearchChange} onSearchBlur={handleOnSearchBlur} searchMode="standard" />
+                <div className={headerSearchColCss} >
+                    <HeaderSearch filterVal={_criteria == null ? null : _criteria.query} onSearch={handleOnSearchChange} onSearchBlur={handleOnSearchBlur} searchMode="standard" className='mw300' />
                 </div>
-                <div className="col-lg-5 pl-0">
+                <div className="col-md-auto">
                     <MarketplaceItemTypeFilter onSearchCriteriaChanged={onTypeSelectionChange} searchCriteria={_criteria} />
                 </div>
             </div>

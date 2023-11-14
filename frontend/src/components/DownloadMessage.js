@@ -24,21 +24,21 @@ function DownloadMessage() {
             const x = loadingProps.downloadItems.findIndex(msg => { return msg.id.toString() === item.id.toString(); });
             //no item found
             if (x < 0) {
-                console.warn(generateLogMessageString(`downloadProfile||no item found with this id: ${item.id}`, CLASS_NAME));
+                console.warn(generateLogMessageString(`downloadItem||no item found with this id: ${item.id}`, CLASS_NAME));
                 return;
             }
             loadingProps.downloadItems[x] = JSON.parse(JSON.stringify(item));
             setLoadingProps({ downloadItems: JSON.parse(JSON.stringify(loadingProps.downloadItems)), downloadNodesetUid: item.uid });
         }
 
-        async function downloadProfile(item) {
-            const url = `profile/export`;
-            console.log(generateLogMessageString(`downloadProfile||${url}`));
+        async function downloadItem(item) {
+            const url = `externalsource/export`;
+            console.log(generateLogMessageString(`downloadItem||${url}`));
 
             //var data = { id: item.profileId };
             const data = item.requestInfo;
             await axiosInstance.post(url, data).then(async result => {
-                console.log(generateLogMessageString(`downloadProfile||${result.data.isSuccess ? 'success' : 'fail'}`));
+                console.log(generateLogMessageString(`downloadItem||${result.data.isSuccess ? 'success' : 'fail'}`));
                 if (result.status === 200 && result.data.isSuccess) {
                     //check for success message OR check if some validation failed
 
@@ -77,7 +77,7 @@ function DownloadMessage() {
                         warnings: null,
                         caption: null
                     };
-                    console.log(generateLogMessageString('downloadProfile||error||' + result.data.message, CLASS_NAME, 'error'));
+                    console.log(generateLogMessageString('downloadItem||error||' + result.data.message, CLASS_NAME, 'error'));
                 }
 
                 //update state
@@ -85,7 +85,7 @@ function DownloadMessage() {
                 //var x = loadingProps.downloadItems.findIndex(msg => { return msg.id.toString() === item.id.toString(); });
                 ////no item found
                 //if (x < 0) {
-                //    console.warn(generateLogMessageString(`downloadProfile||no item found to dismiss with this id: ${item.id}`, CLASS_NAME));
+                //    console.warn(generateLogMessageString(`downloadItem||no item found to dismiss with this id: ${item.id}`, CLASS_NAME));
                 //    return;
                 //}
                 //loadingProps.downloadItems[x] = JSON.parse(JSON.stringify(item));
@@ -102,11 +102,11 @@ function DownloadMessage() {
                     caption: '',
                     warnings: null
                 };
-                console.error(generateLogMessageString('downloadProfile||error||' + JSON.stringify(e), CLASS_NAME, 'error'));
+                console.error(generateLogMessageString('downloadItem||error||' + JSON.stringify(e), CLASS_NAME, 'error'));
                 //update state
                 updateMessageItemState(item);
             })
-        } //end downloadProfile
+        } //end downloadItem
 
         //-------------------------------------------------------------------------------
         //kick off download - if any messages are in the queue that are not started
@@ -130,7 +130,7 @@ function DownloadMessage() {
 
                 //now loop over items tagged as not started (after we set state) and kick off export for each
                 itemsNotStarted.forEach((item) => {
-                    downloadProfile(item);
+                    downloadItem(item);
                 });
             }
         }
