@@ -138,7 +138,7 @@ function ImageUploader(props) {
     var caption = props.caption == null ? "Upload Image" : props.caption;
 
     return (
-        <div className="ml-auto">
+        <div className="ms-auto">
             <label className={buttonCss} >
                 {caption}
                 {props.imageId == null ?

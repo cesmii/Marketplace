@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react'
-import { useHistory, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 import axiosInstance from "../services/AxiosService";
 import ReactGA from 'react-ga4';
@@ -33,7 +33,8 @@ function MarketplaceList() {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const history = useHistory();
+    const navigate = useNavigate();
+    const location = useLocation();
     const { search } = useLocation();
     const searchParams = useMemo(() => new URLSearchParams(search), [search]);
 
@@ -172,7 +173,7 @@ function MarketplaceList() {
                 setLoadingProps({ isLoading: false, message: null });
 
                 //add to recently visited page list
-                var revisedList = UpdateRecentFileList(loadingProps.recentFileList, { url: history.location.pathname, caption: caption, iconName: "folder-setMarketplacePageSize" });
+                var revisedList = UpdateRecentFileList(loadingProps.recentFileList, { url: location.pathname, caption: caption, iconName: "folder-setMarketplacePageSize" });
                 setLoadingProps({ recentFileList: revisedList });
             } else {
                 setLoadingProps({
@@ -308,8 +309,8 @@ function MarketplaceList() {
             pathname: '/library',
             search: `?${generateSearchQueryString(_criteria, _currentPage)}`
         };
-        if (history.location.pathname !== newLocation.pathname || history.location.search != newLocation.search) {
-            history.push(newLocation);
+        if (location.pathname !== newLocation.pathname || location.search != newLocation.search) {
+            navigate(newLocation);
         }
     }, [_criteria]);
     //}, [_criteria, _currentPage]);
@@ -343,7 +344,7 @@ function MarketplaceList() {
         return (
             <div className="row py-2 pb-4 no-gutters">
                 <div className="col-md-auto">
-                    <h1 className="d-block d-sm-flex mt-2 mr-0 mr-sm-3 mb-2 mb-sm-0">{caption}</h1>
+                    <h1 className="d-block d-sm-flex mt-2 me-0 me-sm-3 mb-2 mb-sm-0">{caption}</h1>
                 </div>
                 <div className={headerSearchColCss} >
                     <HeaderSearch filterVal={_criteria == null ? null : _criteria.query} onSearch={handleOnSearchChange} onSearchBlur={handleOnSearchBlur} searchMode="standard" className='mw300' />
@@ -395,10 +396,10 @@ function MarketplaceList() {
         return (
             <>
                 {(_dataRows.itemCount != null && _dataRows.itemCount > 0) &&
-                    <span className="pl-1 text-left headline-2">{_dataRows.itemCount}{_dataRows.itemCount === 1 ? ' item' : ' items'}</span>
+                    <span className="ps-1 text-start headline-2">{_dataRows.itemCount}{_dataRows.itemCount === 1 ? ' item' : ' items'}</span>
                 }
-                <span onClick={onToggleFilters} className="ml-auto d-flex d-md-none px-2 justify-content-end clickable hover rounded" title="Show/Hide Filters" role="button" >{`${_filterToggle ? "Hide" : "Show"}`}<i className="pl-1 material-icons">filter_alt</i></span>
-                <span onClick={onClearAll} className="ml-2 ml-md-auto d-flex px-2 justify-content-end clickable hover rounded" title="Clear All Button" role="button" >Clear All<i className="pl-1 material-icons">update</i></span>
+                <span onClick={onToggleFilters} className="ms-auto d-flex d-md-none px-2 justify-content-end clickable hover rounded" title="Show/Hide Filters" role="button" >{`${_filterToggle ? "Hide" : "Show"}`}<i className="ps-1 material-icons">filter_alt</i></span>
+                <span onClick={onClearAll} className="ms-2 ms-md-auto d-flex px-2 justify-content-end clickable hover rounded" title="Clear All Button" role="button" >Clear All<i className="ps-1 material-icons">update</i></span>
             </>
         );
     }
@@ -408,8 +409,8 @@ function MarketplaceList() {
     //    return (
     //        <>
     //            Sort by: tbd - drop down
-    //            <Button variant="icon-solo" onClick={onListViewToggle} className={_dataRows.listView ? "ml-2" : "ml-2 inactive"} ><i className="material-icons">format_list_bulleted</i></Button>
-    //            <Button variant="icon-solo" onClick={onTileViewToggle} className={!_dataRows.listView ? "ml-2" : "ml-2 inactive"}  ><i className="material-icons">grid_view</i></Button>
+    //            <Button variant="icon-solo" onClick={onListViewToggle} className={_dataRows.listView ? "ms-2" : "ms-2 inactive"} ><i className="material-icons">format_list_bulleted</i></Button>
+    //            <Button variant="icon-solo" onClick={onTileViewToggle} className={!_dataRows.listView ? "ms-2" : "ms-2 inactive"}  ><i className="material-icons">grid_view</i></Button>
     //        </>
     //    );
     //}

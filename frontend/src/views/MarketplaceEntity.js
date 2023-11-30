@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useParams, useHistory } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 
 import axiosInstance from "../services/AxiosService";
@@ -28,7 +28,8 @@ function MarketplaceEntity() {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const history = useHistory();
+    const navigate = useNavigate();
+    const location = useLocation();
     const _scrollToSpecs = useRef(null);
     const _scrollToRelated = useRef(null);
 
@@ -59,7 +60,7 @@ function MarketplaceEntity() {
                 //console.log(err.response.status);
                 if (err != null && err.response != null && err.response.status === 404) {
                     msg += ' This marketplace item was not found.';
-                    history.push('/404');
+                    navigate('/404');
                 }
                 setLoadingProps({
                     isLoading: false, message: null, inlineMessages: [
@@ -79,7 +80,7 @@ function MarketplaceEntity() {
 
             //add to the recent file list to keep track of where we have been
             const revisedList = UpdateRecentFileList(loadingProps.recentFileList, {
-                url: history.location.pathname, caption: result.data.displayName, iconName: getMarketplaceIconName(result.data),
+                url: location.pathname, caption: result.data.displayName, iconName: getMarketplaceIconName(result.data),
                 authorId: result.data.author != null ? result.data.author.id : null
             });
             setLoadingProps({ recentFileList: revisedList });
@@ -101,7 +102,7 @@ function MarketplaceEntity() {
     const onBack = () => {
         //raised from header nav
         console.log(generateLogMessageString('onBack', CLASS_NAME));
-        history.goBack();
+        navigate(-1);
     };
 
     //const onToggleFavorite = () => {
@@ -151,12 +152,12 @@ function MarketplaceEntity() {
 
         return (
             <>
-                <h1 className="m-0 mr-2">
+                <h1 className="m-0 me-2">
                     {item.displayName}
                 </h1>
                 {/*<SVGIcon name={isFavorite ? "favorite" : "favorite-border"} size="24" fill={color.forestGreen} onClick={toggleFavoritesList} />*/}
                 {isAuthorized &&
-                    <a className="btn btn-icon-outline circle ml-auto" href={`/admin/library/${item.id}`} ><i className="material-icons">edit</i></a>
+                    <a className="btn btn-icon-outline circle ms-auto" href={`/admin/library/${item.id}`} ><i className="material-icons">edit</i></a>
                 }
             </>
         )
@@ -173,11 +174,11 @@ function MarketplaceEntity() {
                 </div>
                 <div className="row" >
                     <div className="col-sm-8">
-                        <span className="m-0 mr-2 mb-2 mb-md-0">
-                            <b className="mr-1" >Published By:</b>
+                        <span className="m-0 me-2 mb-2 mb-md-0">
+                            <b className="me-1" >Published By:</b>
                             <br className="d-block d-md-none" />
                             <a href={`/publisher/${item.publisher.name}`} >{item.publisher.displayName}</a></span>
-                        <span className="m-0 mr-2 my-2 mb-md-0 d-flex align-items-center">
+                        <span className="m-0 me-2 my-2 mb-md-0 d-flex align-items-center">
                             <SvgVisibilityIcon fill={color.link} />
                             <a href={getViewByPublisherUrl(loadingProps, item.publisher)} >View all by this publisher</a>
                         </span>
@@ -204,7 +205,7 @@ function MarketplaceEntity() {
     //
     const renderSubTitle = () => {
         return (
-            <span onClick={onBack} className="px-2 btn btn-text-solo align-items-center auto-width ml-md-auto justify-content-end d-flex clickable hover" ><i className="material-icons">chevron_left</i>Back</span>
+            <span onClick={onBack} className="px-2 btn btn-text-solo align-items-center auto-width ms-md-auto justify-content-end d-flex clickable hover" ><i className="material-icons">chevron_left</i>Back</span>
         );
     }
 
@@ -217,13 +218,13 @@ function MarketplaceEntity() {
                     <div className="card mb-0 border-0">
                         <div className="card-header bg-transparent p-2 pt-3 border-bottom-0" id="headingOne">
                             <div className="col-sm-12 d-flex align-items-center">
-                                <h2 className="m-0 mr-2">
+                                <h2 className="m-0 me-2">
                                     {(item.type == null || item.type.name === null) ?
                                         'Smart Manufacturing App Details'
                                         : `${item.type.name.replace('SM ', 'Smart Manufacturing ')} Details`
                                     }
                                 </h2>
-                                <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/app/${item.id}`} >Request More Info</a>
+                                <a className="btn btn-primary px-1 px-md-4 auto-width ms-auto text-nowrap" href={`/more-info/app/${item.id}`} >Request More Info</a>
                             </div>
                         </div>
                         <div id="collapseOne" className="collapse show mb-3" aria-labelledby="headingOne" >

@@ -1,5 +1,4 @@
 import React from 'react'
-//import { useHistory } from 'react-router-dom'
 
 import SocialMedia from '../../components/SocialMedia';
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
@@ -16,7 +15,6 @@ function PublisherSidebar(props) {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-//    const history = useHistory();
     const { loadingProps } = useLoadingContext();
 
     //-------------------------------------------------------------------
@@ -35,7 +33,7 @@ function PublisherSidebar(props) {
                 <p className="mb-2 px-2"><a href={`/publisher/${props.item.name}`} >{props.item.displayName}</a></p>
                 {props.item.allowFilterBy &&
                 <p className="mb-0 px-2">
-                    <span className="mr-1" alt="view"><SvgVisibilityIcon fill={color.link} /></span>
+                    <span className="me-1" alt="view"><SvgVisibilityIcon fill={color.link} /></span>
                     <a href={getViewByPublisherUrl(loadingProps, props.item)} >View all by this publisher</a>
                 </p>
                 }

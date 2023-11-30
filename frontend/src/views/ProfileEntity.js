@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useParams, useHistory } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 import axiosInstance from "../services/AxiosService";
 
@@ -20,7 +20,8 @@ function ProfileEntity() {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const history = useHistory();
+    const navigate = useNavigate();
+    const location = useLocation();
     const _scrollToSpecs = useRef(null);
     const _scrollToRelated = useRef(null);
 
@@ -50,7 +51,7 @@ function ProfileEntity() {
                 //console.log(err.response.status);
                 if (err != null && err.response != null && err.response.status === 404) {
                     msg += ' This profile item was not found.';
-                    history.push('/404');
+                    navigate('/404');
                 }
                 setLoadingProps({
                     isLoading: false, message: null, inlineMessages: [
@@ -70,7 +71,7 @@ function ProfileEntity() {
 
             //add to the recent file list to keep track of where we have been
             var revisedList = UpdateRecentFileList(loadingProps.recentFileList, {
-                url: history.location.pathname, caption: result.data.displayName, iconName: getMarketplaceIconName(result.data),
+                url: location.pathname, caption: result.data.displayName, iconName: getMarketplaceIconName(result.data),
                 authorId: result.data.author != null ? result.data.author.id : null
             });
             setLoadingProps({ recentFileList: revisedList });
@@ -94,7 +95,7 @@ function ProfileEntity() {
     const onBack = () => {
         //raised from header nav
         console.log(generateLogMessageString('onBack', CLASS_NAME));
-        history.goBack();
+        navigate(-1);
     };
 
     const downloadProfile = async (req) => {
@@ -135,7 +136,7 @@ function ProfileEntity() {
 
         return (
             <>
-                <h1 className="m-0 mr-2">
+                <h1 className="m-0 me-2">
                     SM Profile: {item.displayName}
                 </h1>
                 {/*<SVGIcon name={isFavorite ? "favorite" : "favorite-border"} size="24" fill={color.forestGreen} onClick={toggleFavoritesList} />*/}
@@ -155,8 +156,8 @@ function ProfileEntity() {
                 {item.publisher?.displayName &&
                     <div className="row" >
                         <div className="col-sm-8">
-                            <span className="m-0 mr-2 mb-2 mb-md-0">
-                                <b className="mr-1" >Published By:</b>
+                            <span className="m-0 me-2 mb-2 mb-md-0">
+                                <b className="me-1" >Published By:</b>
                                 <br className="d-block d-md-none" />
                                 {item.publisher.displayName}
                             </span>
@@ -183,7 +184,7 @@ function ProfileEntity() {
     //
     const renderSubTitle = () => {
         return (
-            <span onClick={onBack} className="px-2 btn btn-text-solo align-items-center auto-width ml-auto justify-content-end d-flex clickable hover" ><i className="material-icons">chevron_left</i>Back</span>
+            <span onClick={onBack} className="px-2 btn btn-text-solo align-items-center auto-width ms-auto justify-content-end d-flex clickable hover" ><i className="material-icons">chevron_left</i>Back</span>
         );
     }
 
@@ -196,10 +197,10 @@ function ProfileEntity() {
                     <div className="card mb-0 border-0">
                         <div className="card-header bg-transparent p-2 pt-3 border-bottom-0" id="headingOne">
                             <div className="col-sm-12 d-flex align-items-center">
-                                <h2 className="m-0 mr-2">
+                                <h2 className="m-0 me-2">
                                     Smart Manufacturing Profile Details
                                 </h2>
-                                <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/${item.type.code}/${item.externalSource.code}/${item.id}`} >Request More Info</a>
+                                <a className="btn btn-primary px-1 px-md-4 auto-width ms-auto text-nowrap" href={`/more-info/${item.type.code}/${item.externalSource.code}/${item.id}`} >Request More Info</a>
                             </div>
                         </div>
                         <div id="collapseOne" className="collapse show mb-3" aria-labelledby="headingOne" >

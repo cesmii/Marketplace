@@ -1,36 +1,32 @@
 import React from "react";
-import { Route, Redirect } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 import DownloadMessage from "../../../components/DownloadMessage";
 import { InlineMessage } from "../../../components/InlineMessage";
 import ModalMessage from "../../../components/ModalMessage";
 import { useLoginStatus } from "../../../components/OnLoginHandler";
 
-const AdminLayout = ({ children }) => (
-
-    <div className="container-fluid container-md" >
-        <div className="main-panel m-4">
-            <InlineMessage />
-            <DownloadMessage />
-            {children}
-        </div>
-        <ModalMessage />
-    </div>
-);
-
-function AdminRoute({ component: Component, ...rest }) {
-
-    const { isAuthenticated, isAuthorized, redirectUrl } = useLoginStatus(rest.location, rest.roles);
-
+function AdminLayout() {
     return (
-        <Route
-            {...rest}
-            render={props => isAuthenticated && isAuthorized ?
-                (<AdminLayout><Component {...props} /></AdminLayout>) :
-                (<Redirect to={redirectUrl} />)
-            }
-        />
+        <div className="container-fluid container-md" >
+            <div className="main-panel m-4">
+                <InlineMessage />
+                <DownloadMessage />
+                <Outlet />
+            </div>
+            <ModalMessage />
+        </div>
     );
+}
+
+
+function AdminRoute(props) {
+
+    let location = useLocation();
+
+    const { isAuthenticated, isAuthorized, redirectUrl } = useLoginStatus(location, props.roles);
+
+    return isAuthenticated && isAuthorized ? AdminLayout() : (<Navigate to={redirectUrl} />);
 }
 
 export default AdminRoute;

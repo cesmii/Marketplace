@@ -106,8 +106,8 @@ function MarketplaceFilterSelected(props) {
             <div className="d-inline" >
                 {renderSections()}
             </div>
-            <div className="ml-auto justify-content-end text-nowrap" >
-                <span onClick={onClearAll} className="px-2 clickable hover rounded d-flex align-items-center" >Clear All<i className="pl-1 material-icons">update</i></span>
+            <div className="ms-auto justify-content-end text-nowrap" >
+                <span onClick={onClearAll} className="px-2 clickable hover rounded d-flex align-items-center" >Clear All<i className="ps-1 material-icons">update</i></span>
             </div>
         </div>
     )

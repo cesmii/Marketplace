@@ -26,13 +26,13 @@ function AdminJobDefinitionRow(props) { //props are item, showActions
         return (
             <>
                 <tr className={`mx-0 my-1 p-0 py-1 ${cssClass}`}>
-                    <th className="pl-2" >
+                    <th className="ps-2" >
                         
                     </th>
                     <th className="" >
                         Name
                     </th>
-                    <th className="pr-2 text-right" >
+                    <th className="pe-2 text-end" >
                         Delete
                     </th>
                 </tr>
@@ -46,14 +46,14 @@ function AdminJobDefinitionRow(props) { //props are item, showActions
     return (
         <>
             <tr className={`mx-0 my-1 p-0 py-1 ${cssClass}`}>
-                <td className="py-2 pl-2 align-middle" >
-                    <a className="btn btn-icon-outline circle mr-2" href={`/admin/jobdefinition/${props.item.id}`} ><i className="material-icons">edit</i></a>
+                <td className="py-2 ps-2 align-middle" >
+                    <a className="btn btn-icon-outline circle me-2" href={`/admin/jobdefinition/${props.item.id}`} ><i className="material-icons">edit</i></a>
                 </td>
                 <td className="py-2 align-middle" >
                     {props.item.name}
                 </td>
-                <td className="py-2 pr-2 text-right align-middle" >
-                    <button className="btn btn-icon-outline circle ml-auto" title="Delete Item" onClick={onDeleteItem} ><i className="material-icons">close</i></button>
+                <td className="py-2 pe-2 text-end align-middle" >
+                    <button className="btn btn-icon-outline circle ms-auto" title="Delete Item" onClick={onDeleteItem} ><i className="material-icons">close</i></button>
                 </td>
             </tr>
         </>

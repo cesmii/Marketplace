@@ -38,7 +38,7 @@ function AdminRequestInfoRow(props) { //props are item, showActions
                     <th className="d-none d-sm-table-cell" >
                         Status
                     </th>
-                    <th className="text-right" >
+                    <th className="text-end" >
                         Created On
                     </th>
                 </tr>
@@ -53,7 +53,7 @@ function AdminRequestInfoRow(props) { //props are item, showActions
         <>
             <tr className={`mx-0 my-1 p-0 py-1 ${cssClass}`}>
                 <td className="py-2" >
-                    <a className="btn btn-icon-outline circle mr-2" href={`/admin/requestinfo/${props.item.id}`} ><i className="material-icons">edit</i></a>
+                    <a className="btn btn-icon-outline circle me-2" href={`/admin/requestinfo/${props.item.id}`} ><i className="material-icons">edit</i></a>
                 </td>
                 <td className="py-2 align-text-top" >
                         {(props.item.firstName.toString() !== '' || props.item.lastName.toString() !== '') &&
@@ -85,7 +85,7 @@ function AdminRequestInfoRow(props) { //props are item, showActions
                         <p className="m-0" >{props.item.status.name}</p>
                     }
                 </td>
-                <td className="py-2 text-right align-text-top" >
+                <td className="py-2 text-end align-text-top" >
                     {formatDate(props.item.created)}
                 </td>
             </tr>

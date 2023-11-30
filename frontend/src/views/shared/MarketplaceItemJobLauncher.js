@@ -83,7 +83,7 @@ export const MarketplaceItemJobLauncher = (props) => {
     return (
         <>
             <button className={`btn btn-link d-flex align-items-center ${props.className}`} onClick={onExecuteJob}>
-                {renderMenuColorMaterialIcon(props.iconName == null || props.iconName === '' ? 'system_update' : props.iconName, color.cornflower, 'mr-1')}
+                {renderMenuColorMaterialIcon(props.iconName == null || props.iconName === '' ? 'system_update' : props.iconName, color.cornflower, 'me-1')}
                 {props.jobName}
             </button>
         </>

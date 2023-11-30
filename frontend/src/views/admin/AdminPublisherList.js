@@ -242,8 +242,8 @@ function AdminPublisherList() {
     //    return (
     //        <>
     //            Sort by: tbd - drop down
-    //            <Button variant="icon-solo" onClick={onListViewToggle} className={_dataRows.listView ? "ml-2" : "ml-2 inactive"} ><i className="material-icons">format_list_bulleted</i></Button>
-    //            <Button variant="icon-solo" onClick={onTileViewToggle} className={!_dataRows.listView ? "ml-2" : "ml-2 inactive"}  ><i className="material-icons">grid_view</i></Button>
+    //            <Button variant="icon-solo" onClick={onListViewToggle} className={_dataRows.listView ? "ms-2" : "ms-2 inactive"} ><i className="material-icons">format_list_bulleted</i></Button>
+    //            <Button variant="icon-solo" onClick={onTileViewToggle} className={!_dataRows.listView ? "ms-2" : "ms-2 inactive"}  ><i className="material-icons">grid_view</i></Button>
     //        </>
     //    );
     //}
@@ -317,11 +317,11 @@ function AdminPublisherList() {
                 <div className="col-sm-12 d-flex align-items-center" >
                     {(_dataRows.itemCount != null && _dataRows.itemCount > 0) ?
                         <>
-                            <span className="px-2 ml-auto font-weight-bold">{_dataRows.itemCount}{_dataRows.itemCount === 1 ? ' item' : ' items'}</span>
+                            <span className="px-2 ms-auto fw-bold">{_dataRows.itemCount}{_dataRows.itemCount === 1 ? ' item' : ' items'}</span>
                             <a className="btn btn-icon-outline circle primary" href={`/admin/publisher/new`} ><i className="material-icons">add</i></a>
                         </>
                         :
-                        <a className="btn btn-icon-outline circle ml-auto primary" href={`/admin/publisher/new`} ><i className="material-icons">add</i></a>
+                        <a className="btn btn-icon-outline circle ms-auto primary" href={`/admin/publisher/new`} ><i className="material-icons">add</i></a>
                     }
                 </div>
             </div>

@@ -82,11 +82,11 @@ function MarketplaceFilter(props) {
         // sectionKey = caption;
         return (
             <div className={toggleCss} onClick={toggleChildren} data-id={toggleState.enumValue} >
-                <span key="caption" className="pr-2 w-100 d-block rounded">
+                <span key="caption" className="pe-2 w-100 d-block rounded">
                     {caption}
                 </span>
                 {(itemCount > 0) &&
-                    <span key="toggle" className="ml-auto">
+                    <span key="toggle" className="ms-auto">
                     <Button variant="accordion" className="btn p-0" title={toggleTitle} >
                         <span className="d-flex align-items-center">
                             {svgToggleIcon}
@@ -136,7 +136,7 @@ function MarketplaceFilter(props) {
                     {choices}
                 </ul>
                 {(props.showLimited && section.items.length > _viewAllMax) &&
-                    <button className="btn btn-link mr-2 ml-auto justify-content-end align-items-center d-flex" data-id={section.enumValue} onClick={toggleViewAll} >
+                    <button className="btn btn-link me-2 ms-auto justify-content-end align-items-center d-flex" data-id={section.enumValue} onClick={toggleViewAll} >
                         {toggleState.viewAll ? '- See less' : '+ See all'}
                     </button>
                 }

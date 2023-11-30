@@ -36,7 +36,7 @@ function SideMenuLinkList(props) { //props are subMenuItems, bgColor, iconName, 
                     {caption}
                 </span>
                 {(itemCount > 0) &&
-                    <span key="toggle" className="ml-auto">
+                    <span key="toggle" className="ms-auto">
                         <Button variant="accordion" className="btn" >
                             <span>
                                 <SVGIcon name={toggleIcon} size="20" fill={color.gris} alt={caption} />
@@ -56,7 +56,7 @@ function SideMenuLinkList(props) { //props are subMenuItems, bgColor, iconName, 
             <li id={key} key={key} className="body-size">
                 <a href={link.url} >
                     {link.iconName == null ? "" :
-                        <span className="mr-2">
+                        <span className="me-2">
                             <SVGIcon name={link.iconName} size="18" fill={iconColor} />
                         </span>
                     }

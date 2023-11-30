@@ -134,7 +134,7 @@ function GridPager(props) {
             result.push(<Pagination.Item key="next" active={pager.currentPage === pager.totalPages} onClick={() => onPageClick(pager.currentPage + 1)}>{nextCaption}</Pagination.Item>);
             result.push(<Pagination.Item key="last" active={pager.currentPage === pager.totalPages} onClick={() => onPageClick(pager.totalPages)}>{lastCaption}</Pagination.Item>);
         }
-        return (<div className="mr-auto"><Pagination >{result}</Pagination></div>);
+        return (<div className="me-auto"><Pagination >{result}</Pagination></div>);
     }
 
     const renderPageSizeOptions = (pageSize) => {
@@ -156,7 +156,7 @@ function GridPager(props) {
             </Dropdown.Toggle>
         );
         const pageOptionsHTML = pageSizeOptions.map((item) => {
-            return (<Dropdown.Item key={item} onSelect={() => onPageSizeSelect(item)} >{item} per page</Dropdown.Item>);
+            return (<Dropdown.Item key={item} onClick={() => onPageSizeSelect(item)} >{item} per page</Dropdown.Item>);
         });
 
         return (
@@ -168,7 +168,7 @@ function GridPager(props) {
                     {props.showAll &&
                         <>
                             <Dropdown.Divider />
-                            <Dropdown.Item key="all" onSelect={() => onPageSizeSelect(null)} >Show all</Dropdown.Item>
+                            <Dropdown.Item key="all" onClick={() => onPageSizeSelect(null)} >Show all</Dropdown.Item>
                         </>
                     }
                 </Dropdown.Menu>

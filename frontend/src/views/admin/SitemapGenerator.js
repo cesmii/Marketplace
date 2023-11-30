@@ -295,7 +295,7 @@ function SitemapGenerator() {
             <div className="row mb-2" >
                 <div className="col-12 d-flex" >
                     <h1 className="d-inline-block mb-0">Sitemap Generator</h1>
-                    <div className="ml-auto align-content-center" >
+                    <div className="ms-auto align-content-center" >
                         <a className="btn btn-icon-outline circle d-inline-block" onClick={onDownload} ><i className="material-icons">download</i></a>
                     </div>
                 </div>

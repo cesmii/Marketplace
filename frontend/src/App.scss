@@ -143,6 +143,11 @@ a {
     font-weight: normal;
     font-size: .9rem;
     color: color('link');
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
 }
 
 .bitter {
@@ -239,6 +244,7 @@ a {
     font-size: .813rem;
     line-height: 1.23rem;
     margin-bottom: 0px;
+    margin-right: 3px;
 }
 
 .form-group {
@@ -290,7 +296,6 @@ a {
 
 .txt-search-ui-group {
     box-sizing: border-box;
-    box-shadow: 0px 4px 16px rgba( color('selectedBg'), 0.15);
 
     input.form-control {
         border-radius: $inputControl-radius;
@@ -309,7 +314,7 @@ a {
         }
     }
 
-    .input-group-append button {
+    button {
         border-radius: $inputControl-radius;
         border-top-left-radius: 0px;
         border-bottom-left-radius: 0px;
@@ -335,6 +340,9 @@ div.dropdown-menu {
 // }
 a.dropdown-item {
     font-family: $font-family-base;
+    &:hover {
+        text-decoration:none;
+    }
 }
 
 .dropdown-toggle {
@@ -362,6 +370,10 @@ option.selected {
         background-color: color("cararra");
         color: color("textPrimary");
     }
+
+    &:hover, &:focus, &:active {
+        text-decoration: none;
+    }
 }
 
 .btn-text-solo {
@@ -382,6 +394,10 @@ option.selected {
     min-width: 128px;
     border-radius: $button-radius;
     border: none;
+
+    &:hover, &:focus, &:active {
+        color: #fff !important;
+    }
 
     &.auto-width {
         min-width: unset;
@@ -478,8 +494,10 @@ option.selected {
     background-color: color("white") !important;
     color: color("textPrimary");
     border: 1px solid #ced4da;
+    border-left: 1px solid #fff;
     // border-left: none;
-    border-radius: 0.25rem;
+    border-radius: $inputControl-radius;
+    padding: 0 0.75rem;
 
     i.material-icons {
         font-size: 20px;
@@ -605,9 +623,11 @@ option.selected {
     color: color("link");
     font-size: .9rem;
     font-family: $font-family-link;
+    text-decoration: none;
 
     &:hover {
         color: color("link");
+        text-decoration: underline;
     }
 
     &:focus {
@@ -630,18 +650,22 @@ option.selected {
         border-bottom-right-radius: 0px;
     }
 
-    .input-group-append button {
-        border-radius: $inputControl-radius;
-        border-top-left-radius: 0px;
-        border-bottom-left-radius: 0px;
-    }
-
     @media (min-width: 992px) {
         width: 220px;
     }
 
     @media (min-width: 1200px) {
         width: 300px;
+    }
+}
+
+.quick-search {
+    align-self: stretch;
+
+    input.form-control {
+        border-radius: $inputControl-radius !important;
+        border-top-right-radius: 0px !important;
+        border-bottom-right-radius: 0px !important;
     }
 }
 
@@ -783,6 +807,25 @@ select.minimal:focus {
         .overlay-icon {
             min-height: inherit;
         }
+    }
+}
+
+//tab strip
+.nav-link {
+    padding-left: 0px;
+    font-family: $font-family-headings;
+    font-weight: 600;
+
+    &:hover {
+        opacity: 0.8;
+    }
+
+    &.active {
+        //font-size: 1.3rem;
+        color: #fff !important;
+        background-color: color('cornflower') !important;
+        font-weight: 600;
+        opacity: 0.8;
     }
 }
 

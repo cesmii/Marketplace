@@ -27,7 +27,7 @@ function AdminProfileRow(props) { //props are item, showActions
         return (
             <>
                 <tr className={`mx-0 my-1 p-0 py-1 ${cssClass}`}>
-                    <th className="pl-2" >
+                    <th className="ps-2" >
                         
                     </th>
                     <th className="" >
@@ -39,7 +39,7 @@ function AdminProfileRow(props) { //props are item, showActions
                     <th className="py-2" >
                         Source
                     </th>
-                    <th className="py-2 pr-2 text-right" >
+                    <th className="py-2 pe-2 text-end" >
                         Remove Relationships
                     </th>
                 </tr>
@@ -53,8 +53,8 @@ function AdminProfileRow(props) { //props are item, showActions
     return (
         <>
             <tr className={`mx-0 my-1 p-0 py-1 ${cssClass}`}>
-                <td className="py-2 pl-2" >
-                    <a className="btn btn-icon-outline circle mr-2" href={`/admin/relateditem/${props.item.externalSource.code}/${props.item.id}`} ><i className="material-icons">edit</i></a>
+                <td className="py-2 ps-2" >
+                    <a className="btn btn-icon-outline circle me-2" href={`/admin/relateditem/${props.item.externalSource.code}/${props.item.id}`} ><i className="material-icons">edit</i></a>
                 </td>
                 <td className="py-2 align-text-top" >
                     {props.item.displayName}
@@ -79,8 +79,8 @@ function AdminProfileRow(props) { //props are item, showActions
                 <td className="py-2" >
                     {props.item.externalSource.code}
                 </td>
-                <td className="py-2 pr-2 text-right" >
-                    <button className="btn btn-icon-outline circle ml-auto" title="Remove Related Items & Profiles" onClick={onDeleteItem} ><i className="material-icons">close</i></button>
+                <td className="py-2 pe-2 text-end" >
+                    <button className="btn btn-icon-outline circle ms-auto" title="Remove Related Items & Profiles" onClick={onDeleteItem} ><i className="material-icons">close</i></button>
                 </td>
             </tr>
         </>

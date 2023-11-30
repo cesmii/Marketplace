@@ -41,7 +41,7 @@ function AdminImageRow(props) { //props are item, showActions
                     </th>
                     <th className="" >
                     </th>
-                    <th className="text-right" >
+                    <th className="text-end" >
                         Delete
                     </th>
                 </tr>
@@ -67,12 +67,12 @@ function AdminImageRow(props) { //props are item, showActions
                         <span style={{ wordBreak: "break-word" }} >{url}</span>
                     </a>
                 </td>
-                <td className="py-2 text-right align-middle" >
+                <td className="py-2 text-end align-middle" >
                     <ImageUploader imageId={props.item.id} caption="Replace" cssClass="btn-primary auto-width mb-0" uploadToServer={true} onImageUpload={onImageReplace} marketplaceItemId={props.item.marketplaceItemId} />
                 </td>
-                <td className="py-2 pr-0 text-right" >
+                <td className="py-2 pe-0 text-end" >
                     {(props.canDelete) &&
-                        <button className="btn btn-icon-outline circle ml-auto" title="Delete Image" onClick={onDeleteItem} ><i className="material-icons">close</i></button>
+                        <button className="btn btn-icon-outline circle ms-auto" title="Delete Image" onClick={onDeleteItem} ><i className="material-icons">close</i></button>
                     }
                 </td>
             </tr>

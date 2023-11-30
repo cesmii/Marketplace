@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, useHistory } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 import axiosInstance from "../services/AxiosService";
 
@@ -24,7 +24,8 @@ function PublisherEntity() {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const history = useHistory();
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const { id } = useParams();
     const [item, setItem] = useState({});
@@ -50,7 +51,7 @@ function PublisherEntity() {
                 //console.log(err.response.status);
                 if (err != null && err.response != null && err.response.status === 404) {
                     msg += ' This marketplace item was not found.';
-                    history.push('/404');
+                    navigate('/404');
                 }
                 setLoadingProps({
                     isLoading: false, message: null, inlineMessages: [
@@ -70,7 +71,7 @@ function PublisherEntity() {
 
             //add to the recent file list to keep track of where we have been
             const revisedList = UpdateRecentFileList(loadingProps.recentFileList, {
-                url: history.location.pathname, caption: result.data.displayName, iconName: getMarketplaceIconName(result.data),
+                url: location.pathname, caption: result.data.displayName, iconName: getMarketplaceIconName(result.data),
                 authorId: result.data.author != null ? result.data.author.id : null
             });
             setLoadingProps({ recentFileList: revisedList });
@@ -92,7 +93,7 @@ function PublisherEntity() {
     const onBack = () => {
         //raised from header nav
         console.log(generateLogMessageString('onBack', CLASS_NAME));
-        history.goBack();
+        navigate(-1);
     };
 
     //-------------------------------------------------------------------
@@ -128,12 +129,12 @@ function PublisherEntity() {
 
         return (
             <>
-                <h1 className="m-0 mr-2">
+                <h1 className="m-0 me-2">
                     {item.displayName}
                 </h1>
-                <a className="btn btn-secondary ml-2 px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/request-info/publisher/${item.id}`} >Request Info</a>
+                <a className="btn btn-secondary ms-2 px-1 px-md-4 auto-width ms-auto text-nowrap" href={`/request-info/publisher/${item.id}`} >Request Info</a>
                 {isAuthorized &&
-                    <a className="btn btn-icon-outline circle ml-2" href={`/admin/publisher/${item.id}`} ><i className="material-icons">edit</i></a>
+                    <a className="btn btn-icon-outline circle ms-2" href={`/admin/publisher/${item.id}`} ><i className="material-icons">edit</i></a>
                 }
             </>
         )
@@ -156,7 +157,7 @@ function PublisherEntity() {
                 </div>
                 <div className="row mb-3 mb-md-5" >
                     <div className="col-sm-6" >
-                        <span className="material-icons-outlined d-flex align-items-left"><i className="material-icons mr-1" style={{ color: color.selectedBg }}>language</i><a href={item.companyUrl} className="a-text">Website </a></span>
+                        <span className="material-icons-outlined d-flex align-items-left"><i className="material-icons me-1" style={{ color: color.selectedBg }}>language</i><a href={item.companyUrl} className="a-text">Website </a></span>
                     </div>
                     {item.socialMediaLinks != null &&
                         <div className="col-sm-6" >
@@ -198,7 +199,7 @@ function PublisherEntity() {
     //
     const renderSubTitle = () => {
         return (
-            <span onClick={onBack} className="px-2 btn btn-text-solo align-items-center auto-width ml-auto justify-content-end d-flex clickable hover" ><i className="material-icons">chevron_left</i>Back</span>
+            <span onClick={onBack} className="px-2 btn btn-text-solo align-items-center auto-width ms-auto justify-content-end d-flex clickable hover" ><i className="material-icons">chevron_left</i>Back</span>
         );
     }
 

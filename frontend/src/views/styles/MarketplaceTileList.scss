@@ -5,17 +5,9 @@
 }
 
 .tile-link {
-    font: unset;
-    color: unset;
-
-    &:hover {
-        text-decoration: unset;
-        cursor: pointer;
-
-        img {
-            opacity: 0.8;
-        }
-    }
+    font: unset !important;
+    color: unset !important;
+    text-decoration: none !important;
 
     .tile-body {
         background-color: color("white");
@@ -31,6 +23,20 @@
             border-radius: 10px;
             width: 100%;
             height: auto;
+        }
+    }
+
+    &:hover {
+        color: color("link") !important;
+        text-decoration: inherit;
+        cursor: pointer;
+
+        .tile-body {
+            color: color("link") !important;
+        }
+
+        img {
+            opacity: 0.8;
         }
     }
 }

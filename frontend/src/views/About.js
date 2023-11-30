@@ -48,7 +48,7 @@ function About() {
                     </p>
                     <p>
                         CESMII is a Membership based organization.  While much of our value is shared publically, to educate and drive awareness for the benefits of Smart Manufacturing, the real guidance and value comes through access to our Member Portal.
-                        <a href="/contact-us/membership" className="ml-1" >Learn how to become a member.</a>
+                        <a href="/contact-us/membership" className="ms-1" >Learn how to become a member.</a>
                     </p>
                 </div>
             </div>

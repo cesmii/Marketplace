@@ -55,15 +55,15 @@ function LoginButton() {
         return (
             <div className={`p-3 login slide-in-panel ${_toggleSignUpSlideout ? "open" : ""}`} >
                 <div className="d-flex" >
-                    <Button variant="icon-solo" onClick={onCloseSlideout} className="ml-auto" >
+                    <Button variant="icon-solo" onClick={onCloseSlideout} className="ms-auto" >
                         <span>
-                            <i className="material-icons mr-1">close</i>
+                            <i className="material-icons me-1">close</i>
                         </span>
                     </Button>
                 </div>
-                <p className="font-weight-bold text-center mb-3">Don't have an account?</p>
+                <p className="fw-bold text-center mb-3">Don't have an account?</p>
                 <div className="d-flex mt-auto mx-auto">
-                    <Button variant="primary" className="mx-auto ml-2 border" type="submit" onClick={onCreateAccountClick} disabled={loadingProps.isLoading ? "disabled" : ""} >
+                    <Button variant="primary" className="mx-auto ms-2 border" type="submit" onClick={onCreateAccountClick} disabled={loadingProps.isLoading ? "disabled" : ""} >
                         Sign Up
                     </Button>
                 </div>
@@ -81,7 +81,7 @@ function LoginButton() {
 
     return (
         <>
-            <Button variant="link" className="d-inline-flex d-md-block link py-1 px-2 pr-3 nav-link" type="button" onClick={onToggleSlideout} >
+            <Button variant="link" className="d-inline-flex d-md-block link py-1 px-2 pe-3 nav-link" type="button" onClick={onToggleSlideout} >
                 Sign Up
             </Button>
             <Button variant="primary" className="d-inline-flex d-md-block mx-auto mt-2 mt-md-0 border" type="button" onClick={onLoginClick} disabled={loadingProps.isLoading ? "disabled" : ""} >

@@ -50,7 +50,7 @@ function InlineMessage() {
         dismissMessageTimed(msg.id, msg.isTimed ? 6000 : 3000001); //6 seconds or 5 minutes
 
         return (
-            <div key={"inline-msg-" + msg.id} className={"alert alert-" + sev + " ml-5 mr-5 mt-3 mb-2"} >
+            <div key={"inline-msg-" + msg.id} className={"alert alert-" + sev + " ms-5 me-5 mt-3 mb-2"} >
                 {(msg.hideDismissBtn == null || !msg.hideDismissBtn) &&
                     <div className="dismiss-btn">
                         <Button id={`btn-inline-msg-dismiss-${msg.id}`} variant="icon-solo square" data-id={msg.id} onClick={onDismiss} className="align-items-center" ><i className="material-icons">close</i></Button>
@@ -60,7 +60,7 @@ function InlineMessage() {
                     {isProcessing &&
                         <LoadingIcon size="20" />
                     }
-                    <span className={isProcessing ? 'ml-1' : ''} dangerouslySetInnerHTML={{ __html: msg.body }} />
+                    <span className={isProcessing ? 'ms-1' : ''} dangerouslySetInnerHTML={{ __html: msg.body }} />
                 </div>
             </div>
         )

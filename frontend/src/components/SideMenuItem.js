@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link, useHistory } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { Dropdown } from 'react-bootstrap'
 import Fab from './Fab'
 import { SVGIcon } from './SVGIcon'
@@ -13,7 +13,7 @@ function SideMenuItem(props) { //props are subMenuItems, bgColor, iconName, navU
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const history = useHistory();
+    const location = useLocation();
 
     var currentStyle = {
         borderLeftColor: props.bgColor
@@ -33,7 +33,7 @@ function SideMenuItem(props) { //props are subMenuItems, bgColor, iconName, navU
             return (
                 <Dropdown.Item key={i} href={link.url}>
                     {link.iconName == null ? "" : 
-                        <span className="mr-2">
+                        <span className="me-2">
                             <SVGIcon name={link.iconName} size="24" fill={color.shark} />
                         </span>
                     }
@@ -49,7 +49,7 @@ function SideMenuItem(props) { //props are subMenuItems, bgColor, iconName, navU
     //console.log(generateLogMessageString('render', CLASS_NAME));
 
     return (
-        <li className="sidemenu-item" style={(history.location.pathname === props.navUrl) ? currentStyle : defaultStyle} >
+        <li className="sidemenu-item" style={(location.pathname === props.navUrl) ? currentStyle : defaultStyle} >
             <Link className="sidemenu-item-link" to={props.navUrl} style={{ color: 'inherit', textDecoration: 'inherit' }}>
                 <Fab color={props.bgColor} bgColor={props.bgColor} opacity={opacity} iconName={props.iconName} size='48px' />
                 <div className="d-none d-md-block">
@@ -61,7 +61,7 @@ function SideMenuItem(props) { //props are subMenuItems, bgColor, iconName, navU
             {(props.subMenuItems == null || props.subMenuItems.length === 0) ?
                 ('') :
                 (    
-                    <Dropdown className="action-menu icon-dropdown ml-auto" onClick={(e) => e.stopPropagation()} >
+                    <Dropdown className="action-menu icon-dropdown ms-auto" onClick={(e) => e.stopPropagation()} >
                     <Dropdown.Toggle drop="left">
                         {/* <MaterialIcon icon="more_vert" /> */}
                         <SVGIcon name="more-vert" size="24" fill={color.shark} />

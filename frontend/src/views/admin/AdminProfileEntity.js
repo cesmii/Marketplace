@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, useHistory } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 
 import Form from 'react-bootstrap/Form'
@@ -34,7 +34,7 @@ function AdminProfileEntity() {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const { id, code } = useParams();
     //var pageMode = //state is not always present. If user types a url or we use an href link, state is null. history.location.state.viewMode;
@@ -74,13 +74,13 @@ function AdminProfileEntity() {
             //console.log(err.response.status);
             if (err != null && err.response != null && err.response.status === 404) {
                 msg += ' This item was not found.';
-                history.push('/404');
+                navigate('/404');
             }
             //403 error - user may be allowed to log in but not permitted to perform the API call they are attempting
             else if (err != null && err.response != null && err.response.status === 403) {
                 console.log(generateLogMessageString('useEffect||fetchData||Permissions error - 403', CLASS_NAME, 'error'));
                 msg += ' You are not permitted to edit external items.';
-                history.goBack();
+                navigate(-1);
             }
             setLoadingProps({
                 isLoading: false, message: null, inlineMessages: [
@@ -124,7 +124,7 @@ function AdminProfileEntity() {
             //console.log(err.response.status);
             if (err != null && err.response != null && err.response.status === 404) {
                 msg += ' A problem occurred with the add external item screen.';
-                history.push('/404');
+                navigate('/404');
             }
             setLoadingProps({
                 isLoading: false, message: null, inlineMessages: [
@@ -368,7 +368,7 @@ function AdminProfileEntity() {
         if (!isSuccess) return;
 
         //navigate to the list view
-        history.push('/admin/relateditem/list');
+        navigate('/admin/relateditem/list');
     };
 
     const onSave = () => {
@@ -403,7 +403,7 @@ function AdminProfileEntity() {
                     });
 
                     //now redirect to profile item on front end
-                    history.push(`/admin/relateditem/${code}/${resp.data.data}`);
+                    navigate(`/admin/relateditem/${code}/${resp.data.data}`);
                 }
                 else {
                     //update spinner, messages
@@ -575,7 +575,7 @@ function AdminProfileEntity() {
 
         //React-bootstrap bug if you launch modal, then the dropdowns don't work. Add onclick code to the drop down as a workaround - https://github.com/react-bootstrap/react-bootstrap/issues/5561
         return (
-            <Dropdown className="action-menu icon-dropdown ml-2" onClick={(e) => e.stopPropagation()} >
+            <Dropdown className="action-menu icon-dropdown ms-2" onClick={(e) => e.stopPropagation()} >
                 <Dropdown.Toggle drop="left">
                     <SVGIcon name="more-vert" size="24" fill={color.shark} />
                 </Dropdown.Toggle>
@@ -620,8 +620,8 @@ function AdminProfileEntity() {
         if (mode.toLowerCase() !== "view") {
             return (
                 <>
-                    <Button variant="text-solo" className="ml-1" href={`/admin/relateditem/list`} >Cancel</Button>
-                    <Button variant="secondary" type="button" className="ml-2" onClick={onSave} >Save</Button>
+                    <Button variant="text-solo" className="ms-1" href={`/admin/relateditem/list`} >Cancel</Button>
+                    <Button variant="secondary" type="button" className="ms-2" onClick={onSave} >Save</Button>
                     {id !== "new" &&
                         renderMoreDropDown()
                     }
@@ -810,7 +810,7 @@ function AdminProfileEntity() {
                 <div className="info-panel light">
                     <div className="info-section mb-4 px-1 rounded">
                         <div className="headline-3 mb-2">
-                            <span className="pr-2 w-100 d-block rounded">
+                            <span className="pe-2 w-100 d-block rounded">
                             Keywords</span></div>
                         <Form.Group>
                             <Form.Control id="metaTagsConcatenated" as="textarea" style={{ height: '100px' }} value={item.metaTagsConcatenated} readOnly={isReadOnly} />
@@ -841,10 +841,10 @@ function AdminProfileEntity() {
 
         return (
             <>
-                <h1 className="m-0 mr-2">
+                <h1 className="m-0 me-2">
                     External item ({code})
                 </h1>
-                <div className="ml-auto d-flex align-items-center" >
+                <div className="ms-auto d-flex align-items-center" >
                     {renderButtons()}
                 </div>
             </>
@@ -860,13 +860,13 @@ function AdminProfileEntity() {
         return (
             <Tab.Container id="admin-marketplace-entity" defaultActiveKey="relatedItems" onSelect={tabListener} >
                 <Nav variant="pills" className="row mt-1 px-2 pr-md-3">
-                    <Nav.Item className="col-sm-4 rounded p-0 pl-2" >
-                        <Nav.Link eventKey="general" className="text-center text-md-left p-1 px-2 h-100" >
+                    <Nav.Item className="col-sm-4 rounded-0 p-0 ps-1 rounded-top" >
+                        <Nav.Link eventKey="general" className="text-center text-md-left p-1 px-2 h-100 text-decoration-none" >
                             <span className="headline-3">General</span>
                         </Nav.Link>
                     </Nav.Item>
-                    <Nav.Item className="col-sm-4 rounded p-0 pr-2">
-                        <Nav.Link eventKey="relatedItems" className="text-center text-md-left p-1 px-2 h-100" >
+                    <Nav.Item className="col-sm-4 rounded-0 p-0 rounded-top">
+                        <Nav.Link eventKey="relatedItems" className="text-center text-md-left p-1 px-2 h-100 text-decoration-none" >
                             <span className="headline-3">Related Items</span>
                             {/*<span className="d-none d-md-inline"><br />Optional and advanced settings</span>*/}
                         </Nav.Link>
@@ -875,14 +875,14 @@ function AdminProfileEntity() {
 
                 <Tab.Content>
                     <Tab.Pane eventKey="general">
-                        <Card className="">
+                        <Card className="rounded">
                             <Card.Body className="pt-3">
                                 { renderGeneralTab()}
                             </Card.Body>
                         </Card>
                     </Tab.Pane>
                     <Tab.Pane eventKey="relatedItems">
-                        <Card className="">
+                        <Card className="rounded">
                             <Card.Body className="pt-3">
                                 {renderRelatedItems()}
                             </Card.Body>
@@ -896,7 +896,7 @@ function AdminProfileEntity() {
     const renderSubTitle = () => {
         if (mode === "new" || mode === "copy") return;
         return (
-            <a className="px-2 btn btn-text-solo align-items-center auto-width ml-auto justify-content-end d-flex" href={`/profile/${code}/${item.name}`} ><i className="material-icons">visibility</i>View</a>
+            <a className="px-2 btn btn-text-solo align-items-center auto-width ms-auto justify-content-end d-flex" href={`/profile/${code}/${item.name}`} ><i className="material-icons">visibility</i>View</a>
         );
     }
 

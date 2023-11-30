@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, useHistory } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 import axiosInstance from "../../services/AxiosService";
 
@@ -22,7 +22,7 @@ function AdminRequestInfoEntity() {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const history = useHistory();
+    const navigate = useNavigate();
 
     const { id } = useParams();
     //var pageMode = //state is not always present. If user types a url or we use an href link, state is null. history.location.state.viewMode;
@@ -60,13 +60,13 @@ function AdminRequestInfoEntity() {
                 //console.log(err.response.status);
                 if (err != null && err.response != null && err.response.status === 404) {
                     msg += ' This item was not found.';
-                    history.push('/404');
+                    navigate('/404');
                 }
                 //403 error - user may be allowed to log in but not permitted to perform the API call they are attempting
                 else if (err != null && err.response != null && err.response.status === 403) {
                     console.log(generateLogMessageString('useEffect||fetchData||Permissions error - 403', CLASS_NAME, 'error'));
                     msg += ' You are not permitted to edit these items.';
-                    history.goBack();
+                    navigate(-1);
                 }
                 setLoadingProps({
                     isLoading: false, message: null, inlineMessages: [
@@ -164,7 +164,7 @@ function AdminRequestInfoEntity() {
                         ],
                         refreshLookupData: true
                     });
-                    history.push('/admin/requestinfo/list');
+                    navigate('/admin/requestinfo/list');
                 }
                 else {
                     //update spinner, messages
@@ -193,7 +193,7 @@ function AdminRequestInfoEntity() {
     const onCancel = () => {
         //raised from header nav
         console.log(generateLogMessageString('onCancel', CLASS_NAME));
-        history.push('/admin/requestinfo/list');
+        navigate('/admin/requestinfo/list');
     };
 
     const onSave = () => {
@@ -224,7 +224,7 @@ function AdminRequestInfoEntity() {
                 });
 
                 //now redirect 
-                history.push('/admin/requestinfo/list');
+                navigate('/admin/requestinfo/list');
             })
             .catch(error => {
                 //hide a spinner, show a message
@@ -311,7 +311,7 @@ function AdminRequestInfoEntity() {
 
         //React-bootstrap bug if you launch modal, then the dropdowns don't work. Add onclick code to the drop down as a workaround - https://github.com/react-bootstrap/react-bootstrap/issues/5561
         return (
-            <Dropdown className="action-menu icon-dropdown ml-2" onClick={(e) => e.stopPropagation()} >
+            <Dropdown className="action-menu icon-dropdown ms-2" onClick={(e) => e.stopPropagation()} >
                 <Dropdown.Toggle drop="left">
                     <SVGIcon name="more-vert" size="24" fill={color.shark} />
                 </Dropdown.Toggle>
@@ -327,8 +327,8 @@ function AdminRequestInfoEntity() {
 
         return (
             <>
-                <Button variant="text-solo" className="ml-1" onClick={onCancel} >Cancel</Button>
-                <Button variant="secondary" type="button" className="ml-2" onClick={onSave} >Save</Button>
+                <Button variant="text-solo" className="ms-1" onClick={onCancel} >Cancel</Button>
+                <Button variant="secondary" type="button" className="ms-2" onClick={onSave} >Save</Button>
             </>
         );
     }
@@ -390,11 +390,11 @@ function AdminRequestInfoEntity() {
                 </div>
                 <div className="col-md-12">
                     <Form.Label>Name:</Form.Label>
-                    <span className="ml-2"><a href={`/admin/library/${item.marketplaceItem.id}`} >{item.marketplaceItem.displayName}</a></span>
+                    <span className="ms-2"><a href={`/admin/library/${item.marketplaceItem.id}`} >{item.marketplaceItem.displayName}</a></span>
                 </div>
                 <div className="col-md-12">
                     <Form.Label>Abstract:</Form.Label>
-                    <span className="ml-2">{item.marketplaceItem.abstract}</span>
+                    <span className="ms-2">{item.marketplaceItem.abstract}</span>
                 </div>
             </div>
         );
@@ -409,7 +409,7 @@ function AdminRequestInfoEntity() {
                 </div>
                 <div className="col-md-12">
                     <Form.Label>Name:</Form.Label>
-                    <span className="ml-2"><a href={`/admin/publisher/${item.publisher.id}`} >{item.publisher.displayName}</a></span>
+                    <span className="ms-2"><a href={`/admin/publisher/${item.publisher.id}`} >{item.publisher.displayName}</a></span>
                 </div>
             </div>
         );
@@ -424,11 +424,11 @@ function AdminRequestInfoEntity() {
                 </div>
                 <div className="col-md-12">
                     <Form.Label>SM Profile:</Form.Label>
-                    <span className="ml-2">{item.smProfile.displayName}</span>
+                    <span className="ms-2">{item.smProfile.displayName}</span>
                 </div>
                 <div className="col-md-12">
                     <Form.Label>Namespace:</Form.Label>
-                    <span className="ml-2">{item.smProfile.namespace}</span>
+                    <span className="ms-2">{item.smProfile.namespace}</span>
                 </div>
             </div>
         );
@@ -449,11 +449,11 @@ function AdminRequestInfoEntity() {
                 <div className="row mb-3">
                     <div className="col-md-12">
                         <Form.Label>Request Type: </Form.Label>
-                        <span className="ml-2">{item.requestType != null ? item.requestType.name : ''}</span>
+                        <span className="ms-2">{item.requestType != null ? item.requestType.name : ''}</span>
                     </div>
                     <div className="col-md-12">
                         <Form.Label>Sumbitted:</Form.Label>
-                        <span className="ml-2">{formatDate(item.created)}</span>
+                        <span className="ms-2">{formatDate(item.created)}</span>
                     </div>
                 </div>
                 { renderMarketplaceItem()}
@@ -464,20 +464,20 @@ function AdminRequestInfoEntity() {
                         <h2 className="headline-3" >Contact Info</h2>
                     </div>
                     <div className="col-md-12">
-                        <Form.Label>First Name:</Form.Label><span className="ml-2">{item.firstName}</span>
+                        <Form.Label>First Name:</Form.Label><span className="ms-2">{item.firstName}</span>
                     </div>
                     <div className="col-md-12">
-                        <Form.Label>Last Name:</Form.Label><span className="ml-2">{item.lastName}</span>
+                        <Form.Label>Last Name:</Form.Label><span className="ms-2">{item.lastName}</span>
                     </div>
                     <div className="col-md-12">
-                        <Form.Label>Email:</Form.Label><span className="ml-2">{item.email}</span>
+                        <Form.Label>Email:</Form.Label><span className="ms-2">{item.email}</span>
                     </div>
                     <div className="col-md-12">
-                        <Form.Label>Phone:</Form.Label><span className="ml-2">{item.phone}</span>
+                        <Form.Label>Phone:</Form.Label><span className="ms-2">{item.phone}</span>
                     </div>
                     {(item.membershipStatus != null) &&
                         <div className="col-md-12">
-                        <Form.Label>Membership Status:</Form.Label><span className="ml-2">{item.membershipStatus.name}</span>
+                        <Form.Label>Membership Status:</Form.Label><span className="ms-2">{item.membershipStatus.name}</span>
                         </div>
                     }
                     {((item.companyName != null && item.companyUrl != null && item.industries != null) &&
@@ -488,17 +488,17 @@ function AdminRequestInfoEntity() {
                     }
                     {(item.companyName != null && item.companyName !== '') &&
                         <div className="col-md-12">
-                            <Form.Label>Name:</Form.Label><span className="ml-2">{item.companyName}</span>
+                            <Form.Label>Name:</Form.Label><span className="ms-2">{item.companyName}</span>
                         </div>
                     }
                     {(item.industries != null && item.industries !== '') &&
                         <div className="col-md-12">
-                            <Form.Label>Industry(s):</Form.Label><span className="ml-2">{item.industries}</span>
+                            <Form.Label>Industry(s):</Form.Label><span className="ms-2">{item.industries}</span>
                         </div>
                     }
                     {(item.companyUrl != null && item.companyUrl !== '' ) &&
                         <div className="col-md-12">
-                            <Form.Label>Website:</Form.Label><span className="ml-2">{item.companyUrl}</span>
+                            <Form.Label>Website:</Form.Label><span className="ms-2">{item.companyUrl}</span>
                         </div>
                     }
                 </div>
@@ -542,10 +542,10 @@ function AdminRequestInfoEntity() {
 
         return (
             <>
-                <h1 className="m-0 mr-2">
+                <h1 className="m-0 me-2">
                     Admin | {caption}
                 </h1>
-                <div className="ml-auto d-flex align-items-center" >
+                <div className="ms-auto d-flex align-items-center" >
                     {renderButtons()}
                     {renderMoreDropDown()}
                 </div>

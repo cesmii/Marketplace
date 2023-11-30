@@ -66,10 +66,10 @@ function HeaderSearch(props) { //(caption, iconName, showSearch, searchValue, on
         return (
             <>
                 {(props.itemCount != null && props.itemCount > 0) &&
-                    <span className="text-right text-nowrap">{props.itemCount}{props.itemCount === 1 ? ' item' : ' items'}</span>
+                    <span className="text-end text-nowrap">{props.itemCount}{props.itemCount === 1 ? ' item' : ' items'}</span>
                 }
                 <Form onSubmit={onSearchClick} className="header-search-block">
-                    <Form.Row className="mx-0" >
+                    <div className="row">
                         <InputGroup className="txt-search-ui-group">
                             <FormControl
                                 type="text"
@@ -80,16 +80,15 @@ function HeaderSearch(props) { //(caption, iconName, showSearch, searchValue, on
                                 onBlur={onSearchBlur}
                                 className="with-append"
                             />
-                            <InputGroup.Append>
-                                {props.searchMode == null || props.searchMode === "standard" ? (
-                                    <Button variant="search" className="p-0 px-3 border-left-0 d-flex align-items-center" onClick={onSearchClick} type="submit" title="Search" >
-                                        <i className="material-icons">search</i>
-                                    </Button>
-                                ) : ""
-                                }
-                            </InputGroup.Append>
+                            {props.searchMode == null || props.searchMode === "standard" ? (
+                                <Button variant="search" className="d-flex align-items-center" onClick={onSearchClick} type="submit" title="Search" >
+                                    <i className="material-icons">search</i>
+                                </Button>
+                            ) : ""
+                            }
+
                         </InputGroup>
-                    </Form.Row>
+                    </div>
                 </Form>
             </>
         );

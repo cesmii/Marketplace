@@ -18,7 +18,7 @@ export const renderIcon = (item, currentUserId, size = 24, useMarginRight = true
 
     var svg = (<SVGIcon name={iconName} size={size} fill={iconColor} alt={iconName} />);
 
-    return (<span className={useMarginRight ? "d-flex align-items-center justify-content-center mr-2" : "d-flex align-items-center justify-content-center "} >{svg}</span>)
+    return (<span className={useMarginRight ? "d-flex align-items-center justify-content-center me-2" : "d-flex align-items-center justify-content-center "} >{svg}</span>)
 };
 
 export const renderLinkedName = (item, cssClass = null ) => {

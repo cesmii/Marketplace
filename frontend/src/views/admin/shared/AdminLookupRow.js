@@ -26,7 +26,7 @@ function AdminLookupRow(props) { //props are item, showActions
         return (
             <>
                 <tr className={`mx-0 my-1 p-0 py-1 ${cssClass}`}>
-                    <th className="pl-2" >
+                    <th className="ps-2" >
                         
                     </th>
                     <th className="" >
@@ -35,10 +35,10 @@ function AdminLookupRow(props) { //props are item, showActions
                     <th className="" >
                         Name
                     </th>
-                    <th className="py-2 d-none d-sm-table-cell align-middle text-right" >
+                    <th className="py-2 d-none d-sm-table-cell align-middle text-end" >
                         Display Order
                     </th>
-                    <th className="pr-2 text-right" >
+                    <th className="pe-2 text-end" >
                         Delete
                     </th>
                 </tr>
@@ -52,8 +52,8 @@ function AdminLookupRow(props) { //props are item, showActions
     return (
         <>
             <tr className={`mx-0 my-1 p-0 py-1 ${cssClass}`}>
-                <td className="py-2 pl-2" >
-                    <a className="btn btn-icon-outline circle mr-2" href={`/admin/lookup/${props.item.id}`} ><i className="material-icons">edit</i></a>
+                <td className="py-2 ps-2" >
+                    <a className="btn btn-icon-outline circle me-2" href={`/admin/lookup/${props.item.id}`} ><i className="material-icons">edit</i></a>
                 </td>
                 <td className="py-2 align-middle" >
                     {props.item.lookupType.name}
@@ -61,11 +61,11 @@ function AdminLookupRow(props) { //props are item, showActions
                 <td className="py-2 align-middle" >
                     {props.item.name}
                 </td>
-                <td className="py-2 d-none d-sm-table-cell align-middle text-right" >
+                <td className="py-2 d-none d-sm-table-cell align-middle text-end" >
                     {props.item.displayOrder}
                 </td>
-                <td className="py-2 pr-2 text-right" >
-                    <button className="btn btn-icon-outline circle ml-auto" title="Delete Item" onClick={onDeleteItem} ><i className="material-icons">close</i></button>
+                <td className="py-2 pe-2 text-end" >
+                    <button className="btn btn-icon-outline circle ms-auto" title="Delete Item" onClick={onDeleteItem} ><i className="material-icons">close</i></button>
                 </td>
             </tr>
         </>
