@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useHistory, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 import { useMsal } from "@azure/msal-react";
 import { axiosInstance } from "../services/AxiosService";
@@ -31,7 +31,8 @@ function Home() {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const history = useHistory();
+    const navigate = useNavigate();
+    const location = useLocation();
     const { returnUrl } = useParams();
     const { instance } = useMsal();
     const _activeAccount = instance.getActiveAccount();
@@ -50,9 +51,9 @@ function Home() {
     const [_searchCriteriaLocal, setSearchCriteriaLocal] = useState(null);
 
     //check for logged in status - redirect to home page/return url if already logged in.
-    if (history.location.pathname.indexOf('/login?returnUrl=') > -1 && returnUrl != null && isAuthenticated) {
+    if (location.pathname.indexOf('/login?returnUrl=') > -1 && returnUrl != null && isAuthenticated) {
         //set this for downstream use post successful silent login
-        history.push(returnUrl ? decodeURIComponent(returnUrl) : '/');
+        navigate(returnUrl ? decodeURIComponent(returnUrl) : '/');
     }
 
     //-------------------------------------------------------------------
@@ -92,7 +93,7 @@ function Home() {
         criteria.query = val;
         criteria.skip = 0;
         setLoadingProps({ searchCriteria: criteria });
-        history.push({
+        navigate({
             pathname: '/library',
             search: `?${generateSearchQueryString(criteria, 1)}`
         });
@@ -102,7 +103,7 @@ function Home() {
     const filterOnItemClick = (criteria) => {
         //filter event handler - set global state and navigate to search page
         setLoadingProps({ searchCriteria: criteria });
-        history.push({
+        navigate({
             pathname: '/library',
             search: `?${generateSearchQueryString(criteria, 1)}`
         });
@@ -287,7 +288,7 @@ function Home() {
                         {caption}
                     </h2>
                     {showLink && 
-                        <a className="ml-auto" href="/library" >View All</a>
+                        <a className="ms-auto" href="/library" >View All</a>
                     }
                 </div>
             </div>

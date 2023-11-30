@@ -108,12 +108,10 @@ function SubscribeForm() {
                     placeholder="Enter valid email address" aria-label="Enter valid email address"
                     title={renderValidationMessage()}
                 />
-            </InputGroup>
-            <InputGroup.Append>
-                <Button variant="primary" className="ml-2 auto-width px-3 btn-subscribe" onClick={onSubscribeClick} type="submit" >
+                <Button variant="primary" className="auto-width px-3 btn-subscribe" onClick={onSubscribeClick} type="submit" >
                     Subscribe
                 </Button>
-            </InputGroup.Append>
+            </InputGroup>
         </Form>
     )
 

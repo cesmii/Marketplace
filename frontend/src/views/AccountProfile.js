@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 import { useMsal } from "@azure/msal-react";
 import { axiosInstance } from "../services/AxiosService";
@@ -22,7 +22,7 @@ function AccountProfile() {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const history = useHistory();
+    const navigate = useNavigate();
     const { instance } = useMsal();
     const _activeAccount = instance.getActiveAccount();
     const { isAuthenticated, isAuthorized } = useLoginStatus(null, [AppSettings.AADAdminRole]);
@@ -53,13 +53,13 @@ function AccountProfile() {
                 console.log(generateLogMessageString('useEffect||fetchData||error', CLASS_NAME, 'error'));
                 if (err != null && err.response != null && err.response.status === 404) {
                     msg += ' This user was not found.';
-                    history.push('/404');
+                    navigate('/404');
                 }
                 //403 error - user may be allowed to log in but not permitted to perform the API call they are attempting
                 else if (err != null && err.response != null && err.response.status === 403) {
                     console.log(generateLogMessageString('useEffect||fetchData||Permissions error - 403', CLASS_NAME, 'error'));
                     msg += ' You are not permitted to edit account profile.';
-                    history.goBack();
+                    navigate(-1);
                 }
                 setLoadingProps({
                     isLoading: false, message: null, inlineMessages: [
@@ -98,7 +98,7 @@ function AccountProfile() {
     const onCancel = () => {
         //raised from header nav
         console.log(generateLogMessageString('onCancel', CLASS_NAME));
-        history.goBack();
+        navigate(-1);
     };
 
     const onSave = () => {
@@ -338,8 +338,8 @@ function AccountProfile() {
     const renderButtons = () => {
         return (
             <>
-                <Button variant="text-solo" className="ml-1" onClick={onCancel} >Cancel</Button>
-                <Button variant="secondary" type="button" className="ml-2" onClick={onSave} >Save</Button>
+                <Button variant="text-solo" className="ms-1" onClick={onCancel} >Cancel</Button>
+                <Button variant="secondary" type="button" className="ms-2" onClick={onSave} >Save</Button>
             </>
         );
     }
@@ -402,10 +402,10 @@ function AccountProfile() {
 
         return (
             <>
-                <h1 className="m-0 mr-2">
+                <h1 className="m-0 me-2">
                     {_caption}
                 </h1>
-                <div className="ml-auto d-flex align-items-center" >
+                <div className="ms-auto d-flex align-items-center" >
                     {isAuthorized &&
                         renderButtons()
                     }

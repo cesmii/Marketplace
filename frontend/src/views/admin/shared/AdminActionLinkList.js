@@ -95,7 +95,7 @@ function AdminActionLinkList(props) {
                     <button className="btn btn-icon-outline circle primary d-inline " onClick={onAdd} ><i className="material-icons">add</i>
                     </button>
                     {(props.captionAdd != null) &&
-                        <span className="pl-2" >{props.captionAdd}</span>
+                        <span className="ps-2" >{props.captionAdd}</span>
                     }
                 </div>
             </div>

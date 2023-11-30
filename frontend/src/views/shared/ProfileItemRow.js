@@ -1,5 +1,5 @@
 import React from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Button } from 'react-bootstrap'
 
 import { formatItemPublishDate, getImageUrl, getRandomArrayIndexes } from '../../utils/UtilityService';
@@ -10,13 +10,13 @@ import { AppSettings } from '../../utils/appsettings';
 
 function ProfileItemRow(props) { //props are item, showActions
 
-    const history = useHistory();
+    const navigate = useNavigate();
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
     const navigateToItem = (e) => {
-        history.push({
+        navigate({
             pathname: `/profile/${props.item.id}`,
             state: { id: `${props.item.id}` }
         });
@@ -33,7 +33,7 @@ function ProfileItemRow(props) { //props are item, showActions
         return (
             randomIndexes.map((i) => {
                 return (
-                    <span key={items[i]} className="metatag badge meta border">
+                    <span key={items[i]} className="metatag badge meta border text-secondary">
                         {items[i]}
                     </span>
                 )
@@ -49,7 +49,7 @@ function ProfileItemRow(props) { //props are item, showActions
         return (
             randomIndexes.map((i) => {
                 return (
-                    <span key={items[i].id} className="metatag badge meta border">
+                    <span key={items[i].id} className="metatag badge meta border text-secondary">
                         {items[i].name}
                     </span>
                 )
@@ -105,13 +105,13 @@ function ProfileItemRow(props) { //props are item, showActions
                     <p className="my-4" ><Button variant="secondary" type="button" className="px-4" href={`/profile/${props.item.externalSource.code}/${props.item.id}`} >More Info</Button>
                     </p>
                     {(props.item.namespace != null && props.item.namespace !== '') &&
-                        <p className="mb-2" ><b className="mr-2" >Namespace:</b>
+                        <p className="mb-2" ><b className="me-2" >Namespace:</b>
                             <span style={{ wordBreak: "break-word" }} >{props.item.namespace}</span>
                         </p>
                     }
-                    <p className="mb-2" ><b className="mr-2" >Published By:</b>{props.item.publisher.displayName}</p>
-                    <p className="mb-2" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
-                    <p className="mb-2" ><b className="mr-2" >Version:</b>{props.item.version}</p>
+                    <p className="mb-2" ><b className="me-2" >Published By:</b>{props.item.publisher.displayName}</p>
+                    <p className="mb-2" ><b className="me-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
+                    <p className="mb-2" ><b className="me-2" >Version:</b>{props.item.version}</p>
                     <div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>
                     <div className="d-none d-lg-inline" >{renderCategoryItem(props.item)}</div>
                     <div className="d-none d-lg-inline" >{renderMetaTagItem(props.item)}</div>
@@ -132,17 +132,17 @@ function ProfileItemRow(props) { //props are item, showActions
                     <div className="d-inline">
                         <h2 className="mb-2" >SM Profile: {props.item.displayName}</h2>
                         {(props.item.namespace != null && props.item.namespace !== '') &&
-                            <p className="mb-1" ><b className="mr-2" >Namespace:</b>
+                            <p className="mb-1" ><b className="me-2" >Namespace:</b>
                                 <span style={{ wordBreak: "break-word" }} >{props.item.namespace}</span>
-                            <span className="ml-2" >(v.{props.item.version}) </span>
+                            <span className="ms-2" >(v.{props.item.version}) </span>
                             </p>
                         }
                         <p className="mb-0" >
-                            <b className="mr-2" >Published By:</b>{props.item.publisher.displayName},
+                            <b className="me-2" >Published By:</b>{props.item.publisher.displayName},
                             <b className="mx-2" >on:</b>{formatItemPublishDate(props.item)}
                         </p>
                     </div>
-                    <div className="ml-auto" >
+                    <div className="ms-auto" >
                         <Button variant="secondary" type="button" className="text-nowrap" href={`/profile/${props.item.externalSource.code}/${props.item.id}`} >More Info</Button>
                     </div>
                 </div>

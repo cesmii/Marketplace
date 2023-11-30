@@ -1,5 +1,5 @@
 import React from 'react'
-import {Switch} from "react-router-dom"
+import { Routes as SwitchRoutes, Route } from 'react-router-dom';
 
 //common components
 import AdminRoute from '../views/admin/shared/AdminRoute'
@@ -38,62 +38,74 @@ import ExternalSourceEntity from '../views/ExternalSourceEntity'
 
 //const CLASS_NAME = "Routes";
 
+//Upgrade from 5.2 to v6
+//https://github.com/remix-run/react-router/blob/main/docs/upgrading/v5.md
 
 function Routes() {
 
-    //-------------------------------------------------------------------
-    //  Routes
-    //-------------------------------------------------------------------
-    return(
-        <Switch>
-            {/* Route order matters in the profile/ routes* - TBD - update to admin versions of the forms... */}
-            <PublicRouteWFilter exact path="/" component={Home} />
-            <PublicRouteWFilter exact path="/login/success" component={LoginSuccess} />
-            <PublicRouteWFilter path="/login/returnUrl=:returnUrl" component={Home} />
-            <PublicRouteWFilter exact path="/login" component={Home} />
-            {/*<PublicRoute exact path="/about" component={About} />*/}
-            <PublicRoute exact path="/library/:code/:id" component={ExternalSourceEntity} />
-            <PublicRoute exact path="/library/:id" component={MarketplaceEntity} />
-            <PublicRoute exact path="/profile/:code/:id" component={ProfileEntity} />
-            <PublicRouteWFilter exact path="/library" component={MarketplaceList} />
-            <PublicRouteWFilter exact path="/all" component={MarketplaceList} />
-            <PublicRoute exact path="/publisher/:id" component={PublisherEntity} />
-            <PublicRoute exact path="/more-info/:itemType/:code/:externalId" component={RequestInfo} />
-            <PublicRoute exact path="/more-info/:itemType/:id" component={RequestInfo} />
-            <PublicRoute exact path="/request-info/publisher/:publisherId" component={RequestInfo} />
-            <PublicRoute exact path="/contact-us/" component={RequestInfo} />
-            <PublicRoute exact path="/contact-us/:type" component={RequestInfo} />
+	//-------------------------------------------------------------------
+	//  Routes
+	//-------------------------------------------------------------------
+	return (
+		<SwitchRoutes>
+			{/* Route order matters in the profile/ routes* - TBD - update to admin versions of the forms... */}
+			<Route element={<PublicRoute />}>
+				{/*<Route path="/about" element={<About} />*/}
+				<Route path="/library/:code/:id" element={<ExternalSourceEntity />} />
+				<Route path="/library/:id" element={<MarketplaceEntity />} />
+				<Route path="/profile/:code/:id" element={<ProfileEntity />} />
+				<Route path="/publisher/:id" element={<PublisherEntity />} />
+				<Route path="/more-info/:itemType/:code/:externalId" element={<RequestInfo />} />
+				<Route path="/more-info/:itemType/:id" element={<RequestInfo />} />
+				<Route path="/request-info/publisher/:publisherId" element={<RequestInfo />} />
+				<Route path="/contact-us/" element={<RequestInfo />} />
+				<Route path="/contact-us/:type" element={<RequestInfo />} />
+			</Route>
 
-            {/* Admin UI order matters in the profile/ routes* - TBD - update to admin versions of the forms...*/}
-            <AdminRoute path="/admin/library/list" component={AdminMarketplaceList} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/library/copy/:parentId" component={AdminMarketplaceEntity} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/library/:id" component={AdminMarketplaceEntity} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/publisher/list" component={AdminPublisherList} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/publisher/copy/:parentId" component={AdminPubisherEntity} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/publisher/:id" component={AdminPubisherEntity} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/requestinfo/list" component={AdminRequestInfoList} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/requestinfo/:id" component={AdminRequestInfoEntity} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/images/list" component={AdminStockImageList} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/lookup/list" component={AdminLookupList} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/lookup/copy/:parentId" component={AdminLookupEntity} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/lookup/:id" component={AdminLookupEntity} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/jobDefinition/list" component={AdminJobDefinitionList} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/jobDefinition/copy/:parentid" component={AdminJobDefinitionEntity} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/jobDefinition/:id" component={AdminJobDefinitionEntity} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/relateditem/list" component={AdminProfileList} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/relateditem/:code/:id" component={AdminProfileEntity} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/externalsource/list" component={AdminExternalSourceList} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/externalsource/copy/:parentId" component={AdminExternalSourceEntity} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/externalsource/:id" component={AdminExternalSourceEntity} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/admin/sitemap/generate" component={SitemapGenerator} roles={[AppSettings.AADAdminRole]} />
-            <AdminRoute path="/account" component={AccountProfile} />
+			<Route element={<PublicRouteWFilter />}>
+				<Route path="/" element={<Home />} />
+				<Route path="/login/success" element={<LoginSuccess />} />
+				<Route path="/login/returnUrl=:returnUrl" element={<Home />} />
+				<Route path="/login" element={<Home />} />
+				{/*<Route path="/about" element={<About />} />*/}
+				<Route path="/library" element={<MarketplaceList />} />
+				<Route path="/all" element={<MarketplaceList />} />
+			</Route>
 
-            <PublicRoute path="/notpermitted" component={NotAuthorized} />
-            <PublicRoute path="/notauthorized" component={NotAuthorized} />
-            <PublicRoute component={PageNotFound} />
-        </Switch>
+			{/* Admin UI order matters in the profile/ routes* - TBD - update to admin versions of the forms...*/}
 
-    )
+			<Route element={<AdminRoute roles={[AppSettings.AADAdminRole]} />} >
+				<Route path="/admin/library/list" element={<AdminMarketplaceList />}  />
+				<Route path="/admin/library/copy/:parentId" element={<AdminMarketplaceEntity />}  />
+				<Route path="/admin/library/:id" element={<AdminMarketplaceEntity />}  />
+				<Route path="/admin/publisher/list" element={<AdminPublisherList />}  />
+				<Route path="/admin/publisher/copy/:parentId" element={<AdminPubisherEntity />}  />
+				<Route path="/admin/publisher/:id" element={<AdminPubisherEntity />}  />
+				<Route path="/admin/requestinfo/list" element={<AdminRequestInfoList />}  />
+				<Route path="/admin/requestinfo/:id" element={<AdminRequestInfoEntity />}  />
+				<Route path="/admin/images/list" element={<AdminStockImageList />}  />
+				<Route path="/admin/lookup/list" element={<AdminLookupList />}  />
+				<Route path="/admin/lookup/copy/:parentId" element={<AdminLookupEntity />}  />
+				<Route path="/admin/lookup/:id" element={<AdminLookupEntity />}  />
+				<Route path="/admin/jobDefinition/list" element={<AdminJobDefinitionList />}  />
+				<Route path="/admin/jobDefinition/copy/:parentid" element={<AdminJobDefinitionEntity />}  />
+				<Route path="/admin/jobDefinition/:id" element={<AdminJobDefinitionEntity />}  />
+				<Route path="/admin/relateditem/list" element={<AdminProfileList />}  />
+				<Route path="/admin/relateditem/:code/:id" element={<AdminProfileEntity />}  />
+				<Route path="/admin/externalsource/list" element={<AdminExternalSourceList />}  />
+				<Route path="/admin/externalsource/copy/:parentId" element={<AdminExternalSourceEntity />}  />
+				<Route path="/admin/externalsource/:id" element={<AdminExternalSourceEntity />}  />
+				<Route path="/admin/sitemap/generate" element={<SitemapGenerator />}  />
+				<Route path="/account" element={<AccountProfile />} />
+			</Route>
+			<Route element={<PublicRoute />}>
+				<Route path='/notpermitted' element={<NotAuthorized />} />
+				<Route path='/notauthorized' element={<NotAuthorized />} />
+				<Route element={<PageNotFound />} />
+			</Route>
+		</SwitchRoutes>
+
+	)
 
 }
 

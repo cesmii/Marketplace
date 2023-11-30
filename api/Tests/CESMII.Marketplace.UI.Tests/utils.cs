@@ -30,7 +30,7 @@ namespace CESMII.Marketplace.UI.Tests
         public static int QueryItemCount(IWebDriver driver)
         {
             System.Threading.Thread.Sleep(2000);
-            var eleItemCounter = driver.FindElement(By.CssSelector(".text-left"));
+            var eleItemCounter = driver.FindElement(By.CssSelector(".text-start"));
             if (eleItemCounter == null)
             {
                 System.Diagnostics.Debug.WriteLine($"QueryItemCount: null value returned");

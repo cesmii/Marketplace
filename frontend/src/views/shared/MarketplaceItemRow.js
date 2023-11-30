@@ -1,5 +1,5 @@
 import React from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Button } from 'react-bootstrap'
 
 import { formatItemPublishDate, getRandomArrayIndexes } from '../../utils/UtilityService';
@@ -13,14 +13,14 @@ import { getViewByPublisherUrl } from '../../services/PublisherService';
 
 function MarketplaceItemRow(props) { //props are item, showActions
 
-    const history = useHistory();
+    const navigate = useNavigate();
     const { loadingProps, setLoadingProps } = useLoadingContext();
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
     const navigateToMarketplaceItem = (e) => {
-        history.push({
+        navigate({
             pathname: `/library/${props.item.name}`,
             state: { id: `${props.item.name}` }
         });
@@ -37,7 +37,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
         return (
             randomIndexes.map((i) => {
                 return (
-                    <span key={items[i]} className="metatag badge meta border">
+                    <span key={items[i]} className="metatag badge meta border text-secondary">
                         {items[i]}
                     </span>
                 )
@@ -52,7 +52,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
             items.map((tag, counter) => {
                 if (counter < limit) {
                     return (
-                        <span key={tag} className="metatag badge meta">
+                        <span key={tag} className="metatag badge meta text-secondary">
                             {tag}
                         </span>
                     )
@@ -67,7 +67,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
             items.map((tag, counter) => {
                 if (counter < limit) {
                     return (
-                        <span key={tag.id} className="metatag badge meta">
+                        <span key={tag.id} className="metatag badge meta text-secondary">
                             {tag.name}
                         </span>
                     )
@@ -85,7 +85,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
         return (
             randomIndexes.map((i) => {
                 return (
-                    <span key={items[i].id} className="metatag badge meta border">
+                    <span key={items[i].id} className="metatag badge meta border text-secondary">
                         {items[i].name}
                     </span>
                 )
@@ -130,7 +130,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
                         <h2 className="mb-0" >{props.item.displayName}
                         </h2>
                         {(props.isAuthorized && !props.item.isExternal) &&
-                            <a className="btn btn-icon-outline circle ml-auto" href={`/admin/library/${props.item.id}`} ><i className="material-icons">edit</i></a>
+                            <a className="btn btn-icon-outline circle ms-auto" href={`/admin/library/${props.item.id}`} ><i className="material-icons">edit</i></a>
                         }
                     </div>
                     {props.item.abstract != null &&
@@ -138,7 +138,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
                     }
                     <p className="my-4" ><Button variant="secondary" type="button" className="px-4" href={url} >More Info</Button>
                     </p>
-                    <p className="mb-2" ><b className="mr-2" >Published By:</b><a href={`/publisher/${props.item.publisher.name}`} >{props.item.publisher.displayName}</a></p>
+                    <p className="mb-2" ><b className="me-2" >Published By:</b><a href={`/publisher/${props.item.publisher.name}`} >{props.item.publisher.displayName}</a></p>
                     {props.item.publisher?.allowFilterBy &&
                         <p className="mb-2 d-flex align-items-center" >
                             <SvgVisibilityIcon fill={color.link} />
@@ -146,7 +146,7 @@ function MarketplaceItemRow(props) { //props are item, showActions
                         </p>
                     }
                     {props.item.publishDate != null &&
-                        <p className="mb-3" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
+                        <p className="mb-3" ><b className="me-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
                     }
                     <div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>
                     <div className="d-none d-lg-inline" >{renderCategoryItem(props.item)}</div>

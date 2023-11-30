@@ -1,4 +1,4 @@
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { AppSettings } from '../utils/appsettings';
 
 import { generateLogMessageString, getImageUrl, getUserPreferences, setUserPreferences } from '../utils/UtilityService';
@@ -124,7 +124,7 @@ export function MarketplaceRelatedItems(props) {
             return (
                 <div key={key} className="card mb-0">
                     <div className="card-header bg-transparent p-0 border-bottom-0" id={`heading-${i}-${itm.relatedType?.code}`} >
-                        <button className="btn btn-content-accordion p-3 py-2 text-left d-block w-100" type="button" data-toggle="collapse" data-target={`#${collapseTargetId}`} aria-expanded="false" aria-controls={`${collapseTargetId}`} >
+                        <button className="btn btn-content-accordion p-3 py-2 text-start d-block w-100" type="button" data-bs-toggle="collapse" data-bs-target={`#${collapseTargetId}`} aria-expanded="false" aria-controls={`${collapseTargetId}`} >
                             <h3 className="mb-0">
                                 {itm.relatedType?.name}
                             </h3>
@@ -165,26 +165,26 @@ export function MarketplaceRelatedItems(props) {
 //-------------------------------------------------------------------
 export function RenderImageBg (props) {
 
-    const history = useHistory();
+    const navigate = useNavigate();
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
     const navigateToMarketplaceItem = (e) => {
         if (props.itemType != null && props.itemType === AppSettings.itemTypeCode.smProfile) {
-            history.push({
+            navigate({
                 pathname: `/profile/${props.item.externalSource.code}/${props.item.id}`,
                 state: { id: `${props.item.id}` }
             });
         }
         else if (props.item.isExternal) {
-            history.push({
+            navigate({
                 pathname: `/library/${props.item.externalSource.code.toLowerCase()}/${props.item.id}`,
                 state: { id: `${props.item.id}` }
             });
         }
         else {
-            history.push({
+            navigate({
                 pathname: `/library/${props.item.name}`,
                 state: { id: `${props.item.name}` }
             });

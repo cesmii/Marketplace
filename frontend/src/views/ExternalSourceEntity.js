@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useParams, useHistory } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 import axiosInstance from "../services/AxiosService";
 
@@ -23,7 +23,8 @@ function ExternalSourceEntity() {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const history = useHistory();
+    const navigate = useNavigate();
+    const location = useLocation();
     const _scrollToSpecs = useRef(null);
     const _scrollToRelated = useRef(null);
 
@@ -53,7 +54,7 @@ function ExternalSourceEntity() {
                 //console.log(err.response.status);
                 if (err != null && err.response != null && err.response.status === 404) {
                     msg += ' This external source item was not found.';
-                    history.push('/404');
+                    navigate('/404');
                 }
                 setLoadingProps({
                     isLoading: false, message: null, inlineMessages: [
@@ -73,7 +74,7 @@ function ExternalSourceEntity() {
 
             //add to the recent file list to keep track of where we have been
             var revisedList = UpdateRecentFileList(loadingProps.recentFileList, {
-                url: history.location.pathname, caption: result.data.displayName, iconName: getMarketplaceIconName(result.data),
+                url: location.pathname, caption: result.data.displayName, iconName: getMarketplaceIconName(result.data),
                 authorId: result.data.author != null ? result.data.author.id : null
             });
             setLoadingProps({ recentFileList: revisedList });
@@ -95,7 +96,7 @@ function ExternalSourceEntity() {
     const onBack = () => {
         //raised from header nav
         console.log(generateLogMessageString('onBack', CLASS_NAME));
-        history.goBack();
+        navigate(-1);
     };
 
     const onViewSpecifications = (e) => {
@@ -126,7 +127,7 @@ function ExternalSourceEntity() {
 
         return (
             <>
-                <h1 className="m-0 mr-2">
+                <h1 className="m-0 me-2">
                     {item.displayName}
                 </h1>
                 {/*<SVGIcon name={isFavorite ? "favorite" : "favorite-border"} size="24" fill={color.forestGreen} onClick={toggleFavoritesList} />*/}
@@ -143,7 +144,7 @@ function ExternalSourceEntity() {
         return (
             randomIndexes.map((i) => {
                 return (
-                    <span key={items[i]} className="metatag badge meta border">
+                    <span key={items[i]} className="metatag badge meta border text-secondary">
                         {items[i]}
                     </span>
                 )
@@ -162,13 +163,13 @@ function ExternalSourceEntity() {
                 {(item.publisher?.displayName != null) &&
                     <div className="row" >
                         <div className="col-sm-12">
-                            <span className="m-0 mr-2 mb-2 mb-md-0">
-                                <b className="mr-1" >Published By:</b>
+                            <span className="m-0 me-2 mb-2 mb-md-0">
+                                <b className="me-1" >Published By:</b>
                                 <br className="d-block d-md-none" />
                                 <a href={`/publisher/${item.publisher.name}`} >{item.publisher.displayName}</a>
                             </span>
                             {item.publisher?.allowFilterBy &&
-                                <span className="m-0 mr-2 my-2 mb-md-0 d-flex align-items-center">
+                                <span className="m-0 me-2 my-2 mb-md-0 d-flex align-items-center">
                                     <SvgVisibilityIcon fill={color.link} />
                                     <a href={getViewByPublisherUrl(loadingProps, item.publisher)} >View all by this publisher</a>
                                 </span>
@@ -203,7 +204,7 @@ function ExternalSourceEntity() {
     //
     const renderSubTitle = () => {
         return (
-            <span onClick={onBack} className="px-2 btn btn-text-solo align-items-center auto-width ml-auto justify-content-end d-flex clickable hover" ><i className="material-icons">chevron_left</i>Back</span>
+            <span onClick={onBack} className="px-2 btn btn-text-solo align-items-center auto-width ms-auto justify-content-end d-flex clickable hover" ><i className="material-icons">chevron_left</i>Back</span>
         );
     }
 
@@ -222,7 +223,7 @@ function ExternalSourceEntity() {
                                     : `${item.type.name.replace('SM ', 'Smart Manufacturing ')} Details`
                                 }
                                 </h2>
-                                <a className="btn btn-primary px-1 px-md-4 auto-width ml-auto text-nowrap" href={`/more-info/${item.type.code}/${item.externalSource.code}/${item.id}`} >Request More Info</a>
+                                <a className="btn btn-primary px-1 px-md-4 auto-width ms-auto text-nowrap" href={`/more-info/${item.type.code}/${item.externalSource.code}/${item.id}`} >Request More Info</a>
                             </div>
                         </div>
                         <div id="collapseOne" className="collapse show mb-3" aria-labelledby="headingOne" >

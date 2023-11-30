@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useHistory } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { InteractionStatus } from "@azure/msal-browser";
 import { useMsal } from "@azure/msal-react";
 
@@ -23,7 +23,8 @@ function Navbar() {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const history = useHistory();
+    const navigate = useNavigate();
+    const location = useLocation();
     const { instance, inProgress } = useMsal();
     const _activeAccount = instance.getActiveAccount();
     const { isAuthenticated, isAuthorized } = useLoginStatus(null, [AppSettings.AADAdminRole]);
@@ -45,7 +46,7 @@ function Navbar() {
     // Region: event handlers
     //-------------------------------------------------------------------
     const onLogoutClick = (e) => {
-        doLogout(history, instance, '/', true, true);
+        doLogout(navigate, instance, '/', true, true);
         e.preventDefault();
     }
 
@@ -56,16 +57,16 @@ function Navbar() {
         return (
             <nav className="navbar navbar-expand-md navbar-dark bg-primary">
                 <div className="container-fluid container-lg">
-                    <a className="navbar-brand d-flex align-items-center" href="/">
-                        <img className="mr-3 mb-2 d-none d-md-block" src={logo} alt="CESMII Logo"></img>
+                    <a className="navbar-brand d-flex align-items-center text-decoration-none" href="/">
+                        <img className="me-3 mb-2 d-none d-md-block" src={logo} alt="CESMII Logo"></img>
                         <span className="headline-2">{AppSettings.Titles.Caption}</span>
                     </a>
-                    <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+                    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
                         <span className="navbar-toggler-icon"></span>
                     </button>
                     <div className="navbar-collapse collapse" id="navbarMain">
-                        <div className="ml-auto my-2 my-lg-0 nav navbar-nav  align-items-md-center" >
-                            <a className={`nav-link py-1 px-2 ${history.location.pathname === "/library" ? "active" : ""}`} href={_urlLibrary}>Library</a>
+                        <div className="ms-auto my-2 my-lg-0 nav navbar-nav  align-items-md-center" >
+                            <a className={`nav-link py-1 px-2 ${location.pathname === "/library" ? "active" : ""}`} href={_urlLibrary}>Library</a>
                             {/*
                             <a className={`nav-link py-1 px-2 ${history.location.pathname === "/industries" ? "active" : ""}`}
                                 href="/industries">Industries</a>
@@ -73,7 +74,7 @@ function Navbar() {
                             */}
                             {/*    <a className={`nav-link py-1 px-2 ${history.location.pathname === "/about" ? "active" : ""}`}*/}
                             {/*        href="/about">About</a>*/}
-                            <a className={`nav-link py-1 px-2 ${history.location.pathname.indexOf("/contact-us/") > -1 ? "active" : ""}`}
+                            <a className={`nav-link py-1 px-2 ${location.pathname.indexOf("/contact-us/") > -1 ? "active" : ""}`}
                                 href="/contact-us/contribute">Contribute</a>
                             <LoginButton />
                             {renderAdminMenu()}
@@ -89,8 +90,8 @@ function Navbar() {
         return (
             <div className="nav-item" >
             <Dropdown>
-                <Dropdown.Toggle className="ml-0 ml-md-2 px-1 dropdown-custom-components d-flex align-items-center">
-                    <SVGIcon name="account-circle" size="32" fill={Color.white} className="mr-2" />
+                <Dropdown.Toggle className="ms-0 ms-md-2 px-1 dropdown-custom-components d-flex align-items-center">
+                    <SVGIcon name="account-circle" size="32" fill={Color.white} className="me-2" />
                     {_activeAccount?.name}
                 </Dropdown.Toggle>
                 <Dropdown.Menu>

@@ -283,7 +283,7 @@ function AdminProfileList() {
         if (_itemsLookupSources.length === 1) {
             const src = _itemsLookupSources[0];
             return (
-                <a className="btn btn-icon-outline circle primary ml-auto" href={`/admin/relateditem/${src.code}/new`} ><i className="material-icons">add</i></a>
+                <a className="btn btn-icon-outline circle primary ms-auto" href={`/admin/relateditem/${src.code}/new`} ><i className="material-icons">add</i></a>
             )
         };
 
@@ -295,7 +295,7 @@ function AdminProfileList() {
         });
 
         return (
-            <Dropdown className="action-menu icon-dropdown ml-auto" onClick={(e) => e.stopPropagation()} >
+            <Dropdown className="action-menu icon-dropdown ms-auto" onClick={(e) => e.stopPropagation()} >
                 <Dropdown.Toggle drop="left">
                     <SVGIcon name="more-vert" size="24" fill={color.shark} />
                 </Dropdown.Toggle>
@@ -328,7 +328,7 @@ function AdminProfileList() {
                 <div className="col-sm-12 d-flex align-items-center" >
                     {(_dataRows.itemCount != null && _dataRows.itemCount > 0) ?
                         <>
-                            <span className="px-2 ml-auto font-weight-bold">{_dataRows.itemCount}{_dataRows.itemCount === 1 ? ' item' : ' items'}</span>
+                            <span className="px-2 ms-auto fw-bold">{_dataRows.itemCount}{_dataRows.itemCount === 1 ? ' item' : ' items'}</span>
                             {renderAddSourceDropdown()}
                         </>
                         :

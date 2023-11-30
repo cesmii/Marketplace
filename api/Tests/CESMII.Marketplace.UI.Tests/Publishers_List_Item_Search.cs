@@ -148,9 +148,9 @@ public class Publishers_List_Item_Search
 
         for (int iPublisher = 0; iPublisher < 50; iPublisher++)
         {
-            // 5 | click | css=.ml-sm-auto | 
+            // 5 | click | css=.ms-sm-auto | 
             // Clear All
-            driver.FindElement(By.CssSelector(".ml-sm-auto")).Click();
+            driver.FindElement(By.CssSelector(".ms-sm-auto")).Click();
             System.Threading.Thread.Sleep(c1000);
 
             var xxPublisher = GetPublisher(iPublisher);
@@ -301,7 +301,7 @@ public class Publishers_List_Item_Search
 
         try
         {
-            var eleItemCounter = driver.FindElement(By.CssSelector(".text-left"));
+            var eleItemCounter = driver.FindElement(By.CssSelector(".text-start"));
             System.Threading.Thread.Sleep(c1000);
             if (eleItemCounter == null)
             {

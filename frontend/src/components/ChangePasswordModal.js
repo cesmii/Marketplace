@@ -243,7 +243,7 @@ function ChangePasswordModal(props) { //props are item, showActions
             <Modal animation={false} show={_show} onHide={onCancel} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>
-                        <i className="material-icons mr-1">settings</i>
+                        <i className="material-icons me-1">settings</i>
                         Change Password
                     </Modal.Title>
                 </Modal.Header>

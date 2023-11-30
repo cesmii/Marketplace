@@ -5,12 +5,10 @@
   "dependencies": {
     "@azure/msal-browser": "2.30.0",
     "@azure/msal-react": "1.4.9",
-    "@material/react-material-icon": "^0.15.0",
-    "@testing-library/jest-dom": "^5.11.5",
-    "@testing-library/react": "^11.1.0",
-    "@testing-library/user-event": "^12.1.10",
-    "axios": "^0.21.0",
-    "bootstrap": "^4.5.3",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/user-event": "^14.4.3",
+    "axios": "^1.6.2",
+    "bootstrap": "^5.3.2",
     "draft-convert": "^2.1.12",
     "draft-js": "^0.11.7",
     "draft-js-export-html": "^1.4.1",
@@ -18,20 +16,20 @@
     "immutable": "^3.8.2",
     "jquery": "^3.5.1",
     "popper.js": "^1.16.1",
-    "react": "^16.4.2",
-    "react-bootstrap": "^1.4.0",
-    "react-dom": "^16.4.2",
+    "react": "^18.2.0",
+    "react-bootstrap": "^2.9.1",
+    "react-dom": "^18.2.0",
     "react-draft-wysiwyg": "^1.14.7",
     "react-error-boundary": "^3.1.4",
     "react-ga4": "^1.4.1",
     "react-helmet": "^6.1.0",
     "react-json-editor-ajrm": "^2.5.13",
-    "react-router-dom": "^5.2.0",
-    "react-scripts": "4.0.0",
-    "react-slick": "^0.28.1",
+    "react-router-dom": "^6.19.0",
+    "react-scripts": "5.0.1",
+    "react-slick": "^0.29.0",
     "sass": "^1.49.11",
     "slick-carousel": "^1.8.1",
-    "web-vitals": "^0.2.4"
+    "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -59,7 +57,12 @@
       "last 1 safari version"
     ]
   },
+  "jest": {
+    "transformIgnorePatterns": [
+      "<rootdir>/node_modules/(?!(@azure/msal-react)).*\\.js$"
+    ]
+  },
   "devDependencies": {
-    "dotenv": "^8.2.0"
+    "msal-react-tester": "^0.3.1"
   }
 }

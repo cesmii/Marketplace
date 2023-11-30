@@ -207,6 +207,7 @@
             return new PublisherModel()
             {
                 ID = pubItem.ID,
+                AllowFilterBy = pubItem.AllowFilterBy,
                 Verified = pubItem.Verified,
                 Description = pubItem.Description,
                 CompanyUrl = pubItem.CompanyUrl,

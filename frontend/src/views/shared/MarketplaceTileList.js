@@ -28,7 +28,7 @@ function MarketplaceTileList(props) {
                     {(item.version != null && item.version !== '') &&
                         <>
                             <br />
-                            <span className="font-weight-normal" >(v. {item.version})</span>
+                            <span className="fw-normal" >(v. {item.version})</span>
                         </>
                     }
                 </>
@@ -62,7 +62,7 @@ function MarketplaceTileList(props) {
                 <Card.Body className="h-100 p-0 tile-body">
                     <img className="card-img-top" src={imgSrc} alt={`${item.name}-${getImageAlt(item.imageLandscape)}`} />
                     <div className="body-content p-4 pb-0" >
-                        <span className="card-title font-weight-bold mb-3 d-block bitter">{renderDisplayName(item)}</span>
+                        <span className="card-title fw-bold mb-3 d-block bitter">{renderDisplayName(item)}</span>
                         {(item.type?.code === AppSettings.itemTypeCode.smProfile) ?
                             <div className="card-text mb-0" >{renderProfileAbstract(item)}</div>
                             :
@@ -83,7 +83,7 @@ function MarketplaceTileList(props) {
                 <Card.Body className="h-100 p-0 tile-body">
                     <img className="card-img-top" src={imgSrc} alt={`${item.name}-${getImageAlt(item.imageLandscape)}`} />
                     <div className="body-content p-2 px-4" >
-                        <span className="card-title font-weight-bold d-block bitter text-center">{renderDisplayName(item)}</span>
+                        <span className="card-title fw-bold d-block bitter text-center">{renderDisplayName(item)}</span>
                     </div>
                 </Card.Body>
             </Card>
@@ -100,27 +100,13 @@ function MarketplaceTileList(props) {
                         <RenderImageBg item={item} defaultImage={item.imagePortrait} responsiveImage={item.imageBanner} clickable={true} />
                     </div>
                     <div className="col-md-6 col-lg-7 p-4" >
-                        <span className="card-title font-weight-bold mb-3 d-block bitter">{renderDisplayName(item)}</span>
+                        <span className="card-title fw-bold mb-3 d-block bitter">{renderDisplayName(item)}</span>
                         <div className="card-text mb-0" dangerouslySetInnerHTML={{ __html: item.abstract }} ></div>
                     </div>
                 </Card.Body>
             </Card>
         );
     }
-
-    const renderImageBg = (item, transpose = false) => {
-        const imgSrc = item.imagePortrait == null ? iconMolecule : getImageUrl(item.imagePortrait);
-        const bgImageStyle = 
-            {
-                backgroundImage: `url(${imgSrc})`
-            };
-
-        return (
-            <div className={`image-bg ${transpose ? 'transpose-image-horizontal-sm': ''}`} >
-                <div className="overlay-icon cover" style={bgImageStyle} >&nbsp;</div>
-            </div>
-        );
-    };
 
     const renderTiles = () => {
         if (props.items == null || props.items.length === 0) {

@@ -174,13 +174,13 @@ function AdminRelatedItemRow(props) { //props are item, showActions
     if (props.isHeader) {
         return (
             <div className={`row my-1 p-0 py-1 d-flex align-items-center ${cssClass}`}>
-                <div className="col-sm-6 font-weight-bold" >
+                <div className="col-sm-6 fw-bold" >
                     Name
                 </div>
-                <div className="col-sm-4 font-weight-bold" >
+                <div className="col-sm-4 fw-bold" >
                     Related Type
                 </div>
-                <div className="col-sm-2 text-right font-weight-bold" >
+                <div className="col-sm-2 text-end fw-bold" >
                 </div>
             </div>
         );
@@ -197,8 +197,8 @@ function AdminRelatedItemRow(props) { //props are item, showActions
             <div className="col-sm-4" >
                 {renderRelatedType()}
             </div>
-            <div className="col-sm-2 text-right" >
-                <button className="btn btn-icon-outline circle ml-auto" title="Delete Item" onClick={onDelete} ><i className="material-icons">close</i></button>
+            <div className="col-sm-2 text-end" >
+                <button className="btn btn-icon-outline circle ms-auto" title="Delete Item" onClick={onDelete} ><i className="material-icons">close</i></button>
             </div>
         </div>
     );

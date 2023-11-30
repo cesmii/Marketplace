@@ -108,13 +108,13 @@ function AdminActionLinkRow(props) { //props are item, showActions
     if (props.isHeader) {
         return (
             <div className={`row my-1 p-0 py-1 d-flex align-items-center ${cssClass}`}>
-                <div className="col-sm-5 font-weight-bold" >
+                <div className="col-sm-5 fw-bold" >
                     Url / Caption
                 </div>
-                <div className="col-sm-4 font-weight-bold" >
+                <div className="col-sm-4 fw-bold" >
                     Icon Name
                 </div>
-                <div className="col-sm-3 text-right font-weight-bold" >
+                <div className="col-sm-3 text-end fw-bold" >
                     Target
                 </div>
             </div>
@@ -138,8 +138,8 @@ function AdminActionLinkRow(props) { //props are item, showActions
                         value={props.item.url} onBlur={validateForm_url} onChange={onChange} />
                 </Form.Group>
             </div>
-            <div className="col-sm-2 text-right pt-1" >
-                <button className="btn btn-icon-outline circle ml-auto" title="Delete Item" onClick={onDelete} ><i className="material-icons">close</i></button>
+            <div className="col-sm-2 text-end pt-1" >
+                <button className="btn btn-icon-outline circle ms-auto" title="Delete Item" onClick={onDelete} ><i className="material-icons">close</i></button>
             </div>
             <div className="col-sm-5" >
                 <Form.Group>
@@ -149,7 +149,7 @@ function AdminActionLinkRow(props) { //props are item, showActions
                             Required
                         </span>
                     }
-                    <Form.Control id="caption" className={(!_isValid.caption ? 'invalid-field minimal pr-5' : 'minimal pr-5')} type="" placeholder={`Enter friendly caption`}
+                    <Form.Control id="caption" className={(!_isValid.caption ? 'invalid-field minimal pe-5' : 'minimal pe-5')} type="" placeholder={`Enter friendly caption`}
                         value={props.item.caption} onBlur={validateForm_caption} onChange={onChange} />
                 </Form.Group>
             </div>

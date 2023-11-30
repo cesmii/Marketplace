@@ -243,7 +243,7 @@ function JobMessage() {
                                 <LoadingIcon size="20" />
                             </span>
                         }
-                        <span className={isProcessing ? 'ml-1' : ''} dangerouslySetInnerHTML={{ __html: caption }} />
+                        <span className={isProcessing ? 'ms-1' : ''} dangerouslySetInnerHTML={{ __html: caption }} />
                     </div>
                 </div>
             </div >

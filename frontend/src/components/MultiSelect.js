@@ -54,7 +54,7 @@ function MultiSelect(props) {
         // sectionKey = caption;
         return (
             <div className={headerCss} >
-                <span key="caption" className="pr-2 w-100 d-block rounded">
+                <span key="caption" className="pe-2 w-100 d-block rounded">
                     {caption}
                 </span>
             </div>

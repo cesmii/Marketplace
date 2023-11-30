@@ -69,7 +69,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                             <div className="mb-2" dangerouslySetInnerHTML={{ __html: props.item.abstract }} ></div>
                         }
                         {props.item.publishDate != null &&
-                            <p className="mb-0" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
+                            <p className="mb-0" ><b className="me-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
                         }
                         {/*<div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderCategoryItem(props.item)}</div>*/}
@@ -77,8 +77,8 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         {renderActionLinks()}
                         {(props.item.relatedItemsGrouped != null && props.item.relatedItemsGrouped.length > 0) &&
                             <p className="mt-3 mb-0" >
-                                <Button variant="link" type="button" className="d-flex align-self-center px-0" onClick={props.onViewSpecifications} >
-                                    {renderMenuColorMaterialIcon('visibility', color.cornflower, 'mr-1')}View Specifications</Button>
+                            <Button variant="link" type="button" className="d-flex align-items-center px-0" onClick={props.onViewSpecifications} >
+                                {renderMenuColorMaterialIcon('visibility', color.link, 'me-1')}View Specifications</Button>
                             </p>
                         }
                         {renderJobDefinitions()}
@@ -100,28 +100,28 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                             <div className="mb-2" dangerouslySetInnerHTML={{ __html: props.item.abstract }} ></div>
                         }
                         {(props.item.namespace != null && props.item.namespace !== '') &&
-                            <p className="mb-2" ><b className="mr-2" >Namespace:</b>
+                            <p className="mb-2" ><b className="me-2" >Namespace:</b>
                                 <span style={{ wordBreak: "break-word" }} >{props.item.namespace}</span>
                             </p>
                         }
-                        <p className="mb-2" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
-                        <p className="mb-2" ><b className="mr-2" >Version:</b>{props.item.version}</p>
+                        <p className="mb-2" ><b className="me-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
+                        <p className="mb-2" ><b className="me-2" >Version:</b>{props.item.version}</p>
                         {props.onDownload &&
                             <p className="mt-3 mb-0" >
                                 <Button variant="link" type="button" className="d-flex align-self-center px-0" onClick={onDownloadStart} >
-                                {renderMenuColorMaterialIcon('download', color.cornflower, 'mr-1')}Download Nodeset XML</Button>
+                                {renderMenuColorMaterialIcon('download', color.cornflower, 'me-1')}Download Nodeset XML</Button>
                             </p>
                         }
                         {props.showProfileDesignerLink &&
                             <p className="mt-3 mb-0" >
                             <Button variant="link" type="button" target="_blank" className="d-flex align-self-center px-0" href={`${AppSettings.ProfileDesignerUrl}cloudlibrary/viewer/${props.item.id}`} >
-                                {renderMenuColorIcon('profile', null, color.cornflower, 'mr-1')}View in SM Profile Designer</Button>
+                                {renderMenuColorIcon('profile', null, color.cornflower, 'me-1')}View in SM Profile Designer</Button>
                             </p>
                         }
                         {(props.item.relatedItemsGrouped != null && props.item.relatedItemsGrouped.length > 0) &&
                             <p className="mt-3 mb-0" >
-                                <Button variant="link" type="button" className="d-flex align-self-center px-0" onClick={props.onViewSpecifications} >
-                                {renderMenuColorMaterialIcon('visibility', color.cornflower, 'mr-1')}View Specifications</Button>
+                                <Button variant="link" type="button" className="d-flex align-items-center px-0" onClick={props.onViewSpecifications} >
+                                {renderMenuColorMaterialIcon('visibility', color.link, 'me-1')}View Specifications</Button>
                             </p>
                         }
                     </div>
@@ -150,7 +150,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                 <p key={`actionLink-${i}`} className="mt-3 mb-0" >
                     <a className="d-flex align-self-center px-0" href={x.url} target={x.target == null || x.target === '' ? 'self' : x.target} >
                         {renderMenuColorMaterialIcon(x.iconName == null || x.iconName === '' ? 'settings' : x.iconName
-                            , color.cornflower, 'mr-1')}{x.caption}</a>
+                            , color.cornflower, 'me-1')}{x.caption}</a>
                 </p>
             );
         });
@@ -162,7 +162,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
 
         return props.item.jobDefinitions.map((x) => {
             return (
-                <MarketplaceItemJobLauncher key={x.id} className={`mr-2 mt-2`} isAuthenticated={props.isAuthenticated} jobDefinitionId={x.id} marketplaceItemId={props.item.id} jobName={x.name} payload={x.payload} iconName={x.iconName} />
+                <MarketplaceItemJobLauncher key={x.id} className={`me-2 mt-2`} isAuthenticated={props.isAuthenticated} jobDefinitionId={x.id} marketplaceItemId={props.item.id} jobName={x.name} payload={x.payload} iconName={x.iconName} />
             );
         });
     };

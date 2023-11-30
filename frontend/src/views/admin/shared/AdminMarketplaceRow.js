@@ -37,7 +37,7 @@ function AdminMarketplaceRow(props) { //props are item, showActions
         return (
             <>
                 <tr className={`mx-0 my-1 p-0 py-1 ${cssClass}`}>
-                    <th className="pl-2" >
+                    <th className="ps-2" >
                         
                     </th>
                     <th className="" >
@@ -46,7 +46,7 @@ function AdminMarketplaceRow(props) { //props are item, showActions
                     <th className="py-2 d-none d-sm-table-cell align-text-top" >
                         Analytics
                     </th>
-                    <th className="pr-2 text-right" >
+                    <th className="pe-2 text-end" >
                         Delete
                     </th>
                 </tr>
@@ -60,25 +60,25 @@ function AdminMarketplaceRow(props) { //props are item, showActions
     return (
         <>
             <tr className={`mx-0 my-1 p-0 py-1 ${cssClass}`}>
-                <td className="py-2 pl-2" >
-                    <a className="btn btn-icon-outline circle mr-2" href={`/admin/library/${props.item.id}`} ><i className="material-icons">edit</i></a>
+                <td className="py-2 ps-2" >
+                    <a className="btn btn-icon-outline circle me-2" href={`/admin/library/${props.item.id}`} ><i className="material-icons">edit</i></a>
                 </td>
                 <td className="py-2 align-text-top" >
                     {props.item.displayName}
                     <br/>
                     <a href={`/library/${props.item.name}`} >View in Library</a>
                     <br />
-                    <span className="font-weight-bold mr-2" >Type:</span>
+                    <span className="fw-bold me-2" >Type:</span>
                     <span>{props.item.type.name}</span>
                     <br/>
-                    <span className="font-weight-bold mr-2" >Status:</span>
+                    <span className="fw-bold me-2" >Status:</span>
                     <span className={`${props.item.status.code.toLowerCase() === "live" ? "text-success" : "text-warning"}`} >{props.item.status.name}</span>
                 </td>
                 <td className="py-2 d-none d-sm-table-cell align-text-top" >
                     {renderAnalytics()}
                 </td>
-                <td className="py-2 pr-2 text-right" >
-                    <button className="btn btn-icon-outline circle ml-auto" title="Delete Item" onClick={onDeleteItem} ><i className="material-icons">close</i></button>
+                <td className="py-2 pe-2 text-end" >
+                    <button className="btn btn-icon-outline circle ms-auto" title="Delete Item" onClick={onDeleteItem} ><i className="material-icons">close</i></button>
                 </td>
             </tr>
         </>

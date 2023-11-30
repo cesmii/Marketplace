@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Form } from 'react-bootstrap';
-import { useParams, useHistory } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 import axiosInstance from "../services/AxiosService";
 
@@ -21,7 +21,7 @@ function RequestInfo() {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const history = useHistory();
+    const navigate = useNavigate();
 
     //can access this form for specific marketplace item (id) or for a specific publisher (publisherId)
     //TBD - update form to pull publisher info if coming from that angle.
@@ -143,7 +143,7 @@ function RequestInfo() {
                 //console.log(err.response.status);
                 if (err != null && err.response != null && err.response.status === 404) {
                     msg += ' This item was not found.';
-                    history.push('/404');
+                    navigate('/404');
                 }
                 setLoadingProps({
                     isLoading: false, message: null, inlineMessages: [
@@ -206,7 +206,7 @@ function RequestInfo() {
                 //console.log(err.response.status);
                 if (err != null && err.response != null && err.response.status === 404) {
                     msg += ' This external source item was not found.';
-                    history.push('/404');
+                    navigate('/404');
                 }
                 setLoadingProps({
                     isLoading: false, message: null, inlineMessages: [
@@ -339,7 +339,7 @@ function RequestInfo() {
     const onCancel = () => {
         //raised from header nav
         console.log(generateLogMessageString('onCancel', CLASS_NAME));
-        history.goBack();
+        navigate(-1);
     };
 
     const onSave = () => {
@@ -423,7 +423,7 @@ function RequestInfo() {
     const onBack = () => {
         //raised from header nav
         console.log(generateLogMessageString('onBack', CLASS_NAME));
-        history.goBack();
+        navigate(-1);
     };
     //(function () {
     //    'use strict'
@@ -472,7 +472,7 @@ function RequestInfo() {
 
     const renderHeaderBlock = () => {
         return (
-            <h1 className="m-0 mr-2">
+            <h1 className="m-0 me-2">
                 {_formDisplay.caption}
                 {_referrerItem != null &&
                     ` - ${_referrerItem.displayName}`
@@ -548,7 +548,7 @@ function RequestInfo() {
     //
     const renderSubTitle = () => {
         return (
-            <span onClick={onBack} className="px-2 btn btn-text-solo align-items-center ml-auto ml-sm-0 auto-width d-flex clickable hover" ><i className="material-icons">chevron_left</i>Back</span>
+            <span onClick={onBack} className="px-2 btn btn-text-solo align-items-center ms-auto ms-sm-0 auto-width d-flex clickable hover" ><i className="material-icons">chevron_left</i>Back</span>
         );
     }
 
@@ -741,8 +741,8 @@ function RequestInfo() {
                         <hr className="my-3" />
                         <div className="row">
                             <div className="col-md-12">
-                                <Button variant="primary" type="button" className="ml-2" onClick={onSave} >Submit</Button>
-                                <Button variant="text-solo" className="ml-1" onClick={onCancel} >Cancel</Button>
+                                <Button variant="primary" type="button" className="ms-2" onClick={onSave} >Submit</Button>
+                                <Button variant="text-solo" className="ms-1" onClick={onCancel} >Cancel</Button>
                             </div>
                         </div>
                     </Form>

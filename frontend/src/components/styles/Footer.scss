@@ -22,6 +22,10 @@ footer {
             //contrast errors - AIM / accessibility
             a {
                 color: color('textSecondary');
+
+                &:hover {
+                    text-decoration:underline;
+                }
             }
         }
     }

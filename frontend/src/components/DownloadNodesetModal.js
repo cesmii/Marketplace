@@ -228,7 +228,7 @@ function DownloadNodesetModal(props) {
             <Modal animation={false} show={showModal} onHide={onCancel} centered>
                 <Modal.Header className="py-2 pb-1 d-flex align-items-center" closeButton>
                     <Modal.Title className="d-flex align-items-center py-2">
-                        <img className="mr-2 icon" src={_icon} alt="CESMII icon"></img>
+                        <img className="me-2 icon" src={_icon} alt="CESMII icon"></img>
                         <span className="headline-3 d-none d-md-block">SM Marketplace - </span>
                         <span className="headline-3">Download Nodeset XML</span>
                     </Modal.Title>
@@ -236,7 +236,7 @@ function DownloadNodesetModal(props) {
                 <Modal.Body className="my-1 py-2">
                     {renderErrorMessage()}
                     <p className="mb-2 pb-2 border-bottom">
-                        <span className="font-weight-bold mr-2">Nodeset:</span>
+                        <span className="fw-bold me-2">Nodeset:</span>
                         <span>{props.item.displayName}</span>
                     </p>
                     <p className="mb-2 text-muted">

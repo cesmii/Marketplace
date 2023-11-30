@@ -48,7 +48,7 @@ export default function SocialMedia(props) {
             props.items.map((item, counter) => {
                 return (
                     <a href={item.url} key={item.icon} target="_blank" rel="noreferrer"
-                        className={`${item.css} social m-0 ${counter === 0 ? '' : 'ml-2 ml-md-3'}`} >
+                        className={`${item.css} social m-0 ${counter === 0 ? '' : 'ms-2 ms-md-3'}`} >
                         <img className="social-icon" src={renderIcon(item.icon)} alt={item.icon} />
                     </a>
                 )

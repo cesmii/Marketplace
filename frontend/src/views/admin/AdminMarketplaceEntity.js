@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, useHistory } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 
 import Form from 'react-bootstrap/Form'
@@ -33,7 +33,8 @@ function AdminMarketplaceEntity() {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const history = useHistory();
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const { id, parentId } = useParams();
     //var pageMode = //state is not always present. If user types a url or we use an href link, state is null. history.location.state.viewMode;
@@ -80,13 +81,13 @@ function AdminMarketplaceEntity() {
                 //console.log(err.response.status);
                 if (err != null && err.response != null && err.response.status === 404) {
                     msg += ' This marketplace item was not found.';
-                    history.push('/404');
+                    navigate('/404');
                 }
                 //403 error - user may be allowed to log in but not permitted to perform the API call they are attempting
                 else if (err != null && err.response != null && err.response.status === 403) {
                     console.log(generateLogMessageString('useEffect||fetchData||Permissions error - 403', CLASS_NAME, 'error'));
                     msg += ' You are not permitted to edit marketplace items.';
-                    history.goBack();
+                    navigate(-1);
                 }
                 setLoadingProps({
                     isLoading: false, message: null, inlineMessages: [
@@ -134,7 +135,7 @@ function AdminMarketplaceEntity() {
                 //console.log(err.response.status);
                 if (err != null && err.response != null && err.response.status === 404) {
                     msg += ' A problem occurred with the add marketplace item screen.';
-                    history.push('/404');
+                    navigate('/404');
                 }
                 setLoadingProps({
                     isLoading: false, message: null, inlineMessages: [
@@ -288,7 +289,7 @@ function AdminMarketplaceEntity() {
     function initPageMode() {
         //if path contains copy and parent id is set, mode is copy
         //else - we won't know the author ownership till we fetch data, default view
-        if (parentId != null && history.location.pathname.indexOf('/copy/') > -1) return 'copy';
+        if (parentId != null && location.pathname.indexOf('/copy/') > -1) return 'copy';
 
         //if path contains new, then go into a new mode
         if (id === 'new') {
@@ -429,7 +430,7 @@ function AdminMarketplaceEntity() {
                     setError({ show: true, caption: 'Delete Item Error', message: `An error occurred deleting this item: ${result.data.message}` });
                     setLoadingProps({ isLoading: false, message: null });
                 }
-                history.push('/library');
+                navigate('/library');
             })
             .catch(error => {
                 //hide a spinner, show a message
@@ -480,7 +481,7 @@ function AdminMarketplaceEntity() {
                     });
 
                     //now redirect to marketplace item on front end
-                    history.push(`/admin/library/${resp.data.data}`);
+                    navigate(`/admin/library/${resp.data.data}`);
                 }
                 else {
                     //update spinner, messages
@@ -816,7 +817,7 @@ function AdminMarketplaceEntity() {
 
         //React-bootstrap bug if you launch modal, then the dropdowns don't work. Add onclick code to the drop down as a workaround - https://github.com/react-bootstrap/react-bootstrap/issues/5561
         return (
-            <Dropdown className="action-menu icon-dropdown ml-2" onClick={(e) => e.stopPropagation()} >
+            <Dropdown className="action-menu icon-dropdown ms-2" onClick={(e) => e.stopPropagation()} >
                 <Dropdown.Toggle drop="left">
                     <SVGIcon name="more-vert" size="24" fill={color.shark} />
                 </Dropdown.Toggle>
@@ -876,8 +877,8 @@ function AdminMarketplaceEntity() {
         if (mode.toLowerCase() !== "view") {
             return (
                 <>
-                    <Button variant="text-solo" className="ml-1" href="/admin/library/list" >Cancel</Button>
-                    <Button variant="secondary" type="button" className="ml-2" onClick={onSave} >Save</Button>
+                    <Button variant="text-solo" className="ms-1" href="/admin/library/list" >Cancel</Button>
+                    <Button variant="secondary" type="button" className="ms-2" onClick={onSave} >Save</Button>
                 </>
             );
         }
@@ -1087,7 +1088,7 @@ function AdminMarketplaceEntity() {
                                 <Form.Check className="align-self-end" type="checkbox" id="isVerified" label="Verified" checked={item.isVerified}
                                     onChange={onChange} readOnly={isReadOnly} />
                             </Form.Group>
-                            <Form.Group className="ml-4">
+                            <Form.Group className="ms-4">
                                 <Form.Check className="align-self-end" type="checkbox" id="isFeatured" label="Featured" checked={item.isFeatured}
                                     onChange={onChange} readOnly={isReadOnly} />
                             </Form.Group>
@@ -1203,7 +1204,7 @@ function AdminMarketplaceEntity() {
                 <div className="info-panel light">
                     <div className="info-section mb-4 px-1 rounded">
                         <div className="headline-3 mb-2">
-                            <span className="pr-2 w-100 d-block rounded">
+                            <span className="pe-2 w-100 d-block rounded">
                             Meta tags (optional)</span></div>
                         <Form.Group>
                             <Form.Control id="metaTagsConcatenated" as="textarea" style={{ height: '300px' }} placeholder="Enter tags seperated by a comma" value={item.metaTagsConcatenated} onChange={onChange} readOnly={isReadOnly} />
@@ -1234,10 +1235,10 @@ function AdminMarketplaceEntity() {
 
         return (
             <>
-                <h1 className="m-0 mr-2">
+                <h1 className="m-0 me-2">
                     Marketplace Item
                 </h1>
-                <div className="ml-auto d-flex align-items-center" >
+                <div className="ms-auto d-flex align-items-center" >
                     {renderButtons()}
                     {renderMoreDropDown()}
                 </div>
@@ -1252,23 +1253,23 @@ function AdminMarketplaceEntity() {
         return (
             <Tab.Container id="admin-marketplace-entity" defaultActiveKey="general" onSelect={tabListener} >
                 <Nav variant="pills" className="row mt-1 px-2 pr-md-3">
-                    <Nav.Item className="col-sm-3 rounded p-0 pl-2" >
-                        <Nav.Link eventKey="general" className="text-center text-md-left p-1 px-2 h-100" >
+                    <Nav.Item className="col-sm-3 rounded-0 p-0 ps-1 rounded-top" >
+                        <Nav.Link eventKey="general" className="text-center text-md-left p-1 px-2 h-100 text-decoration-none" >
                             <span className="headline-3">General</span>
                         </Nav.Link>
                     </Nav.Item>
-                    <Nav.Item className="col-sm-3 rounded p-0 px-md-0" >
-                        <Nav.Link eventKey="images" className="text-center text-md-left p-1 px-2 h-100" >
+                    <Nav.Item className="col-sm-3 rounded-0 p-0 px-md-0 rounded-top" >
+                        <Nav.Link eventKey="images" className="text-center text-md-left p-1 px-2 h-100 text-decoration-none" >
                             <span className="headline-3">Images</span>
                         </Nav.Link>
                     </Nav.Item>
-                    <Nav.Item className="col-sm-3 rounded p-0">
-                        <Nav.Link eventKey="actionLinks" className="text-center text-md-left p-1 px-2 h-100" >
+                    <Nav.Item className="col-sm-3 rounded-0 p-0 rounded-top">
+                        <Nav.Link eventKey="actionLinks" className="text-center text-md-left p-1 px-2 h-100 text-decoration-none" >
                             <span className="headline-3">Action Links</span>
                         </Nav.Link>
                     </Nav.Item>
-                    <Nav.Item className="col-sm-3 rounded p-0 pr-2">
-                        <Nav.Link eventKey="relatedItems" className="text-center text-md-left p-1 px-2 h-100" >
+                    <Nav.Item className="col-sm-3 rounded-0 p-0 rounded-top">
+                        <Nav.Link eventKey="relatedItems" className="text-center text-md-left p-1 px-2 h-100 text-decoration-none" >
                             <span className="headline-3">Related Items</span>
                         </Nav.Link>
                     </Nav.Item>
@@ -1276,28 +1277,28 @@ function AdminMarketplaceEntity() {
 
                 <Tab.Content>
                     <Tab.Pane eventKey="general">
-                        <Card className="">
+                        <Card className="rounded-0 rounded-bottom border-top-0">
                             <Card.Body className="pt-3">
                                 { renderGeneralTab()}
                             </Card.Body>
                         </Card>
                     </Tab.Pane>
                     <Tab.Pane eventKey="images">
-                        <Card className="">
+                        <Card className="rounded-0 rounded-bottom border-top-0">
                             <Card.Body className="pt-3">
                                 { renderImagesInfo()}
                             </Card.Body>
                         </Card>
                     </Tab.Pane>
                     <Tab.Pane eventKey="actionLinks">
-                        <Card className="">
+                        <Card className="rounded-0 rounded-bottom border-top-0">
                             <Card.Body className="pt-3">
                                 {renderActionLinks()}
                             </Card.Body>
                         </Card>
                     </Tab.Pane>
                     <Tab.Pane eventKey="relatedItems">
-                        <Card className="">
+                        <Card className="rounded-0 rounded-bottom border-top-0">
                             <Card.Body className="pt-3">
                                 {renderRelatedItems()}
                             </Card.Body>
@@ -1311,7 +1312,7 @@ function AdminMarketplaceEntity() {
     const renderSubTitle = () => {
         if (mode === "new" || mode === "copy") return;
         return (
-            <a className="px-2 btn btn-text-solo align-items-center auto-width ml-auto justify-content-end d-flex" href={`/library/${item.name}`} ><i className="material-icons">visibility</i>View</a>
+            <a className="px-2 btn btn-text-solo align-items-center auto-width ms-auto justify-content-end d-flex" href={`/library/${item.name}`} ><i className="material-icons">visibility</i>View</a>
         );
     }
 
