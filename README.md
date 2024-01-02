@@ -2,15 +2,11 @@
 
 ## Prerequisites
 
-- Install node.js (version > 16.17) - https://nodejs.org/en/
-- Install npm (version > 8.15.0) - https://www.npmjs.com/ (note I just upgraded to 7.17 =>  npm install -g npm)
+- Install node.js (version > 10.16) - https://nodejs.org/en/
+- Install npm (version > 5.6) - https://www.npmjs.com/ (note I just upgraded to 7.17 =>  npm install -g npm)
 - React - https://reactjs.org/
-- .NET Core 6.0 SDK - https://dotnet.microsoft.com/en-us/download/dotnet/6.0
-- Visual Studio 2022 (or later) - https://visualstudio.microsoft.com/downloads/
-- Database - Mongo DB server - https://www.mongodb.com/try/download/community
-- Mongo DB tools:
-    - Compass - GUI tool - https://www.mongodb.com/try/download/compass
-    - Other tools - https://www.mongodb.com/try/download/tools
+- .NET Core 5, Visual Studio 2019 or equivalent
+- DB - Mongo DB - details to follow...
 
 ## Directories
 
