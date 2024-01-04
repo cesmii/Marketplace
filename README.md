@@ -1,42 +1,84 @@
 # CESMII - Marketplace
 
+Last revision date: January 4, 2024
+
 ## Prerequisites
 
-- Install node.js (version > 10.16) - https://nodejs.org/en/
-- Install npm (version > 5.6) - https://www.npmjs.com/ (note I just upgraded to 7.17 =>  npm install -g npm)
-- React - https://reactjs.org/
-- .NET Core 5, Visual Studio 2019 or equivalent
-- DB - Mongo DB - details to follow...
+- Node.JS (v 14.17.3) - https://nodejs.org/en/blog/release/v14.17.3
+    - npm (v 6.14.13) Node Package Manager is installed as part of Node.JS
+- .NET Core 6.0.417 SDK - https://dotnet.microsoft.com/en-us/download/dotnet/6.0
+- Visual Studio 2022 (17.0 or later) - https://visualstudio.microsoft.com/downloads/
+- Mongo DB Community Server (6.0.12) - https://www.mongodb.com/try/download/community
+- MongoDB Command Line Database Tools (100.9.4): https://www.mongodb.com/try/download/database-tools 
+
+
+## Documentation
+- The front-end uses React - https://reactjs.org/
+- Mongo database - 
+- MonoDB Command Line Database Tools - https://www.mongodb.com/docs/database-tools/
+
 
 ## Directories
+- .\.github - Holds workflows and actions to run on github.com, or locally using nektos/act.
+- .\api - This contains a .NET web API back end for marketplace. Within this solution, the DB database connections to Mongo DB will occur. 
+- .\common - references submodule CESMII.Common
+- .\frontend - This contains the REACT front end for the marketplace app.
+- .\mongo-data - Import to populate the mongoDB database
+- .\tools - Standalone helper dev tools, not used in a production system.
+    - DumpAppLog - dumps records from the application log table (app-log).
 
-- \api - This contains a .NET web API back end for marketplace. Within this solution, the DB database connections to Mongo DB will occur. 
-- \frontend - This contains the REACT front end for the marketplace app.
-- \images - These are starter images loaded into the system to be used in content areas.
-- \sample-data - This contains JSON data that mimics the data in the stage Azure Cosmos Mongo DB.
 
-## How to Build
+## Building the Marketplace Components
 
-1. Clone the repo from GIT.
+1. **Clone the repo from GIT.**
 
-2. **Build/Run the front end (Using a node.js prompt):**
+2. **Setup MongoDB:**
+    - Install the MongoDB Community Server. After the server has been installed, an instance of MongoDB Compass is started.
+    - In MongoDB Compass, click the plus '+' sign to create a database:
+        - Database Name: Marketplace
+        - Collection Name: app_log
+    - Open appsettings.json (in .\api\CESMII.Marketplace.API), find the MongoDBSettings object, and review the values for the following keys:
+        - DatabaseName - set to "Marketplace"
+        - NLogCollectionName - set to "app-log".
+        - ConnectionString - set to "mongodb://localhost:27107"
+
+3. **Populate the MongoDB Database:**
+    - Download the MongoDB Command Line Database Tools. Copy the file named mongoimport.exe 
+    from the bin folder to the .\mongo-data folder.
+    - Open the file populateDB.bat (in .\mongo-data)
+    - Check that the name of the database in the first line is correct.
+        set DATABASE="Marketplace"
+    - Open a command line prompt, change directory to mongo-data, then run populateDB.bat
+
+
+4. **Build the front end:**
+
+    Enter these commands in a command prompt window:
 
     ```ps
-    cd \front-end
+    cd \frontend
     npm install
     npm run start
     ```
 
     Verify the site is running in a browser: http://localhost:3000
 
-3. **Build/Run the back end API - CESMII.Marketplace.sln (.NET Solution):**
+4. **Build the back end API:**
 
-    This contains the .NET web API project and supporting projects to interact with marketplace data storage.
+    From within Visual Studio, open the solution file CESMII.Marketplace.sln. Start building the back end using the Visual Studio menu item: Build| Build Solution.
 
-4. **Database - Mongo DB:**
-    - We use Mongo DB Compasss to directly inspect, view or edit data as needed.
-    - The DB is deployed to an Azure location but could be installed locally or to another hosting provider. 
-    - Sample collections of data are stored in the sample-data folder.
+
+## Starting CESMII Marketplace
+
+1. **Start the front end (in a command prompt window):**
+    ```ps
+    cd \frontend
+    npm run start
+    ```
+2. **Start the back end**
+    - In Visual Studio 2022, open the solution CESMII.Marketplace.sln.
+    - Select the Visual Studio command Debug|Start Without Debugging
+
 
 ## Provision Azure AD tenant
 
@@ -71,20 +113,3 @@ cesmii.marketplace.jobadmin
 
 5. Configure the application itself (local config files or in the Azure Portal Settings/Configuration) with the AAD tenant information.
 
-## Local development environment
-
-### Clone a mongo database to a local instance
-
-1. Download all documents to a .\dump folder:
-
-```ps1
-mongodump /uri:mongodb:... /db:marketplace_db
-```
-
-If using a cloud database/ssl, make sue the uri ends in ?ssl=true.
-
-2. Restore into a local database
-
-```ps1
-mongorestore /nsFrom:marketplace_db.* /nsTo:marketplace_db_dev.*
-```
