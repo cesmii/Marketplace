@@ -109,6 +109,11 @@
         public string _ccName2;
         public string _ccEmail2;
 
+        #region eCommerce Fields
+        public bool AllowPurchase { get; set; }
+        public string PaymentProductId { get; set; }
+        #endregion
+
     }
 
     /// <summary>

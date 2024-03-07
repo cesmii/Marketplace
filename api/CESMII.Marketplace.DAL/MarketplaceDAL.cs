@@ -266,7 +266,10 @@
                     IsActive = entity.IsActive,
                     ImagePortrait = entity.ImagePortraitId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImagePortraitId.ToString()), _imagesAll),
                     ImageBanner = entity.ImageBannerId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageBannerId.ToString()), _imagesAll),
-                    ImageLandscape = entity.ImageLandscapeId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageLandscapeId.ToString()), _imagesAll)
+                    ImageLandscape = entity.ImageLandscapeId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageLandscapeId.ToString()), _imagesAll),
+                    //eCommerce fields
+                    AllowPurchase = entity.AllowPurchase,
+                    PaymentProductId = entity.PaymentProductId
                 };
                 //get additional data under certain scenarios
                 if (verbose)

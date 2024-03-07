@@ -53,4 +53,13 @@
         Cancelled = 11
     }
 
+    public enum CartStatusEnum
+    {
+        Pending = 0,
+        Checkout = 1,
+        Completed = 2,
+        Failed = 3,
+        Cancelled = 4
+    }
+
 }

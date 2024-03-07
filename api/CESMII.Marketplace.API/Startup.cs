@@ -41,6 +41,7 @@ using CESMII.Common.CloudLibClient;
 using CESMII.Common.SelfServiceSignUp.Services;
 using CESMII.Common.SelfServiceSignUp.Models;
 using System.Security;
+using CESMII.Marketplace.Service;
 
 namespace CESMII.Marketplace.Api
 {
@@ -82,6 +83,8 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IMongoRepository<ImageItemSimple>, MongoRepository<ImageItemSimple>>();
             services.AddScoped<IMongoRepository<SearchKeyword>, MongoRepository<SearchKeyword>>();
             services.AddScoped<IMongoRepository<ProfileItem>, MongoRepository<ProfileItem>>();
+            //eCommerce
+            services.AddScoped<IMongoRepository<Cart>, MongoRepository<Cart>>();
 
             //stock tables
             services.AddScoped<IMongoRepository<Organization>, MongoRepository<Organization>>();
@@ -105,6 +108,9 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IDal<JobLog, JobLogModel>, JobLogDAL>();
             services.AddScoped<IDal<JobDefinition, JobDefinitionModel>, JobDefinitionDAL>();
             services.AddScoped<IDal<SearchKeyword, SearchKeywordModel>, SearchKeywordDAL>();
+            //eCommerce
+            services.AddScoped<IDal<Cart, CartModel>, CartDAL>();
+            services.AddScoped<IECommerceService<CartModel>, StripeService>();
 
             // Configuration, utils, one off objects
             services.AddSingleton<IConfiguration>(Configuration);
