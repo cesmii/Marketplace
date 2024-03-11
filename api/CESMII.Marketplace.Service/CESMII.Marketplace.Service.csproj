@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Stripe.net" Version="43.18.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\CESMII.Marketplace.Api.Shared\CESMII.Marketplace.Api.Shared.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.Common\CESMII.Marketplace.Common.csproj" />
     <ProjectReference Include="..\CESMII.Marketplace.DAL\CESMII.Marketplace.DAL.csproj" />

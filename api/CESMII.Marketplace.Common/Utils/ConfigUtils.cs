@@ -108,7 +108,7 @@
             get
             {
                 var result = new StripeConfig();
-                _configuration.GetSection("StripeConfig").Bind(result);
+                _configuration.GetSection("StripeSettings").Bind(result);
                 return result;
             }
         }

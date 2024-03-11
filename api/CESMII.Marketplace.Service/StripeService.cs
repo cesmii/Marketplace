@@ -1,59 +1,137 @@
-﻿using CESMII.Marketplace.Api.Shared.Models;
+﻿using Microsoft.Extensions.Logging;
+
+using Stripe;
+
 using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Data.Entities;
-using CESMII.Marketplace.Data.Extensions;
+using CESMII.Marketplace.Service.Models;
+using CESMII.Marketplace.Common;
+using CESMII.Marketplace.Common.Models;
 
 namespace CESMII.Marketplace.Service
 {
+    // TBD - Remarks - Note this is prototype / sample code that is not fully implemented and not yet tested. Work in progress.
     public class StripeService : IECommerceService<CartModel>
     {
         private readonly IDal<Cart, CartModel> _dal;
+        private readonly ILogger<StripeService> _logger;
+        private readonly StripeConfig _config;
 
-        public StripeService(IDal<Cart, CartModel> dal)
+        public StripeService(IDal<Cart, CartModel> dal, ILogger<StripeService> logger, ConfigUtil configUtil)
         {
             _dal = dal;
+            _logger = logger;
+            _config = configUtil.StripeSettings;
         }
 
-        public IEnumerable<CartModel> GetAll()
+        public async Task<CheckoutModel> DoCheckout(CartModel item, string userId)
         {
-            return _dal.GetAll().OrderBy(x => x.Name).ToList();
+            throw new NotImplementedException();
         }
 
-        public DALResult<CartModel> GetPaged(int? skip, int? take, bool returnCount = false, bool verbose = false) {
-            var result = _dal.Where(new List<Func<Cart, bool>>(), skip, take, returnCount, verbose);
-            result.Data = result.Data.OrderBy(x => x.Name).ToList();
-            return result;
-        }
-
-        public DALResult<CartModel> Search(PagerFilterSimpleModel model, bool returnCount = false, bool verbose = false)
+        public async Task<bool> GetProduct(string paymentProductId)
         {
-            //lowercase model.query
-            model.Query = string.IsNullOrEmpty(model.Query) ? model.Query : model.Query.ToLower();
+            throw new NotImplementedException();
+        }
 
-            //get all including inactive. 
-            Func<Cart, bool>? predicate = null;
+        public async Task<bool> AddProduct(MarketplaceItemModel item, string userId)
+        {
+            throw new NotImplementedException();
+            /*
+            StripeConfiguration.ApiKey = _config.SecretKey;
 
-            //now trim further by name if needed. 
-            if (!string.IsNullOrEmpty(model.Query))
+            //cannot updateProduct if paymentProductId is null or empty
+            if (string.IsNullOrEmpty(item.PaymentProductId))
             {
-                predicate = x => x.Name.ToLower().Equals(model.Query);
+                _logger.LogError("StripeService|UpdateProduct|Cannot update product with null payment product id.");
+                throw new ArgumentException("Cannot update product with null payment product id.");
             }
-            var orderBys = new OrderByExpression<Cart>() { Expression = x => x.Name };
-            var result = predicate == null ?
-                _dal.GetAllPaged(model.Skip, model.Take, true, true, orderBys)
-                :
-                _dal.Where(predicate, model.Skip, model.Take, true, true, orderBys);
-            return result;
+
+            //map stuff from marketplace item to ProductUpdateOptions object
+            var itemAdd = new ProductCreateOptions
+            {
+                Name = item.DisplayName,
+                Description = item.Abstract,
+                //DefaultPrice = //update marketplace item to support passing price
+            };
+            var serviceProduct = new ProductService();
+
+            //check for product 
+            Product product = await serviceProduct.AddAsync(item.PaymentProductId, itemAdd);
+
+            _logger.LogInformation($"StripeService|AddProduct|Product added: {product.Id}|{product.Name}.");
+
+            //TBD - now set price for item - pull info from marketplace item
+            var optionsPrice = new PriceCreateOptions
+            {
+                UnitAmount = 1200,
+                Currency = "usd",
+                Recurring = new PriceRecurringOptions
+                {
+                    Interval = "month",
+                },
+                Product = product.Id
+            };
+            var servicePrice = new PriceService();
+            Price price = servicePrice.Create(optionsPrice);
+            _logger.LogInformation($"StripeService|AddProduct|Product price added: {product.Id}|{product.Name}.");
+            
+            //TBD - update product id into paymentProductId field and either save here or save in calling method.
+            */
+        }
+
+        public async Task<bool> UpdateProduct(MarketplaceItemModel item, string userId)
+        {
+            StripeConfiguration.ApiKey = _config.SecretKey;
+
+            //cannot updateProduct if paymentProductId is null or empty
+            if (string.IsNullOrEmpty(item.PaymentProductId))
+            {
+                _logger.LogError("StripeService|UpdateProduct|Cannot update product with null payment product id.");
+                throw new ArgumentException("Cannot update product with null payment product id.");
+            }
+
+            //map stuff from marketplace item to ProductUpdateOptions object
+            var itemUpdate = new ProductUpdateOptions
+            {
+                Name = item.DisplayName,
+                Description = item.Abstract,
+                //DefaultPrice = //update marketplace item to support passing price
+            };
+            var serviceProduct = new ProductService();
+
+            //check for product 
+            Product product = await serviceProduct.UpdateAsync(item.PaymentProductId, itemUpdate);
+
+            _logger.LogInformation($"StripeService|UpdateProduct|Product updated: {product.Id}|{product.Name}.");
+
+            //TBD - now set price for item - pull info from marketplace item
+            /*
+            var optionsPrice = new PriceUpdateOptions
+            {
+                UnitAmount = 1200,
+                Currency = "usd",
+                Recurring = new PriceRecurringOptions
+                {
+                    Interval = "month",
+                },
+                Product = product.Id
+            };
+            var servicePrice = new PriceService();
+            Price price = servicePrice.Update(optionsPrice);
+            _logger.LogInformation($"StripeService|UpdateProduct|Product price updated: {product.Id}|{product.Name}.");
+            */
+            return true;
+        }
+
+        public Task<bool> UpdateAllProducts(MarketplaceItemModel item, string userId)
+        {
+            throw new NotImplementedException();
         }
 
         public CartModel GetById(string id) {
             return _dal.GetById(id);
-        }
-
-        public CartModel Copy(string id)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<string> Add(CartModel item, string userId) { 
@@ -66,9 +144,5 @@ namespace CESMII.Marketplace.Service
             await _dal.Delete(id, userId);
         }
 
-        public bool IsUnique(CartModel item)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

@@ -1,17 +1,17 @@
-﻿namespace CESMII.Marketplace.DAL
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+using Microsoft.Extensions.Logging;
+
+using CESMII.Marketplace.Common;
+using CESMII.Marketplace.DAL.Models;
+using CESMII.Marketplace.Data.Entities;
+using CESMII.Marketplace.Data.Repositories;
+
+namespace CESMII.Marketplace.DAL
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-
-    using CESMII.Marketplace.Common;
-    using CESMII.Marketplace.DAL.Models;
-    using CESMII.Marketplace.Data.Entities;
-    using CESMII.Marketplace.Data.Repositories;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Logging;
-
     /// <summary>
     /// </summary>
     public class CartDAL : BaseDAL<Cart, CartModel>, IDal<Cart, CartModel>
@@ -28,7 +28,7 @@
             ConfigUtil configUtil, ILogger<CartDAL> logger) : base(repo)
         {
             _repoMarketplaceItem = repoMarketplaceItem;
-            _apiKey = configUtil.StripeSettings.ApiKey;
+            _apiKey = configUtil.StripeSettings.SecretKey;
             _logger = logger;
             if (string.IsNullOrEmpty(_apiKey))
             {
