@@ -52,6 +52,10 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
         setDownloadModal(false);
     };
 
+    const addToCart = (e) => {
+        console.log(generateLogMessageString('addToCart', CLASS_NAME));
+    }
+
     //-------------------------------------------------------------------
     // Region: Render helpers
     //-------------------------------------------------------------------
@@ -79,6 +83,9 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                             </p>
                         }
                         {renderJobDefinitions()}
+                        {props.item.allowPurchase &&
+                            <Button variant="primary" className="px-1 px-md-4 auto-width mt-3 text-nowrap" onClick={addToCart}>Add to Cart</Button>
+                        }
                     </div>
                 </div>
             </>

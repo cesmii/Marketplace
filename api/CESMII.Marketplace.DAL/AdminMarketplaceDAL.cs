@@ -263,7 +263,10 @@
                     ccName1 = entity._ccName1,
                     ccName2 = entity._ccName2,
                     ccEmail1 = entity._ccEmail1,
-                    ccEmail2 = entity._ccEmail2
+                    ccEmail2 = entity._ccEmail2, 
+                    //new eCommerce fields
+                    AllowPurchase = entity.AllowPurchase,
+                    PaymentProductId = entity.PaymentProductId
                 };
                 if (verbose)
                 {
@@ -434,6 +437,11 @@
             entity._ccEmail1 = model.ccEmail1;
             entity._ccName2 = model.ccName2;
             entity._ccEmail2 = model.ccEmail2;
+
+            //new eCommerce fields
+            entity.AllowPurchase = model.AllowPurchase;
+            entity.PaymentProductId = model.PaymentProductId;
+
         }
 
         /// <summary>

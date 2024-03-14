@@ -114,7 +114,7 @@
         public string ccEmail2 { get; set; }
 
         #region eCommerce Fields
-        public bool AllowPurchase { get; set; }
+        public bool AllowPurchase { get; set; } = true;
         public string PaymentProductId { get; set; }
         #endregion
 
