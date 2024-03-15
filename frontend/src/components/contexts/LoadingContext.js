@@ -23,7 +23,8 @@ const initialState = {
     searchCriteria: [],
     lookupDataStatic: [],
     refreshSearchCriteria: null,
-    downloadNodesetCounter: 0
+    downloadNodesetCounter: 0,
+    cart: {}
 };
 
 //Split between local storage and session storage, unify the response
@@ -116,5 +117,9 @@ function toggleFavoritesList(existingList, link) {
     if (i < 0) { existingList.push(link) };
     return JSON.parse(JSON.stringify(existingList));
 }
-export { LoadingContext, LoadingContextProvider, UpdateRecentFileList, toggleFavoritesList};
+
+//-------------------------------------------------------------------
+// Region: Exports
+//-------------------------------------------------------------------
+export { LoadingContext, LoadingContextProvider, UpdateRecentFileList, toggleFavoritesList };
 

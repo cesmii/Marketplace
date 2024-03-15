@@ -89,6 +89,14 @@ export const AppSettings = {
         Completed: 2,
         Failed: 10,
         Cancelled: 11
+    },
+    CartStatusEnum: {
+        None: 0,
+        Shopping: 1,
+        Pending: 2,
+        Completed: 3,
+        Failed: 4,
+        Cancelled: 5
     }
     //MSAL (Authentication) Config
     , MsalConfig: {

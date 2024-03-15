@@ -12,8 +12,6 @@
         /// <summary>
         /// Product identifier in Stripe
         /// </summary>
-        public string PaymentProductId { get { return this.MarketplaceItem == null ? null : this.MarketplaceItem.PaymentProductId;  } }
-
         public int Quantity { get; set; }
         /// <summary>
         /// Calculated Price at the time it was added to the cart

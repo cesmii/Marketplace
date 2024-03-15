@@ -249,7 +249,7 @@ namespace CESMII.Marketplace.DAL
                     Credits = model.Credits,
                     Quantity = model.Quantity,
                     Price = model.Price,
-                    StripeId = model.PaymentProductId
+                    StripeId = model.MarketplaceItem.PaymentProductId
                 } );
             }
             return result;
