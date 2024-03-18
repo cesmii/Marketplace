@@ -451,6 +451,7 @@ option.selected {
         padding: 0.6rem;
         border-radius: 3rem;
         max-width: 45px;
+        min-width:unset;
 
         &:hover {
             background-color: color("cararra");

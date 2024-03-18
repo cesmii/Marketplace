@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import Modal from 'react-bootstrap/Modal'
-import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 
 import { useLoadingContext } from "../contexts/LoadingContext";
 import { generateLogMessageString } from '../../utils/UtilityService';
+import CartItem from './CartItem';
 import { updateCart } from '../../utils/CartUtil';
 import _icon from '../img/icon-cesmii-white.png'
 import '../styles/Modal.scss';
@@ -18,14 +18,15 @@ function CartAddModal(props) {
     //-------------------------------------------------------------------
     const [showModal, setShowModal] = useState(props.showModal);
     const { loadingProps, setLoadingProps } = useLoadingContext();
+    const [_item, setItem] = useState({marketplaceItem: props.item, quantity: 1});
     const [_quantity, setQuantity] = useState(1);
-    const [_isValid, setIsValid] = useState({required: true, range: true, numeric: true});
+    const [_isValid, setIsValid] = useState(true);
 
     //-------------------------------------------------------------------
     // Region: Hooks
     //-------------------------------------------------------------------
     useEffect(() => {
-        setQuantity(1);
+        setItem({ ..._item, marketplaceItem: props.item});
 
         //this will execute on unmount
         return () => {
@@ -35,54 +36,6 @@ function CartAddModal(props) {
 
     //-------------------------------------------------------------------
     // Region: Event Handling
-    //-------------------------------------------------------------------
-    //on change handler to update state
-    const onChange = (e) => {
-        //console.log(generateLogMessageString(`onEntityChange||e:${e.target}`, CLASS_NAME));
-
-        //note you must update the state value for the input to be read only. It is not enough to simply have the onChange handler.
-        switch (e.target.id) {
-            case "quantity":
-                //update the state
-                if (e.target.value == '') {
-                    setQuantity(e.target.value);
-                    return;
-                }
-                else if (isNaN(parseInt(e.target.value))) return;
-                
-                setQuantity(parseInt(e.target.value));
-            default:
-                return;
-        }
-    }
-
-    //-------------------------------------------------------------------
-    // Region: Validation
-    //-------------------------------------------------------------------
-    const validate_quantity = (val) => {
-        var required = (val != null);
-        var numeric = required && (!isNaN(parseInt(val)));
-        var range = required && parseInt(val) > 0;
-        return { required: required, numeric: numeric, range: range };
-    };
-
-    const validateForm_quantity = (e) => {
-        const result = validate_quantity(e.target.value);
-        setIsValid(result);
-    };
-
-    // check validation
-    const validateForm = () => {
-        console.log(generateLogMessageString(`validateForm`, CLASS_NAME));
-
-        const result = validate_quantity(_quantity);
-        setIsValid(result);
-        return (_isValid.required && _isValid.numeric && _isValid.range);
-    }
-
-
-    //-------------------------------------------------------------------
-    // Region: Event Handling of child component events
     //-------------------------------------------------------------------
     const onCancel = () => {
         console.log(generateLogMessageString('onCancel', CLASS_NAME));
@@ -94,53 +47,33 @@ function CartAddModal(props) {
         console.log(generateLogMessageString('onAdd', CLASS_NAME));
 
         //do validation
-        if (!validateForm()) {
+        if (!_isValid) {
             //alert("validation failed");
             return;
         }
 
         //add the item to the cart and save context
-        let cart = updateCart(loadingProps.cart, props.item, _quantity);
+        let cart = updateCart(loadingProps.cart, _item, _quantity);
         setLoadingProps({ cart: cart });
+        if (props.onAdd) props.onAdd();
+    };
 
-        //call parent form which will combine request info and sm profile and submit to server.
-        if (props.onAdd) props.onAdd(_quantity);
+    const onValidate = (id, isValid) => {
+        console.log(generateLogMessageString('onValidate', CLASS_NAME));
+        setIsValid(isValid.required && isValid.numeric && isValid.range);
+    };
+
+    //-------------------------------------------------------------------
+    // Region: Event Handling of child component events
+    //-------------------------------------------------------------------
+    const onChange = (id, qty) => {
+        console.log(generateLogMessageString('onChange', CLASS_NAME));
+        setQuantity(qty);
     };
 
     //-------------------------------------------------------------------
     // Region: Render Helpers
     //-------------------------------------------------------------------
-    const renderForm = () => {
-        return (
-            <Form noValidate >
-                <div className="row">
-                    <div className="col-12">
-                        <Form.Group>
-                            <Form.Label htmlFor="quantity" >Quantity</Form.Label>
-                            {!_isValid.required &&
-                                <span className="invalid-field-message inline">
-                                    Required
-                                </span>
-                            }
-                            {!_isValid.range &&
-                                <span className="invalid-field-message inline">
-                                    Enter a number greater than 0
-                                </span>
-                            }
-                            {!_isValid.numeric &&
-                                <span className="invalid-field-message inline">
-                                    Enter a valid integer
-                                </span>
-                            }
-                            <Form.Control id="quantity" className={(!(_isValid.required || _isValid.numeric || _isValid.range) ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
-                                value={_quantity} onBlur={validateForm_quantity} onChange={onChange} />
-                        </Form.Group>
-                    </div>
-                </div>
-            </Form>
-        );
-    };
-
 
     //-------------------------------------------------------------------
     // Region: Render
@@ -160,16 +93,7 @@ function CartAddModal(props) {
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="my-1 py-2">
-                    <div className="mb-2 pb-2 border-bottom">
-                        <span>{props.item.displayName}</span>
-                        {props.item.abstract != null &&
-                            <>
-                            -
-                            <div dangerouslySetInnerHTML={{ __html: props.item.abstract }} ></div>
-                            </>
-                        }
-                    </div>
-                    {renderForm()}
+                    <CartItem item={_item} quantity={_quantity} isAdd={true} onChange={onChange} onValidate={onValidate} />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="text-solo" className="mx-1" onClick={onCancel} >Cancel</Button>

@@ -1,0 +1,113 @@
+import React, { useState } from 'react'
+import { Button } from 'react-bootstrap';
+
+import { useLoadingContext } from '../../components/contexts/LoadingContext';
+import { generateLogMessageString } from '../../utils/UtilityService';
+import { removeCartItem, updateCart } from '../../utils/CartUtil';
+import CartItem from './CartItem';
+
+const CLASS_NAME = "CartPreview";
+
+function CartPreview(props) {
+
+    //-------------------------------------------------------------------
+    // Region: Initialization
+    //-------------------------------------------------------------------
+    const _caption = 'Shopping Cart';
+    const [_isValid, setIsValid] = useState(true);
+    const { loadingProps, setLoadingProps } = useLoadingContext();
+
+    //-------------------------------------------------------------------
+    // Region: Get data 
+    //-------------------------------------------------------------------
+
+    //-------------------------------------------------------------------
+    // Region: Event Handling
+    //-------------------------------------------------------------------
+    const onCheckout = () => {
+        console.log(generateLogMessageString('onCheckout', CLASS_NAME));
+        if (props.onCheckout != null) props.onCheckout();
+        //TBD - call API to start checkout
+        //TBd - show a processing message and disable cart interactivity
+    };
+
+    const onValidate = (isValid) => {
+        console.log(generateLogMessageString('onValidate', CLASS_NAME));
+        setIsValid(isValid.required && isValid.numeric && isValid.range);
+    };
+
+    const onChange = (item, qty) => {
+        console.log(generateLogMessageString(`onChange`, CLASS_NAME));
+        //add the item to the cart and save context
+        let cart = updateCart(loadingProps.cart, item, qty);
+        setLoadingProps({ cart: cart });
+    };
+
+    const onRemoveItem = (id) => {
+        console.log(generateLogMessageString('onRemoveItem', CLASS_NAME));
+        //TBD - consider showing confirmation modal first.
+        let cart = removeCartItem(loadingProps.cart, id);
+        setLoadingProps({ cart: cart });
+    };
+
+    const onEmptyCart = () => {
+        console.log(generateLogMessageString('onEmptyCart', CLASS_NAME));
+        if (props.onEmptyCart != null) props.onEmptyCart();
+        //TBD - call API to start checkout
+        //TBd - show a processing message and disable cart interactivity
+    };
+
+
+    //-------------------------------------------------------------------
+    // Region: Get data 
+    //-------------------------------------------------------------------
+
+    //-------------------------------------------------------------------
+    // Region: Render helpers
+    //-------------------------------------------------------------------
+    const renderCartItems = (cart) => {
+
+        if (cart == null)
+            return (
+                <div className="alert alert-warning py-2" >
+                    No items in your cart. <a href="/library" >Start Shopping.</a>
+                </div>
+                );
+
+        const mainBody = cart?.items.map((item) => {
+            return (
+                <CartItem item={item} quantity={item.quantity} isAdd={false} onChange={onChange} onChange={onValidate} onRemoveItem={onRemoveItem} />
+            );
+        });
+
+
+        return (
+            <div className="row" >
+                <div className="col-sm-12 mb-2">
+                    <h2 className="m-0 headline-2">
+                        {_caption}
+                    </h2>
+                </div>
+                <div className="col-sm-12">
+                    {mainBody}
+                </div>
+                <div className="col-sm-12">
+                    <Button variant="secondary" type="button" className="mx-3" onClick={onEmptyCart} >Empty Cart</Button>
+                    <Button variant="link" className="mx-1 ml-auto" onClick={props.onClose} >Continue Shopping</Button>
+                    <Button variant="primary" type="button" className="mx-3" onClick={onCheckout} disabled={_isValid} >Checkout</Button>
+                </div>
+            </div>
+        );
+    }
+
+    //-------------------------------------------------------------------
+    // Region: Render final output
+    //-------------------------------------------------------------------
+    return (
+        <>
+            {renderCartItems(props.cart)}
+        </>
+    )
+}
+
+export default CartPreview;

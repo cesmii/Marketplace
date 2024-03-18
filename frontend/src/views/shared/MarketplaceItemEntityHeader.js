@@ -55,7 +55,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
 
     const onAddCart = (itm, quantity) => {
         console.log(generateLogMessageString(`onAddCart`, CLASS_NAME));
-        if (props.onAddCart) props.onDownload(itm, quantity);
+        if (props.onAddCart) props.onAddCart(itm, quantity);
     };
 
     //-------------------------------------------------------------------
