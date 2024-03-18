@@ -52,9 +52,9 @@ function CartPreview(props) {
 
     const onEmptyCart = () => {
         console.log(generateLogMessageString('onEmptyCart', CLASS_NAME));
-        if (props.onEmptyCart != null) props.onEmptyCart();
-        //TBD - call API to start checkout
-        //TBd - show a processing message and disable cart interactivity
+        //TBD - consider showing confirmation modal first.
+        const cart = null;
+        setLoadingProps({ cart: cart });
     };
 
 
@@ -74,9 +74,9 @@ function CartPreview(props) {
                 </div>
                 );
 
-        const mainBody = cart?.items.map((item) => {
+        const mainBody = cart?.items.map((item, i) => {
             return (
-                <CartItem item={item} quantity={item.quantity} isAdd={false} onChange={onChange} onChange={onValidate} onRemoveItem={onRemoveItem} />
+                <CartItem key={i} item={item} quantity={item.quantity} isAdd={false} onChange={onChange} onChange={onValidate} onRemoveItem={onRemoveItem} />
             );
         });
 
@@ -88,12 +88,12 @@ function CartPreview(props) {
                         {_caption}
                     </h2>
                 </div>
-                <div className="col-sm-12">
+                <div className="col-sm-12 mb-4">
                     {mainBody}
                 </div>
-                <div className="col-sm-12">
+                <div className="col-sm-12 pt-4 border-top">
                     <Button variant="secondary" type="button" className="mx-3" onClick={onEmptyCart} >Empty Cart</Button>
-                    <Button variant="link" className="mx-1 ml-auto" onClick={props.onClose} >Continue Shopping</Button>
+                    <a className="mx-1 ml-auto" href="/library" >Continue Shopping</a>
                     <Button variant="primary" type="button" className="mx-3" onClick={onCheckout} disabled={_isValid} >Checkout</Button>
                 </div>
             </div>
@@ -105,7 +105,7 @@ function CartPreview(props) {
     //-------------------------------------------------------------------
     return (
         <>
-            {renderCartItems(props.cart)}
+            {renderCartItems(loadingProps.cart)}
         </>
     )
 }

@@ -15,7 +15,7 @@ import { doLogout, useLoginStatus } from './OnLoginHandler';
 import LoginButton from './LoginButton';
 
 import './styles/Navbar.scss'
-import Cart from './eCommerce/Cart';
+import CartIcon from './eCommerce/CartIcon';
 
 //const CLASS_NAME = "Navbar";
 
@@ -76,7 +76,7 @@ function Navbar() {
                             {/*        href="/about">About</a>*/}
                             <a className={`nav-link py-1 px-2 ${history.location.pathname.indexOf("/contact-us/") > -1 ? "active" : ""}`}
                                 href="/contact-us/contribute">Contribute</a>
-                            <Cart />
+                            <CartIcon />
                             <LoginButton />
                             {renderAdminMenu()}
                         </div>

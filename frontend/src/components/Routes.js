@@ -32,6 +32,7 @@ import SitemapGenerator from '../views/admin/SitemapGenerator'
 import AccountProfile from '../views/AccountProfile'
 import LoginSuccess from '../views/LoginSuccess'
 //eCommerce 
+import Cart from '../views/ecommerce/Cart'
 import Checkout from '../views/ecommerce/Checkout'
 import CheckoutComplete from '../views/ecommerce/CheckoutComplete'
 
@@ -85,6 +86,7 @@ function Routes() {
 
             {/* eCommerce Routes */}
             <PublicRoute exact path="/checkout/:type" component={CheckoutComplete} />
+            <PublicRoute exact path="/cart" component={Cart} />
             <PublicRoute exact path="/checkout" component={Checkout} />
 
             <PublicRoute path="/notpermitted" component={NotAuthorized} />

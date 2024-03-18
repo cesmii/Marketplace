@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { Button } from 'react-bootstrap';
 
-import { useLoadingContext } from '../../components/contexts/LoadingContext';
+import { useLoadingContext } from '../contexts/LoadingContext';
 import { generateLogMessageString } from '../../utils/UtilityService';
-import CartPreview from '../../components/eCommerce/CartPreview';
+import CartPreview from './CartPreview';
 
 const CLASS_NAME = "Cart";
 
@@ -51,11 +51,7 @@ function Cart(props) { //props are item, showActions
 
     return (
         <>
-            <Button variant="icon-outline" className="primary circle" onClick={onSlideOut}><i className="material-icons">shopping_cart</i></Button>
-
-            {_slideOutShow &&
-                <CartPreview cart={loadingProps.cart} onCheckout={onCheckout} onEmptyCart={onEmptyCart} onClose={onClose} />
-            }
+            <a className="btn btn-icon-outline primary circle" href='/cart'><i className="material-icons">shopping_cart</i></a>
         </>
     );
 }
