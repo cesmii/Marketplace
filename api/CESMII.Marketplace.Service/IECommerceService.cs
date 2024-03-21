@@ -1,9 +1,6 @@
-﻿using CESMII.Marketplace.Api.Shared.Models;
-using CESMII.Marketplace.DAL;
-using CESMII.Marketplace.DAL.Models;
-using CESMII.Marketplace.Data.Entities;
-using CESMII.Marketplace.Data.Extensions;
-using CESMII.Marketplace.Service.Models;
+﻿using CESMII.Marketplace.DAL.Models;
+using Stripe;
+using Stripe.Checkout;
 
 namespace CESMII.Marketplace.Service
 {
@@ -15,7 +12,18 @@ namespace CESMII.Marketplace.Service
         /// </summary>
         /// <param name="code"></param>
         /// <returns></returns>
-        Task<CheckoutModel> DoCheckout(TModel item, string userId);
+        Task<String> DoCheckout(TModel item, string userId);
+
+        Task<Session> SessionStatus(string session_id);
+
+        /// <summary>
+        /// Get all products from the Stripe product catalog.
+        /// This is called after user saves marketplace item from admin screen when the marketplace item 
+        /// does not have a ProductPaymentId
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        Task<IEnumerable<Product>> GetProducts();
 
         /// <summary>
         /// Get a product from the Stripe product catalog.
@@ -24,7 +32,34 @@ namespace CESMII.Marketplace.Service
         /// </summary>
         /// <param name="code"></param>
         /// <returns></returns>
-        Task<bool> GetProduct(string paymentProductId);
+        Task<Product> GetProduct(string paymentProductId);
+
+        /// <summary>
+        /// Create the product in the Stripe product catalog.
+        /// This is called after user saves marketplace item from admin screen when the marketplace item 
+        /// does not have a ProductPaymentId
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        Task<Product> CreateProduct(MarketplaceItemModel item);
+
+        /// <summary>
+        /// Delete the product in the Stripe product catalog.
+        /// This is called after user saves marketplace item from admin screen when the marketplace item 
+        /// does not have a ProductPaymentId
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        Task<bool> DeleteProduct(string paymentProductId);
+
+        /// <summary>
+        /// Get all products from the Stripe product catalog.
+        /// This is called after user saves marketplace item from admin screen when the marketplace item 
+        /// does not have a ProductPaymentId
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        Task<IEnumerable<Price>> GetPrices();
 
         /// <summary>
         /// Add the product in the Stripe product catalog.
@@ -43,6 +78,15 @@ namespace CESMII.Marketplace.Service
         /// <param name="code"></param>
         /// <returns></returns>
         Task<bool> UpdateProduct(MarketplaceItemModel item, string userId);
+
+        /// <summary>
+        /// Update the product in the Stripe product catalog.
+        /// This is called after user saves marketplace item from admin screen. 
+        /// This should only be called if the item has a ProductPaymentId (ie a Stripe product id) to be used to map the catalog.
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        Task<Price> DeletePrice(Price item);
 
         /// <summary>
         /// Add or update all products from the marketplace catalog to the Stripe product catalog.

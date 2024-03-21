@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
 import { Button } from 'react-bootstrap';
 
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
@@ -24,9 +25,23 @@ function CartPreview(props) {
     //-------------------------------------------------------------------
     // Region: Event Handling
     //-------------------------------------------------------------------
-    const onCheckout = () => {
+    const onCheckout = async () => {
         console.log(generateLogMessageString('onCheckout', CLASS_NAME));
         if (props.onCheckout != null) props.onCheckout();
+        
+           const response = await fetch("https://localhost:44373/api/ecommerce/checkout/init", {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain',
+                    'Content-Type': 'application/json;charset=UTF-8'
+                },
+                body: JSON.stringify(loadingProps.cart)
+           });
+
+        const stripePromise = await loadStripe("pk_test_51Os66lHXjPkvmDZJ927KVzxAVIWaFhySoPDcoGVfxog1SXioudXZCbcaoMysdUrUBu1TgGEUGos0XkLpFyr0HB0Y00IxD721az");
+        const session = await response.json();
+        stripePromise.redirectToCheckout({sessionId:session});
+
         //TBD - call API to start checkout
         //TBd - show a processing message and disable cart interactivity
     };
@@ -96,7 +111,7 @@ function CartPreview(props) {
                 <div className="col-sm-12 pt-4 border-top">
                     <Button variant="secondary" type="button" className="mx-3" onClick={onEmptyCart} >Empty Cart</Button>
                     <a className="mx-1 ml-auto" href="/library" >Continue Shopping</a>
-                    <Button variant="primary" type="button" className="mx-3" onClick={onCheckout} disabled={_isValid} >Checkout</Button>
+                    <Button variant="primary" type="button" className="mx-3" onClick={onCheckout} >Checkout</Button>
                 </div>
             </div>
         );
