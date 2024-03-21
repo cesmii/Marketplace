@@ -13,9 +13,9 @@ import { useLoadingContext } from './contexts/LoadingContext';
 import { AppSettings } from '../utils/appsettings';
 import { doLogout, useLoginStatus } from './OnLoginHandler';
 import LoginButton from './LoginButton';
+import CartIcon from './eCommerce/CartIcon';
 
 import './styles/Navbar.scss'
-import CartIcon from './eCommerce/CartIcon';
 
 //const CLASS_NAME = "Navbar";
 

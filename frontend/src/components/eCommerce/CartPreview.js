@@ -67,12 +67,19 @@ function CartPreview(props) {
     //-------------------------------------------------------------------
     const renderCartItems = (cart) => {
 
-        if (cart == null)
+        if (cart == null || cart.items == null || cart.items.length === 1) {
             return (
-                <div className="alert alert-warning py-2" >
-                    No items in your cart. <a href="/library" >Start Shopping.</a>
+                <div className="row" >
+                    <div className="col-sm-4 my-5 mx-auto text-center">
+                        <span className="icon-circle primary mx-auto" ><i className="material-icons">shopping_cart</i></span>
+                        <div className="d-block py-4" >
+                            Your cart is empty.
+                        </div>
+                        <a className="btn btn-primary" href='/library'>Shop Now</a>
+                    </div>
                 </div>
-                );
+            );
+        }
 
         const mainBody = cart?.items.map((item, i) => {
             return (
@@ -83,11 +90,6 @@ function CartPreview(props) {
 
         return (
             <div className="row" >
-                <div className="col-sm-12 mb-2">
-                    <h2 className="m-0 headline-2">
-                        {_caption}
-                    </h2>
-                </div>
                 <div className="col-sm-12 mb-4">
                     {mainBody}
                 </div>

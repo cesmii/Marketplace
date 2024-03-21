@@ -11,7 +11,7 @@ function Cart() {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const _caption = 'Cart';
+    const _caption = 'Shopping Cart';
 
     //-------------------------------------------------------------------
     // Region: Get data 
@@ -28,22 +28,6 @@ function Cart() {
     //-------------------------------------------------------------------
     // Region: Render helpers
     //-------------------------------------------------------------------
-    const renderCartItems = () => {
-        return (
-            <div className="row" >
-                <div className="col-sm-12 mb-2">
-                    <h1 className="m-0 headline-2">
-                        {_caption}
-                    </h1>
-                </div>
-                <div className="col-sm-12">
-                    <p>
-                        TBD - content here.
-                    </p>
-                </div>
-            </div>
-        );
-    }
 
     //-------------------------------------------------------------------
     // Region: Render final output
@@ -53,6 +37,13 @@ function Cart() {
             <Helmet>
                 <title>{`${_caption} | ${AppSettings.Titles.Main}`}</title>
             </Helmet>
+            <div className="row" >
+                <div className="col-sm-12 mb-2">
+                    <h1 className="m-0 headline-2">
+                        {_caption}
+                    </h1>
+                </div>
+            </div>
             <CartPreview />
         </>
     )

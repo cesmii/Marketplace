@@ -1,44 +1,23 @@
-import React, { useState } from 'react'
-import { Button } from 'react-bootstrap';
+import React from 'react'
 
 import { useLoadingContext } from '../contexts/LoadingContext';
-import { generateLogMessageString } from '../../utils/UtilityService';
-import CartPreview from './CartPreview';
+import { getCartCount } from '../../utils/CartUtil';
 
-const CLASS_NAME = "Cart";
+import '../styles/Cart.scss'
 
-function Cart(props) { //props are item, showActions
+//const CLASS_NAME = "Cart";
+
+function Cart() { //props are item, showActions
 
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
     //used in popup profile add/edit ui. Default to new version
-    const { loadingProps, setLoadingProps } = useLoadingContext();
-    const [_slideOutShow, setShow] = useState(false);
+    const { loadingProps } = useLoadingContext();
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
-    const onSlideOut = (e) => {
-        console.log(generateLogMessageString('slideOut', CLASS_NAME));
-        setShow(true);
-    }
-
-    const onCheckout = () => {
-        //initiate checkout, call API to perform a checkout.
-        setShow(false);
-    }
-
-    const onEmptyCart = () => {
-        const cart = null;
-        setLoadingProps({ cart: cart });
-        setShow(false);
-    }
-
-    const onClose = () => {
-        console.log(generateLogMessageString(`onClose`, CLASS_NAME));
-        setShow(false);
-    };
 
     //-------------------------------------------------------------------
     // Region: Render helpers
@@ -47,11 +26,15 @@ function Cart(props) { //props are item, showActions
     //-------------------------------------------------------------------
     // Region: Render final output
     //-------------------------------------------------------------------
-    if (loadingProps.cart?.items == null) return null;
-
     return (
         <>
-            <a className="btn btn-icon-outline primary circle" href='/cart'><i className="material-icons">shopping_cart</i></a>
+            <a className="btn btn-icon-outline primary circle" href='/cart'><i className="material-icons">shopping_cart</i>
+                {(loadingProps.cart?.items != null && loadingProps.cart?.items.length > 0) &&
+                    <div className="footnote" >
+                    <span className="primary icon-circle small blazeOrange" >{getCartCount(loadingProps.cart)}</span>
+                    </div>
+                }
+            </a>
         </>
     );
 }
