@@ -1,6 +1,8 @@
-﻿using CESMII.Marketplace.DAL.Models;
-using Stripe;
+﻿using Stripe;
 using Stripe.Checkout;
+
+using CESMII.Marketplace.DAL.Models;
+using CESMII.Marketplace.Service.Models;
 
 namespace CESMII.Marketplace.Service
 {
@@ -12,7 +14,7 @@ namespace CESMII.Marketplace.Service
         /// </summary>
         /// <param name="code"></param>
         /// <returns></returns>
-        Task<String> DoCheckout(TModel item, string userId);
+        Task<CheckoutInitModel> DoCheckout(TModel item, string userId);
 
         Task<Session> SessionStatus(string session_id);
 

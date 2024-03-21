@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import Form from 'react-bootstrap/Form'
-
+import { validateCartItem_Quantity } from '../../utils/CartUtil';
 import { generateLogMessageString } from '../../utils/UtilityService';
 import _icon from '../img/icon-cesmii-white.png'
 import '../styles/Modal.scss';
@@ -56,15 +56,8 @@ function CartItem(props) {
     //-------------------------------------------------------------------
     // Region: Validation
     //-------------------------------------------------------------------
-    const validate_quantity = (val) => {
-        var required = (val != null);
-        var numeric = required && (!isNaN(parseInt(val)));
-        var range = required && parseInt(val) > 0;
-        return { required: required, numeric: numeric, range: range };
-    };
-
     const validateForm_quantity = (e) => {
-        const result = validate_quantity(e.target.value);
+        const result = validateCartItem_Quantity(e.target.value);
         setIsValid(result);
         if (props.onValidate != null) props.onValidate(props.item.marketplaceItem?.id, result);
     };

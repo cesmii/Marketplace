@@ -1,13 +1,14 @@
 ﻿using Microsoft.Extensions.Logging;
 
 using Stripe;
+using Stripe.Checkout;
 
 using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Models;
-using Stripe.Checkout;
+using CESMII.Marketplace.Service.Models;
 
 namespace CESMII.Marketplace.Service
 {
@@ -25,10 +26,10 @@ namespace CESMII.Marketplace.Service
             _config = configUtil.StripeSettings;
         }
 
-        public async Task<string> DoCheckout(CartModel item, string userId)
+        public async Task<CheckoutInitModel> DoCheckout(CartModel item, string userId)
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
-            var domain = "http://localhost:3000";
+            //var domain = "http://localhost:3000";
 
             var options = new SessionCreateOptions
             {
@@ -44,7 +45,8 @@ namespace CESMII.Marketplace.Service
                       },
                     },
                     Mode = "payment",
-                    ReturnUrl = domain + "/checkout?type:success"
+                    //ReturnUrl = domain + "/checkout?type:success"
+                    ReturnUrl = item.ReturnUrl
             };
 
             try
@@ -53,7 +55,10 @@ namespace CESMII.Marketplace.Service
                 var service = new SessionService();
                 Session session = await service.CreateAsync(options);
 
-                return session.Id;
+                return new CheckoutInitModel() { 
+                    ApiKey = _config.PublishKey, //_config.SecretKey,
+                    SessionId = session.Id
+                };
             }catch(Exception ex)
             {
                 return null;

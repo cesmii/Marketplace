@@ -62,3 +62,36 @@ export function removeCartItem(cart, marketplaceItemId) {
     cart.splice(x, 1);
     return cart;
 }
+
+//-------------------------------------------------------------------
+// validate cart - make sure all items can be purchased and all quantities are > 0
+//-------------------------------------------------------------------
+export function validateCart(cart) {
+
+    if (cart == null) return false;
+    if (cart.items == null) return false;
+
+    //loop through cart and see if item is there. 
+    let result = {quantity: true, allowPurchase: true};
+    let x = cart.items.forEach(item => {
+        //check item is allowed to be purchased
+        if (!item.marketplaceItem.allowPurchase)
+        {
+            result = { ...result, allowPurchase: false };
+        }
+        //check for valid qty
+        var isValid = validateCartItem_Quantity(item.quantity);
+        if (!isValid.required || isValid.numeric || isValid.range) {
+            result = { ...result, quantity: false };
+        }
+    });
+
+    return result;
+}
+
+export const validateCartItem_Quantity = (val) => {
+    var required = (val != null);
+    var numeric = required && (!isNaN(parseInt(val)));
+    var range = required && parseInt(val) > 0;
+    return { required: required, numeric: numeric, range: range };
+};

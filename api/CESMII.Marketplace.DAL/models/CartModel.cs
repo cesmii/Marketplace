@@ -25,6 +25,8 @@
 
         public DateTime? Completed { get; set; }
 
+        public string ReturnUrl { get; set; }
+
         public virtual List<CartItemModel> Items { get; set; }
     }
 }

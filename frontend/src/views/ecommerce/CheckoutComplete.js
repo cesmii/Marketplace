@@ -25,7 +25,7 @@ function CheckoutComplete() {
         //update cart status based on type
         let cart = loadingProps.cart;
         if (cart == null) cart = {};
-        cart.status = (type?.toLowercase() === 'success' ? AppSettings.CartStatusEnum.Success : AppSettings.CartStatusEnum.Fail);
+        cart.status = (type?.toLowercase() === 'success' ? AppSettings.CartStatusEnum.Completed : AppSettings.CartStatusEnum.Failed);
         setLoadingProps({ cart: cart });
     }, [type]);
 

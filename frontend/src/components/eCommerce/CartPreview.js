@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
-import { Button } from 'react-bootstrap';
+import React, { useState } from 'react'
 
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
 import { generateLogMessageString } from '../../utils/UtilityService';
@@ -9,12 +7,11 @@ import CartItem from './CartItem';
 
 const CLASS_NAME = "CartPreview";
 
-function CartPreview(props) {
+function CartPreview() {
 
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const _caption = 'Shopping Cart';
     const [_isValid, setIsValid] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
 
@@ -25,10 +22,11 @@ function CartPreview(props) {
     //-------------------------------------------------------------------
     // Region: Event Handling
     //-------------------------------------------------------------------
+    /*
     const onCheckout = async () => {
         console.log(generateLogMessageString('onCheckout', CLASS_NAME));
         if (props.onCheckout != null) props.onCheckout();
-        
+
            const response = await fetch("https://localhost:44373/api/ecommerce/checkout/init", {
                 method: 'POST',
                 headers: {
@@ -46,6 +44,8 @@ function CartPreview(props) {
         //TBd - show a processing message and disable cart interactivity
     };
 
+    */
+
     const onValidate = (isValid) => {
         console.log(generateLogMessageString('onValidate', CLASS_NAME));
         setIsValid(isValid.required && isValid.numeric && isValid.range);
@@ -62,13 +62,6 @@ function CartPreview(props) {
         console.log(generateLogMessageString('onRemoveItem', CLASS_NAME));
         //TBD - consider showing confirmation modal first.
         let cart = removeCartItem(loadingProps.cart, id);
-        setLoadingProps({ cart: cart });
-    };
-
-    const onEmptyCart = () => {
-        console.log(generateLogMessageString('onEmptyCart', CLASS_NAME));
-        //TBD - consider showing confirmation modal first.
-        const cart = null;
         setLoadingProps({ cart: cart });
     };
 
@@ -107,11 +100,6 @@ function CartPreview(props) {
             <div className="row" >
                 <div className="col-sm-12 mb-4">
                     {mainBody}
-                </div>
-                <div className="col-sm-12 pt-4 border-top">
-                    <Button variant="secondary" type="button" className="mx-3" onClick={onEmptyCart} >Empty Cart</Button>
-                    <a className="mx-1 ml-auto" href="/library" >Continue Shopping</a>
-                    <Button variant="primary" type="button" className="mx-3" onClick={onCheckout} >Checkout</Button>
                 </div>
             </div>
         );

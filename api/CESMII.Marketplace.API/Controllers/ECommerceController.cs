@@ -37,8 +37,8 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("checkout/init")]
-       // [Authorize(Policy = nameof(PermissionEnum.UserAzureADMapped))]
-        //[ProducesResponseType(200, Type = typeof(Session))]
+        // [Authorize(Policy = nameof(PermissionEnum.UserAzureADMapped))]
+        [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         [ProducesResponseType(400)]
         public async Task<IActionResult> Checkout([FromBody] CartModel model)
         {
@@ -47,7 +47,11 @@ namespace CESMII.Marketplace.Api.Controllers
             {
                 return BadRequest($"Could not initialize checkout.");
             }
-            return Ok(result);
+            return Ok(new ResultMessageWithDataModel() {
+                Data = result,
+                IsSuccess = true,
+                Message = "Check out started..."
+            } );
         }
 
         [HttpGet, Route("session-status")]
