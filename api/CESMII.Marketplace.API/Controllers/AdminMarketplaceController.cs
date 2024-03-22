@@ -159,6 +159,10 @@ namespace CESMII.Marketplace.Api.Controllers
             }
             else
             {
+                //TBD - add call to Stripe service to add/update item
+                //get back Stripe price id and save to our DB.
+                //if Stripe fails, catch exception, log exception, and still save to our db
+
                 var result = await _dal.Update(model, UserID);
                 if (result < 0)
                 {
@@ -186,6 +190,9 @@ namespace CESMII.Marketplace.Api.Controllers
         [ProducesResponseType(200, Type = typeof(ResultMessageModel))]
         public async Task<IActionResult> Delete([FromBody] IdStringModel model)
         {
+            //TBD - add call to Stripe service to remove item from catalog - only if it has payment product id
+            //if Stripe fails, catch exception, log exception, and still save to our db
+
             var result = await _dal.Delete(model.ID.ToString(), UserID);
             if (result < 0)
             {
@@ -223,6 +230,10 @@ namespace CESMII.Marketplace.Api.Controllers
             }
             else
             {
+                //TBD - add call to Stripe service to add item to catalog
+                //set paymentProductId on our model.PaymentProductId
+                //if Stripe fails, catch exception, log exception, and still save to our db
+
                 var result = await _dal.Add(model, UserID);
                 if (String.IsNullOrEmpty(result))
                 {
