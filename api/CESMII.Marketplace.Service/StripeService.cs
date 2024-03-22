@@ -30,6 +30,13 @@ namespace CESMII.Marketplace.Service
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
 
+            var price = await GetPriceByProductId(item.Items[0].MarketplaceItem.PaymentProductId);
+            if(price == null)
+            {
+                _logger.LogError("StripeService|DoCheckout|Cannot get price with payment product id.");
+                throw new ArgumentException("Cannot get price with payment product id.");
+            }
+
             var options = new SessionCreateOptions
             {
                 UiMode = "embedded",
@@ -38,8 +45,7 @@ namespace CESMII.Marketplace.Service
                       new SessionLineItemOptions
                       {
                         // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
-                        //Price = item.Items[0].MarketplaceItem.PaymentProductId,
-                        Price = "price_1OwOdLHXjPkvmDZJn7EvXrKr",
+                        Price = price.Id,
                         Quantity = 1,
                       },
                     },
@@ -275,6 +281,19 @@ namespace CESMII.Marketplace.Service
         public async Task Delete(string id, string userId)
         {
             await _dal.Delete(id, userId);
+        }
+
+        private async Task<Price> GetPriceByProductId(string paymentProductId)
+        {
+            StripeConfiguration.ApiKey = _config.SecretKey;
+
+            // Fetch all prices
+            var priceService = new PriceService();
+            var prices = await priceService.ListAsync(
+                new PriceListOptions { Limit = 100 }
+            );
+
+            return prices.FirstOrDefault(price => price.ProductId == paymentProductId);
         }
 
     }
