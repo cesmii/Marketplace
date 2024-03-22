@@ -29,7 +29,6 @@ namespace CESMII.Marketplace.Service
         public async Task<CheckoutInitModel> DoCheckout(CartModel item, string userId)
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
-            //var domain = "http://localhost:3000";
 
             var options = new SessionCreateOptions
             {
@@ -45,33 +44,24 @@ namespace CESMII.Marketplace.Service
                       },
                     },
                     Mode = "payment",
-                    //ReturnUrl = domain + "/checkout?type:success"
                     ReturnUrl = item.ReturnUrl
             };
 
             try
             {
-
                 var service = new SessionService();
                 Session session = await service.CreateAsync(options);
 
                 return new CheckoutInitModel() { 
-                    ApiKey = _config.PublishKey, //_config.SecretKey,
+                    ApiKey = _config.PublishKey,
                     SessionId = session.Id
                 };
-            }catch(Exception ex)
+            } catch(Exception ex)
             {
-                return null;
+                _logger.LogError(ex, "StripeService|DoCheckout|Error occured while checkout.");
+                
+                throw;
             }
-        }
-
-        public async Task<Session> SessionStatus( string session_id)
-        {
-            StripeConfiguration.ApiKey = _config.SecretKey;
-            var sessionService = new SessionService();
-            Session session = await sessionService.GetAsync(session_id);
-
-            return session;
         }
 
         public async Task<IEnumerable<Product>> GetProducts()

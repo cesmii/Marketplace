@@ -75,7 +75,7 @@ function CartPreview() {
     //-------------------------------------------------------------------
     const renderCartItems = (cart) => {
 
-        if (cart == null || cart.items == null || cart.items.length === 1) {
+        if (cart == null || cart.items == null || cart.items.length === 0) {
             return (
                 <div className="row" >
                     <div className="col-sm-4 my-5 mx-auto text-center">

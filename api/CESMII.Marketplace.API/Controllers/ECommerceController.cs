@@ -17,9 +17,7 @@ using CESMII.Marketplace.Api.Shared.Models;
 using CESMII.Marketplace.Api.Shared.Controllers;
 using CESMII.Marketplace.Api.Shared.Extensions;
 using CESMII.Marketplace.Service;
-using CESMII.Marketplace.Service.Models;
 using Stripe;
-using Stripe.Checkout;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
@@ -52,19 +50,6 @@ namespace CESMII.Marketplace.Api.Controllers
                 IsSuccess = true,
                 Message = "Check out started..."
             } );
-        }
-
-        [HttpGet, Route("session-status")]
-        //[ProducesResponseType(200, Type = typeof(Session))]
-        [ProducesResponseType(400)]
-        public async Task<IActionResult> Getsession(string sessionid)
-        {
-            var result = await _svc.SessionStatus(sessionid);
-            if (result == null)
-            {
-                return BadRequest($"Could not fetch Products.");
-            }
-            return Ok(result);
         }
 
         [HttpGet, Route("products")]

@@ -16,8 +16,6 @@ namespace CESMII.Marketplace.Service
         /// <returns></returns>
         Task<CheckoutInitModel> DoCheckout(TModel item, string userId);
 
-        Task<Session> SessionStatus(string session_id);
-
         /// <summary>
         /// Get all products from the Stripe product catalog.
         /// This is called after user saves marketplace item from admin screen when the marketplace item 
