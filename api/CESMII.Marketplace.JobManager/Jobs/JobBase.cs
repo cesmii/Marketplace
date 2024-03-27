@@ -20,6 +20,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
         protected bool _disposed = false;
         protected readonly IHttpApiFactory _httpFactory;
         protected readonly IDal<JobLog, JobLogModel> _dalJobLog;
+        protected readonly UserDAL _dalUser;
         protected readonly ConfigUtil _configUtil;
         protected readonly MailRelayService _mailRelayService;
 
@@ -31,12 +32,14 @@ namespace CESMII.Marketplace.JobManager.Jobs
             ILogger<IJob> logger,
             IHttpApiFactory httpFactory,
             IDal<JobLog, JobLogModel> dalJobLog,
+            UserDAL dalUser,
             IConfiguration configuration,
             MailRelayService mailRelayService)
         {
             _logger = logger;
             _httpFactory = httpFactory;
             _dalJobLog = dalJobLog;
+            _dalUser = dalUser;
             _configUtil = new ConfigUtil(configuration);
             _mailRelayService = mailRelayService;
         }

@@ -129,6 +129,7 @@ namespace CESMII.Marketplace.JobManager
             {
                 //initialize scoped services for DI, initialize job class
                 var dalJobLog = scope.ServiceProvider.GetService<IDal<JobLog, JobLogModel>>();
+                var dalUser = scope.ServiceProvider.GetService<UserDAL>();
                 var logger = scope.ServiceProvider.GetService<ILogger<IJob>>();
                 var httpFactory = scope.ServiceProvider.GetService<IHttpApiFactory>();
                 var configuration = scope.ServiceProvider.GetService<IConfiguration>();
@@ -137,7 +138,7 @@ namespace CESMII.Marketplace.JobManager
                 try
                 {
                     //instantiate job class
-                    var job = InstantiateJob(jobDef.TypeName, logger, httpFactory, dalJobLog, configuration, mailRelay);
+                    var job = InstantiateJob(jobDef.TypeName, logger, httpFactory, dalJobLog, dalUser, configuration, mailRelay);
 
                     //initialize job
                     job.Initialize(jobDef, payload, logId, user);
