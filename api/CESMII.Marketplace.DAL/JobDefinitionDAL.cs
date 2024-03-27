@@ -171,6 +171,10 @@
                     Name = entity.Name,
                     IconName = entity.IconName,
                     TypeName = entity.TypeName,
+                    ActionType = (Common.Enums.JobActionTypeEnum)entity.ActionType,
+                    ActionLink = entity.ActionLink,
+                    ClassName = entity.ClassName,
+                    RequiresAuthentication = entity.RequiresAuthentication,
                     Data = !string.IsNullOrEmpty(entity.Data) ? 
                             PasswordUtils.DecryptString(entity.Data, _encryptDecryptKey) : null, 
                     IsActive = entity.IsActive
@@ -191,6 +195,10 @@
             entity.Name = model.Name;
             entity.IconName = model.IconName;
             entity.TypeName = model.TypeName;
+            entity.ActionType = (int)model.ActionType;
+            entity.ActionLink = model.ActionLink;
+            entity.ClassName = model.ClassName;
+            entity.RequiresAuthentication = model.RequiresAuthentication;
             entity.Data = PasswordUtils.EncryptString(model.Data, _encryptDecryptKey);
         }
 

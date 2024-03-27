@@ -159,7 +159,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
 
         return props.item.jobDefinitions.map((x) => {
             return (
-                <MarketplaceItemJobLauncher key={x.id} className={`mr-2 mt-2`} isAuthenticated={props.isAuthenticated} jobDefinitionId={x.id} marketplaceItemId={props.item.id} jobName={x.name} payload={x.payload} iconName={x.iconName} />
+                <MarketplaceItemJobLauncher key={x.id} isAuthenticated={props.isAuthenticated} jobDefinition={x} marketplaceItemId={props.item.id} marketplaceItemName={props.item.name} />
             );
         });
     };

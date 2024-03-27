@@ -10,7 +10,6 @@ using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.Api.Shared.Controllers;
 using CESMII.Marketplace.Api.Shared.Models;
-using CESMII.Marketplace.Api.Shared.Extensions;
 using CESMII.Marketplace.JobManager;
 using CESMII.Marketplace.JobManager.Models;
 
@@ -20,17 +19,43 @@ namespace CESMII.Marketplace.Api.Controllers
     public class JobController : BaseController<JobController>
     {
         private readonly IJobFactory _jobFactory;
+        private readonly IDal<JobDefinition, JobDefinitionModel> _dal;
         private readonly IDal<JobLog, JobLogModel> _dalJobLog;
 
-        public JobController(IJobFactory jobFactory, 
+        public JobController(IJobFactory jobFactory,
+            IDal<JobDefinition, JobDefinitionModel> dal,
             IDal<JobLog, JobLogModel> dalJobLog,
             UserDAL dalUser,
             ConfigUtil config, ILogger<JobController> logger) 
             : base(config, logger, dalUser)
         {
             _jobFactory = jobFactory;
+            _dal = dal;
             _dalJobLog = dalJobLog;
         }
+
+        [HttpPost, Route("GetByID")]
+        //[ProducesResponseType(200, Type = typeof(NodeSetModel))]
+        [ProducesResponseType(200, Type = typeof(JobDefinitionModel))]
+        [ProducesResponseType(400)]
+        public IActionResult GetByID([FromBody] IdStringModel model)
+        {
+            if (model == null)
+            {
+                _logger.LogWarning($"JobController|GetByID|Invalid model (null)");
+                return BadRequest($"Invalid model (null)");
+            }
+
+            var result = _dal.GetById(model.ID);
+            if (result == null)
+            {
+                _logger.LogWarning($"JobController|GetById|No records found matching this ID: {model.ID}");
+                return BadRequest($"No records found matching this ID: {model.ID}");
+            }
+            return Ok(result);
+        }
+
+
 
         #region Job Factory
         [HttpPost, Route("Execute")]
@@ -63,7 +88,7 @@ namespace CESMII.Marketplace.Api.Controllers
         //[ProducesResponseType(200, Type = typeof(NodeSetModel))]
         [ProducesResponseType(200, Type = typeof(JobLogModel))]
         [ProducesResponseType(400)]
-        public IActionResult GetByID([FromBody] IdStringModel model)
+        public IActionResult GetLogByID([FromBody] IdStringModel model)
         {
             if (model == null)
             {

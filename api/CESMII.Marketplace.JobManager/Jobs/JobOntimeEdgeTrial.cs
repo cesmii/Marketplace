@@ -14,7 +14,7 @@ using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Common.SelfServiceSignUp.Services;
-
+using System.Net.Mail;
 
 namespace CESMII.Marketplace.JobManager.Jobs
 {
@@ -48,13 +48,13 @@ namespace CESMII.Marketplace.JobManager.Jobs
             //3 sources of data - job config - static data, runtime payload data - user entered data and user data - user profile data
             //extract out job config params from payload and convert from JSON to an object we can use within this job
             //if smip settings is null, still allow trial to go through but inform user
-            var jobConfigData = JsonConvert.DeserializeObject<JobOnTimeEdgeConfig>(e.Config.Data);
+            var jobConfig = JsonConvert.DeserializeObject<JobOnTimeEdgeConfig>(e.Config.Data);
             var payload = JsonConvert.DeserializeObject<JobOnTimeEdgePayload>(e.Payload);
             var smipSettings = payload.SmipSettings != null ? payload.SmipSettings :
                                     e.User?.SmipSettings != null ? e.User.SmipSettings : 
                                     null;
             //validate all settings before we proceed
-            var isValid = this.ValidateData(jobConfigData, payload, smipSettings, out string errorMessage);
+            var isValid = this.ValidateData(jobConfig, payload, smipSettings, out string errorMessage);
             if (!isValid)
             {
                 base.CreateJobLogMessage($"Validating data...failed. {errorMessage}", TaskStatusEnum.Failed);
@@ -73,7 +73,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
 
             //get user information from request info type of form.
             base.CreateJobLogMessage($"Preparing request info user information to submit to OnTime | Edge...", TaskStatusEnum.InProgress);
-            var req = MapToBody(jobConfigData.OnTimeEdgeSettings.SecretKey, payload.TrialFormData);
+            var req = MapToBody(jobConfig.SecretKey, payload.FormData);
 
             //save record of submission to the request info DB.
             base.CreateJobLogMessage($"TBD - Saving request info user information to Marketplace DB...", TaskStatusEnum.InProgress);
@@ -85,71 +85,37 @@ namespace CESMII.Marketplace.JobManager.Jobs
             //call the Zapier catch hook API to intialize start trial flow
             var config = new HttpApiConfig()
             {
-                Url = jobConfigData.OnTimeEdgeSettings.Url,
+                Url = jobConfig.Url,
                 Body = JsonConvert.SerializeObject(req),
                 IsPost = true,
                 ContentType = "application/json",
             };
 
-            string responseRaw = await _httpFactory.Run(config);
-            var result = JsonConvert.DeserializeObject<OnTimeEdgeResponseModel>(responseRaw);
+            //string responseRaw = await _httpFactory.Run(config);
+            //var result = JsonConvert.DeserializeObject<OnTimeEdgeResponseModel>(responseRaw);
+            var result = JsonConvert.DeserializeObject<OnTimeEdgeResponseModel>("{attempt: '018e80b4-cfe9-5ed6-fd7e-99adf0eebc7a',id: '018e80b4-cfe9-5ed6-fd7e-99adf0eebc7a',request_id: '018e80b4-cfe9-5ed6-fd7e-99adf0eebc7a',status: 'success'}");
+            /*
+            {attempt: '018e80b4-cfe9-5ed6-fd7e-99adf0eebc7a',id: '018e80b4-cfe9-5ed6-fd7e-99adf0eebc7a',request_id: '018e80b4-cfe9-5ed6-fd7e-99adf0eebc7a',status: 'success'}
+            */
+            var isSuccess = !string.IsNullOrEmpty(result.status) && result.status.ToLower().Equals("success");
 
-            if (!string.IsNullOrEmpty(result.status) && result.status.ToLower().Equals("success"))
+            string msg;
+            if (isSuccess)
             {
-                base.CreateJobLogMessage($"Form submitted to the OnTime | Edge API workflow successfully...", TaskStatusEnum.Completed);
+                msg = GenerateSuccessHTML(e.Config.MarketplaceItem, payload);
+                base.CreateJobLogMessage($"{msg}", TaskStatusEnum.Completed);
             }
             else
             {
-                base.CreateJobLogMessage($"An error occurred submitting the trial form to OnTime | Edge...", TaskStatusEnum.Failed);
+                msg = GenerateFailHTML(e.Config.MarketplaceItem, payload);
+                base.CreateJobLogMessage($"{msg}", TaskStatusEnum.Failed);
             }
 
-            //TBD - notify CESMII recipients of the trial. 
-            await EmailSubmissionData(jobConfigData, payload);
-
-            //TBD - below here
-            //create an organization in the SMIP if OnTime | Edge API indicates successful result. 
+            //notify CESMII recipients of the trial submission. 
+            await GenerateNotifyEmailHTML(e.Config.MarketplaceItem, jobConfig, payload, isSuccess);
 
             //return success / fail to user and show thank you page on success. 
-
-/* TBD
-            //put response into a human readable format that can be displayed as a message in the front end. 
-            //TBD - encrypt result data in the response data field in the JobLog table. This will be decrypted 
-            //by DAL and displayed on the front end.
-            string response = $"Url: <a href='{result.URL}' target='_blank' >{result.URL}</a>, User name: {result.Username}. An email has been sent with your temporary password.";
-            base.CreateJobLogMessage($"Customer created. Connection information:: {"<br />"}{response}", TaskStatusEnum.Completed, false);
-*/
-            return JsonConvert.SerializeObject(result);
-
-        }
-
-        /// <summary>
-        /// Send two emails with account info. a password to the owner of this job. 
-        /// </summary>
-        /// <remarks>do not fail the process if email sending fails. </remarks>
-        /// <param name="result"></param>
-        /// <returns></returns>
-        private async Task EmailSubmissionData(OnTimeEdgeConfig jobConfig, JobOnTimeEdgePayload payload)
-        {
-            try
-            {
-                string body = $"<p>Thank you for your interest in OnTime | Edge and the Smart Manufacturing Innovation Platform. Your OnTime | Edge activation has completed and your instance information is included below. " +
-                    "For security reasons, your password will be delivered in a separate email. </p>" +
-                    $"<p><b>Connection Details:</b><br />" +
-                    $"<b>Url</b>: <a href='{result.URL}' target='_blank' >{result.URL}</a><br />" +
-                    $"<b>Username</b>: {result.Username}<br />" +
-                    "</p>";
-                await base.SendEmail("CESMII | SM Marketplace | OnTime | Edge | Trial Form Submitted", body);
-
-                string bodyPw = $"<p>Thank you for your interest in OnTime | Edge and the Smart Manufacturing Innovation Platform. Your OnTime | Edge activation has completed and your password information is included below. " +
-                    "For security reasons, your instance details will be delivered in a separate email. </p>" +
-                    $"<p></p>" +
-                    $"<b>Password</b>: {result.Password}</p>";
-                await base.SendEmail("CESMII | SM Marketplace | OnTime | Edge | Activation - Connection Information", bodyPw);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"JobOnTimeEdgeTrial|Email Error");
-            }
+            return JsonConvert.SerializeObject(new { isSuccess = isSuccess, Message = msg });
         }
 
         private bool ValidateData(JobOnTimeEdgeConfig jobConfig, JobOnTimeEdgePayload payload, SmipSettings smipSettings, out string message)
@@ -165,7 +131,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             if (!string.IsNullOrEmpty(errorMessagePayload)) sbResult.AppendLine(errorMessagePayload);
 
             message = sbResult.ToString();
-            return sbResult.Length == 0;
+            return isValidJobConfig && isValidPayload;
         }
 
         private bool ValidateJobConfig(JobOnTimeEdgeConfig jobConfig, out string message)
@@ -176,19 +142,14 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 sbResult.AppendLine("The configuration file is missing. Please contact the system administrator.");
                 _logger.LogError($"JobOnTimeEdgeTrial|ValidateJobConfig|jobConfig is missing.");
             }
-            if (jobConfig.OnTimeEdgeSettings == null)
-            {
-                sbResult.AppendLine("The OnTime Edge configuration is missing. Please contact the system administrator.");
-                _logger.LogError($"JobOnTimeEdgeTrial|ValidateJobConfig|The jobConfig.OnTimeEdgeSettings is missing.");
-            }
-            if (string.IsNullOrEmpty(jobConfig.OnTimeEdgeSettings?.Url)) {
+            if (string.IsNullOrEmpty(jobConfig.Url)) {
                 sbResult.AppendLine("The OnTime Edge url is missing. Please contact the system administrator.");
-                _logger.LogError($"JobOnTimeEdgeTrial|ValidateJobConfig|The jobConfig.OnTimeEdgeSettings.Url is missing.");
+                _logger.LogError($"JobOnTimeEdgeTrial|ValidateJobConfig|The jobConfig.Url is missing.");
             }
-            if (string.IsNullOrEmpty(jobConfig.OnTimeEdgeSettings?.SecretKey))
+            if (string.IsNullOrEmpty(jobConfig.SecretKey))
             {
                 sbResult.AppendLine("The OnTime Edge configuration is missing configuration data. Please contact the system administrator.");
-                _logger.LogError($"JobOnTimeEdgeTrial|ValidateJobConfig|The jobConfig.OnTimeEdgeSettings.SecretKey is missing.");
+                _logger.LogError($"JobOnTimeEdgeTrial|ValidateJobConfig|The jobConfig.SecretKey is missing.");
             }
 
             message = sbResult.ToString();
@@ -198,7 +159,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
         private bool ValidatePayload(JobOnTimeEdgePayload payload, out string message)
         {
             var sbResult = new System.Text.StringBuilder();
-            if (payload == null || payload.TrialFormData == null)
+            if (payload == null || payload.FormData == null)
             {
                 sbResult.AppendLine("The trial form data is missing. Please contact the system administrator.");
                 _logger.LogError($"JobOnTimeEdgeTrial|ValidatePayload|payload is missing.");
@@ -206,27 +167,27 @@ namespace CESMII.Marketplace.JobManager.Jobs
             
             //TBD - determine if SMIP settings is being included here. 
             
-            if (string.IsNullOrEmpty(payload.TrialFormData?.FirstName))
+            if (string.IsNullOrEmpty(payload.FormData?.FirstName))
             {
                 sbResult.AppendLine("First Name is required.");
                 _logger.LogInformation($"JobOnTimeEdgeTrial|ValidatePayload|FirstName is required.");
             }
-            if (string.IsNullOrEmpty(payload.TrialFormData?.LastName))
+            if (string.IsNullOrEmpty(payload.FormData?.LastName))
             {
                 sbResult.AppendLine("Last Name is required.");
                 _logger.LogInformation($"JobOnTimeEdgeTrial|ValidatePayload|LastName is required.");
             }
-            if (string.IsNullOrEmpty(payload.TrialFormData?.Organization))
+            if (string.IsNullOrEmpty(payload.FormData?.CompanyName))
             {
                 sbResult.AppendLine("Organization is required.");
                 _logger.LogInformation($"JobOnTimeEdgeTrial|ValidatePayload|Organization is required.");
             }
-            if (string.IsNullOrEmpty(payload.TrialFormData?.Email))
+            if (string.IsNullOrEmpty(payload.FormData?.Email))
             {
                 sbResult.AppendLine("Email is required.");
                 _logger.LogInformation($"JobOnTimeEdgeTrial|ValidatePayload|Email is required.");
             }
-            if (string.IsNullOrEmpty(payload.TrialFormData?.Phone))
+            if (string.IsNullOrEmpty(payload.FormData?.Phone))
             {
                 sbResult.AppendLine("Phone is required.");
                 _logger.LogInformation($"JobOnTimeEdgeTrial|ValidatePayload|Phone is required.");
@@ -242,12 +203,102 @@ namespace CESMII.Marketplace.JobManager.Jobs
             {
                 firstName = model.FirstName,
                 lastName = model.LastName,
-                organization = model.Organization,
+                organization = model.CompanyName,
                 email = model.Email,
                 phone = model.Phone,
                 secretKey = secretKey
             };
         }
+
+        #region Confirmation message html
+        private string GenerateSuccessHTML(MarketplaceItemSimpleModel marketplaceItem, JobOnTimeEdgePayload payload)
+        {
+            System.Text.StringBuilder sbResult = new System.Text.StringBuilder();
+            sbResult.AppendLine("<div class='row mb-2'>");
+            sbResult.AppendLine("<div class='col-6 mx-auto'>");
+            sbResult.AppendLine("<h1>Thank you for submitting your information.</h1>");
+            sbResult.AppendLine($"<h2>Nice job {payload.FormData.FirstName}! Starting a free trial of Apogean is the first step to collecting CNC machine data.</h2>");
+            sbResult.AppendLine("<p>Within one business day, we'll send you a license key to activate your free trial.  Meanwhile, you can get started by following the instructions below.</p>");
+            sbResult.AppendLine("</div>");
+            sbResult.AppendLine("</div>");
+            sbResult.AppendLine("<div class='row mb-2'>");
+            sbResult.AppendLine("<div class='col-6 mx-auto'>");
+            sbResult.AppendLine("<h3 class='headline-3'>Start getting these things ready:</h3>");
+            sbResult.AppendLine("<ul class='p-0 m-0'>");
+            sbResult.AppendLine("<li class='m-0 p-0 my-1'>Purchase a Windows 10 or later edge device<br>(we tested the <a href='https://a.co/d/64V2XJE' rel='noopener' target='_blank'>GMKtec Mini PC Windows 11</a> and the <a href='https://a.co/d/eQDeobH' rel='noopener' target='_blank'>Mini PC GoLite 11</a>)</li>");
+            sbResult.AppendLine("<li class='m-0 p-0 my-1'>Decide if you need a serial cable or ethernet cable to connect the CNC machine to the Windows device<br>(we tested this <a href='https://a.co/d/fJJIcVK' rel='noopener' target='_blank'>USB to RS232 DB25 serial adapter cable</a>)</li>");
+            sbResult.AppendLine("<li class='m-0 p-0 my-1'>We'll send you the installation file and activation key within one business day</li>");
+            sbResult.AppendLine("</ul>");
+            sbResult.AppendLine("</div>");
+            sbResult.AppendLine("</div>");
+            sbResult.AppendLine("<div class='row mb-2'>");
+            sbResult.AppendLine("<div class='col-6 mx-auto'>");
+            sbResult.AppendLine($"<p>About <a href='{payload.HostUrl}/library/{marketplaceItem.Name}' >{marketplaceItem.DisplayName}</a></p>");
+            sbResult.AppendLine("</div>");
+            sbResult.AppendLine("</div>");
+            return sbResult.ToString();
+        }
+
+        private string GenerateFailHTML(MarketplaceItemSimpleModel marketplaceItem, JobOnTimeEdgePayload payload)
+        {
+            System.Text.StringBuilder sbResult = new System.Text.StringBuilder();
+            sbResult.AppendLine("<div class='row mb-2'>");
+            sbResult.AppendLine("<div class='col-6 mx-auto'>");
+            sbResult.AppendLine("<h1>An error occurred submitting your information.</h1>");
+            sbResult.AppendLine("<p>For more information, please contact the system administrator.</p>");
+            sbResult.AppendLine("</div>");
+            sbResult.AppendLine("</div>");
+            sbResult.AppendLine("<div class='row mb-2'>");
+            sbResult.AppendLine("<div class='col-6 mx-auto'>");
+            sbResult.AppendLine($"<p>About <a href='{payload.HostUrl}/library/{marketplaceItem.Name}' >{marketplaceItem.DisplayName}</a></p>");
+            sbResult.AppendLine("</div>");
+            sbResult.AppendLine("</div>");
+            return sbResult.ToString();
+        }
+
+        private async Task GenerateNotifyEmailHTML(MarketplaceItemSimpleModel marketplaceItem, JobOnTimeEdgeConfig jobConfig, JobOnTimeEdgePayload payload, bool isSuccess)
+        {
+            if (jobConfig.EmailRecipients == null || !jobConfig.EmailRecipients.Any()) return;
+
+            //build to email list
+            /*
+            var toEmails = new MailAddressCollection();
+            foreach (var e in jobConfig.EmailRecipients)
+            {
+                toEmails.Add(new MailAddress(e));
+            }
+            */
+            var title = isSuccess ? "Trial Submitted Successfully" : "Trial Submission Failed";
+                        
+            //generate email body
+            System.Text.StringBuilder sbBody = new System.Text.StringBuilder();
+            sbBody.AppendLine("<div class='row mb-2'>");
+            sbBody.AppendLine("<div class='col-6 mx-auto'>");
+            sbBody.AppendLine($"<h1>{title} | {marketplaceItem.DisplayName}</h1>");
+            sbBody.AppendLine($"<hr class='my-2' />");
+            sbBody.AppendLine("<ul class='p-0 m-0'>");
+            sbBody.AppendLine($"<li class='m-0 p-0 my-1'>First Name: {payload.FormData.FirstName}</li>");
+            sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Last Name: {payload.FormData.LastName}</li>");
+            sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Company Name: {payload.FormData.CompanyName}</li>");
+            sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Email: {payload.FormData.Email}</li>");
+            sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Phone: {payload.FormData.Phone}</li>");
+            sbBody.AppendLine("</ul>");
+            sbBody.AppendLine("</div>");
+            sbBody.AppendLine("</div>");
+
+            var toEmails = string.Join(",", jobConfig.EmailRecipients.ToArray());
+            var message = new MailMessage(_configUtil.MailSettings.MailFromAddress, toEmails)
+            {
+                Subject = $"CESMII | SM Marketplace | OnTime Edge | {title}",
+                Body = sbBody.ToString(),
+                IsBodyHtml = true
+            };
+
+            await _mailRelayService.SendEmail(message);
+
+        }
+
+        #endregion
 
     }
 
@@ -255,12 +306,9 @@ namespace CESMII.Marketplace.JobManager.Jobs
     #region Models associated with this particular job
     internal class JobOnTimeEdgePayload
     {
-        public OnTimeEdgeUserModel TrialFormData { get; set; }
+        public string HostUrl { get; set; }
+        public OnTimeEdgeUserModel FormData { get; set; }
         public SmipSettings SmipSettings { get; set; }
-        /// <summary>
-        /// If true, update user profile with SMIP settings and User Profile Settings.
-        /// </summary>
-        public bool UpdateSmipSettings { get; set; }
     }
 
     internal class JobOnTimeEdgeConfig
@@ -278,7 +326,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string Organization { get; set; }
+        public string CompanyName { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
     }

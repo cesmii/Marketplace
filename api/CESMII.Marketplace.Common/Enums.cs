@@ -53,4 +53,9 @@
         Cancelled = 11
     }
 
+    public enum JobActionTypeEnum
+    {
+        Standard = 0,
+        Link = 1
+    }
 }

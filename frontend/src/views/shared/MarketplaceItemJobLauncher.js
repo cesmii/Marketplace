@@ -39,8 +39,8 @@ export const MarketplaceItemJobLauncher = (props) => {
 
         var data = {
             marketplaceItemId: props.marketplaceItemId,
-            jobDefinitionId: props.jobDefinitionId,
-            payload: props.payload
+            jobDefinitionId: props.jobDefinition.id,
+            payload: props.jobDefinition.payload
         }
         axiosInstance.post(url, data).then(result => {
             if (result.status === 200 && result.data.isSuccess) {
@@ -78,15 +78,32 @@ export const MarketplaceItemJobLauncher = (props) => {
     // Region: Render
     //-------------------------------------------------------------------
     // renders nothing if not logged in
-    if (!props.isAuthenticated) return null;
+    if (props.jobDefinition == null) return null;
+    if (props.jobDefinition.requiresAuthentication && !props.isAuthenticated) return null;
 
-    return (
-        <>
-            <button className={`btn btn-link d-flex align-items-center ${props.className}`} onClick={onExecuteJob}>
-                {renderMenuColorMaterialIcon(props.iconName == null || props.iconName === '' ? 'system_update' : props.iconName, color.cornflower, 'mr-1')}
-                {props.jobName}
-            </button>
-        </>
-    )
+    const className = props.jobDefinition.className == null || props.jobDefinition.className === '' ? 'btn btn-link' : props.jobDefinition.className;
+    const icon = renderMenuColorMaterialIcon(props.jobDefinition.iconName == null || props.jobDefinition.iconName === '' ? 'system_update' : props.jobDefinition.iconName, color.cornflower, 'mr-1');
+
+    if (props.jobDefinition.actionType === AppSettings.JobActionType.Standard) {
+        return (
+            <>
+                <button className={`d-flex align-items-center mr-2 mt-2 ${props.className}`} onClick={onExecuteJob}>
+                    {icon}
+                    {props.jobDefinition.name}
+                </button>
+            </>
+        )
+    }
+    else {
+        const url = props.jobDefinition.actionLink.replace('{{job-id}}', props.jobDefinition.id)
+            .replace('{{jobid}}', props.jobDefinition.id)
+            .replace('{{marketplace-id}}', props.marketplaceItemName)
+            .replace('{{marketplaceid}}', props.marketplaceItemName);
+        return (
+            <a className={className} href={url} >{icon}{props.jobDefinition.name}</a>
+        );
+    }
+
+
 
 };
