@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
@@ -34,24 +35,34 @@ namespace CESMII.Marketplace.Api.Controllers
             _dalJobLog = dalJobLog;
         }
 
-        [HttpPost, Route("GetByID")]
+        [HttpPost, Route("GetByName")]
         //[ProducesResponseType(200, Type = typeof(NodeSetModel))]
         [ProducesResponseType(200, Type = typeof(JobDefinitionModel))]
         [ProducesResponseType(400)]
-        public IActionResult GetByID([FromBody] IdStringModel model)
+        public IActionResult GetByName([FromBody] IdStringModel model)
         {
             if (model == null)
             {
-                _logger.LogWarning($"JobController|GetByID|Invalid model (null)");
+                _logger.LogWarning($"JobController|GetByName|Invalid model (null)");
                 return BadRequest($"Invalid model (null)");
             }
 
-            var result = _dal.GetById(model.ID);
-            if (result == null)
+            //name is supposed to be unique. Note name is different than display name.
+            //if we get more than one match, throw exception
+            var matches = _dal.Where(x => x.Name.ToLower().Equals(model.ID.ToLower()), null, null, false, true).Data;
+
+            if (!matches.Any())
             {
-                _logger.LogWarning($"JobController|GetById|No records found matching this ID: {model.ID}");
-                return BadRequest($"No records found matching this ID: {model.ID}");
+                _logger.LogWarning($"JobController|GetByName|No records found matching this name: {model.ID}");
+                return BadRequest($"No records found matching this name: {model.ID}");
             }
+            if (matches.Count > 1)
+            {
+                _logger.LogWarning($"JobController|GetByName|Multiple records found matching this name: {model.ID}");
+                return BadRequest($"Multiple records found matching this name: {model.ID}");
+            }
+
+            var result = matches[0];
             return Ok(result);
         }
 

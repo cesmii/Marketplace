@@ -17,6 +17,11 @@ namespace CESMII.Marketplace.DAL.Models
         /// </summary>
         public string Name { get; set; }
 
+        /// <summary>
+        /// Friendly display name
+        /// </summary>
+        public string DisplayName { get; set; }
+
         public string TypeName { get; set; }
 
         /// <summary>
@@ -38,20 +43,12 @@ namespace CESMII.Marketplace.DAL.Models
         public JobActionTypeEnum ActionType { get; set; } = JobActionTypeEnum.Standard;
 
         /// <summary>
-        /// The action link is a relative or full url to navigate to a page on front end to then do something.
-        /// In most cases, this should then navigate to a page on front end that knows how to take a job id and do something.
-        /// The link will also have a custom replace format string to embed the {{jobid}} in the link so the front end knows what
-        /// job to associate with link.
-        /// </summary>
-        public string ActionLink { get; set; }
-
-        /// <summary>
         /// Css Class for the link or button associated with the item. 
         /// </summary>
         public string ClassName { get; set; }
 
         /// <summary>
-        /// Can this job be seen on front end ui if not logged in?
+        /// Flag for controlling if this job be seen on front end ui when not logged in.
         /// </summary>
         public bool RequiresAuthentication { get; set; }
     }
@@ -62,7 +59,11 @@ namespace CESMII.Marketplace.DAL.Models
         /// Job description.
         /// </summary>
         public string Name { get; set; }
+        public string DisplayName { get; set; }
         public string IconName { get; set; }
+        public JobActionTypeEnum ActionType { get; set; } = JobActionTypeEnum.Standard;
+        public string ClassName { get; set; }
+        public bool RequiresAuthentication { get; set; }
     }
 
 }

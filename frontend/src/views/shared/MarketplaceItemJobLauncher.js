@@ -3,7 +3,7 @@ import React from 'react'
 import axiosInstance from '../../services/AxiosService'
 import { useLoadingContext } from "../../components/contexts/LoadingContext";
 import { AppSettings } from '../../utils/appsettings';
-import { generateLogMessageString, renderMenuColorMaterialIcon } from '../../utils/UtilityService';
+import { generateActionLink, generateLogMessageString, renderMenuColorMaterialIcon } from '../../utils/UtilityService';
 import color from '../../components/Constants';
 
 const CLASS_NAME = "MarketplaceItemJobLauncher";
@@ -34,7 +34,7 @@ export const MarketplaceItemJobLauncher = (props) => {
         console.log(generateLogMessageString(`onExecuteJob||${url}`, CLASS_NAME));
 
         setLoadingProps({
-            isLoading: true, message: `Initiating ${props.jobName}...This may take a few minutes.`
+            isLoading: true, message: `Initiating ${props.jobDefinition?.displayName}...This may take a few minutes.`
         });
 
         var data = {
@@ -81,26 +81,23 @@ export const MarketplaceItemJobLauncher = (props) => {
     if (props.jobDefinition == null) return null;
     if (props.jobDefinition.requiresAuthentication && !props.isAuthenticated) return null;
 
-    const className = props.jobDefinition.className == null || props.jobDefinition.className === '' ? 'btn btn-link' : props.jobDefinition.className;
-    const icon = renderMenuColorMaterialIcon(props.jobDefinition.iconName == null || props.jobDefinition.iconName === '' ? 'system_update' : props.jobDefinition.iconName, color.cornflower, 'mr-1');
+    const className = props.jobDefinition.className == null || props.jobDefinition.className === '' ? 'd-flex btn btn-link' : props.jobDefinition.className;
+    const icon = renderMenuColorMaterialIcon(props.jobDefinition.iconName == null || props.jobDefinition.iconName === '' ? null : props.jobDefinition.iconName, color.cornflower, 'mr-1');
 
     if (props.jobDefinition.actionType === AppSettings.JobActionType.Standard) {
         return (
             <>
                 <button className={`d-flex align-items-center mr-2 mt-2 ${props.className}`} onClick={onExecuteJob}>
                     {icon}
-                    {props.jobDefinition.name}
+                    {props.jobDefinition.displayName}
                 </button>
             </>
         )
     }
     else {
-        const url = props.jobDefinition.actionLink.replace('{{job-id}}', props.jobDefinition.id)
-            .replace('{{jobid}}', props.jobDefinition.id)
-            .replace('{{marketplace-id}}', props.marketplaceItemName)
-            .replace('{{marketplaceid}}', props.marketplaceItemName);
+        const url = generateActionLink(props.marketplaceItemName, props.jobDefinition.name);
         return (
-            <a className={className} href={url} >{icon}{props.jobDefinition.name}</a>
+            <a className={`mr-2 mt-2 ${className}`} href={url} >{icon}{props.jobDefinition.displayName}</a>
         );
     }
 

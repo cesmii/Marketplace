@@ -641,3 +641,12 @@ export function trimString(val, length = 256) {
     return val.substring(0, lengthAdjusted) + '...';
 }
 
+///--------------------------------------------------------------------------
+/// Dynamically generate a standardized action link
+///--------------------------------------------------------------------------
+export function generateActionLink(marketplaceItemName, jobName) {
+    let result = `/custom/action/{{marketplacename}}/{{jobName}}`;
+    result = marketplaceItemName != null ? result.replace('{{marketplacename}}', marketplaceItemName) : result;
+    result = jobName != null ? result.replace('{{jobName}}', jobName) : result;
+    return result.toLowerCase();
+}
