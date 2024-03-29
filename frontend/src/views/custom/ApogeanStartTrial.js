@@ -161,12 +161,11 @@ function ApogeanStartTrial(props) {
             <>
                 <div class="row mb-2 mx-3">
                     <div class="col-12">
-                        <h1>Thank you for submitting your information.</h1>
-                        <h2>Nice job {_item.formData.firstName}! Starting a free trial of Apogean is the first step to collecting CNC machine data.</h2>
+                        <h2>Nice job! Starting a free trial of Apogean is the first step to collecting CNC machine data.</h2>
                         <p>Within one business day, we'll send you a license key to activate your free trial.  Meanwhile, you can get started by following the instructions below.</p>
                     </div>
                 </div>
-                <div class="row mb-2">
+                <div class="row mb-2 mx-3">
                     <div class="col-12">
                         <h3 class="headline-3">Start getting these things ready:</h3>
                         {renderPrerequisites()}

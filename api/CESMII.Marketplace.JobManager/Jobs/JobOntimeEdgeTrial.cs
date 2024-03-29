@@ -111,7 +111,8 @@ namespace CESMII.Marketplace.JobManager.Jobs
             string msg;
             if (isSuccess)
             {
-                base.CreateJobLogMessage($"Your trial information was submitted. You should receive a confirmation email shortly.", TaskStatusEnum.Completed);
+                //front end will display a message
+                base.CreateJobLogMessage($"", TaskStatusEnum.Completed);
             }
             else
             {

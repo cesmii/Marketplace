@@ -143,22 +143,6 @@ function CustomLandingPage() {
     // Region: Monitor JobLog here. There is a common job log message component to handle this. However, 
     //  we also want to monitor job status here so we can direct child component 
     //  with latest latest job status
-    //-------------------------------------------------------------------
-    useEffect(() => {
-
-        if (loadingProps.activateJobLog === true) {
-            console.log(generateLogMessageString('useEffect||activateJobLog||Trigger fetch', CLASS_NAME));
-            setPollJobLog(_pollJobLog + 1);
-            //once it is activated, it will then know when to stop itself.
-            setLoadingProps({ activateJobLog: null });
-        }
-
-        //type passed so that any change to this triggers useEffect to be called again
-        //_nodesetPreferences.pageSize - needs to be passed so that useEffects dependency warning is avoided.
-    }, [loadingProps.activateJobLog]);
-
-
-    //-------------------------------------------------------------------
     // Query job log for specific id and get job status. Update state variable with job status
     //-------------------------------------------------------------------
     useEffect(() => {
@@ -182,7 +166,7 @@ function CustomLandingPage() {
                         console.log(generateLogMessageString(`useEffect||fetchJobLog||polling ${_jobLog.id}||job complete`, CLASS_NAME));
                     }
 
-                    setJobLog(result.data.data);
+                    setJobLog(result.data);
 
                 } else {
                     setLoadingProps({
@@ -256,14 +240,16 @@ function CustomLandingPage() {
                 //asynch flow - we kick off job and then a 2nd component polls to look for updated progress messages. 
                 var jobLogs = loadingProps.jobLogs == null || loadingProps.jobLogs.length === 0 ? [] :
                     JSON.parse(JSON.stringify(loadingProps.jobLogs));
-                jobLogs.push({ id: result.data.data, status: AppSettings.JobLogStatus.InProgress, message: null });
+                const initialLogMsg = { id: result.data.data, status: AppSettings.JobLogStatus.InProgress, message: null };
+                jobLogs.push(initialLogMsg);
                 setLoadingProps({
                     isLoading: false, message: null,
                     jobLogs: jobLogs,
                     activateJobLog: true,
                     isImporting: false
                 });
-
+                setJobLog(initialLogMsg);
+                setPollJobLog(_pollJobLog + 1);
                 scrollTopScreen();
 
             } else {
