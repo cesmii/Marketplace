@@ -23,21 +23,13 @@ function CustomLandingPage() {
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_jobDef, setJobDef] = useState(null);
     const [_marketplaceItem, setMarketplaceItem] = useState(null);
-    const [_item, setItem] = useState(
-        {
-            hostUrl: null,
-            marketplaceItem: null,
-            formData: { firstName: '', lastName: '', email: '', phone: '', companyName: '' }
-        });
-    const [_isValid, setIsValid] = useState({
-        firstName: true, lastName: true, email: true, emailFormat: true,
-        companyName: true, phone: true
-
-    });
+    const [_jobLog, setJobLog] = useState(null);
     const [_caption, setCaption] = useState(null);
+    const [_pollJobLog, setPollJobLog] = useState(0); //increment this value to cause a re-get of the latest job log.
 
     //-------------------------------------------------------------------
     // Region: Hooks
+    //-------------------------------------------------------------------
     //-------------------------------------------------------------------
     //get job def record
     useEffect(() => {
@@ -86,6 +78,7 @@ function CustomLandingPage() {
     }, [jobName]);
 
 
+    //-------------------------------------------------------------------
     //get marketplace item record
     useEffect(() => {
         async function fetchData() {
@@ -133,7 +126,8 @@ function CustomLandingPage() {
     }, [name]);
 
 
-    //get marketplace item record
+    //-------------------------------------------------------------------
+    //update caption once we have the data loaded initially
     useEffect(() => {
         if (_marketplaceItem == null || _jobDef == null) return;
         setCaption(
@@ -143,6 +137,83 @@ function CustomLandingPage() {
         return () => {
         };
     }, [_marketplaceItem, _jobDef]);
+
+
+    //-------------------------------------------------------------------
+    // Region: Monitor JobLog here. There is a common job log message component to handle this. However, 
+    //  we also want to monitor job status here so we can direct child component 
+    //  with latest latest job status
+    //-------------------------------------------------------------------
+    useEffect(() => {
+
+        if (loadingProps.activateJobLog === true) {
+            console.log(generateLogMessageString('useEffect||activateJobLog||Trigger fetch', CLASS_NAME));
+            setPollJobLog(_pollJobLog + 1);
+            //once it is activated, it will then know when to stop itself.
+            setLoadingProps({ activateJobLog: null });
+        }
+
+        //type passed so that any change to this triggers useEffect to be called again
+        //_nodesetPreferences.pageSize - needs to be passed so that useEffects dependency warning is avoided.
+    }, [loadingProps.activateJobLog]);
+
+
+    //-------------------------------------------------------------------
+    // Query job log for specific id and get job status. Update state variable with job status
+    //-------------------------------------------------------------------
+    useEffect(() => {
+
+        async function fetchData() {
+            var data = { id: _jobLog?.id };
+            var url = `job/log/getbyid`;
+            console.log(generateLogMessageString(`useEffect||fetchJobLogData||${url}`, CLASS_NAME));
+
+            await axiosInstance.post(url, data).then(result => {
+                if (result.status === 200) {
+
+                    //if not complete, initiate a polling mech to check until completed. 
+                    if (!result.data.completed) {
+                        setTimeout(() => {
+                            setPollJobLog(_pollJobLog + 1);
+                        }, 4000);
+                        console.log(generateLogMessageString(`useEffect||fetchJobLog||polling ${_jobLog.id}||job in progress.`, CLASS_NAME));
+                    }
+                    else {
+                        console.log(generateLogMessageString(`useEffect||fetchJobLog||polling ${_jobLog.id}||job complete`, CLASS_NAME));
+                    }
+
+                    setJobLog(result.data.data);
+
+                } else {
+                    setLoadingProps({
+                        isLoading: false, message: null, inlineMessages: [
+                            { id: new Date().getTime(), severity: "danger", body: 'An error occurred retrieving job status.', isTimed: true }]
+                    });
+                }
+
+            }).catch(e => {
+                if ((e.response && e.response.status === 401) || e.toString().indexOf('Network Error') > -1) {
+                    //do nothing, this is handled in routes.js using common interceptor
+                    //setAuthTicket(null); //the call of this will clear the current user and the token
+                }
+                else {
+                    setLoadingProps({
+                        isLoading: false, message: null, inlineMessages: [
+                            { id: new Date().getTime(), severity: "danger", body: 'An error occurred retrieving job status.', isTimed: true }]
+                    });
+                }
+            });
+        } //end fetch
+
+        //only call if polling has started and we have joblog id
+        if (_pollJobLog > 0 && _jobLog?.id != null && _jobLog.id.length > 0) {
+            fetchData();
+        }
+
+        //this will execute on unmount
+        return () => {
+        };
+    }, [_pollJobLog, _jobLog?.id]);
 
     //-------------------------------------------------------------------
     // Region: Validation
@@ -179,6 +250,7 @@ function CustomLandingPage() {
             jobDefinitionId: _jobDef.id,
             payload: payload == null ? null : JSON.stringify(payload)
         }
+        //call execute job
         axiosInstance.post(url, data).then(result => {
             if (result.status === 200 && result.data.isSuccess) {
                 //asynch flow - we kick off job and then a 2nd component polls to look for updated progress messages. 
@@ -223,7 +295,7 @@ function CustomLandingPage() {
     //-------------------------------------------------------------------
     // Region: Render Helpers
     //-------------------------------------------------------------------
-    const renderLeftRail = () => {
+    const renderRail = () => {
         if (!loadingProps.isLoading && (_marketplaceItem == null)) {
             return;
         }
@@ -250,15 +322,13 @@ function CustomLandingPage() {
         if (_marketplaceItem == null) return;
         return (
             <div className="px-2">
-                <div className="row mb-3" >
+                <div className="row mb-2" >
                     <div className="col-sm-12">
                         <p className="mb-2 headline-3 p-1 px-2 w-100 d-block rounded">
-                            {_marketplaceItem.displayName}
+                            About {_marketplaceItem.displayName}
                         </p>
                         <div className="px-2 mb-2" dangerouslySetInnerHTML={{ __html: _marketplaceItem.abstract }} ></div>
-                        {_marketplaceItem.publishDate != null &&
-                            <p className="px-2 mb-0">Published: {formatItemPublishDate(_marketplaceItem)}</p>
-                        }
+                        <p><a href={`/library/${_marketplaceItem.name}`}>More Info</a></p>
                     </div>
                 </div>
             </div>
@@ -268,7 +338,7 @@ function CustomLandingPage() {
     //
     const renderSubTitle = () => {
         return (
-            <span onClick={onBack} className="px-2 btn btn-text-solo align-items-center ml-auto ml-sm-0 auto-width d-flex clickable hover" ><i className="material-icons">chevron_left</i>Back</span>
+            <span onClick={onBack} className="px-2 btn btn-text-solo align-items-center ml-auto mr-2 auto-width d-flex clickable hover" ><i className="material-icons">chevron_left</i>Back</span>
         );
     }
 
@@ -280,7 +350,7 @@ function CustomLandingPage() {
         switch (_jobDef.name.toLowerCase()) {
             case 'ontimeedge-free-trial':
                 return (
-                    <ApogeanStartTrial jobDef={_jobDef} marketplaceItem={_marketplaceItem} onExecute={onExecute} onCancel={onCancel} />
+                    <ApogeanStartTrial jobDef={_jobDef} marketplaceItem={_marketplaceItem} jobLog={_jobLog} onExecute={onExecute} onCancel={onCancel} />
                     );
             default: return null;
         }
@@ -298,22 +368,22 @@ function CustomLandingPage() {
                 <title>{_title}</title>
                 <meta property="og:title" content={_title} />
             </Helmet>
-            <div className="row py-2 pb-3" >
-                <div className="col-sm-3 d-flex align-items-center" >
-                    {renderSubTitle()}
-                </div>
+            <div className="row py-2 pb-2" >
                 <div className="col-sm-9 d-flex align-items-center" >
                     {renderHeaderBlock()}
+                </div>
+                <div className="col-sm-3 d-flex align-items-center" >
+                    {renderSubTitle()}
                 </div>
             </div>
 
             <div className="row" >
-                <div className="col-sm-3 order-2 order-sm-1" >
-                    {renderLeftRail()}
-                </div>
-                <div className="col-sm-9 mb-4 order-1 order-sm-2" >
-                    <hr className="my-2" />
+                <div className="col-sm-9 mb-4" >
+                    <hr className="mb-3" />
                     { renderJobSpecificUI() }
+                </div>
+                <div className="col-sm-3" >
+                    {renderRail()}
                 </div>
             </div>
         </>

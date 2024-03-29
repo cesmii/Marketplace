@@ -72,50 +72,57 @@ namespace CESMII.Marketplace.JobManager.Jobs
             //}
 
             //get user information from request info type of form.
-            base.CreateJobLogMessage($"Preparing request info user information to submit to OnTime | Edge...", TaskStatusEnum.InProgress);
-            var req = MapToBody(jobConfig.SecretKey, payload.FormData);
+            base.CreateJobLogMessage($"Preparing user information to submit to OnTime | Edge...", TaskStatusEnum.InProgress);
+            var req = MapToBody(jobConfig.ApogeanApi.SecretKey, payload.FormData);
 
             //save record of submission to the request info DB.
-            base.CreateJobLogMessage($"TBD - Saving request info user information to Marketplace DB...", TaskStatusEnum.InProgress);
+            //base.CreateJobLogMessage($"TBD - Saving request info user information to Marketplace DB...", TaskStatusEnum.InProgress);
             //TBD
-            
+
             //try to connect to the OnTime | Edge API to submit request to start trial. 
-            //they use Zapier catch hook to receive the post
-            base.CreateJobLogMessage($"Submitting user information to OnTime | Edge API trial workflow...", TaskStatusEnum.InProgress);
-            //call the Zapier catch hook API to intialize start trial flow
-            var config = new HttpApiConfig()
+            bool isSuccess = true;
+            if (jobConfig.ApogeanApi.Enabled)
             {
-                Url = jobConfig.Url,
-                Body = JsonConvert.SerializeObject(req),
-                IsPost = true,
-                ContentType = "application/json",
-            };
+                //they use Zapier catch hook to receive the post
+                base.CreateJobLogMessage($"Submitting user information to OnTime | Edge API trial workflow...", TaskStatusEnum.InProgress);
+                //call the Zapier catch hook API to intialize start trial flow
+                var config = new HttpApiConfig()
+                {
+                    Url = jobConfig.ApogeanApi.Url,
+                    Body = JsonConvert.SerializeObject(req),
+                    IsPost = true,
+                    ContentType = "application/json",
+                };
 
-            //string responseRaw = await _httpFactory.Run(config);
-            //var result = JsonConvert.DeserializeObject<OnTimeEdgeResponseModel>(responseRaw);
-            var result = JsonConvert.DeserializeObject<OnTimeEdgeResponseModel>("{attempt: '018e80b4-cfe9-5ed6-fd7e-99adf0eebc7a',id: '018e80b4-cfe9-5ed6-fd7e-99adf0eebc7a',request_id: '018e80b4-cfe9-5ed6-fd7e-99adf0eebc7a',status: 'success'}");
-            /*
-            {attempt: '018e80b4-cfe9-5ed6-fd7e-99adf0eebc7a',id: '018e80b4-cfe9-5ed6-fd7e-99adf0eebc7a',request_id: '018e80b4-cfe9-5ed6-fd7e-99adf0eebc7a',status: 'success'}
-            */
-            var isSuccess = !string.IsNullOrEmpty(result.status) && result.status.ToLower().Equals("success");
-
-            string msg;
-            if (isSuccess)
-            {
-                msg = GenerateSuccessHTML(e.Config.MarketplaceItem, payload);
-                base.CreateJobLogMessage($"{msg}", TaskStatusEnum.Completed);
+                string responseRaw = await _httpFactory.Run(config);
+                var result = JsonConvert.DeserializeObject<OnTimeEdgeResponseModel>(responseRaw);
+                //var result = JsonConvert.DeserializeObject<OnTimeEdgeResponseModel>("{attempt: '018e80b4-cfe9-5ed6-fd7e-99adf0eebc7a',id: '018e80b4-cfe9-5ed6-fd7e-99adf0eebc7a',request_id: '018e80b4-cfe9-5ed6-fd7e-99adf0eebc7a',status: 'success'}");
+                /*
+                {attempt: '018e80b4-cfe9-5ed6-fd7e-99adf0eebc7a',id: '018e80b4-cfe9-5ed6-fd7e-99adf0eebc7a',request_id: '018e80b4-cfe9-5ed6-fd7e-99adf0eebc7a',status: 'success'}
+                */
+                isSuccess = !string.IsNullOrEmpty(result.status) && result.status.ToLower().Equals("success");
             }
             else
             {
-                msg = GenerateFailHTML(e.Config.MarketplaceItem, payload);
-                base.CreateJobLogMessage($"{msg}", TaskStatusEnum.Failed);
+                base.CreateJobLogMessage($"Warning. Apogean API configuration is disabled. Skipping submit user information to OnTime | Edge API trial workflow...", TaskStatusEnum.InProgress);
+            }
+
+            //generate output
+            string msg;
+            if (isSuccess)
+            {
+                base.CreateJobLogMessage($"Your trial information was submitted. You should receive a confirmation email shortly.", TaskStatusEnum.Completed);
+            }
+            else
+            {
+                base.CreateJobLogMessage($"An error occurred submitting your information.", TaskStatusEnum.Failed);
             }
 
             //notify CESMII recipients of the trial submission. 
             await GenerateNotifyEmailHTML(e.Config.MarketplaceItem, jobConfig, payload, isSuccess);
 
             //return success / fail to user and show thank you page on success. 
-            return JsonConvert.SerializeObject(new { isSuccess = isSuccess, Message = msg });
+            return JsonConvert.SerializeObject(isSuccess);
         }
 
         private bool ValidateData(JobOnTimeEdgeConfig jobConfig, JobOnTimeEdgePayload payload, SmipSettings smipSettings, out string message)
@@ -142,11 +149,16 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 sbResult.AppendLine("The configuration file is missing. Please contact the system administrator.");
                 _logger.LogError($"JobOnTimeEdgeTrial|ValidateJobConfig|jobConfig is missing.");
             }
-            if (string.IsNullOrEmpty(jobConfig.Url)) {
+            if (jobConfig.ApogeanApi == null)
+            {
+                sbResult.AppendLine("The ApogeanApi config section is missing. Please contact the system administrator.");
+                _logger.LogError($"JobOnTimeEdgeTrial|ValidateJobConfig|ApogeanApi section is missing.");
+            }
+            if (string.IsNullOrEmpty(jobConfig.ApogeanApi.Url)) {
                 sbResult.AppendLine("The OnTime Edge url is missing. Please contact the system administrator.");
                 _logger.LogError($"JobOnTimeEdgeTrial|ValidateJobConfig|The jobConfig.Url is missing.");
             }
-            if (string.IsNullOrEmpty(jobConfig.SecretKey))
+            if (string.IsNullOrEmpty(jobConfig.ApogeanApi.SecretKey))
             {
                 sbResult.AppendLine("The OnTime Edge configuration is missing configuration data. Please contact the system administrator.");
                 _logger.LogError($"JobOnTimeEdgeTrial|ValidateJobConfig|The jobConfig.SecretKey is missing.");
@@ -211,51 +223,6 @@ namespace CESMII.Marketplace.JobManager.Jobs
         }
 
         #region Confirmation message html
-        private string GenerateSuccessHTML(MarketplaceItemSimpleModel marketplaceItem, JobOnTimeEdgePayload payload)
-        {
-            System.Text.StringBuilder sbResult = new System.Text.StringBuilder();
-            sbResult.AppendLine("<div class='row mb-2'>");
-            sbResult.AppendLine("<div class='col-6 mx-auto'>");
-            sbResult.AppendLine("<h1>Thank you for submitting your information.</h1>");
-            sbResult.AppendLine($"<h2>Nice job {payload.FormData.FirstName}! Starting a free trial of Apogean is the first step to collecting CNC machine data.</h2>");
-            sbResult.AppendLine("<p>Within one business day, we'll send you a license key to activate your free trial.  Meanwhile, you can get started by following the instructions below.</p>");
-            sbResult.AppendLine("</div>");
-            sbResult.AppendLine("</div>");
-            sbResult.AppendLine("<div class='row mb-2'>");
-            sbResult.AppendLine("<div class='col-6 mx-auto'>");
-            sbResult.AppendLine("<h3 class='headline-3'>Start getting these things ready:</h3>");
-            sbResult.AppendLine("<ul class='p-0 m-0'>");
-            sbResult.AppendLine("<li class='m-0 p-0 my-1'>Purchase a Windows 10 or later edge device<br>(we tested the <a href='https://a.co/d/64V2XJE' rel='noopener' target='_blank'>GMKtec Mini PC Windows 11</a> and the <a href='https://a.co/d/eQDeobH' rel='noopener' target='_blank'>Mini PC GoLite 11</a>)</li>");
-            sbResult.AppendLine("<li class='m-0 p-0 my-1'>Decide if you need a serial cable or ethernet cable to connect the CNC machine to the Windows device<br>(we tested this <a href='https://a.co/d/fJJIcVK' rel='noopener' target='_blank'>USB to RS232 DB25 serial adapter cable</a>)</li>");
-            sbResult.AppendLine("<li class='m-0 p-0 my-1'>We'll send you the installation file and activation key within one business day</li>");
-            sbResult.AppendLine("</ul>");
-            sbResult.AppendLine("</div>");
-            sbResult.AppendLine("</div>");
-            sbResult.AppendLine("<div class='row mb-2'>");
-            sbResult.AppendLine("<div class='col-6 mx-auto'>");
-            sbResult.AppendLine($"<p>About <a href='{payload.HostUrl}/library/{marketplaceItem.Name}' >{marketplaceItem.DisplayName}</a></p>");
-            sbResult.AppendLine("</div>");
-            sbResult.AppendLine("</div>");
-            return sbResult.ToString();
-        }
-
-        private string GenerateFailHTML(MarketplaceItemSimpleModel marketplaceItem, JobOnTimeEdgePayload payload)
-        {
-            System.Text.StringBuilder sbResult = new System.Text.StringBuilder();
-            sbResult.AppendLine("<div class='row mb-2'>");
-            sbResult.AppendLine("<div class='col-6 mx-auto'>");
-            sbResult.AppendLine("<h1>An error occurred submitting your information.</h1>");
-            sbResult.AppendLine("<p>For more information, please contact the system administrator.</p>");
-            sbResult.AppendLine("</div>");
-            sbResult.AppendLine("</div>");
-            sbResult.AppendLine("<div class='row mb-2'>");
-            sbResult.AppendLine("<div class='col-6 mx-auto'>");
-            sbResult.AppendLine($"<p>About <a href='{payload.HostUrl}/library/{marketplaceItem.Name}' >{marketplaceItem.DisplayName}</a></p>");
-            sbResult.AppendLine("</div>");
-            sbResult.AppendLine("</div>");
-            return sbResult.ToString();
-        }
-
         private async Task GenerateNotifyEmailHTML(MarketplaceItemSimpleModel marketplaceItem, JobOnTimeEdgeConfig jobConfig, JobOnTimeEdgePayload payload, bool isSuccess)
         {
             if (jobConfig.EmailRecipients == null || !jobConfig.EmailRecipients.Any()) return;
@@ -276,7 +243,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             sbBody.AppendLine("<div class='col-6 mx-auto'>");
             sbBody.AppendLine($"<h1>{title} | {marketplaceItem.DisplayName}</h1>");
             sbBody.AppendLine($"<hr class='my-2' />");
-            sbBody.AppendLine("<ul class='p-0 m-0'>");
+            sbBody.AppendLine("<ul class='p-0 m-0 pl-3'>");
             sbBody.AppendLine($"<li class='m-0 p-0 my-1'>First Name: {payload.FormData.FirstName}</li>");
             sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Last Name: {payload.FormData.LastName}</li>");
             sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Company Name: {payload.FormData.CompanyName}</li>");
@@ -313,11 +280,18 @@ namespace CESMII.Marketplace.JobManager.Jobs
 
     internal class JobOnTimeEdgeConfig
     {
-        public string Url { get; set; }
-        public string SecretKey { get; set; }
+        public JobOnTimeEdgeApiConfig ApogeanApi { get; set; }
         public SmipSettings SmipSettings { get; set; }
         public List<string> EmailRecipients { get; set; }
     }
+
+    internal class JobOnTimeEdgeApiConfig
+    {
+        public bool Enabled { get; set; }
+        public string Url { get; set; }
+        public string SecretKey { get; set; }
+    }
+
 
     /// <summary>
     /// Structure of the post argument passed to OnTime | Edge for authorization

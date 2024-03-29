@@ -41,6 +41,11 @@
     /// <remarks>Eventually, this will go away in favor of a SSO unified user record</remarks>
     public class SmipSettings
     {
+        /// <summary>
+        /// Allow job to skip over SMIP step if needed
+        /// </summary>
+        public bool Enabled { get; set; }
+
         public string UserName { get; set; }
 
         public string Password { get; set; }
