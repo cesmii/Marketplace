@@ -59,7 +59,7 @@ export function removeCartItem(cart, marketplaceItemId) {
     //loop through cart and see if item is there. 
     let x = cart.items.findIndex(x => { return x.marketplaceItem?.id === marketplaceItemId; });
     if (x < 0) return;
-    cart.splice(x, 1);
+    cart.items.splice(x, 1);
     return cart;
 }
 

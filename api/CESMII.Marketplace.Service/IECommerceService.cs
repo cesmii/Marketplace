@@ -1,5 +1,4 @@
 ﻿using Stripe;
-using Stripe.Checkout;
 
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Service.Models;
@@ -35,15 +34,6 @@ namespace CESMII.Marketplace.Service
         Task<Product> GetProduct(string paymentProductId);
 
         /// <summary>
-        /// Create the product in the Stripe product catalog.
-        /// This is called after user saves marketplace item from admin screen when the marketplace item 
-        /// does not have a ProductPaymentId
-        /// </summary>
-        /// <param name="code"></param>
-        /// <returns></returns>
-        Task<Product> CreateProduct(MarketplaceItemModel item);
-
-        /// <summary>
         /// Delete the product in the Stripe product catalog.
         /// This is called after user saves marketplace item from admin screen when the marketplace item 
         /// does not have a ProductPaymentId
@@ -68,7 +58,7 @@ namespace CESMII.Marketplace.Service
         /// </summary>
         /// <param name="code"></param>
         /// <returns></returns>
-        Task<bool> AddProduct(MarketplaceItemModel item, string userId);
+        Task<Product> AddProduct(AdminMarketplaceItemModel item, string userId);
 
         /// <summary>
         /// Update the product in the Stripe product catalog.
@@ -77,7 +67,7 @@ namespace CESMII.Marketplace.Service
         /// </summary>
         /// <param name="code"></param>
         /// <returns></returns>
-        Task<bool> UpdateProduct(MarketplaceItemModel item, string userId);
+        Task<Product> UpdateProduct(AdminMarketplaceItemModel item, string userId);
 
         /// <summary>
         /// Update the product in the Stripe product catalog.
@@ -124,6 +114,15 @@ namespace CESMII.Marketplace.Service
         /// <param name="userId"></param>
         /// <returns></returns>
         Task Delete(string id, string userId);
+
+        /// <summary>
+        /// Get all transactions from the Stripe.
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        Task<IEnumerable<PaymentIntent>> GetTransactions();
+
+        Task<StripeList<InvoiceItem>> GetInvoiceList();
     }
 
 }

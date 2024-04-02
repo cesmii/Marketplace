@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Button } from 'react-bootstrap';
+import { Button, Container, Row, Col } from 'react-bootstrap';
 
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
 import { generateLogMessageString } from '../../utils/UtilityService';
@@ -56,7 +56,12 @@ function AddCartButton(props) { //props are item, showActions
 
     return (
         <>
-            <Button variant="primary" className="px-1 px-md-4 auto-width mt-3 text-nowrap" onClick={addStart}>Add to Cart</Button>
+            <Container>
+                <Row>
+                    <Col>Price: {props.item.price}$</Col>
+                    <Col><Button variant="primary" className="auto-width text-nowrap" onClick={addStart}>Add to Cart</Button></Col>
+                </Row>
+            </Container>            
             {renderCartModal()}
         </>
     );

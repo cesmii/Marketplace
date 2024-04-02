@@ -12,6 +12,7 @@ using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common.Enums;
+using CESMII.Marketplace.Service;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
@@ -20,15 +21,18 @@ namespace CESMII.Marketplace.Api.Controllers
     {
         private readonly IDal<MarketplaceItem, AdminMarketplaceItemModel> _dal;
         private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
+        private readonly IECommerceService<CartModel> _stripeService;
 
         public AdminMarketplaceController(IDal<MarketplaceItem, AdminMarketplaceItemModel> dal,
             IDal<LookupItem, LookupItemModel> dalLookup,
+            IECommerceService<CartModel> stripeService,
             UserDAL dalUser,
             ConfigUtil config, ILogger<AdminMarketplaceController> logger)
             : base(config, logger, dalUser)
         {
             _dal = dal;
             _dalLookup = dalLookup;
+            _stripeService = stripeService;
         }
 
         #region Admin UI
@@ -142,6 +146,13 @@ namespace CESMII.Marketplace.Api.Controllers
                 _logger.LogWarning("AdminMarketplaceController|Update|Invalid model");
                 return BadRequest("Marketplace|Update|Invalid model");
             }
+
+            if (model.AllowPurchase && model.Price == 0)
+            {
+                _logger.LogWarning("AdminMarketplaceController|Update|Price is missing");
+                return BadRequest("AdminMarketplaceController|Update|Price is missing");
+            }
+
             var record = _dal.GetById(model.ID);
             if (record == null)
             {
@@ -162,6 +173,21 @@ namespace CESMII.Marketplace.Api.Controllers
                 //TBD - add call to Stripe service to add/update item
                 //get back Stripe price id and save to our DB.
                 //if Stripe fails, catch exception, log exception, and still save to our db
+                try
+                {
+                    if (string.IsNullOrEmpty(model.PaymentProductId))
+                    {
+                        var newlyCreatedProduct = await _stripeService.AddProduct(model, UserID);
+                        model.PaymentProductId = newlyCreatedProduct.Id;
+                    }
+                    else
+                    {
+                        await _stripeService.UpdateProduct(model, UserID);
+                    }
+                } catch (Exception ex)
+                {
+                    _logger.LogError(ex, "AdminMarketplaceController|Update|Failed to update the product in Stripe");
+                }
 
                 var result = await _dal.Update(model, UserID);
                 if (result < 0)
@@ -192,6 +218,19 @@ namespace CESMII.Marketplace.Api.Controllers
         {
             //TBD - add call to Stripe service to remove item from catalog - only if it has payment product id
             //if Stripe fails, catch exception, log exception, and still save to our db
+            
+            try
+            {
+                var adminMarketplaceItem = _dal.GetById(model.ID);
+                if (adminMarketplaceItem !=null && adminMarketplaceItem.IsActive && !string.IsNullOrEmpty(adminMarketplaceItem.PaymentProductId))
+                {
+                    await _stripeService.DeleteProduct(adminMarketplaceItem.PaymentProductId);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "AdminMarketplaceController|Delete|Failed to delete the product in Stripe");
+            }
 
             var result = await _dal.Delete(model.ID.ToString(), UserID);
             if (result < 0)
@@ -228,11 +267,25 @@ namespace CESMII.Marketplace.Api.Controllers
                     Message = $"Name '{model.Name}' is not unique. Please enter a unique name."
                 });
             }
+            else if (model.AllowPurchase && model.Price == 0)
+            {
+                _logger.LogWarning("AdminMarketplaceController|Add|Price is missing");
+                return BadRequest("AdminMarketplaceController|Add|Price is missing");
+            }
             else
             {
                 //TBD - add call to Stripe service to add item to catalog
                 //set paymentProductId on our model.PaymentProductId
                 //if Stripe fails, catch exception, log exception, and still save to our db
+                try
+                {
+                    var newlyCreatedProduct = await _stripeService.AddProduct(model, UserID);
+                    model.PaymentProductId = newlyCreatedProduct.Id;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "AdminMarketplaceController|Update|Failed to update the product in Stripe");
+                }
 
                 var result = await _dal.Add(model, UserID);
                 if (String.IsNullOrEmpty(result))

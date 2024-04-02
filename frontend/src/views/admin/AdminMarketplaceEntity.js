@@ -477,9 +477,11 @@ function AdminMarketplaceEntity() {
                             { id: new Date().getTime(), severity: "success", body: `Marketplace item was saved`, isTimed: true }
                         ]
                     });
-
                     //now redirect to marketplace item on front end
-                    history.push(`/admin/library/${resp.data.data}`);
+                    if (mode.toLowerCase() === "new")
+                        history.push(`/admin/library/${resp.data.data}`);
+                    else
+                        window.location.reload();
                 }
                 else {
                     //update spinner, messages
@@ -531,6 +533,7 @@ function AdminMarketplaceEntity() {
             case "description":
             case "abstract":
             case "version":
+            case "price":
             case "metaTagsConcatenated":
             case "ccName1":
             case "ccName2":

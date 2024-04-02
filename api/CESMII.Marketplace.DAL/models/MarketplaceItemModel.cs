@@ -116,6 +116,7 @@
         #region eCommerce Fields
         public bool AllowPurchase { get; set; } = true;
         public string PaymentProductId { get; set; }
+        public long Price { get; set; }
         #endregion
 
 

@@ -79,6 +79,7 @@ function Cart() {
         const host = window.location.protocol.concat("//").concat(window.location.host);
         //TBD - refine these once we further understand how to handle each scenario.
         cart.returnUrl = host.concat(`/checkout`);
+        //cart.returnUrl = host.concat(`/checkout/success`);
         //cart.successUrl = host.concat(`/checkout/success`);
         //cart.cancelUrl = host.concat(`/checkout/cancel`);
         setLoadingProps({ isLoading: true, message: "", cart: cart });

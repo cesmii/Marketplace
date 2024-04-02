@@ -269,7 +269,8 @@
                     ImageLandscape = entity.ImageLandscapeId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageLandscapeId.ToString()), _imagesAll),
                     //eCommerce fields
                     AllowPurchase = entity.AllowPurchase,
-                    PaymentProductId = entity.PaymentProductId
+                    PaymentProductId = entity.PaymentProductId,
+                    Price = entity.Price
                 };
                 //get additional data under certain scenarios
                 if (verbose)

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import Form from 'react-bootstrap/Form'
+import { Form, Row, Col } from 'react-bootstrap'
 import { validateCartItem_Quantity } from '../../utils/CartUtil';
 import { generateLogMessageString } from '../../utils/UtilityService';
 import _icon from '../img/icon-cesmii-white.png'
@@ -67,37 +67,39 @@ function CartItem(props) {
     //-------------------------------------------------------------------
     const renderForm = () => {
         return (
-            <Form noValidate >
-                <div className="row">
-                    <div className="col-8">
-                        <Form.Group>
-                            <Form.Label htmlFor="quantity" >Quantity</Form.Label>
-                            {!_isValid.required &&
-                                <span className="invalid-field-message inline">
-                                    Required
-                                </span>
-                            }
-                            {!_isValid.range &&
-                                <span className="invalid-field-message inline">
-                                    Enter a number greater than 0
-                                </span>
-                            }
-                            {!_isValid.numeric &&
-                                <span className="invalid-field-message inline">
-                                    Enter a valid integer
-                                </span>
-                            }
-                            <Form.Control id="quantity" className={(!(_isValid.required || _isValid.numeric || _isValid.range) ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
-                                value={props.quantity == null ? '' : props.quantity} onBlur={validateForm_quantity} onChange={onChange} />
-                        </Form.Group>
-                        <div className="col-4">
-                            { !props.isAdd &&
-                                <button className="btn btn-icon-outline circle ml-auto" title="Remove item from cart" onClick={onRemoveItem} ><i className="material-icons">close</i></button>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </Form>
+            <Form.Group>
+                <Form.Row>
+                    <Form.Label htmlFor="price" column lg={2}>Price</Form.Label>
+                    <Form.Label htmlFor="price" column lg={2}>{props.item.marketplaceItem?.price}$</Form.Label>
+                </Form.Row>
+                <Form.Row>
+                    <Form.Label htmlFor="quantity" column lg={2}>Quantity</Form.Label>
+                    {!_isValid.required &&
+                        <span className="invalid-field-message inline">
+                            Required
+                        </span>
+                    }
+                    {!_isValid.range &&
+                        <span className="invalid-field-message inline">
+                            Enter a number greater than 0
+                        </span>
+                    }
+                    {!_isValid.numeric &&
+                        <span className="invalid-field-message inline">
+                            Enter a valid integer
+                        </span>
+                    }
+                    <Col column lg={2}>
+                        <Form.Control id="quantity" className={(!(_isValid.required || _isValid.numeric || _isValid.range) ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
+                            value={props.item.quantity == null ? '' : props.item.quantity} onBlur={validateForm_quantity} onChange={onChange} />
+                    </Col>
+                    <Col column lg={1}>
+                        {!props.isAdd &&
+                            <button className="btn btn-icon-outline circle ml-auto" title="Remove item from cart" onClick={onRemoveItem} ><i className="material-icons">close</i></button>
+                        }
+                    </Col>
+                </Form.Row>
+            </Form.Group>
         );
     };
 

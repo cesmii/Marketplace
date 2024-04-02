@@ -266,7 +266,8 @@
                     ccEmail2 = entity._ccEmail2, 
                     //new eCommerce fields
                     AllowPurchase = entity.AllowPurchase,
-                    PaymentProductId = entity.PaymentProductId
+                    PaymentProductId = entity.PaymentProductId,
+                    Price = entity.Price
                 };
                 if (verbose)
                 {
@@ -441,7 +442,7 @@
             //new eCommerce fields
             entity.AllowPurchase = model.AllowPurchase;
             entity.PaymentProductId = model.PaymentProductId;
-
+            entity.Price = model.Price;
         }
 
         /// <summary>

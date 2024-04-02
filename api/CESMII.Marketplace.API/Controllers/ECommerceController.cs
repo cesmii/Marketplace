@@ -78,26 +78,13 @@ namespace CESMII.Marketplace.Api.Controllers
             return Ok(result);
         }
 
-        [HttpPost, Route("product")]
-        [ProducesResponseType(200, Type = typeof(Product))]
-        [ProducesResponseType(400)]
-        public async Task<IActionResult> CreateProduct([FromBody] MarketplaceItemModel marketplaceItemModel)
-        {
-            var result = await _svc.CreateProduct(marketplaceItemModel);
-            if (result == null)
-            {
-                return BadRequest($"Could not create Product.");
-            }
-            return Ok(result);
-        }
-
         [HttpDelete, Route("product")]
         [ProducesResponseType(200, Type = typeof(bool))]
         [ProducesResponseType(400)]
         public async Task<IActionResult> DeleteProduct(string paymentProductId)
         {
             var result = await _svc.DeleteProduct(paymentProductId);
-            if (result == null)
+            if (!result)
             {
                 return BadRequest($"Could not delete Product.");
             }
