@@ -80,7 +80,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 logItem.Completed = DateTime.UtcNow;
             }
             logItem.Messages.Add(new JobLogMessage() { Message = message, Created = DateTime.UtcNow, isEncrypted = isEncrypted });
-            _dalJobLog.Update(logItem, _jobEventArgs.User.ID);
+            _dalJobLog.Update(logItem, _jobEventArgs.User == null ? null : _jobEventArgs.User.ID);
         }
 
         protected void SetJobLogResponse(string responseData, string message, TaskStatusEnum status, bool isEncrypted = false)
@@ -95,7 +95,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             logItem.ResponseData = responseData;
 
             logItem.Messages.Add(new JobLogMessage() { Message = message, Created = DateTime.UtcNow, isEncrypted = isEncrypted });
-            _dalJobLog.Update(logItem, _jobEventArgs.User.ID);
+            _dalJobLog.Update(logItem, _jobEventArgs.User == null ? null : _jobEventArgs.User.ID);
         }
 
         protected async Task<bool> SendEmail(string subject, string body)

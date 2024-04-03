@@ -155,7 +155,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
 
     const renderJobDefinitions = () => {
 
-        if (!props.isAuthenticated || !props.isAuthorized || props.item.jobDefinitions == null || props.item.jobDefinitions.length === 0) return;
+        if (props.item.jobDefinitions == null || props.item.jobDefinitions.length === 0) return;
 
         return props.item.jobDefinitions.map((x) => {
             return (

@@ -108,11 +108,10 @@ namespace CESMII.Marketplace.JobManager.Jobs
             }
 
             //generate output
-            string msg;
             if (isSuccess)
             {
                 //front end will display a message
-                base.CreateJobLogMessage($"", TaskStatusEnum.Completed);
+                base.CreateJobLogMessage($"Success! Your information has been submitted.", TaskStatusEnum.Completed);
             }
             else
             {
@@ -281,12 +280,12 @@ namespace CESMII.Marketplace.JobManager.Jobs
 
     internal class JobOnTimeEdgeConfig
     {
-        public JobOnTimeEdgeApiConfig ApogeanApi { get; set; }
+        public OnTimeEdgeApiConfig ApogeanApi { get; set; }
         public SmipSettings SmipSettings { get; set; }
         public List<string> EmailRecipients { get; set; }
     }
 
-    internal class JobOnTimeEdgeApiConfig
+    internal class OnTimeEdgeApiConfig
     {
         public bool Enabled { get; set; }
         public string Url { get; set; }
@@ -295,7 +294,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
 
 
     /// <summary>
-    /// Structure of the post argument passed to OnTime | Edge for authorization
+    /// Structure of the data we receive from our front end
     /// </summary>
     internal class OnTimeEdgeUserModel
     {
@@ -320,7 +319,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
     }
 
     /// <summary>
-    /// Structure of the response
+    /// Structure of the response from Apogean
     /// </summary>
     internal class OnTimeEdgeResponseModel
     {

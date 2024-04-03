@@ -71,19 +71,30 @@ namespace CESMII.Marketplace.Api.Controllers
         #region Job Factory
         [HttpPost, Route("Execute")]
         //[ProducesResponseType(200, Type = typeof(NodeSetModel))]
-        [Authorize]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         [ProducesResponseType(400)]
         public async Task<IActionResult> ExecuteJob([FromBody] JobPayloadModel model)
         {
             if (model == null)
             {
-                _logger.LogWarning($"JobController|Execute|GetByID|Invalid model (null)");
+                _logger.LogWarning($"JobController|ExecuteJob|Invalid model (null)");
                 return BadRequest($"Invalid model (null)");
+            }
+            //check if job requires user to be authorized
+            var job = _dal.GetById(model.JobDefinitionId);
+            if (job == null)
+            {
+                _logger.LogWarning($"JobController|ExecuteJob|Job {model.JobDefinitionId} not found. (null)");
+                return BadRequest($"Job not found.");
+            }
+            if (job.RequiresAuthentication && !User.Identity.IsAuthenticated)
+            {
+                _logger.LogWarning($"JobController|ExecuteJob|Job {model.JobDefinitionId}|User is not authenticated. This job requires the user to be logged in.");
+                return Unauthorized();
             }
 
             //execute job
-            var result = await _jobFactory.ExecuteJob(model, base.LocalUser);
+            var result = await _jobFactory.ExecuteJob(model, User.Identity.IsAuthenticated ? base.LocalUser : null);
 
             return Ok(new ResultMessageWithDataModel() {
                 Data = result,

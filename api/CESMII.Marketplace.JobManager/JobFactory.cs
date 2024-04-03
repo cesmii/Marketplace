@@ -81,7 +81,7 @@ namespace CESMII.Marketplace.JobManager
                 }
             }
             };
-            var logId = await _dalJobLog.Add(logItem, user.ID);
+            var logId = await _dalJobLog.Add(logItem, user == null ? null : user?.ID);
 
             Task backgroundTask = null;
 

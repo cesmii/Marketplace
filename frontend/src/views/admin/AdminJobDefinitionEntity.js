@@ -709,7 +709,7 @@ function AdminJobDefinitionEntity() {
                 <div className="row">
                     <div className="col-md-12">
                         <Form.Group>
-                            <Form.Label>Css Class</Form.Label>
+                            <Form.Label>Button / Link Css Class</Form.Label>
                             <Form.Control id="className" className={'minimal pr-5'} 
                                 value={_item.className == null ? '' : _item.className} onChange={onChange} readOnly={isReadOnly} />
                         </Form.Group>

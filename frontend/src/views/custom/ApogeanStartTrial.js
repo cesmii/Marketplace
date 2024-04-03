@@ -4,6 +4,8 @@ import Button from 'react-bootstrap/Button'
 import { AppSettings } from '../../utils/appsettings';
 
 import { generateLogMessageString, validate_Email } from '../../utils/UtilityService'
+import { RenderImageBg } from '../../services/MarketplaceService';
+import '../styles/MarketplaceEntity.scss';
 import '../styles/RequestInfo.scss';
 
 const CLASS_NAME = "ApogeanStartTrial";
@@ -128,11 +130,42 @@ function ApogeanStartTrial(props) {
     //-------------------------------------------------------------------
     // Region: Render Helpers
     //-------------------------------------------------------------------
+    const renderMarketplaceHeader = (item) => {
+        if (item == null) return;
+
+        return (
+            <>
+                <div className={`row mx-0 p-0 mb-4 marketplace-list-item border`}>
+                    <div className="col-sm-5 p-0" >
+                        <RenderImageBg item={item} defaultImage={item.imagePortrait} responsiveImage={item.imagePortrait} clickable={false} />
+                    </div>
+                    <div className="col-sm-7 p-4" >
+                        {(_jobStatus !== AppSettings.JobLogStatus.Completed && _jobStatus !== AppSettings.JobLogStatus.Failed) &&
+                            <>
+                                {renderIntro()}
+                            </>
+                        }
+                        {_jobStatus === AppSettings.JobLogStatus.Completed &&
+                            <>
+                            <h2>Nice job! </h2>
+                            <p>Starting a free trial of Apogean is the first step to collecting CNC machine data.</p>
+                            <p>
+                                Within one business day, we'll send you a license key to activate your free trial.  Meanwhile, you can get started by following the instructions below.</p>
+                            </>
+                        }
+                        {_jobStatus === AppSettings.JobLogStatus.Failed &&
+                            renderFailContent()
+                        }
+                    </div>
+                </div>
+            </>
+        );
+    };
+
     const renderIntro = () => {
         return (
-            <div class="row mb-2 mx-3">
-                <div class="col-12">
-                    <h2>Collect data from HAAS CNC with Apogean&#8482;</h2>
+            <div className="row mb-2">
+                <div className="col-12">
                     <p>
                         Complete the form for a free 30 - day trial of Apogean. We'll send you a license key and a link to download and install the app within one business day.
                         To use it, you'll need:
@@ -145,12 +178,12 @@ function ApogeanStartTrial(props) {
 
     const renderPrerequisites = () => {
         return (
-            <ul class="p-0 m-0 ml-3">
-                <li class="m-0 p-0 my-1">Purchase a Windows 10 or later edge device<br />(we tested the <a href='https://a.co/d/64V2XJE' rel='noopener' target='_blank'>GMKtec Mini PC Windows 11</a> and the <a href='https://a.co/d/eQDeobH' rel='noopener' target='_blank'>Mini PC GoLite 11</a>)
+            <ul className="p-0 m-0 ml-3">
+                <li className="m-0 p-0 my-1">Purchase a Windows 10 or later edge device<br />(we tested the <a href='https://a.co/d/64V2XJE' rel='noopener' target='_blank'>GMKtec Mini PC Windows 11</a> and the <a href='https://a.co/d/eQDeobH' rel='noopener' target='_blank'>Mini PC GoLite 11</a>)
                 </li>
-                <li class="m-0 p-0 my-1">Decide if you need a serial cable or ethernet cable to connect the CNC machine to the Windows device<br />(we tested this <a href="https://a.co/d/fJJIcVK" rel="noopener" target="_blank">USB to RS232 DB25 serial adapter cable</a>)
+                <li className="m-0 p-0 my-1">Decide if you need a serial cable or ethernet cable to connect the CNC machine to the Windows device<br />(we tested this <a href="https://a.co/d/fJJIcVK" rel="noopener" target="_blank">USB to RS232 DB25 serial adapter cable</a>)
                 </li>
-                <li class="m-0 p-0 my-1">We'll send you the installation file and activation key within one business day
+                <li className="m-0 p-0 my-1">We'll send you the installation file and activation key within one business day
                 </li>
             </ul>
         );
@@ -159,16 +192,21 @@ function ApogeanStartTrial(props) {
     const renderSuccessContent = () => {
         return (
             <>
-                <div class="row mb-2 mx-3">
-                    <div class="col-12">
-                        <h2>Nice job! Starting a free trial of Apogean is the first step to collecting CNC machine data.</h2>
-                        <p>Within one business day, we'll send you a license key to activate your free trial.  Meanwhile, you can get started by following the instructions below.</p>
+                <div className="row">
+                    <div className="col-12">
+                        <h2>Start getting these things ready:</h2>
+                        <hr className="mt-2" />
                     </div>
                 </div>
-                <div class="row mb-2 mx-3">
-                    <div class="col-12">
-                        <h3 class="headline-3">Start getting these things ready:</h3>
+                <div className="row mb-2">
+                    <div className="col-12">
                         {renderPrerequisites()}
+                    </div>
+                </div>
+                <div className="row mb-2">
+                    <div className="col-12">
+                        <hr className="" />
+                        <div dangerouslySetInnerHTML={{ __html: props.marketplaceItem.abstract }} ></div>
                     </div>
                 </div>
             </>
@@ -178,10 +216,12 @@ function ApogeanStartTrial(props) {
     const renderFailContent = () => {
         return (
             <>
-                <div class="row mb-2 mx-3">
-                    <div class="col-12">
-                        <h1>An error occurred submitting your information.</h1>
+                <div className="row mb-2">
+                    <div className="col-12">
+                        <h2>An error occurred submitting your information.</h2>
                         <p><a href='/contact-us/support' >Please contact the system administrator.</a></p>
+                        <hr className="mt-2" />
+                        <div className="mb-2" dangerouslySetInnerHTML={{ __html: props.marketplaceItem.abstract }} ></div>
                     </div>
                 </div>
             </>
@@ -192,6 +232,12 @@ function ApogeanStartTrial(props) {
         const disabled = !(_jobStatus === AppSettings.JobLogStatus.NotStarted);
         return (
             <Form noValidate className="mx-3" >
+                <div className="row mb-2">
+                    <div className="col-12">
+                        <h2>Collect data from HAAS CNC with Apogean&#8482;</h2>
+                        <hr className="mt-3" />
+                    </div>
+                </div>
                 <div className="row">
                     <div className="col-md-6">
                         <Form.Group>
@@ -278,6 +324,28 @@ function ApogeanStartTrial(props) {
         );
     }
 
+    const renderMainContent = () => {
+        if (_jobStatus === AppSettings.JobLogStatus.Failed) return;
+
+        return (
+            <>
+                <div className="marketplace-list-item border" >
+                    <div className="card mb-0 border-0">
+                        <div className="card-body">
+                            {(_jobStatus !== AppSettings.JobLogStatus.Completed && _jobStatus !== AppSettings.JobLogStatus.Failed) &&
+                                <>
+                                    {renderForm()}
+                                </>
+                            }
+                            {_jobStatus === AppSettings.JobLogStatus.Completed &&
+                                renderSuccessContent()
+                            }
+                        </div>
+                    </div>
+                </div>
+            </>
+        );
+    }
 
     //-------------------------------------------------------------------
     // Region: Render
@@ -285,19 +353,8 @@ function ApogeanStartTrial(props) {
     //return final ui
     return (
         <>
-            {_jobStatus !== AppSettings.JobLogStatus.Completed  &&
-                <>
-                {renderIntro()}
-                <hr className="my-3" />
-                {renderForm()}
-                </>
-            }
-            {_jobStatus === AppSettings.JobLogStatus.Completed &&
-                renderSuccessContent()
-            }
-            {_jobStatus === AppSettings.JobLogStatus.Failed &&
-                renderFailContent()
-            }
+            {renderMarketplaceHeader(props.marketplaceItem)}
+            {renderMainContent()}
         </>
     )
 }

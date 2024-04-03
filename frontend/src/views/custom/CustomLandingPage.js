@@ -4,9 +4,13 @@ import { Helmet } from "react-helmet"
 import axiosInstance from "../../services/AxiosService";
 
 import { AppSettings } from '../../utils/appsettings';
-import { generateLogMessageString, scrollTopScreen, formatItemPublishDate } from '../../utils/UtilityService'
+import { generateLogMessageString, scrollTopScreen } from '../../utils/UtilityService'
 import { useLoadingContext } from "../../components/contexts/LoadingContext";
+import MarketplaceEntitySidebar from '../shared/MarketplaceEntitySidebar';
+//custom components
 import ApogeanStartTrial from './ApogeanStartTrial'
+//styles
+import '../styles/MarketplaceEntity.scss';
 import '../styles/RequestInfo.scss';
 
 const CLASS_NAME = "CustomLandingPage";
@@ -296,6 +300,22 @@ function CustomLandingPage() {
         );
     }
 
+    const renderHeaderRow = () => {
+        return (
+            <div className="row py-2 pb-3">
+                <div className="col-sm-3" >
+                    <div className="header-title-block d-flex align-items-center">
+                        <span className="headline-1 d-none d-md-block">Library</span>
+                        {renderSubTitle()}
+                    </div>
+                </div>
+                <div className="col-sm-9 d-flex align-items-center" >
+                    {renderHeaderBlock()}
+                </div>
+            </div>
+        );
+    };
+
     const renderHeaderBlock = () => {
         return (
             <h1 className="m-0 mr-2">
@@ -355,21 +375,24 @@ function CustomLandingPage() {
                 <meta property="og:title" content={_title} />
             </Helmet>
             <div className="row py-2 pb-2" >
-                <div className="col-sm-9 d-flex align-items-center" >
-                    {renderHeaderBlock()}
-                </div>
                 <div className="col-sm-3 d-flex align-items-center" >
                     {renderSubTitle()}
+                </div>
+                <div className="col-sm-9 d-flex align-items-center" >
+                    {renderHeaderBlock()}
                 </div>
             </div>
 
             <div className="row" >
-                <div className="col-sm-9 mb-4" >
-                    <hr className="mb-3" />
-                    { renderJobSpecificUI() }
+                <div className="col-md-3 order-2 order-md-1" >
+                    {_marketplaceItem != null &&
+                        <MarketplaceEntitySidebar item={_marketplaceItem} className="light" />
+                    }
                 </div>
-                <div className="col-sm-3" >
-                    {renderRail()}
+                <div className="col-md-9 mb-4 order-1 order-md-2" >
+                    <div className="marketplace-entity">
+                        {renderJobSpecificUI()}
+                    </div>
                 </div>
             </div>
         </>
