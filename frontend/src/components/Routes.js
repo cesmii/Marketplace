@@ -87,7 +87,7 @@ function Routes() {
             {/* eCommerce Routes */}
             <PublicRoute exact path="/checkout/:type" component={CheckoutComplete} />
             <PublicRoute exact path="/cart" component={Cart} />
-            <PublicRoute exact path="/checkout" component={Checkout} />
+            <PublicRoute exact path="/checkoutold" component={Checkout} />
 
             <PublicRoute path="/notpermitted" component={NotAuthorized} />
             <PublicRoute path="/notauthorized" component={NotAuthorized} />

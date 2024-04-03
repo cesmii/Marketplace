@@ -2,6 +2,7 @@
 
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Service.Models;
+using Stripe.FinancialConnections;
 
 namespace CESMII.Marketplace.Service
 {
@@ -116,13 +117,60 @@ namespace CESMII.Marketplace.Service
         Task Delete(string id, string userId);
 
         /// <summary>
+        /// Get all payments from the Stripe.
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        Task<IEnumerable<PaymentIntent>> GetPayments();
+
+        /// <summary>
+        /// Get payment by id from the Stripe.
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        Task<PaymentIntent> GetPaymentById(string paymentId);
+
+        /// <summary>
+        /// Get all payment methods from the Stripe.
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        Task<StripeList<PaymentMethod>> GetPaymentMethods();
+
+        /// <summary>
         /// Get all transactions from the Stripe.
         /// </summary>
         /// <param name="code"></param>
         /// <returns></returns>
-        Task<IEnumerable<PaymentIntent>> GetTransactions();
+        Task<StripeList<Transaction>> GetTransactions();
 
+        /// <summary>
+        /// Get all invoice list from the Stripe.
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
         Task<StripeList<InvoiceItem>> GetInvoiceList();
+
+        /// <summary>
+        /// Get all sessions from the Stripe.
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        Task<StripeList<Stripe.Checkout.Session>> GetSessions();
+
+        /// <summary>
+        /// Get session by id from the Stripe.
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        Task<Stripe.Checkout.Session> GetSessionById(string sessionId);
+
+        /// <summary>
+        /// Get session items by id from the Stripe.
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        Task<StripeList<LineItem>> GetSessionItemsById(string sessionId);
     }
 
 }

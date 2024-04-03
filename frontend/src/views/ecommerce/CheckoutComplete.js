@@ -1,4 +1,5 @@
-import React, { useEffect, useParams } from 'react'
+import React, { useEffect } from 'react'
+import { useParams } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 
 import { AppSettings } from '../../utils/appsettings'
@@ -25,7 +26,19 @@ function CheckoutComplete() {
         //update cart status based on type
         let cart = loadingProps.cart;
         if (cart == null) cart = {};
-        cart.status = (type?.toLowercase() === 'success' ? AppSettings.CartStatusEnum.Completed : AppSettings.CartStatusEnum.Failed);
+        let status = '' + type;
+
+        let checkout = loadingProps.checkout;
+        //console.log(checkout);
+
+        if (status.toLocaleLowerCase() === 'success') {
+            cart.status = AppSettings.CartStatusEnum.Completed;
+            cart.items = [];
+        }
+        else {
+            cart.status = AppSettings.CartStatusEnum.Failed;
+        }
+
         setLoadingProps({ cart: cart });
     }, [type]);
 
@@ -78,22 +91,23 @@ function CheckoutComplete() {
     }
 
     const getCaption = (includePipe = true) => {
-
         if (loadingProps.cart?.status == null) return '';
 
         const pipeVal = includePipe ? ' | ' : '';
 
         switch (loadingProps.cart?.status) {
-            case AppSettings.CartStatusEnum.CheckoutSuccess:
-                return `${pipeVal}Success`;
-            case AppSettings.CartStatusEnum.CheckoutFail:
-                return `${pipeVal}Fail`;
-            case AppSettings.CartStatusEnum.CheckoutInProgress:
-                return `${pipeVal}Pending`;
+            case AppSettings.CartStatusEnum.Completed:
+                return `${pipeVal}Success ${pipeVal}${AppSettings.Titles.Main}`;
+            case AppSettings.CartStatusEnum.Cancelled:
+                return `${pipeVal}Cancelled ${pipeVal}${AppSettings.Titles.Main}`;
+            case AppSettings.CartStatusEnum.Failed:
+                return `${pipeVal}Fail ${pipeVal}${AppSettings.Titles.Main}`;
+            case AppSettings.CartStatusEnum.Pending:
+                return `${pipeVal}Pending ${pipeVal}${AppSettings.Titles.Main}`;
             case AppSettings.CartStatusEnum.Shopping:
-                return `${pipeVal}Still Shopping`;
+                return `${pipeVal}Still Shopping ${pipeVal}${AppSettings.Titles.Main}`;
             case AppSettings.CartStatusEnum.None:
-                return `${pipeVal}No Items to Checkout`;
+                return `${pipeVal}No Items to Checkout ${pipeVal}${AppSettings.Titles.Main}`;
             default:
                 return "";
         }
@@ -104,11 +118,11 @@ function CheckoutComplete() {
         if (loadingProps.cart?.status == null) return '';
 
         switch (loadingProps.cart?.status) {
-            case AppSettings.CartStatusEnum.CheckoutSuccess:
+            case AppSettings.CartStatusEnum.Completed:
                 return renderSuccessInfo();
-            case AppSettings.CartStatusEnum.CheckoutFail:
+            case AppSettings.CartStatusEnum.Failed:
                 return renderFailInfo();
-            case AppSettings.CartStatusEnum.CheckoutInProgress:
+            case AppSettings.CartStatusEnum.Pending:
             case AppSettings.CartStatusEnum.Shopping:
             case AppSettings.CartStatusEnum.None:
             default:
@@ -124,7 +138,7 @@ function CheckoutComplete() {
     return (
         <>
             <Helmet>
-                <title>{`${_caption}{getCaption()}| ${AppSettings.Titles.Main}`}</title>
+                <title>{`${_caption}${getCaption()}`}</title>
             </Helmet>
             <div className="row" >
                 <div className="col-sm-12 mb-2">

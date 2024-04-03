@@ -9,6 +9,7 @@ using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.Service.Models;
+using Stripe.FinancialConnections;
 
 namespace CESMII.Marketplace.Service
 {
@@ -282,11 +283,32 @@ namespace CESMII.Marketplace.Service
             return prices.FirstOrDefault(price => price.ProductId == paymentProductId);
         }
 
-        public async Task<IEnumerable<PaymentIntent>> GetTransactions()
+        public async Task<IEnumerable<PaymentIntent>> GetPayments()
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
 
             return await new PaymentIntentService().ListAsync();
+        }
+
+        public async Task<PaymentIntent> GetPaymentById(string paymentId)
+        {
+            StripeConfiguration.ApiKey = _config.SecretKey;
+
+            return await new PaymentIntentService().GetAsync(paymentId);
+        }
+
+        public async Task<StripeList<PaymentMethod>> GetPaymentMethods()
+        {
+            StripeConfiguration.ApiKey = _config.SecretKey;
+
+            return await new PaymentMethodService().ListAsync();
+        }
+
+        public async Task<StripeList<Transaction>> GetTransactions()
+        {
+            StripeConfiguration.ApiKey = _config.SecretKey;
+
+            return await new TransactionService().ListAsync();
         }
 
         public async Task<StripeList<InvoiceItem>> GetInvoiceList()
@@ -294,6 +316,27 @@ namespace CESMII.Marketplace.Service
             StripeConfiguration.ApiKey = _config.SecretKey;
 
             return await new InvoiceItemService().ListAsync();
+        }
+
+        public async Task<StripeList<Stripe.Checkout.Session>> GetSessions()
+        {
+            StripeConfiguration.ApiKey = _config.SecretKey;
+
+            return await new Stripe.Checkout.SessionService().ListAsync();
+        }
+
+        public async Task<Stripe.Checkout.Session> GetSessionById(string sessionId)
+        {
+            StripeConfiguration.ApiKey = _config.SecretKey;
+
+            return await new Stripe.Checkout.SessionService().GetAsync(sessionId);
+        }
+
+        public async Task<StripeList<LineItem>> GetSessionItemsById(string sessionId)
+        {
+            StripeConfiguration.ApiKey = _config.SecretKey;
+
+            return await new Stripe.Checkout.SessionService().ListLineItemsAsync(sessionId);
         }
     }
 }

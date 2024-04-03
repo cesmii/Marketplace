@@ -30,10 +30,7 @@ function Cart() {
 
         if (_cartResponse == null) return;
 
-        //const stripePromise = await loadStripe("pk_test_51Os66lHXjPkvmDZJ927KVzxAVIWaFhySoPDcoGVfxog1SXioudXZCbcaoMysdUrUBu1TgGEUGos0XkLpFyr0HB0Y00IxD721az");
-        //const session = await response.json();
-        //const stripePromise = await loadStripe(_cartResponse.apiKey);
-        //stripePromise.redirectToCheckout({ sessionId: _cartResponse.sessionId });
+        setLoadingProps({ checkout: { apiKey: _cartResponse.apiKey, sessionId: _cartResponse.sessionId } });
 
         loadStripe(_cartResponse.apiKey).then(resp => {
             resp.redirectToCheckout({ sessionId: _cartResponse.sessionId });
@@ -78,8 +75,8 @@ function Cart() {
         cart.status = AppSettings.CartStatusEnum.Pending;
         const host = window.location.protocol.concat("//").concat(window.location.host);
         //TBD - refine these once we further understand how to handle each scenario.
-        cart.returnUrl = host.concat(`/checkout`);
-        //cart.returnUrl = host.concat(`/checkout/success`);
+        //cart.returnUrl = host.concat(`/checkout`);
+        cart.returnUrl = host.concat(`/checkout/success`);
         //cart.successUrl = host.concat(`/checkout/success`);
         //cart.cancelUrl = host.concat(`/checkout/cancel`);
         setLoadingProps({ isLoading: true, message: "", cart: cart });
@@ -99,8 +96,6 @@ function Cart() {
 
                     //TBD - now redirect to checkout page and show the embedded Stripe form
                     setCartResponse(resp.data.data);
-                    //setLoadingProps({ checkout: { init: resp.data.data } });
-
                 }
                 else {
                     //update spinner, messages

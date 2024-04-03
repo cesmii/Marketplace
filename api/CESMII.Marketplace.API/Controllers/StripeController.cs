@@ -44,5 +44,77 @@ namespace CESMII.Marketplace.API.Controllers
             }
             return Ok(result);
         }
+
+        [HttpGet, Route("payments")]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> GetPayments()
+        {
+            var result = await _svc.GetPayments();
+            if (result == null)
+            {
+                return BadRequest($"Could not fetch payments.");
+            }
+            return Ok(result);
+        }
+
+        [HttpGet, Route("payment")]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> GetPaymentById(string paymentId)
+        {
+            var result = await _svc.GetPaymentById(paymentId);
+            if (result == null)
+            {
+                return BadRequest($"Could not fetch payments.");
+            }
+            return Ok(result);
+        }
+
+        [HttpGet, Route("paymentMethods")]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> GetPaymentMethods()
+        {
+            var result = await _svc.GetPaymentMethods();
+            if (result == null)
+            {
+                return BadRequest($"Could not fetch payment methods.");
+            }
+            return Ok(result);
+        }
+
+        [HttpGet, Route("sessions")]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> GetSessions()
+        {
+            var result = await _svc.GetSessions();
+            if (result == null)
+            {
+                return BadRequest($"Could not fetch sessions.");
+            }
+            return Ok(result);
+        }
+
+        [HttpGet, Route("session")]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> GetSessionById(string sessionId)
+        {
+            var result = await _svc.GetSessionById(sessionId);
+            if (result == null)
+            {
+                return BadRequest($"Could not fetch sessions.");
+            }
+            return Ok(result);
+        }
+
+        [HttpGet, Route("sessionItems")]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> GetSessionItems(string sessionId)
+        {
+            var result = await _svc.GetSessionItemsById(sessionId);
+            if (result == null)
+            {
+                return BadRequest($"Could not fetch sessions.");
+            }
+            return Ok(result);
+        }
     }
 }
