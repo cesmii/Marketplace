@@ -4,9 +4,10 @@ import color from '../../components/Constants';
 
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
 import DownloadNodesetModal from '../../components/DownloadNodesetModal';
+import AddCartButton from '../../components/eCommerce/AddCartButton';
 import { RenderImageBg } from '../../services/MarketplaceService';
 import { AppSettings } from '../../utils/appsettings';
-import { formatItemPublishDate, generateLogMessageString, getImageUrl, renderMenuColorIcon, renderMenuColorMaterialIcon } from '../../utils/UtilityService';
+import { formatItemPublishDate, generateLogMessageString, renderMenuColorIcon, renderMenuColorMaterialIcon } from '../../utils/UtilityService';
 import { MarketplaceItemJobLauncher } from './MarketplaceItemJobLauncher';
 
 const CLASS_NAME = "MarketplaceItemEntityHeader";
@@ -52,6 +53,11 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
         setDownloadModal(false);
     };
 
+    const onAddCart = (itm, quantity) => {
+        console.log(generateLogMessageString(`onAddCart`, CLASS_NAME));
+        if (props.onAddCart) props.onAddCart(itm, quantity);
+    };
+
     //-------------------------------------------------------------------
     // Region: Render helpers
     //-------------------------------------------------------------------
@@ -79,6 +85,8 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                             </p>
                         }
                         {renderJobDefinitions()}
+                        
+                        <AddCartButton item={props.item} onAdd={onAddCart} />
                     </div>
                 </div>
             </>
@@ -136,7 +144,6 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
             <DownloadNodesetModal item={props.item} showModal={_downloadModalShow} onDownload={onDownload} onCancel={onDownloadCancel} showSavedMessage={true} />
         );
     };
-
 
     const renderActionLinks = () => {
 

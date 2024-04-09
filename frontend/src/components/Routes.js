@@ -32,6 +32,11 @@ import AdminProfileList from '../views/admin/AdminProfileList'
 import SitemapGenerator from '../views/admin/SitemapGenerator'
 import AccountProfile from '../views/AccountProfile'
 import LoginSuccess from '../views/LoginSuccess'
+//eCommerce 
+import Cart from '../views/ecommerce/Cart'
+import Checkout from '../views/ecommerce/Checkout'
+import CheckoutComplete from '../views/ecommerce/CheckoutComplete'
+
 import { AppSettings } from '../utils/appsettings'
 
 //const CLASS_NAME = "Routes";
@@ -82,6 +87,11 @@ function Routes() {
             <AdminRoute path="/admin/profile/:id" component={AdminProfileEntity} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/sitemap/generate" component={SitemapGenerator} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/account" component={AccountProfile} />
+
+            {/* eCommerce Routes */}
+            <PublicRoute exact path="/checkout/:type" component={CheckoutComplete} />
+            <PublicRoute exact path="/cart" component={Cart} />
+            <PublicRoute exact path="/checkoutold" component={Checkout} />
 
             <PublicRoute path="/notpermitted" component={NotAuthorized} />
             <PublicRoute path="/notauthorized" component={NotAuthorized} />

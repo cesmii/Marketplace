@@ -477,9 +477,11 @@ function AdminMarketplaceEntity() {
                             { id: new Date().getTime(), severity: "success", body: `Marketplace item was saved`, isTimed: true }
                         ]
                     });
-
                     //now redirect to marketplace item on front end
-                    history.push(`/admin/library/${resp.data.data}`);
+                    if (mode.toLowerCase() === "new")
+                        history.push(`/admin/library/${resp.data.data}`);
+                    else
+                        window.location.reload();
                 }
                 else {
                     //update spinner, messages
@@ -531,6 +533,7 @@ function AdminMarketplaceEntity() {
             case "description":
             case "abstract":
             case "version":
+            case "price":
             case "metaTagsConcatenated":
             case "ccName1":
             case "ccName2":
@@ -543,6 +546,7 @@ function AdminMarketplaceEntity() {
                 break;
             case "isFeatured":
             case "isVerified":
+            case "allowPurchase":
                 item[e.target.id] = e.target.checked;
                 break;
             case "status":
@@ -1165,6 +1169,41 @@ function AdminMarketplaceEntity() {
         );
     }
 
+    const renderECommerceTab = () => {
+        //console.log(item);
+        return (
+            <>
+                <div className="row mt-2">
+                    <div className="col-sm-6 col-lg-4">
+                        <Form.Group>
+                            <Form.Label>Stripe Product Id</Form.Label>
+                            <Form.Control id="paymentProductId" type="" placeholder=""
+                                value={item.paymentProductId == null ? '' : item.paymentProductId} readOnly={true} />
+                        </Form.Group>
+                    </div>
+                </div>
+                <div className="row mt-2">
+                    <div className="col-sm-6 col-lg-4">
+                        <div className="d-flex h-100">
+                            <Form.Group>
+                                <Form.Check className="align-self-end" type="checkbox" id="allowPurchase" label="Allow Purchase" checked={item.allowPurchase}
+                                    onChange={onChange} readOnly={isReadOnly} />
+                            </Form.Group>
+                        </div>
+                    </div>
+                </div>
+                <div className="row mt-2">
+                    <div className="col-sm-6 col-lg-4">
+                        <Form.Group>
+                            <Form.Label>Price</Form.Label>
+                            <Form.Control id="price" type="" placeholder="" value={item.price == null ? '' : item.price} onChange={onChange} readOnly={isReadOnly || !item.allowPurchase} />
+                        </Form.Group>
+                    </div>
+                </div>
+            </>
+        );
+    }
+
     const renderImagesInfo = () => {
         return (
             <>
@@ -1261,6 +1300,11 @@ function AdminMarketplaceEntity() {
                         </Nav.Link>
                     </Nav.Item>
                     <Nav.Item className="col-sm-3 rounded p-0">
+                        <Nav.Link eventKey="eCommerce" className="text-center text-md-left p-1 px-2 h-100" >
+                            <span className="headline-3">eCommerce</span>
+                        </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item className="col-sm-3 rounded p-0">
                         <Nav.Link eventKey="actionLinks" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">Action Links</span>
                         </Nav.Link>
@@ -1284,6 +1328,13 @@ function AdminMarketplaceEntity() {
                         <Card className="">
                             <Card.Body className="pt-3">
                                 { renderImagesInfo()}
+                            </Card.Body>
+                        </Card>
+                    </Tab.Pane>
+                    <Tab.Pane eventKey="eCommerce">
+                        <Card className="">
+                            <Card.Body className="pt-3">
+                                {renderECommerceTab()}
                             </Card.Body>
                         </Card>
                     </Tab.Pane>

@@ -31,11 +31,13 @@
     "react-slick": "^0.28.1",
     "sass": "^1.49.11",
     "slick-carousel": "^1.8.1",
-    "web-vitals": "^0.2.4"
+    "web-vitals": "^0.2.4",
+    "@stripe/react-stripe-js": "^2.6.2",
+    "@stripe/stripe-js": "^3.0.10"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "start-dev": "set PORT=3001 && react-scripts start",
+    "start": "react-scripts --openssl-legacy-provider start",
+    "start-dev": "set PORT=3001 && react-scripts --openssl-legacy-provider start",
     "build": "GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",

@@ -113,6 +113,12 @@
         public string ccName2 { get; set; }
         public string ccEmail2 { get; set; }
 
+        #region eCommerce Fields
+        public bool AllowPurchase { get; set; } = true;
+        public string PaymentProductId { get; set; }
+        public long Price { get; set; }
+        #endregion
+
 
         public override string ToString() => $"{DisplayName} {ID}";
 
@@ -200,6 +206,16 @@
         public ImageItemSimpleModel ImageLandscape { get; set; }
 
         public LookupItemModel RelatedType { get; set; }
+    }
+
+
+    /// <summary>
+    /// A very simple marketplace item with checkout specific data used for checkout processes
+    /// </summary>
+    public class MarketplaceItemCheckoutModel : MarketplaceItemSimpleModel
+    {
+        //TBD - append to this model
+        public string PaymentProductId { get; set; }
     }
 
 

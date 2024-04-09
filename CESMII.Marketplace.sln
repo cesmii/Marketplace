@@ -40,6 +40,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{CDBCED6A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.UI.Tests", "api\Tests\CESMII.Marketplace.UI.Tests\CESMII.Marketplace.UI.Tests.csproj", "{4732A574-BC5E-463A-B34A-2DBF667C59D8}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.Service", "api\CESMII.Marketplace.Service\CESMII.Marketplace.Service.csproj", "{EEF4FBAC-A5FC-4B97-B9D8-82EAB1E6D1FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CESMII.Marketplace.DAL.Tests", "api\Tests\CESMII.Marketplace.DAL.Tests\CESMII.Marketplace.DAL.Tests.csproj", "{B6528C4E-9F3D-44E1-8A15-8F2DBEA0A802}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -122,12 +126,25 @@ Global
 		{4732A574-BC5E-463A-B34A-2DBF667C59D8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4732A574-BC5E-463A-B34A-2DBF667C59D8}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
 		{4732A574-BC5E-463A-B34A-2DBF667C59D8}.Staging|Any CPU.Build.0 = Debug|Any CPU
+		{EEF4FBAC-A5FC-4B97-B9D8-82EAB1E6D1FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEF4FBAC-A5FC-4B97-B9D8-82EAB1E6D1FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEF4FBAC-A5FC-4B97-B9D8-82EAB1E6D1FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEF4FBAC-A5FC-4B97-B9D8-82EAB1E6D1FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEF4FBAC-A5FC-4B97-B9D8-82EAB1E6D1FC}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEF4FBAC-A5FC-4B97-B9D8-82EAB1E6D1FC}.Staging|Any CPU.Build.0 = Debug|Any CPU
+		{B6528C4E-9F3D-44E1-8A15-8F2DBEA0A802}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6528C4E-9F3D-44E1-8A15-8F2DBEA0A802}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6528C4E-9F3D-44E1-8A15-8F2DBEA0A802}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6528C4E-9F3D-44E1-8A15-8F2DBEA0A802}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6528C4E-9F3D-44E1-8A15-8F2DBEA0A802}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6528C4E-9F3D-44E1-8A15-8F2DBEA0A802}.Staging|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4732A574-BC5E-463A-B34A-2DBF667C59D8} = {CDBCED6A-2084-42FD-86D8-4DB12FFFA9F8}
+		{B6528C4E-9F3D-44E1-8A15-8F2DBEA0A802} = {CDBCED6A-2084-42FD-86D8-4DB12FFFA9F8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {DE4E0FBF-6B7D-4479-9902-C42E2F6A879A}

@@ -353,3 +353,5 @@ MigrationBackup/
 /frontend/mpfe.bat
 /frontend/.env.development
 /api/CESMII.Marketplace.API/appsettings.Development.json
+/.env.development
+/appSettings.Development.json

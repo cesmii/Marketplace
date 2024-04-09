@@ -103,5 +103,15 @@
             }
         }
 
+        public StripeConfig StripeSettings
+        {
+            get
+            {
+                var result = new StripeConfig();
+                _configuration.GetSection("StripeSettings").Bind(result);
+                return result;
+            }
+        }
+
     }
 }
