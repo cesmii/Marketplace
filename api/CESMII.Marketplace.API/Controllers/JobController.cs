@@ -145,7 +145,8 @@ namespace CESMII.Marketplace.Api.Controllers
 
             if (string.IsNullOrEmpty(model.Query))
             {
-                return Ok(_dalJobLog.Where(s => s.CreatedById.Equals(MongoDB.Bson.ObjectId.Parse(LocalUser.ID)) &&
+                return Ok(_dalJobLog.Where(s => s.CreatedById != null && 
+                                s.CreatedById.Equals(MongoDB.Bson.ObjectId.Parse(LocalUser.ID)) &&
                                 s.IsActive
                                 , null, null, false, true));
             }

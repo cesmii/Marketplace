@@ -275,13 +275,13 @@ namespace CESMII.Marketplace.JobManager.Jobs
     {
         public string HostUrl { get; set; }
         public OnTimeEdgeUserModel FormData { get; set; }
-        public SmipSettings SmipSettings { get; set; }
+        public SmipSettingsOnTimeEdge SmipSettings { get; set; }
     }
 
     internal class JobOnTimeEdgeConfig
     {
         public OnTimeEdgeApiConfig ApogeanApi { get; set; }
-        public SmipSettings SmipSettings { get; set; }
+        public SmipSettingsOnTimeEdge SmipSettings { get; set; }
         public List<string> EmailRecipients { get; set; }
     }
 
@@ -336,6 +336,16 @@ namespace CESMII.Marketplace.JobManager.Jobs
         public string request_id { get; set; }
         public string status { get; set; }
     }
+
+    internal class SmipSettingsOnTimeEdge : SmipSettings
+    {
+        /// <summary>
+        /// Allow job to skip over SMIP step if needed
+        /// </summary>
+        public bool Enabled { get; set; }
+
+    }
+
 
     #endregion
 
