@@ -39,6 +39,7 @@
     /// Temporary class to store and use SMIP settings
     /// </summary>
     /// <remarks>Eventually, this will go away in favor of a SSO unified user record</remarks>
+    [BsonIgnoreExtraElements]
     public class SmipSettings
     {
         public string UserName { get; set; }
