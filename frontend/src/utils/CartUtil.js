@@ -6,19 +6,19 @@
 //-------------------------------------------------------------------
 // add to cart
 //-------------------------------------------------------------------
-export function updateCart(cart, item, quantity) {
+export function updateCart(cart, item, quantity, overwrite = false) {
 
     if (cart == null) cart = {};
     if (cart.items == null) cart.items = [];
 
     //loop through cart and see if item is there. If not, add, if there, add new quantity to existing.
-    let cartItem = cart.items.find(x => { return x.marketplaceItem?.id === item.marketplaceItem?.id; });
+    let cartItem = cart.items.find(x => { return x.marketplaceItem?.id === item?.id; });
     if (cartItem == null) {
-        cartItem = { marketplaceItem: item.marketplaceItem, quantity: quantity };
+        cartItem = { marketplaceItem: item, quantity: quantity };
         cart.items.push(cartItem);
     }
     else {
-        cartItem.quantity += quantity;
+        cartItem.quantity = overwrite ? quantity : cartItem.quantity + quantity;
     }
     return cart;
 }

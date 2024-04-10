@@ -106,7 +106,7 @@ function SubscribeForm() {
                 <Form.Control id="email" type="email" className={(!_isValid.email || !_isValid.emailFormat ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
                     value={_item.email != null ? _item.email : ''} onBlur={validateForm_email} onChange={onChange}
                     placeholder="Enter valid email address" aria-label="Enter valid email address"
-                    title={renderValidationMessage()}
+                    title={renderValidationMessage()} autoComplete="on"
                 />
             </InputGroup>
             <InputGroup.Append>

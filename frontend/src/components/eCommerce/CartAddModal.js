@@ -19,7 +19,6 @@ function CartAddModal(props) {
     const [showModal, setShowModal] = useState(props.showModal);
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_item, setItem] = useState({marketplaceItem: props.item, quantity: 1});
-    const [_quantity, setQuantity] = useState(1);
     const [_isValid, setIsValid] = useState(true);
 
     //-------------------------------------------------------------------
@@ -53,7 +52,7 @@ function CartAddModal(props) {
         }
 
         //add the item to the cart and save context
-        let cart = updateCart(loadingProps.cart, _item, _quantity);
+        let cart = updateCart(loadingProps.cart, _item.marketplaceItem, _item.quantity);
         setLoadingProps({ cart: cart });
         if (props.onAdd) props.onAdd();
     };
@@ -66,9 +65,9 @@ function CartAddModal(props) {
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
-    const onChange = (id, qty) => {
+    const onChange = (item, qty) => {
         console.log(generateLogMessageString('onChange', CLASS_NAME));
-        setQuantity(qty);
+        setItem({ marketplaceItem: item, quantity: qty });
     };
 
     //-------------------------------------------------------------------
@@ -93,7 +92,7 @@ function CartAddModal(props) {
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body className="my-1 py-2">
-                    <CartItem item={_item} quantity={_quantity} isAdd={true} onChange={onChange} onValidate={onValidate} />
+                    <CartItem item={_item} isAdd={true} onChange={onChange} onValidate={onValidate} className="col-8 mx-auto" />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="text-solo" className="mx-1" onClick={onCancel} >Cancel</Button>

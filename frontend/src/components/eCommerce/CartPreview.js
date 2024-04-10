@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, Fragment } from 'react'
 
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
 import { generateLogMessageString } from '../../utils/UtilityService';
@@ -54,7 +54,7 @@ function CartPreview() {
     const onChange = (item, qty) => {
         console.log(generateLogMessageString(`onChange`, CLASS_NAME));
         //add the item to the cart and save context
-        let cart = updateCart(loadingProps.cart, item, qty);
+        let cart = updateCart(loadingProps.cart, item, qty, true); //overwrite existing amount
         setLoadingProps({ cart: cart });
     };
 
@@ -77,30 +77,30 @@ function CartPreview() {
 
         if (cart == null || cart.items == null || cart.items.length === 0) {
             return (
-                <div className="row" >
-                    <div className="col-sm-4 my-5 mx-auto text-center">
-                        <span className="icon-circle primary mx-auto" ><i className="material-icons">shopping_cart</i></span>
-                        <div className="d-block py-4" >
-                            Your cart is empty.
-                        </div>
-                        <a className="btn btn-primary" href='/library'>Shop Now</a>
+                <div className="col-sm-4 my-5 mx-auto text-center">
+                    <span className="icon-circle primary mx-auto" ><i className="material-icons">shopping_cart</i></span>
+                    <div className="d-block py-4" >
+                        Your cart is empty.
                     </div>
+                    <a className="btn btn-primary" href='/library'>Shop Now</a>
                 </div>
             );
         }
 
         const mainBody = cart?.items.map((item, i) => {
             return (
-                <CartItem key={i} item={item} quantity={item.quantity} isAdd={false} onChange={onChange} onChange={onValidate} onRemoveItem={onRemoveItem} />
+                <Fragment key={i} >
+                    <CartItem item={item} isAdd={false} onChange={onChange}
+                        onValidate={onValidate} onRemoveItem={onRemoveItem} showAbstract={true} className="col-8 mx-auto" />
+                    <hr />
+                </Fragment>
             );
         });
 
 
         return (
-            <div className="row" >
-                <div className="col-sm-12 mb-4">
-                    {mainBody}
-                </div>
+            <div className="mb-2">
+                {mainBody}
             </div>
         );
     }
