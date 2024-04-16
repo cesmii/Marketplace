@@ -217,7 +217,8 @@ export function getUserPreferences() {
         requestInfoPreferences: { pageSize: AppSettings.PageSize },
         lookupPreferences: { pageSize: AppSettings.PageSize },
         publisherPreferences: { pageSize: AppSettings.PageSize },
-        jobDefinitionPreferences: { pageSize: AppSettings.PageSize }
+        jobDefinitionPreferences: { pageSize: AppSettings.PageSize },
+        externalSourcePreferences: { pageSize: AppSettings.PageSize }
     };
 
     var item = JSON.parse(result);
@@ -229,6 +230,7 @@ export function getUserPreferences() {
     if (item.lookupPreferences == null || item.lookupPreferences.pageSize == null) item.lookupPreferences = { pageSize: AppSettings.PageSize };
     if (item.publisherPreferences == null || item.publisherPreferences.pageSize == null) item.publisherPreferences = { pageSize: AppSettings.PageSize };
     if (item.jobDefinitionPreferences == null || item.jobDefinitionPreferences.pageSize == null) item.jobDefinitionPreferences = { pageSize: AppSettings.PageSize };
+    if (item.externalSourcePreferences == null || item.externalSourcePreferences.pageSize == null) item.externalSourcePreferences = { pageSize: AppSettings.PageSize };
     if (needsUpdate) localStorage.setItem('userPreferences', JSON.stringify(item));
 
     return item;
@@ -319,11 +321,18 @@ export function getProfileIconName(item) {
 export function getImageUrl(item)
 {
     if (item == null) return '';
+    //if item has src, return that as the url
+    if (item.src != null) return item.src;
+    return `${AppSettings.BASE_API_URL}/image/${item.id}`
+}
+
+export function getImageUrlAdmin(item) {
+    if (item == null) return '';
     return `${AppSettings.BASE_API_URL}/image/${item.id}`
 }
 
 export function getImageAlt(item) {
-    if (item == null) return '';
+    if (item == null || item.fileName == null) return '';
     return item.fileName.replace(/.jpeg/g, "").replace(/.jpg/g, "").replace(/.png/g, "").replace(/.gif/g, "").replace(/.bmp/g, "");
 }
 

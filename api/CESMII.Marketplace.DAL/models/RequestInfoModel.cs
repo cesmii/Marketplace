@@ -21,11 +21,16 @@ namespace CESMII.Marketplace.DAL.Models
         public string PublisherId { get; set; }
 
         /// <summary>
-        /// This is only populated if this request info is associated with a particular SM Profile
-        /// Only map on get
+        /// This is only populated if this request info is associated with a particular external source item
         /// </summary>
-        public MarketplaceItemModel SmProfile { get; set; }
-        public long? SmProfileId { get; set; }
+        public Data.Entities.ExternalSourceSimpleInfo ExternalSource { get; set; }
+
+        /// <summary>
+        /// This is only populated if the external source data is populated. 
+        /// We keep it separate from ExternalSource because it is only populated under certain
+        /// scenarios and it is a more time consuming call to call external API to get item data. 
+        /// </summary>
+        public MarketplaceItemModel ExternalItem { get; set; }
 
         public string RequestTypeCode { get; set; }
 
@@ -72,9 +77,4 @@ namespace CESMII.Marketplace.DAL.Models
         public string ccName2 { get; set; }
         public string ccEmail2 { get; set; }
     }
-
-
-
-
-
 }

@@ -15,9 +15,10 @@
         /// </summary>
         public BsonObjectId MarketplaceItemId { get; set; }
         /// <summary>
-        /// Id of SM Profile from CloudLib - This will be null for marketplace items
+        /// Refers to an external item associated with this request info item
         /// </summary>
-        public string CloudLibId { get; set; }
+        public ExternalSourceSimple ExternalSource { get; set; }
+
         public int PageVisitCount { get; set; }
         public int SearchResultCount { get; set; }
         public int LikeCount { get; set; }

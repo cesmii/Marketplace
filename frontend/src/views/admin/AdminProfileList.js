@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Helmet } from "react-helmet"
+import { Dropdown } from 'react-bootstrap';
 import axiosInstance from "../../services/AxiosService";
 
 import { AppSettings } from '../../utils/appsettings'
@@ -13,6 +14,7 @@ import { clearSearchCriteria, getMarketplacePreferences, setMarketplacePageSize 
 import AdminProfileRow from './shared/AdminProfileRow';
 import color from '../../components/Constants';
 import OnDeleteConfirm from '../../components/OnDeleteConfirm';
+import { SVGIcon } from '../../components/SVGIcon';
 
 const CLASS_NAME = "AdminProfileList";
 
@@ -30,6 +32,8 @@ function AdminProfileList() {
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_error, setError] = useState({ show: false, message: null, caption: null });
     const [_itemDelete, setItemDelete] = useState(null);
+    const [_itemsLookupSources, setItemsLookupSources] = useState([]);  //profile items 
+    const [_loadLookupSources, setLoadLookupSources] = useState(null);
 
     const caption = 'Admin';
 
@@ -68,20 +72,21 @@ function AdminProfileList() {
             //show a spinner
             setLoadingProps({ isLoading: true, message: null });
 
-            var url = `admin/profile/search`;
+            var url = `admin/relateditem/search`;
             console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
 
             //get copy of search criteria structure from session storage
             var criteria = JSON.parse(JSON.stringify(loadingProps.searchCriteria));
             criteria = clearSearchCriteria(criteria);
             criteria = { ...criteria, Query: _pager.searchVal, Skip: (_pager.currentPage - 1) * _pager.pageSize, Take: _pager.pageSize };
+            //append related item indicator
             await axiosInstance.post(url, criteria).then(result => {
                 if (result.status === 200) {
 
                     //set state on fetch of data
                     setDataRows({
                         ..._dataRows,
-                        all: result.data
+                        all: result.data.data
                     });
 
                     //hide a spinner
@@ -117,6 +122,58 @@ function AdminProfileList() {
         };
         //type passed so that any change to this triggers useEffect to be called again
     }, [_pager]);
+
+    //-------------------------------------------------------------------
+    // Trigger get related items lookups - all mktplace items, all profiles.
+    //-------------------------------------------------------------------
+    useEffect(() => {
+        // Load lookup data upon certain triggers in the background
+        async function fetchData() {
+
+            console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
+
+            //get copy of search criteria structure from session storage
+            var url = `admin/relateditem/lookup/sources`;
+            await axiosInstance.post(url).then(result => {
+                if (result.status === 200) {
+
+                    //set state on fetch of data
+                    setItemsLookupSources(result.data);
+                    setLoadLookupSources(false);
+
+                } else {
+                    setLoadingProps({
+                        isLoading: false, message: null, inlineMessages: [
+                            { id: new Date().getTime(), severity: "danger", body: 'An error occurred retrieving related item lookups.', isTimed: true }]
+                    });
+                }
+                setLoadLookupSources(false);
+
+            }).catch(e => {
+                if ((e.response && e.response.status === 401) || e.toString().indexOf('Network Error') > -1) {
+                    //do nothing, this is handled in routes.js using common interceptor
+                    //setAuthTicket(null); //the call of this will clear the current user and the token
+                }
+                else {
+                    setLoadingProps({
+                        isLoading: false, message: null, inlineMessages: [
+                            { id: new Date().getTime(), severity: "danger", body: 'An error occurred retrieving related item lookups.', isTimed: true }]
+                    });
+                }
+                setLoadLookupSources(false);
+            });
+        }
+
+        //go get the data.
+        if (_loadLookupSources == null || _loadLookupSources === true) {
+            fetchData();
+        }
+
+        //this will execute on unmount
+        return () => {
+            //
+        };
+    }, [_loadLookupSources]);
 
     //-------------------------------------------------------------------
     // Region: Event Handling - delete item
@@ -220,6 +277,35 @@ function AdminProfileList() {
         );
     };
 
+    const renderAddSourceDropdown = () => {
+        if (_itemsLookupSources == null || _itemsLookupSources.length === 0) return;
+
+        if (_itemsLookupSources.length === 1) {
+            const src = _itemsLookupSources[0];
+            return (
+                <a className="btn btn-icon-outline circle primary ml-auto" href={`/admin/relateditem/${src.code}/new`} ><i className="material-icons">add</i></a>
+            )
+        };
+
+        //allow for add of multiple different types of sources
+        const options = _itemsLookupSources.map((src) => {
+            return (
+                <Dropdown.Item key={src.id} href={`/admin/relateditem/${src.code}/new`} >Add '{src.name}' Relationship</Dropdown.Item>
+            )
+        });
+
+        return (
+            <Dropdown className="action-menu icon-dropdown ml-auto" onClick={(e) => e.stopPropagation()} >
+                <Dropdown.Toggle drop="left">
+                    <SVGIcon name="more-vert" size="24" fill={color.shark} />
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                    {options}
+                </Dropdown.Menu>
+            </Dropdown>
+        );
+    }
+
 
     //-------------------------------------------------------------------
     // Region: Render final output
@@ -231,7 +317,7 @@ function AdminProfileList() {
             </Helmet>
             <div className="row py-2 pb-4">
                 <div className="col-sm-9">
-                    <h1>Admin | Profile Items</h1>
+                    <h1>Admin | External Items</h1>
                 </div>
                 <div className="col-sm-3 d-flex align-items-center" >
                     <HeaderSearch filterVal={_pager.searchVal == null ? null : _pager.searchVal} onSearch={handleOnSearchChange} searchMode="standard" />
@@ -243,10 +329,10 @@ function AdminProfileList() {
                     {(_dataRows.itemCount != null && _dataRows.itemCount > 0) ?
                         <>
                             <span className="px-2 ml-auto font-weight-bold">{_dataRows.itemCount}{_dataRows.itemCount === 1 ? ' item' : ' items'}</span>
-                            <a className="btn btn-icon-outline circle primary" href={`/admin/profile/new`} ><i className="material-icons">add</i></a>
+                            {renderAddSourceDropdown()}
                         </>
                         :
-                        <a className="btn btn-icon-outline circle ml-auto primary" href={`/admin/profile/new`} ><i className="material-icons">add</i></a>
+                        renderAddSourceDropdown()
                     }
                 </div>
             </div>
@@ -263,10 +349,10 @@ function AdminProfileList() {
             <OnDeleteConfirm
                 item={_itemDelete}
                 onDeleteComplete={onDeleteComplete}
-                urlDelete={`admin/profile/delete`}
+                urlDelete={`admin/relateditem/delete`}
                 caption='Remove Related Items'
-                confirmMessage={`You are about to remove all related items and related profiles from '${_itemDelete?.displayName}'. This action cannot be undone.`}
-                successMessage='Related items and related profiles were removed.'
+                confirmMessage={`You are about to remove all related items from '${_itemDelete?.displayName}'. This action cannot be undone.`}
+                successMessage='Related items were removed.'
                 errorMessage='An error occurred removing relationships'
             />
             {renderErrorMessage()}

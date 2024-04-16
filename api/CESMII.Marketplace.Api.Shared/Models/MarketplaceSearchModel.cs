@@ -1,11 +1,19 @@
 ﻿using CESMII.Marketplace.DAL.Models;
+using CESMII.Marketplace.Data.Entities;
 using System.Collections.Generic;
 
 namespace CESMII.Marketplace.Api.Shared.Models
 {
     public class MarketplaceSearchModel : PagerFilterSimpleModel
     {
-        public string PageCursors { get; set; }
+        /// <summary>
+        /// These are previous cursors used in the same search setting 
+        /// (ie everything stayed same with search except skip value - page changed)
+        /// This will be cleared out when anything else about search is modified 
+        /// (ie page size, search criteria)
+        /// </summary>
+        public List<SourceSearchCursor> CachedCursors { get; set; }
+
         public List<LookupGroupByModel> Filters { get; set; }
 
         /// <summary>
@@ -22,4 +30,5 @@ namespace CESMII.Marketplace.Api.Shared.Models
         /// <remarks>This is calculated on search in the controller.</remarks>
         public List<LookupItemFilterModel> KeyWordItemTypes { get; set; }
     }
+
 }

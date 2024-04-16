@@ -37,7 +37,8 @@ function OnDeleteConfirm(props) {
         setLoadingProps({ isLoading: true, message: "" });
 
         //perform delete call
-        var data = { id: _deleteModal.item.id };
+        //in some cases, we have to pass externalSource instead of id
+        let data = _deleteModal.item.externalSource ? _deleteModal.item.externalSource : { id: _deleteModal.item.id };
         var url = props.urlDelete;
         axiosInstance.post(url, data)  //api allows one or many
             .then(result => {

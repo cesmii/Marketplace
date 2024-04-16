@@ -208,7 +208,7 @@ function SitemapGenerator() {
         _items.map((itm, i) => {
             const url =
                 itm.type === 'publisher' ? `${_item.domainName}/publisher/${itm.name}` :
-                    itm.type === AppSettings.itemTypeCode.smProfile ? `${_item.domainName}/profile/${itm.id}` :
+                    itm.type === AppSettings.itemTypeCode.smProfile ? `${_item.domainName}/profile/${itm.externalSource.code}/${itm.id}` :
                         `${_item.domainName}/library/${itm.name}`;
             //don't let date be less than min date, otherwise, use updated date
             const modDate = itm.updated == null ? _item.maxDate :

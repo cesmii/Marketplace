@@ -29,7 +29,7 @@ function DownloadNodesetModal(props) {
     // Trigger get lookup data from server (if necessary)
     useEffect(() => {
         //set item's sm profile value and request type
-        setItem({ ..._item, smProfileId: props.item.id, smProfile: props.item, requestTypeCode: "smprofile-download" })
+        setItem({ ..._item, externalSource: props.item.externalSource, externalId: props.item.id, externalItem: props.item, requestTypeCode: "smprofile-download" })
 
         //this will execute on unmount
         return () => {

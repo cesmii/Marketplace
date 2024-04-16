@@ -31,8 +31,9 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
         //if user already downloaded any nodeset in past, bypass email collection form
         if (loadingProps.downloadNodesetUid) {
             const itm = JSON.parse(JSON.stringify(AppSettings.requestInfoNew));
-            itm.smProfileId = props.item.id;
-            itm.smProfile = props.item;
+            itm.externalId = props.item.id;
+            itm.externalItem = props.item;
+            itm.externalSource = props.item.externalSource;
             itm.requestTypeCode = "smprofile-download";
             itm.email = "REPEAT";
             itm.uid = loadingProps.downloadNodesetUid;

@@ -105,22 +105,25 @@ function Navbar() {
                             <Dropdown.Divider />
                             <Dropdown.Item eventKey="4" href="/admin/library/list">Manage Marketplace Items</Dropdown.Item>
                             <Dropdown.Item eventKey="5" href="/admin/publisher/list">Manage Publishers</Dropdown.Item>
-                            <Dropdown.Item eventKey="6" href="/admin/profile/list">Manage Profile Relationships</Dropdown.Item>
-                            <Dropdown.Item eventKey="7" href="/admin/lookup/list">Manage Lookup Items</Dropdown.Item>
-                            <Dropdown.Item eventKey="8" href="/admin/images/list">Manage Stock Images</Dropdown.Item>
-                            <Dropdown.Item eventKey="9" href="/admin/requestinfo/list">Manage Request Info Inquiries</Dropdown.Item>
+                            <Dropdown.Divider />
+                            <Dropdown.Item eventKey="6" href="/admin/externalsource/list">Manage External Sources</Dropdown.Item>
+                            <Dropdown.Item eventKey="7" href="/admin/relateditem/list">Manage Related Items</Dropdown.Item>
+                            <Dropdown.Divider />
+                            <Dropdown.Item eventKey="8" href="/admin/lookup/list">Manage Lookup Items</Dropdown.Item>
+                            <Dropdown.Item eventKey="9" href="/admin/images/list">Manage Stock Images</Dropdown.Item>
+                            <Dropdown.Item eventKey="10" href="/admin/requestinfo/list">Manage Request Info Inquiries</Dropdown.Item>
                             <Dropdown.Divider />
                         </>
                     }
                     {isAuthorized &&
                         <>
-                            <Dropdown.Item eventKey="10" href="/admin/jobdefinition/list">Manage Job Definitions</Dropdown.Item>
+                            <Dropdown.Item eventKey="11" href="/admin/jobdefinition/list">Manage Job Definitions</Dropdown.Item>
                             <Dropdown.Divider />
                         </>
                     }
                     {isAuthorized &&
                         <>
-                            <Dropdown.Item eventKey="11" href="/admin/sitemap/generate">Generate Sitemap...</Dropdown.Item>
+                            <Dropdown.Item eventKey="12" href="/admin/sitemap/generate">Generate Sitemap...</Dropdown.Item>
                             <Dropdown.Divider />
                         </>
                     }

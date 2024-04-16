@@ -28,9 +28,9 @@
         }
 
         /// <summary>
-        /// Simple high level information related to an SM profile from CloudLib
+        /// Refers to an external item associated with this request info item
         /// </summary>
-        public long? SmProfileId { get; set; }
+        public ExternalSourceSimple ExternalSource { get; set; }
 
         public BsonObjectId RequestTypeId { get; set; } //map like statusid for marketplaceitem
        

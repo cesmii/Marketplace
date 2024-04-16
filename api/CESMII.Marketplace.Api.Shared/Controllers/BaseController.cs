@@ -103,7 +103,8 @@
             return await _mailRelayService.SendEmail(message);
         }
 
-        protected async Task<bool> EmailRequestInfo(string subject, string body, MailRelayService _mailRelayService, string[] astrEmailAddress, string[] astrName, bool[] abSendTo)
+        protected async Task<bool> EmailRequestInfo(string subject, string body, MailRelayService _mailRelayService,
+                List<MailAddress> listTo, List<MailAddress> listCC)
         {
             var message = new MailMessage
             {
@@ -113,36 +114,24 @@
                 IsBodyHtml = true
             };
 
-            int count = astrEmailAddress.Length;
-
-            for (int i= 0; i < count; i++)
+            //add to items
+            foreach (var itm in listTo)
             {
-                string strEmail = astrEmailAddress[i];
-                string strName = "";
-                if (astrName.Length > i)
-                    strName = astrName[i];
-
-                if (abSendTo[i])
+                if (!string.IsNullOrEmpty(itm.Address))
                 {
-                    if (string.IsNullOrEmpty(strName))
-                    {
-                        message.To.Add(new MailAddress(strEmail));
-                    }
-                    else
-                    {
-                        message.To.Add(new MailAddress(strEmail, strName));
-                    }
+                    message.To.Add(new MailAddress(itm.Address, itm.DisplayName));
                 }
-                else
+            }
+
+            //add cc items
+            foreach (var itm in listCC)
+            {
+                if (!string.IsNullOrEmpty(itm.Address))
                 {
-                    if (string.IsNullOrEmpty(strName) && !string.IsNullOrEmpty(strEmail))
-                    {
-                        message.CC.Add(new MailAddress(strEmail));
-                    }
-                    else if (!string.IsNullOrEmpty(strName) && !string.IsNullOrEmpty(strEmail))
-                    {
-                        message.CC.Add(new MailAddress(strEmail, strName));
-                    }
+                    //base class does not support the CC addresses so put all on the to addresses
+                    //sendGrid will not show all addresses in the to line so it is ok.
+                    message.To.Add(new MailAddress(itm.Address, itm.DisplayName));
+                    //message.CC.Add(new MailAddress(itm.Address, itm.DisplayName));
                 }
             }
 
