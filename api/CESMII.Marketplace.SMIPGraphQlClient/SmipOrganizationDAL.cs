@@ -1,21 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-
 using GraphQL;
-using GraphQL.Client;
-using GraphQL.Client.Abstractions;
-using GraphQL.Client.Http;
-using GraphQL.Client.Serializer.Newtonsoft;
-
 using CESMII.Marketplace.SmipGraphQlClient.Models;
-using System.Text;
 
 namespace CESMII.Marketplace.SmipGraphQlClient
 {
-
-    //smmarketplace
-    //8XxPpWKYgELk
-    //$2a$06$lJVBo1jICwn3JDIc3vpgHOnc8whLYAIbr9bKDCmbYY5mZ2QQRZ.iq|$2a$06$lJVBo1jICwn3JDIc3vpgHO
 
     public class SmipOrganizationDAL : SmipBaseDAL<SmipOrganizationModel>, ISmipDAL<SmipOrganizationModel>
     {
@@ -43,43 +31,8 @@ namespace CESMII.Marketplace.SmipGraphQlClient
                     query = query
                 }
             };
-            /*
-                {
-                  "data": {
-                    "organizations": [
-                      {
-                        "id": "73316",
-                        "displayName": "PPKOrg",
-                        "description": "An Organization where Prakashan can test Organization queries",
-                        "relativeName": "ppkorg"
-                      }
-                    ]
-                  }
-                }             
-             */
             return await _repo.SearchAsync(req);
         }
-
-
-        /*
-            var query = new GraphQLRequest
-            {
-                Query = @"
-                        query ownerQuery($ownerID: ID!) {
-                          owner(ownerId: $ownerID) {
-                            id
-                            name
-                            address
-                            accounts {
-                              id
-                              type
-                              description
-                            }
-                          }
-                        }",
-                Variables = new { ownerID = id }
-            };         
-         */
     }
 
 }

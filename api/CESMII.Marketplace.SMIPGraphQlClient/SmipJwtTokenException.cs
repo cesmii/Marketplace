@@ -1,6 +1,4 @@
 ﻿using System.Runtime.Serialization;
-using GraphQL;
-
 namespace CESMII.Marketplace.SmipGraphQlClient
 {
     [Serializable]

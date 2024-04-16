@@ -1,10 +1,6 @@
-﻿using System.Text;
-
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 using GraphQL;
-using GraphQL.Client;
-using GraphQL.Client.Abstractions;
 using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.Newtonsoft;
 using Newtonsoft.Json;
@@ -15,10 +11,6 @@ using Newtonsoft.Json.Linq;
 
 namespace CESMII.Marketplace.SmipGraphQlClient
 {
-
-    //smmarketplace
-    //8XxPpWKYgELk
-    //$2a$06$lJVBo1jICwn3JDIc3vpgHOnc8whLYAIbr9bKDCmbYY5mZ2QQRZ.iq|$2a$06$lJVBo1jICwn3JDIc3vpgHO
 
     public class SmipRepo<TModel> :ISmipRepo<TModel> where TModel : SmipAbstractModel 
     {
@@ -51,20 +43,6 @@ namespace CESMII.Marketplace.SmipGraphQlClient
         public async Task Authenticate()
         {
             //2 -step process - request authentication challenge.
-            //{authenticator: "smmarketplace", role: "sandbox_ro_group", userName: "scoxen"}
-            //convert inbound model to what SMIP expects
-            /* step 1 request
-                mutation get_challenge {
-                  authenticationRequest(
-                    input: {authenticator: "smmarketplace", role: "sandbox_ro_group", userName: "scoxen"}
-                  ) {
-                    jwtRequest {
-                      challenge
-                      message
-                    }
-                  }
-                }
-            */
             var reqChallenge = new GraphQLRequest()
             {
                 Query = @"
@@ -92,7 +70,7 @@ namespace CESMII.Marketplace.SmipGraphQlClient
                   "data": {
                     "authenticationRequest": {
                       "jwtRequest": {
-                        "challenge": "de98735adb9782956bc06007689b78a7",
+                        "challenge": "[challenge value]",
                         "message": "Return \"$challenge|$password\" to validate"
                       }
                     }
@@ -107,7 +85,7 @@ namespace CESMII.Marketplace.SmipGraphQlClient
                   authenticationValidation(
                     input: {
                       authenticator: "smmarketplace"
-                      signedChallenge: "ea89fab65c9d07b30853ac7ac449c183|8XxPpWKYgELk"
+                      signedChallenge: "[challenge value]|[authenticator pw]"
                     }
                   ) {
                     jwtClaim
@@ -140,7 +118,7 @@ namespace CESMII.Marketplace.SmipGraphQlClient
             {
                 "data": {
                     "authenticationValidation": {
-                        "jwtClaim": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2FuZGJveF9yb19ncm91cCIsImV4cCI6MTcxMzIwNTkyOSwidXNlcl9uYW1lIjoic2NveGVuIiwiYXV0aGVudGljYXRvciI6InNtbWFya2V0cGxhY2UiLCJhdXRoZW50aWNhdGlvbl9pZCI6IjE0MDciLCJpYXQiOjE3MTMyMDQyNzUsImF1ZCI6InBvc3RncmFwaGlsZSIsImlzcyI6InBvc3RncmFwaGlsZSJ9.u61-A-4bnLhyv7rtJ41oRh6QupGaxlXR75pMM_kb2ws"
+                        "jwtClaim": "[jwt token value]"
                     }
                 }
             }
@@ -159,8 +137,8 @@ namespace CESMII.Marketplace.SmipGraphQlClient
                   "data": {
                     "organizations": [
                       {
-                        "id": "73316",
-                        "displayName": "PPKOrg",
+                        "id": "12345",
+                        "displayName": "MyOrg",
                       }
                     ]
                   }
@@ -183,8 +161,8 @@ namespace CESMII.Marketplace.SmipGraphQlClient
                   "data": {
                     "organizations": [
                       {
-                        "id": "73316",
-                        "displayName": "PPKOrg",
+                        "id": "12345",
+                        "displayName": "MyOrg",
                       }
                     ]
                   }
@@ -204,32 +182,13 @@ namespace CESMII.Marketplace.SmipGraphQlClient
         {
             throw new NotImplementedException();
         }
-            /*
-                var query = new GraphQLRequest
-                {
-                    Query = @"
-                            query ownerQuery($ownerID: ID!) {
-                              owner(ownerId: $ownerID) {
-                                id
-                                name
-                                address
-                                accounts {
-                                  id
-                                  type
-                                  description
-                                }
-                              }
-                            }",
-                    Variables = new { ownerID = id }
-                };         
-             */
 
         private void CheckErrors(GraphQLError[] errors)
         { 
             if (errors != null)
             {
                 if (IsTokenExpired(errors)) {
-                    _logger.LogWarning($"SmipRepo.SearchAsync||{_client.HttpClient.BaseAddress}||JWT Token expired");
+                    _logger.LogWarning($"SmipRepo.CheckErrors||{_client.HttpClient.BaseAddress}||JWT Token expired");
                     throw new SmipJwtTokenException();
                 }
 
