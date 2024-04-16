@@ -276,7 +276,8 @@ namespace CESMII.Marketplace.JobManager.Jobs
 
                     if (numMatches > 0)
                     {
-                        sbResult.AppendLine("This trial does not permit use of free email domains. Please use a different email.");
+                        //var matches = repoBlockedDomains.FindByCondition(x => email.Trim().ToLower().EndsWith(x.domain.ToLower())).Select(x => x.domain).ToList();
+                        sbResult.AppendLine("Signing up for this trial prohibits use of free email domains. Please use a different email.");
                         _logger.LogWarning($"JobOnTimeEdgeTrial|ValidateEmailDomain|Blocked|Email '{email}' has a blocked email domain and is not permitted.");
                     }
                 }
