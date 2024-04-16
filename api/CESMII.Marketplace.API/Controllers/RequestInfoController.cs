@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Net.Mail;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
@@ -10,6 +12,7 @@ using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.DAL.Models;
+using CESMII.Marketplace.DAL.ExternalSources;
 using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.Api.Shared.Controllers;
 using CESMII.Marketplace.Api.Shared.Extensions;
@@ -23,20 +26,24 @@ namespace CESMII.Marketplace.Api.Controllers
     {
 
         private readonly IDal<RequestInfo, RequestInfoModel> _dal;
-        private readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _dalCloudLib;
         private readonly MailRelayService _mailRelayService;
+        private readonly IExternalSourceFactory<MarketplaceItemModel> _sourceFactory;
+        private readonly IDal<ExternalSource, ExternalSourceModel> _dalExternalSource;
 
         public RequestInfoController(
             IDal<RequestInfo, RequestInfoModel> dal,
-            ICloudLibDAL<MarketplaceItemModelWithCursor> dalCloudLib,
             UserDAL dalUser,
-            ConfigUtil config, ILogger<RequestInfoController> logger,
+            ConfigUtil config,
+            IExternalSourceFactory<MarketplaceItemModel> sourceFactory,
+            IDal<ExternalSource, ExternalSourceModel> dalExternalSource,
+            ILogger<RequestInfoController> logger,
             MailRelayService mailRelayService)
             : base(config, logger, dalUser)
         {
             _dal = dal;
-            _dalCloudLib = dalCloudLib;
             _mailRelayService = mailRelayService;
+            _sourceFactory = sourceFactory;
+            _dalExternalSource = dalExternalSource;
         }
 
 
@@ -86,12 +93,6 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest($"No records found matching this ID: {model.ID}");
             }
 
-            //if we are getting a request info of smprofile type, then also get the associated sm profile.
-            if (result.SmProfileId.HasValue)
-            {
-                result.SmProfile = await _dalCloudLib.GetById(result.SmProfileId.Value.ToString());
-            }
-
             return Ok(result);
         }
 
@@ -128,15 +129,8 @@ namespace CESMII.Marketplace.Api.Controllers
                 //Don't fail to user submitting request if email send fails, log critical. 
                 try
                 {
-
                     //populate some fields that may not be present on the add model. (request type code, created date). 
                     modelNew = _dal.GetById(result);
-
-                    //if we are adding a request info of smprofile type, then also get the associated sm profile.
-                    if (modelNew.SmProfileId.HasValue)
-                    {
-                        modelNew.SmProfile = await _dalCloudLib.GetById(modelNew.SmProfileId.Value.ToString());
-                    }
 
                     var subject = GetEmailSubject(modelNew);
                     var body = await this.RenderViewAsync(GetRenderViewUrl(modelNew), modelNew);
@@ -146,20 +140,27 @@ namespace CESMII.Marketplace.Api.Controllers
 
                     if (strRequestType == "marketplaceitem")
                     {
-                        bool[] abSendTo = new bool[3];
-                        abSendTo[0] = true;
-                        abSendTo[1] = false;
-                        abSendTo[2] = false;
+                        var listTo = new List<MailAddress>() {
+                            new MailAddress(modelNew.Email, $"{modelNew.FirstName} {modelNew.LastName}")
+                        };
+                        //TBD - eventually convert this to a list instead of adding 2 fixed items
+                        var listCC = new List<MailAddress>() { };
+                        if (!string.IsNullOrEmpty(modelNew.MarketplaceItem.ccEmail1))
+                            listCC.Add(new MailAddress(modelNew.MarketplaceItem.ccEmail1, modelNew.MarketplaceItem.ccName1));
+                        if (!string.IsNullOrEmpty(modelNew.MarketplaceItem.ccEmail2))
+                            listCC.Add(new MailAddress(modelNew.MarketplaceItem.ccEmail2, modelNew.MarketplaceItem.ccName2));
+                        //remove nulls
+                        listCC = listCC.Where(x => !string.IsNullOrEmpty(x.Address)).ToList();
 
-                        string[] astrEmail = new string[3];
-                        astrEmail[0] = modelNew.Email;
-                        astrEmail[1] = modelNew.MarketplaceItem.ccEmail1;
-                        astrEmail[2] = modelNew.MarketplaceItem.ccEmail2;
-
-                        string[] astrName = new string[3];
-                        astrName[0] = $"{modelNew.FirstName} {modelNew.LastName}";
-                        astrName[1] = modelNew.MarketplaceItem.ccName1;
-                        astrName[2] = modelNew.MarketplaceItem.ccName2;
+                        //still need to send it to send to MailToAddress at CESMII
+                        var additionalEmails = _mailConfig.ToAddresses.Where(x => !listCC.Any() || listCC.Any(y => x != y.Address)).ToList();
+                        if (additionalEmails.Any())
+                        {
+                            foreach (var email in additionalEmails) 
+                            {
+                                listCC.Add(new MailAddress(email, null));
+                            }
+                        }
 
                         // Add target email addresses to the support request.
                         modelNew.ccEmail1 = modelNew.MarketplaceItem.ccEmail1;
@@ -168,7 +169,8 @@ namespace CESMII.Marketplace.Api.Controllers
                         modelNew.ccName2 = modelNew.MarketplaceItem.ccName2;
                         bUpdateNeeded = true;
 
-                        bEmailSuccess = await EmailRequestInfo(subject, body, _mailRelayService, astrEmail, astrName, abSendTo);
+                        bEmailSuccess = await EmailRequestInfo(subject, body, _mailRelayService, 
+                            listTo, listCC);
                     }
                     else
                     {
@@ -208,6 +210,8 @@ namespace CESMII.Marketplace.Api.Controllers
                 case "sm-profile":
                 case "marketplaceitem":
                     return REQUESTINFO_SUBJECT.Replace("{{RequestType}}", $"Request More Info | {item.RequestType.Name}");
+                case "external-source":
+                    return REQUESTINFO_SUBJECT.Replace("{{RequestType}}", $"Request More Info | {item.ExternalItem.Type.Name} ({item.ExternalSource.Name})");
                 case "membership":
                 case "contribute":
                 case "request-demo":
@@ -225,9 +229,9 @@ namespace CESMII.Marketplace.Api.Controllers
             {
                 case "marketplaceitem":
                     return "~/Views/Template/MoreInfoRequest.cshtml";
-
                 case "publisher":
                 case "sm-profile":
+                case "external-source":
                     return "~/Views/Template/RequestInfo.cshtml";
                 default:
                     return "~/Views/Template/ContactUs.cshtml";

@@ -2,9 +2,9 @@
 #
 # For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
 name: Tests In Browser|API|Marketplace
-on: [workflow_dispatch]
+on:
   #manually trigger deploy
-  #workflow_dispatch:
+  workflow_dispatch:
   # Trigger the workflow on push
   #push:
   #  branches:
@@ -45,7 +45,6 @@ jobs:
       - name: Build (${{env.SOLUTION_FILE}})
         run: dotnet build ${{env.SOLUTION_FILE}} --configuration Staging --no-restore
         working-directory: ${{env.SOLUTION_DIRECTORY}}
-      # Branch: develop. What? I thought it always ran from master. Huh?!?
       #- name: Setup ChromeDriver (version 88.0.4324.96)
       #  uses: nanasess/setup-chromedriver@v2
       #  with:
@@ -56,11 +55,10 @@ jobs:
       #     export DISPLAY=:99
       #     chromedriver --url-base=/wd/hub --whitelisted-ips="" &
       #     sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
-      # Branch: develop. What? I thought it always ran from master. Huh?!?
-      #- name: Set up chrome (driver?)
-      #  uses: browser-actions/setup-chrome@latest
-      #- name: Run browser
-      #  run: chrome --version
+      - name: Set up chrome (driver?)
+        uses: browser-actions/setup-chrome@latest
+      - name: Run browser
+        run: chrome --version
       - name: Run Test on (${{env.SOLUTION_FILE}})
         run: dotnet test ${{env.SOLUTION_DIRECTORY}}api/Tests/CESMII.Marketplace.InBrowser.Tests/CESMII.Marketplace.InBrowser.Tests.csproj --configuration Staging --verbosity normal -l:"console;verbosity=normal"
         working-directory: ${{env.SOLUTION_DIRECTORY}}

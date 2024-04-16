@@ -1,6 +1,7 @@
 ﻿namespace CESMII.Marketplace.DAL.Models
 {
     using CESMII.Marketplace.Common.Enums;
+    using CESMII.Marketplace.Data.Entities;
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
@@ -79,7 +80,7 @@
 
         public PublisherModel Publisher { get; set; }
 
-        public bool IsFeatured { get; set; }
+        public bool IsFeatured { get; set; } = false;
 
         /// <summary>
         /// Has this been verified by CESMII
@@ -99,10 +100,9 @@
         /// <remarks>Doing it this way allows for additional groups to be added w/o additional back end coding</remarks>
         public List<RelatedItemsGroupBy> RelatedItemsGrouped { get; set; }
 
-        public ImageItemSimpleModel ImagePortrait { get; set; }
-        
-        public ImageItemSimpleModel ImageBanner { get; set; }
-        public ImageItemSimpleModel ImageLandscape { get; set; }
+        public ImageItemModel ImagePortrait { get; set; }
+        public ImageItemModel ImageBanner { get; set; }
+        public ImageItemModel ImageLandscape { get; set; }
 
         public virtual List<JobDefinitionSimpleModel> JobDefinitions { get; set; }
 
@@ -119,6 +119,17 @@
         public long Price { get; set; }
         #endregion
 
+        /// <summary>
+        /// Id, source id and code related to external source. Can be null.
+        /// </summary>
+        public ExternalSourceSimple ExternalSource { get; set; }
+
+        /// <summary>
+        /// This will be an indicator that this item is derived from an external data source. 
+        /// The value is determined at runtime in the DAL based on where we get the data from.
+        /// Default to false. 
+        /// </summary>
+        public bool IsExternal { get { return (ExternalSource != null && !string.IsNullOrEmpty(ExternalSource.SourceId));  } }
 
         public override string ToString() => $"{DisplayName} {ID}";
 
@@ -132,9 +143,6 @@
 
         public virtual MarketplaceItemAnalyticsModel Analytics { get; set; }
 
-    }
-    public class MarketplaceItemModelWithCursor : MarketplaceItemModel
-    {
         public string Cursor { get; set; }
     }
 
@@ -152,11 +160,8 @@
         /// <summary>
         /// List of items that are related to this item.
         /// </summary>
-        public virtual List<ProfileItemRelatedModel> RelatedProfiles { get; set; }
-    }
+        public virtual List<ExternalSourceItemModel> RelatedItemsExternal { get; set; }
 
-    public class AdminMarketplaceItemModelWithCursor : AdminMarketplaceItemModel
-    {
         public string Cursor { get; set; }
     }
 
@@ -206,6 +211,7 @@
         public ImageItemSimpleModel ImageLandscape { get; set; }
 
         public LookupItemModel RelatedType { get; set; }
+        public ExternalSourceSimple ExternalSource { get; set; }
     }
 
 
@@ -223,5 +229,14 @@
     {
         public LookupItemModel RelatedType { get; set; }
         public List<MarketplaceItemRelatedModel> Items { get; set; }
+    }
+
+    /// <summary>
+    /// Extend marketplaceitemmodel for the export scenario.
+    /// </summary>
+    public class ExternalItemExportModel
+    {
+        public MarketplaceItemModel Item { get; set; }
+        public string Data { get; set; }
     }
 }

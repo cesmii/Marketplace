@@ -30,7 +30,12 @@ function AdminRelatedItemRow(props) { //props are item, showActions
         //update state for other components to see
         if (props.onChangeItem != null) {
             props.onChangeItem(props.item.relatedId,
-                { relatedId: props.item.relatedId, displayName: props.item.displayName, relatedType: { id: e.target.value, name: e.target.options[e.target.selectedIndex].text } });
+                {
+                    relatedId: props.item.relatedId,
+                    displayName: props.item.displayName,
+                    relatedType: { id: e.target.value, name: e.target.options[e.target.selectedIndex].text },
+                    externalSource: props.item.externalSource
+                });
         }
     }
 
@@ -41,8 +46,18 @@ function AdminRelatedItemRow(props) { //props are item, showActions
 
         //update state for other components to see
         if (props.onChangeItem != null) {
+            //if we are dealing with external source drop down, then we handle this slightly differently
+            const sourceId = e.target[e.target.selectedIndex].getAttribute("data-sourceid");
+            const code = e.target[e.target.selectedIndex].getAttribute("data-code");
+            const externalSource = (sourceId && code) ? { sourceId: sourceId, code: code, id: e.target.value } : null;
+
             props.onChangeItem(props.item.relatedId,
-                { relatedId: e.target.value, displayName: e.target.options[e.target.selectedIndex].text, relatedType: props.item.relatedType });
+                {
+                    relatedId: e.target.value,
+                    displayName: e.target.options[e.target.selectedIndex].text,
+                    relatedType: props.item.relatedType,
+                    externalSource: externalSource
+                });
         }
     }
 
@@ -103,6 +118,8 @@ function AdminRelatedItemRow(props) { //props are item, showActions
         )
     };
 
+    //Note - this component is shared by marketplace related items grid and external items grid so use caution 
+    //in changing one without disrupting the other
     const renderRelatedId = () => {
         //until lookup data arrives, show label
         if (props.itemsLookup == null) return (`${props.item.displayName}`);
@@ -126,9 +143,11 @@ function AdminRelatedItemRow(props) { //props are item, showActions
 
         //show drop down list
         const options = props.itemsLookup.map((itm) => {
+            //marketplace item, externalSource is null, external items will have externalSource populated 
+            //and externalSource will include the id
             const displayName = `${itm.displayName}` +
                 `${(itm.namespace != null && itm.namespace !== '') ? ' (' + itm.namespace + ' v.' + itm.version + ')' : ''}`;
-            return (<option key={itm.id} value={itm.id} >{displayName}</option>)
+            return (<option key={itm.id} value={itm.id} data-sourceid={itm.externalSource?.sourceId} data-code={itm.externalSource?.code} >{displayName}</option>)
         });
 
         return (

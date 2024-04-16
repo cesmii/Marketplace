@@ -47,7 +47,7 @@ function AdminMarketplaceEntity() {
         name: true, nameFormat: true, displayName: true, abstract: true, description: true,
         status: true, type: true, publisher: true, publishDate: true,
         images: { imagePortrait: true, imageBanner: true, imageLandscape: true },
-        relatedItems: true, relatedProfiles: true, actionLinks: true
+        relatedItems: true, relatedItemsExternal: true, actionLinks: true
     });
     const [_deleteModal, setDeleteModal] = useState({ show: false, items: null });
     const [_error, setError] = useState({ show: false, message: null, caption: null });
@@ -222,21 +222,22 @@ function AdminMarketplaceEntity() {
     }, [loadingProps.lookupDataStatic]);
 
     //-------------------------------------------------------------------
-    // Trigger get related items lookups - all mktplace items, all profiles.
+    // Trigger get related items lookups - all mktplace items, all external items.
     //-------------------------------------------------------------------
     useEffect(() => {
         // Load lookup data upon certain triggers in the background
-        async function fetchData(url) {
+        async function fetchData() {
             //show a spinner
             setLoadingProps({ isLoading: true, message: null });
 
+            const url = `marketplace/admin/lookup/related`;
             console.log(generateLogMessageString(`useEffect||fetchData||${url}`, CLASS_NAME));
 
             //get copy of search criteria structure from session storage
             var criteria = JSON.parse(JSON.stringify(loadingProps.searchCriteria));
             criteria = clearSearchCriteria(criteria);
             criteria = { ...criteria, Query: null, Skip: 0, Take: 999 };
-            await axiosInstance.post(url, criteria).then(result => {
+            await axiosInstance.post(url, { criteria: criteria, src: null }).then(result => {
                 if (result.status === 200) {
 
                     //set state on fetch of data
@@ -272,7 +273,7 @@ function AdminMarketplaceEntity() {
 
         //go get the data.
         if (_loadLookupData == null || _loadLookupData === true) {
-            fetchData(`marketplace/admin/lookup/related`);
+            fetchData();
         }
 
         //this will execute on unmount
@@ -354,9 +355,9 @@ function AdminMarketplaceEntity() {
             item.relatedItems.filter(x => x.relatedId === "-1" || x.relatedType?.id === "-1").length === 0;
     };
 
-    const validateForm_relatedProfiles = () => {
-        return item.relatedProfiles == null ||
-            item.relatedProfiles.filter(x => x.relatedId === "-1" || x.relatedType?.id === "-1").length === 0;
+    const validateForm_relatedItemsExternal = () => {
+        return item.relatedItemsExternal == null ||
+            item.relatedItemsExternal.filter(x => x.relatedId === "-1" || x.relatedType?.id === "-1").length === 0;
     };
 
     const validateForm_actionLinks = () => {
@@ -382,14 +383,14 @@ function AdminMarketplaceEntity() {
         _isValid.images.imageBanner = true; //item.imageBanner != null && item.imageBanner.id.toString() !== "-1";
         _isValid.images.imageLandscape = item.imageLandscape != null && item.imageLandscape.id.toString() !== "-1";
         _isValid.relatedItems = validateForm_relatedItems();
-        _isValid.relatedProfiles = validateForm_relatedProfiles();
+        _isValid.relatedItemsExternal = validateForm_relatedItemsExternal();
         _isValid.actionLinks = validateForm_actionLinks();
 
         setIsValid(JSON.parse(JSON.stringify(_isValid)));
         return (_isValid.name && _isValid.nameFormat && _isValid.displayName && _isValid.abstract && _isValid.description &&
             _isValid.status && _isValid.publisher && _isValid.publishDate &&
             _isValid.images.imagePortrait && _isValid.images.imageBanner && _isValid.images.imageLandscape &&
-            _isValid.relatedItems && _isValid.relatedProfiles && _isValid.type && _isValid.actionLinks);
+            _isValid.relatedItems && _isValid.relatedItemsExternal && _isValid.type && _isValid.actionLinks);
     }
 
     //-------------------------------------------------------------------
@@ -617,7 +618,7 @@ function AdminMarketplaceEntity() {
     }
 
     //-------------------------------------------------------------------
-    // Region: Event handler - related items, related profiles
+    // Region: Event handler - related items, related external items
     //-------------------------------------------------------------------
     const onChangeRelatedItem = (currentId, arg) => {
         console.log(generateLogMessageString('onChangeRelatedItem', CLASS_NAME));
@@ -628,12 +629,13 @@ function AdminMarketplaceEntity() {
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
-    const onChangeRelatedProfile = (currentId, arg) => {
-        console.log(generateLogMessageString('onChangeRelatedProfile', CLASS_NAME));
-        var match = item.relatedProfiles.find(x => x.relatedId === currentId);
+    const onChangeRelatedItemExternal = (currentId, arg) => {
+        console.log(generateLogMessageString('onChangeRelatedItemExternal', CLASS_NAME));
+        var match = item.relatedItemsExternal.find(x => x.relatedId === currentId);
         match.relatedId = arg.relatedId;
         match.displayName = arg.displayName;
         match.relatedType = arg.relatedType;
+        match.externalSource = arg.externalSource;
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
@@ -654,19 +656,20 @@ function AdminMarketplaceEntity() {
         //Depending on how we are adding (single row or multiple rows), the id generation will be different. Both need 
         //a starting point negative id
         var id = (-1) * (item.relatedItems == null ? 1 : item.relatedItems.length + 1);
-
+        if (item.relatedItems == null) item.relatedItems = [];
         item.relatedItems.push({ relatedId: id, relatedType: { id: "-1" } });
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
-    const onAddRelatedProfile = () => {
-        console.log(generateLogMessageString('onAddRelatedProfile', CLASS_NAME));
+    const onAddRelatedItemExternal = () => {
+        console.log(generateLogMessageString('onAddRelatedItemExternal', CLASS_NAME));
         //we need to be aware of newly added rows and those will be signified by a negative -id. 
         //Once saved server side, these will be issued ids from db.
         //Depending on how we are adding (single row or multiple rows), the id generation will be different. Both need 
         //a starting point negative id
-        var id = (-1) * (item.relatedProfiles == null ? 1 : item.relatedProfiles.length + 1);
-        item.relatedProfiles.push({ relatedId: id, relatedType: { id: "-1" } });
+        var id = (-1) * (item.relatedItemsExternal == null ? 1 : item.relatedItemsExternal.length + 1);
+        if (item.relatedItemsExternal == null) item.relatedItemsExternal = [];
+        item.relatedItemsExternal.push({ relatedId: id, relatedType: { id: "-1" }, externalSource: null });
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
@@ -686,9 +689,9 @@ function AdminMarketplaceEntity() {
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
-    const onDeleteRelatedProfile = (id) => {
-        console.log(generateLogMessageString('onDeleteRelatedProfile', CLASS_NAME));
-        item.relatedProfiles = item.relatedProfiles.filter(x => x.relatedId !== id);
+    const onDeleteRelatedItemExternal = (id) => {
+        console.log(generateLogMessageString('onDeleteRelatedItemExternal', CLASS_NAME));
+        item.relatedItemsExternal = item.relatedItemsExternal.filter(x => x.relatedId !== id);
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
@@ -940,7 +943,6 @@ function AdminMarketplaceEntity() {
         if (!_isValid.displayName) summary.push('Display name is required.');
         if (!_isValid.abstract) summary.push('Abstract is required.');
         if (!_isValid.description) summary.push('Description is required.');
-        if (!_isValid.abstract) summary.push('Abstract is required.');
         if (!_isValid.status) summary.push('Status is required.');
         if (!_isValid.type) summary.push('Type is required.');
         if (!_isValid.publisher) summary.push('Publisher is required.');
@@ -948,7 +950,7 @@ function AdminMarketplaceEntity() {
         if (!_isValid.images.imagePortrait) summary.push('Portrait image is required.');
         if (!_isValid.images.imageLandscape) summary.push('Landscape image is required.');
         if (!validateForm_relatedItems()) summary.push('Related Items - Select item and set related type.');
-        if (!validateForm_relatedProfiles()) summary.push('Related Profiles - Select item and set related type.');
+        if (!validateForm_relatedItemsExternal()) summary.push('Related External Items - Select item and set related type.');
         if (!validateForm_actionLinks()) summary.push('Action Links - Make sure all action links include required data.');
         if (summary.length == 0) return null;
 
@@ -977,10 +979,10 @@ function AdminMarketplaceEntity() {
                 <div className="row">
                     <div className="col-12">
                         <hr className="my-3" />
-                        <AdminRelatedItemList caption="Related SM Profiles" captionAdd="Add Related SM Profile"
-                            items={item.relatedProfiles} itemsLookup={_itemsLookup?.lookupProfiles}
-                            type={AppSettings.itemTypeCode.smProfile} onChangeItem={onChangeRelatedProfile}
-                            onAdd={onAddRelatedProfile} onDelete={onDeleteRelatedProfile} />
+                        <AdminRelatedItemList caption="Related External Items" captionAdd="Add Related External Item"
+                            items={item.relatedItemsExternal} itemsLookup={_itemsLookup?.lookupExternalItems}
+                            type={AppSettings.itemTypeCode.smProfile} onChangeItem={onChangeRelatedItemExternal}
+                            onAdd={onAddRelatedItemExternal} onDelete={onDeleteRelatedItemExternal} />
                     </div>
                 </div>
                 <div className="row">
@@ -1157,7 +1159,7 @@ function AdminMarketplaceEntity() {
                     </div>
                 </div>
                 <div className="row mt-2">
-                    <div className="col-md-4">
+                    <div className="col-md-6">
                         {renderPublisher()}
                     </div>
                     <div className="col-md-4">
@@ -1175,21 +1177,21 @@ function AdminMarketplaceEntity() {
             <>
                 <div className="row mt-2">
                     <div className="col-sm-6 col-lg-4">
-                        <Form.Group>
-                            <Form.Label>Stripe Product Id</Form.Label>
-                            <Form.Control id="paymentProductId" type="" placeholder=""
-                                value={item.paymentProductId == null ? '' : item.paymentProductId} readOnly={true} />
-                        </Form.Group>
-                    </div>
-                </div>
-                <div className="row mt-2">
-                    <div className="col-sm-6 col-lg-4">
                         <div className="d-flex h-100">
                             <Form.Group>
                                 <Form.Check className="align-self-end" type="checkbox" id="allowPurchase" label="Allow Purchase" checked={item.allowPurchase}
                                     onChange={onChange} readOnly={isReadOnly} />
                             </Form.Group>
                         </div>
+                    </div>
+                </div>
+                <div className="row mt-2">
+                    <div className="col-sm-6 col-lg-4">
+                        <Form.Group>
+                            <Form.Label>Stripe Product Id</Form.Label>
+                            <Form.Control id="paymentProductId" type="" placeholder=""
+                                value={item.paymentProductId == null ? '' : item.paymentProductId} readOnly={true} />
+                        </Form.Group>
                     </div>
                 </div>
                 <div className="row mt-2">
@@ -1289,27 +1291,27 @@ function AdminMarketplaceEntity() {
         return (
             <Tab.Container id="admin-marketplace-entity" defaultActiveKey="general" onSelect={tabListener} >
                 <Nav variant="pills" className="row mt-1 px-2 pr-md-3">
-                    <Nav.Item className="col-sm-3 rounded p-0 pl-2" >
+                    <Nav.Item className="col-sm-2 rounded p-0 pl-2" >
                         <Nav.Link eventKey="general" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">General</span>
                         </Nav.Link>
                     </Nav.Item>
-                    <Nav.Item className="col-sm-3 rounded p-0 px-md-0" >
+                    <Nav.Item className="col-sm-2 rounded p-0 px-md-0" >
                         <Nav.Link eventKey="images" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">Images</span>
                         </Nav.Link>
                     </Nav.Item>
-                    <Nav.Item className="col-sm-3 rounded p-0">
+                    <Nav.Item className="col-sm-2 rounded p-0">
                         <Nav.Link eventKey="eCommerce" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">eCommerce</span>
                         </Nav.Link>
                     </Nav.Item>
-                    <Nav.Item className="col-sm-3 rounded p-0">
+                    <Nav.Item className="col-sm-2 rounded p-0">
                         <Nav.Link eventKey="actionLinks" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">Action Links</span>
                         </Nav.Link>
                     </Nav.Item>
-                    <Nav.Item className="col-sm-3 rounded p-0 pr-2">
+                    <Nav.Item className="col-sm-2 rounded p-0 pr-2">
                         <Nav.Link eventKey="relatedItems" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">Related Items</span>
                         </Nav.Link>

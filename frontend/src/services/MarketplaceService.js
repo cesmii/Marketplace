@@ -173,7 +173,13 @@ export function RenderImageBg (props) {
     const navigateToMarketplaceItem = (e) => {
         if (props.itemType != null && props.itemType === AppSettings.itemTypeCode.smProfile) {
             history.push({
-                pathname: `/profile/${props.item.id}`,
+                pathname: `/profile/${props.item.externalSource.code}/${props.item.id}`,
+                state: { id: `${props.item.id}` }
+            });
+        }
+        else if (props.item.isExternal) {
+            history.push({
+                pathname: `/library/${props.item.externalSource.code.toLowerCase()}/${props.item.id}`,
                 state: { id: `${props.item.id}` }
             });
         }
@@ -220,11 +226,11 @@ export function RenderImageBg (props) {
     return (
         <>
             <div className={`image-bg ${props.responsiveImage != null ? 'd-none d-sm-block' : 'transpose-image-horizontal-sm'}`} >
-                <div className={`overlay-icon cover ${props.clickable ? 'clickable' : ''} `} style={bgImageStyleDefault} onClick={navigateToMarketplaceItem} >&nbsp;</div>
+                <div className={`overlay-icon cover ${props.clickable ? 'clickable' : ''} `} style={bgImageStyleDefault} onClick={!props.clickable ? null : navigateToMarketplaceItem} >&nbsp;</div>
             </div>
             {props.responsiveImage != null &&
                 <div className="image-bg d-block d-sm-none transpose-image-horizontal-sm" >
-                    <div className="overlay-icon cover clickable" style={bgImageStyleResponsive} onClick={navigateToMarketplaceItem} >&nbsp;</div>
+                    <div className="overlay-icon cover clickable" style={bgImageStyleResponsive} onClick={!props.clickable ? null : navigateToMarketplaceItem} >&nbsp;</div>
                 </div>
             }
         </>

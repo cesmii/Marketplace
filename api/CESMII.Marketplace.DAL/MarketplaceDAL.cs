@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
 
     using CESMII.Marketplace.DAL.Models;
+    using CESMII.Marketplace.DAL.ExternalSources;
     using CESMII.Marketplace.Data.Entities;
     using CESMII.Marketplace.Data.Repositories;
     using CESMII.Marketplace.Common;
@@ -23,7 +24,7 @@
         protected List<ImageItemSimple> _imagesAll;
         protected IMongoRepository<JobDefinition> _repoJobDefinition; 
         protected List<JobDefinition> _jobDefinitionAll;
-        protected readonly ICloudLibDAL<MarketplaceItemModelWithCursor> _cloudLibDAL;
+        protected readonly IExternalDAL<MarketplaceItemModel> _cloudLibDAL;
 
         //default type - use if none assigned yet.
         private readonly MongoDB.Bson.BsonObjectId _smItemTypeIdDefault;
@@ -33,7 +34,7 @@
             IMongoRepository<MarketplaceItemAnalytics> repoAnalytics,
             IMongoRepository<ImageItemSimple> repoImages,
             IMongoRepository<JobDefinition> repoJobDefinition,
-            ICloudLibDAL<MarketplaceItemModelWithCursor> cloudLibDAL,
+            IExternalDAL<MarketplaceItemModel> cloudLibDAL,
             ConfigUtil configUtil
             ) : base(repo)
         {
@@ -46,7 +47,7 @@
 
             //init some stuff we will use during the mapping methods
             _smItemTypeIdDefault = new MongoDB.Bson.BsonObjectId(
-                MongoDB.Bson.ObjectId.Parse(configUtil.MarketplaceSettings.SmApp.TypeId));
+                MongoDB.Bson.ObjectId.Parse(configUtil.MarketplaceSettings.DefaultItemTypeId));
 
         }
 
@@ -101,6 +102,7 @@
         /// <returns></returns>
         public override DALResult<MarketplaceItemModel> GetAllPaged(int? skip = null, int? take = null, bool returnCount = false, bool verbose = false)
         {
+            var timer = System.Diagnostics.Stopwatch.StartNew();
             //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
             var query = _repo.FindByCondition(
                 x => x.IsActive,  //is active is a soft delete indicator. IsActive == false means deleted so we filter out those.
@@ -124,6 +126,7 @@
                 Data = MapToModels(data, verbose),
                 SummaryData = null
             };
+            _logger.Log(NLog.LogLevel.Warn, $"MarketplaceDAL|GetAll|Duration: { timer.ElapsedMilliseconds}ms.");
             return result;
         }
 
@@ -135,6 +138,7 @@
         public override DALResult<MarketplaceItemModel> Where(List<Func<MarketplaceItem, bool>> predicates, int? skip, int? take, bool returnCount = false, bool verbose = false,
             params OrderByExpression<MarketplaceItem>[] orderByExpressions)
         {
+            var timer = System.Diagnostics.Stopwatch.StartNew();
             //put the order by and where clause before skip.take so we skip/take on filtered/ordered query 
             var query = _repo.FindByCondition(
                 predicates,  //is active is a soft delete indicator. IsActive == false means deleted so we filter out those.
@@ -166,6 +170,7 @@
                 Data = MapToModels(data, verbose),
                 SummaryData = null
             };
+            _logger.Log(NLog.LogLevel.Warn, $"MarketplaceDAL|Where|Duration: { timer.ElapsedMilliseconds}ms.");
             return result;
 
         }
@@ -281,7 +286,7 @@
                     var relatedItems = MapToModelRelatedItems(entity.RelatedItems).Result;
 
                     //get related profiles from CloudLib
-                    var relatedProfiles = MapToModelRelatedProfiles(entity.RelatedProfiles);
+                    var relatedProfiles = MapToModelRelatedItemsExternal(entity.RelatedItemsExternal);
                     
                     //map related items into specific buckets - required, recommended
                     result.RelatedItemsGrouped = GroupAndMergeRelatedItems(relatedItems, relatedProfiles);
@@ -376,11 +381,12 @@
                 }).ToList();
         }
 
+        //TBD - come back to this and re-factor for external sources 
         /// <summary>
         /// Get related items from DB, filter out each group based on required/recommended/related flag
         /// assume all related items in same collection and a type id distinguishes between the types. 
         /// </summary>
-        protected List<MarketplaceItemRelatedModel> MapToModelRelatedProfiles(List<RelatedProfileItem> items)
+        protected List<MarketplaceItemRelatedModel> MapToModelRelatedItemsExternal(List<RelatedExternalItem> items)
         {
             if (items == null)
             {
@@ -388,7 +394,7 @@
             }
 
             //get list of profile items associated with this list of ids, call CloudLib to get the supporting info for these
-            var matches = _cloudLibDAL.GetManyById(items.Select(x => x.ProfileId).ToList()).Result;
+            var matches = _cloudLibDAL.GetManyById(items.Select(x => x.ExternalSource?.ID).ToList()).Result.Data;
             return !matches.Any() ? new List<MarketplaceItemRelatedModel>() : 
                 matches.Select(x => new MarketplaceItemRelatedModel()
                 {
@@ -405,9 +411,11 @@
                     ImageBanner = x.ImageBanner,
                     ImageLandscape = x.ImageLandscape,
                     //assumes only one related item per type
-                    RelatedType = MapToModelLookupItem(items.Find(z => z.ProfileId.ToString().Equals(x.ID)).RelatedTypeId,
+                    RelatedType = MapToModelLookupItem(items.Find(z => z.ExternalSource != null && z.ExternalSource.ID.Equals(x.ID)).RelatedTypeId,
                             _lookupItemsAll.Where(z => z.LookupType.EnumValue.Equals(LookupTypeEnum.RelatedType)).ToList()),
-                }).ToList();
+                    ExternalSource = x.ExternalSource
+                })
+                .ToList();
         }
 
         /// <summary>

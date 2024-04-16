@@ -95,7 +95,8 @@ namespace CESMII.Marketplace.Api.Controllers
             }
 
             // get publisher profiles, append to group by model
-            var publishers = _dalPublisher.GetAll();
+            //filter out pubs who want to remain hidden - doing this after the fact because it is a minor subset, small data size
+            var publishers = _dalPublisher.GetAll().Where(x => x.AllowFilterBy).ToList();
 
             filters.Add(new LookupGroupByModel()
             {

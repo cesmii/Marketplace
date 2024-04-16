@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { ImageUploader } from '../../../components/ImageUploader';
-import { generateLogMessageString, getImageAlt, getImageUrl } from '../../../utils/UtilityService';
+import { generateLogMessageString, getImageAlt, getImageUrlAdmin } from '../../../utils/UtilityService';
 
 const CLASS_NAME = "AdminImageRow";
 
@@ -52,7 +52,7 @@ function AdminImageRow(props) { //props are item, showActions
     //item row
     if (props.item === null || props.item === {}) return null;
 
-    const url = getImageUrl(props.item);
+    const url = getImageUrlAdmin(props.item);
 
     return (
         <>

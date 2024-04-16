@@ -17,6 +17,7 @@ using CESMII.Marketplace.Common.Enums;
 using CESMII.Common.SelfServiceSignUp.Services;
 using CESMII.Marketplace.SmipGraphQlClient;
 using CESMII.Marketplace.SmipGraphQlClient.Models;
+using System.Net.Http;
 
 namespace CESMII.Marketplace.JobManager.Jobs
 {
@@ -90,8 +91,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 var config = new HttpApiConfig()
                 {
                     Url = jobConfig.ApogeanApi.Url,
-                    Body = JsonConvert.SerializeObject(req),
-                    IsPost = true,
+                    Body = new StringContent(JsonConvert.SerializeObject(req)),
                     ContentType = "application/json",
                 };
 
