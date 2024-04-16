@@ -42,7 +42,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.UI.Tests
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.Service", "api\CESMII.Marketplace.Service\CESMII.Marketplace.Service.csproj", "{EEF4FBAC-A5FC-4B97-B9D8-82EAB1E6D1FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CESMII.Marketplace.DAL.Tests", "api\Tests\CESMII.Marketplace.DAL.Tests\CESMII.Marketplace.DAL.Tests.csproj", "{B6528C4E-9F3D-44E1-8A15-8F2DBEA0A802}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.DAL.Tests", "api\Tests\CESMII.Marketplace.DAL.Tests\CESMII.Marketplace.DAL.Tests.csproj", "{B6528C4E-9F3D-44E1-8A15-8F2DBEA0A802}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CESMII.Marketplace.SMIPGraphQlClient", "api\CESMII.Marketplace.SMIPGraphQlClient\CESMII.Marketplace.SMIPGraphQlClient.csproj", "{F216BBD9-C3F0-4337-AFE1-1FB90CA67A60}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -138,6 +140,12 @@ Global
 		{B6528C4E-9F3D-44E1-8A15-8F2DBEA0A802}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B6528C4E-9F3D-44E1-8A15-8F2DBEA0A802}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
 		{B6528C4E-9F3D-44E1-8A15-8F2DBEA0A802}.Staging|Any CPU.Build.0 = Debug|Any CPU
+		{F216BBD9-C3F0-4337-AFE1-1FB90CA67A60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F216BBD9-C3F0-4337-AFE1-1FB90CA67A60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F216BBD9-C3F0-4337-AFE1-1FB90CA67A60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F216BBD9-C3F0-4337-AFE1-1FB90CA67A60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F216BBD9-C3F0-4337-AFE1-1FB90CA67A60}.Staging|Any CPU.ActiveCfg = Debug|Any CPU
+		{F216BBD9-C3F0-4337-AFE1-1FB90CA67A60}.Staging|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

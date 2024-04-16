@@ -11,7 +11,7 @@ import JSONInput from 'react-json-editor-ajrm';
 import locale from 'react-json-editor-ajrm/locale/en';
 
 import { AppSettings } from '../../utils/appsettings';
-import { generateLogMessageString, tryJsonParse, validate_NoSpecialCharacters } from '../../utils/UtilityService'
+import { generateActionLink, generateLogMessageString, tryJsonParse, validate_NoSpecialCharacters } from '../../utils/UtilityService'
 import { useLoadingContext } from "../../components/contexts/LoadingContext";
 
 import { SVGIcon } from "../../components/SVGIcon";
@@ -35,11 +35,16 @@ function AdminJobDefinitionEntity() {
     const [isLoading, setIsLoading] = useState(true);
     const [isReadOnly, setIsReadOnly] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const [_isValid, setIsValid] = useState({ name: true, typeName: true, typeNameFormat: true, dataFormat: true, marketplaceItem: true });
+    const [_isValid, setIsValid] = useState({
+        name: true, nameFormat: true, displayName: true, typeName: true, typeNameFormat: true,
+        dataFormat: true, marketplaceItem: true,
+        actionType: true
+    });
     const [_deleteModal, setDeleteModal] = useState({ show: false, items: null });
     const [_error, setError] = useState({ show: false, message: null, caption: null });
     const [_refreshMarketplaceData, setRefreshMarketplaceData] = useState(true);
     const [_marketplaceRows, setMarketplaceRows] = useState([]);
+    const [_actionLink, setActionLink] = useState(null);
 
     var caption = 'Job Definition';
 
@@ -201,7 +206,13 @@ function AdminJobDefinitionEntity() {
     //-------------------------------------------------------------------
     const validateForm_name = (e) => {
         var isValid = e.target.value != null && e.target.value.trim().length > 0;
-        setIsValid({ ..._isValid, name: isValid });
+        var isValidFormat = validate_NoSpecialCharacters(e.target.value);
+        setIsValid({ ..._isValid, name: isValid, nameFormat: isValidFormat });
+    };
+
+    const validateForm_displayName = (e) => {
+        var isValid = e.target.value != null && e.target.value.trim().length > 0;
+        setIsValid({ ..._isValid, displayName: isValid });
     };
 
     const validate_TypeName = (val) => {
@@ -215,6 +226,11 @@ function AdminJobDefinitionEntity() {
         var isValid = e.target.value != null && e.target.value.trim().length > 0;
         var isValidFormat = validate_TypeName(e.target.value);
         setIsValid({ ..._isValid, typeName: isValid, typeNameFormat: isValidFormat });
+    };
+
+    const validateForm_actionType = (e) => {
+        var isValid = e.target.value != null && e.target.value.trim().length > 0;
+        setIsValid({ ..._isValid, actionType: isValid });
     };
 
     const validateForm_marketplaceItem = (e) => {
@@ -238,13 +254,17 @@ function AdminJobDefinitionEntity() {
         console.log(generateLogMessageString(`validateForm`, CLASS_NAME));
 
         _isValid.name = _item.name != null && _item.name.trim().length > 0;
+        _isValid.nameFormat = validate_NoSpecialCharacters(_item.name);
+        _isValid.displayName = _item.displayName != null && _item.displayName.trim().length > 0;
         _isValid.typeName = _item.name != null && _item.typeName.trim().length > 0;
         _isValid.typeNameFormat = validate_TypeName(_item.typeName);
         _isValid.marketplaceItem = _item.marketplaceItem != null && _item.marketplaceItem.id.toString() !== "-1";
+        _isValid.actionType = _item.actionType != null;
         //use the value checked when we onBlur from the json editor. This will be the most up to date indicator: _isValid.dataFormat =
 
         setIsValid(JSON.parse(JSON.stringify(_isValid)));
-        return (_isValid.name && _isValid.typeName && _isValid.typeNameFormat && _isValid.dataFormat && _isValid.marketplaceItem);
+        return (_isValid.name && _isValid.nameFormat && _isValid.displayName && _isValid.typeName && _isValid.typeNameFormat &&
+            _isValid.dataFormat && _isValid.marketplaceItem && _isValid.actionType );
     }
 
     //-------------------------------------------------------------------
@@ -357,12 +377,25 @@ function AdminJobDefinitionEntity() {
     //on change handler to update state
     const onChange = (e) => {
 
+        let actionLink = null;
+
         //note you must update the state value for the input to be read only. It is not enough to simply have the onChange handler.
         switch (e.target.id) {
             case "name":
+                _item[e.target.id] = e.target.value;
+                //generate a standardized action link
+                if (_item.actionType === AppSettings.JobActionType.Link && e.target.value !== '') {
+                    actionLink = generateActionLink(_item.marketplaceItem?.name, e.target.value);
+                }
+                break;
+            case "displayName":
             case "iconName":
             case "typeName":
+            case "className":
                 _item[e.target.id] = e.target.value;
+                break;
+            case "requiresAuthentication":
+                _item[e.target.id] = e.target.checked;
                 break;
             case "data":
                 if (e.target.value === '') {
@@ -380,10 +413,24 @@ function AdminJobDefinitionEntity() {
                     }
                 }
                 break;
+            case "actionType":
+                if (e.target.value.toString() === "-1") _item.actionType = AppSettings.JobActionType.Standard;
+                else {
+                    _item.actionType = parseInt(e.target.value);
+                }
+                //generate a standardized action link
+                if (e.target.value === AppSettings.JobActionType.Link) {
+                    actionLink = generateActionLink(_item.marketplaceItem?.name, _item.name);
+                }
+                break;
             case "marketplaceItem":
                 if (e.target.value.toString() === "-1") _item.marketplaceItem = null;
                 else {
                     _item.marketplaceItem = { id: e.target.value, name: e.target.options[e.target.selectedIndex].text };
+                }
+                //generate a standardized action link
+                if (_item.actionType === AppSettings.JobActionType.Link && e.target.value.toString() !== "-1") {
+                    actionLink = generateActionLink(e.target.options[e.target.selectedIndex].text, _item.name);
                 }
                 break;
             default:
@@ -391,6 +438,7 @@ function AdminJobDefinitionEntity() {
         }
         //update the state
         setItem(JSON.parse(JSON.stringify(_item)));
+        setActionLink(actionLink);
     }
 
     //on change handler to update state
@@ -522,6 +570,40 @@ function AdminJobDefinitionEntity() {
         )
     };
 
+    const renderActionType = () => {
+        //show readonly input for view mode
+        if (isReadOnly) {
+            return (
+                <Form.Group>
+                    <Form.Label>Action Type</Form.Label>
+                    <Form.Control id="actionType" type="" value={_item.actionType != null ? _item.actionType : ""} readOnly={isReadOnly} />
+                </Form.Group>
+            )
+        }
+        //show drop down list - hard coding list due to time limitations
+        const ddlItems = [];
+        ddlItems.push({ key: AppSettings.JobActionType.Standard, caption: "Standard" });
+        ddlItems.push({ key: AppSettings.JobActionType.Link, caption: "Link" });
+        const options = ddlItems.map((item) => {
+            return (<option key={item.key} value={item.key} >{item.caption}</option>)
+        });
+
+        return (
+            <Form.Group>
+                <Form.Label>Action Type</Form.Label>
+                {!_isValid.actionType &&
+                    <span className="invalid-field-message inline">
+                        Required
+                    </span>
+                }
+                <Form.Control id="actionType" as="select" className={(!_isValid.actionType ? 'invalid-field minimal pr-5' : 'minimal pr-5')} value={_item.actionType == null ? AppSettings.JobActionType.Standard : _item.actionType}
+                    onBlur={validateForm_actionType} onChange={onChange} >
+                    {options}
+                </Form.Control>
+            </Form.Group>
+        )
+    };
+
     const renderForm = () => {
         return (
             <>
@@ -534,8 +616,30 @@ function AdminJobDefinitionEntity() {
                                     Required
                                 </span>
                             }
-                            <Form.Control id="name" className={(!_isValid.name ? 'invalid-field minimal pr-5' : 'minimal pr-5')} type="" placeholder={`Enter unique name`}
-                                value={_item.name == null ? '' : _item.name} onBlur={validateForm_name} onChange={onChange} readOnly={isReadOnly} />
+                            {!_isValid.nameFormat &&
+                                <span className="invalid-field-message inline">
+                                    No spaces or special characters
+                                </span>
+                            }
+                            <Form.Control id="name" className={(!_isValid.name || !_isValid.nameFormat ? 'invalid-field minimal pr-5' : 'minimal pr-5')} type="" placeholder={`Enter unique name with no spaces or special characters. `}
+                                value={_item.name} onBlur={validateForm_name} onChange={onChange} readOnly={isReadOnly} />
+                        </Form.Group>
+                    </div>
+                    <div className="col-md-12 pb-2">
+                        <span className="small text-muted" >This will be used in the formation of urls. This must be unique and contain no spaces nor special characters.</span>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-md-8">
+                        <Form.Group>
+                            <Form.Label>Display Name</Form.Label>
+                            {!_isValid.displayName &&
+                                <span className="invalid-field-message inline">
+                                    Required
+                                </span>
+                            }
+                            <Form.Control id="displayName" className={(!_isValid.displayName ? 'invalid-field minimal pr-5' : 'minimal pr-5')} type="" placeholder={`Enter friendly name displayed on action button / link`}
+                                value={_item.displayName != null ? _item.displayName : ''} onBlur={validateForm_displayName} onChange={onChange} readOnly={isReadOnly} />
                         </Form.Group>
                     </div>
                     <div className="col-md-12 pb-2">
@@ -579,6 +683,52 @@ function AdminJobDefinitionEntity() {
                     </div>
                     <div className="col-md-12 pb-2">
                         <span className="small text-muted" >This is the fully qualified type name used by the job execution code. When launching this job, the code will attempt to instantiate a class of this type. So, this requires companion code to be written which executes the job properly. (Ex: CESMII.Marketplace.JobManager.Jobs.JobBorgConnectActivate)</span>
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-md-8">
+                        {renderActionType()}
+                    </div>
+                    <div className="col-md-12 pb-2">
+                        <span className="small text-muted" >When standard is selected, the job will be launched and back end code will execute directly. Link allows for the site to redirect to a custom page and then perform data entry before the sumission of that page executes the job.)</span>
+                    </div>
+                </div>
+                {(_item.actionType === AppSettings.JobActionType.Link && _actionLink != null) &&
+                <div className="row">
+                    <div className="col-md-12">
+                        <Form.Group>
+                            <Form.Label>Action Link</Form.Label>
+                            <Form.Control id="actionLink" className={'minimal pr-5'} value={_actionLink == null ? '' : _actionLink} readOnly={true} />
+                        </Form.Group>
+                    </div>
+                    <div className="col-md-12 pb-2">
+                        <span className="small" ><a href={_actionLink} target='_blank' >Test Link</a> </span>
+                    </div>
+                </div>
+                }
+                <div className="row">
+                    <div className="col-md-12">
+                        <Form.Group>
+                            <Form.Label>Button / Link Css Class</Form.Label>
+                            <Form.Control id="className" className={'minimal pr-5'} 
+                                value={_item.className == null ? '' : _item.className} onChange={onChange} readOnly={isReadOnly} />
+                        </Form.Group>
+                    </div>
+                    <div className="col-md-12 pb-2">
+                        <span className="small text-muted" >This will control how the button or link will look on the page. </span>
+                    </div>
+                </div>
+                <div className="row mt-2">
+                    <div className="col-sm-6 col-lg-4">
+                        <div className="d-flex h-100">
+                            <Form.Group>
+                                <Form.Check className="align-self-end" type="checkbox" id="requiresAuthentication" label="Requires Authentication" checked={_item.requiresAuthentication}
+                                    onChange={onChange} readOnly={isReadOnly} />
+                            </Form.Group>
+                        </div>
+                    </div>
+                    <div className="col-md-12 pb-2">
+                        <span className="small text-muted" >If true, the job action will only be visible to someone who is logged in. If false, the button / link will always be available</span>
                     </div>
                 </div>
                 <div className="row">

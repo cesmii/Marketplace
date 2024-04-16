@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
@@ -10,7 +11,6 @@ using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.Api.Shared.Controllers;
 using CESMII.Marketplace.Api.Shared.Models;
-using CESMII.Marketplace.Api.Shared.Extensions;
 using CESMII.Marketplace.JobManager;
 using CESMII.Marketplace.JobManager.Models;
 
@@ -20,34 +20,81 @@ namespace CESMII.Marketplace.Api.Controllers
     public class JobController : BaseController<JobController>
     {
         private readonly IJobFactory _jobFactory;
+        private readonly IDal<JobDefinition, JobDefinitionModel> _dal;
         private readonly IDal<JobLog, JobLogModel> _dalJobLog;
 
-        public JobController(IJobFactory jobFactory, 
+        public JobController(IJobFactory jobFactory,
+            IDal<JobDefinition, JobDefinitionModel> dal,
             IDal<JobLog, JobLogModel> dalJobLog,
             UserDAL dalUser,
             ConfigUtil config, ILogger<JobController> logger) 
             : base(config, logger, dalUser)
         {
             _jobFactory = jobFactory;
+            _dal = dal;
             _dalJobLog = dalJobLog;
         }
+
+        [HttpPost, Route("GetByName")]
+        //[ProducesResponseType(200, Type = typeof(NodeSetModel))]
+        [ProducesResponseType(200, Type = typeof(JobDefinitionModel))]
+        [ProducesResponseType(400)]
+        public IActionResult GetByName([FromBody] IdStringModel model)
+        {
+            if (model == null)
+            {
+                _logger.LogWarning($"JobController|GetByName|Invalid model (null)");
+                return BadRequest($"Invalid model (null)");
+            }
+
+            //name is supposed to be unique. Note name is different than display name.
+            //if we get more than one match, throw exception
+            var matches = _dal.Where(x => x.Name.ToLower().Equals(model.ID.ToLower()), null, null, false, true).Data;
+
+            if (!matches.Any())
+            {
+                _logger.LogWarning($"JobController|GetByName|No records found matching this name: {model.ID}");
+                return BadRequest($"No records found matching this name: {model.ID}");
+            }
+            if (matches.Count > 1)
+            {
+                _logger.LogWarning($"JobController|GetByName|Multiple records found matching this name: {model.ID}");
+                return BadRequest($"Multiple records found matching this name: {model.ID}");
+            }
+
+            var result = matches[0];
+            return Ok(result);
+        }
+
+
 
         #region Job Factory
         [HttpPost, Route("Execute")]
         //[ProducesResponseType(200, Type = typeof(NodeSetModel))]
-        [Authorize]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         [ProducesResponseType(400)]
         public async Task<IActionResult> ExecuteJob([FromBody] JobPayloadModel model)
         {
             if (model == null)
             {
-                _logger.LogWarning($"JobController|Execute|GetByID|Invalid model (null)");
+                _logger.LogWarning($"JobController|ExecuteJob|Invalid model (null)");
                 return BadRequest($"Invalid model (null)");
+            }
+            //check if job requires user to be authorized
+            var job = _dal.GetById(model.JobDefinitionId);
+            if (job == null)
+            {
+                _logger.LogWarning($"JobController|ExecuteJob|Job {model.JobDefinitionId} not found. (null)");
+                return BadRequest($"Job not found.");
+            }
+            if (job.RequiresAuthentication && !User.Identity.IsAuthenticated)
+            {
+                _logger.LogWarning($"JobController|ExecuteJob|Job {model.JobDefinitionId}|User is not authenticated. This job requires the user to be logged in.");
+                return Unauthorized();
             }
 
             //execute job
-            var result = await _jobFactory.ExecuteJob(model, base.LocalUser);
+            var result = await _jobFactory.ExecuteJob(model, User.Identity.IsAuthenticated ? base.LocalUser : null);
 
             return Ok(new ResultMessageWithDataModel() {
                 Data = result,
@@ -63,7 +110,7 @@ namespace CESMII.Marketplace.Api.Controllers
         //[ProducesResponseType(200, Type = typeof(NodeSetModel))]
         [ProducesResponseType(200, Type = typeof(JobLogModel))]
         [ProducesResponseType(400)]
-        public IActionResult GetByID([FromBody] IdStringModel model)
+        public IActionResult GetLogByID([FromBody] IdStringModel model)
         {
             if (model == null)
             {
@@ -98,7 +145,8 @@ namespace CESMII.Marketplace.Api.Controllers
 
             if (string.IsNullOrEmpty(model.Query))
             {
-                return Ok(_dalJobLog.Where(s => s.CreatedById.Equals(MongoDB.Bson.ObjectId.Parse(LocalUser.ID)) &&
+                return Ok(_dalJobLog.Where(s => s.CreatedById != null && 
+                                s.CreatedById.Equals(MongoDB.Bson.ObjectId.Parse(LocalUser.ID)) &&
                                 s.IsActive
                                 , null, null, false, true));
             }

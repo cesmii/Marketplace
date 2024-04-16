@@ -26,10 +26,12 @@ namespace CESMII.Marketplace.JobManager.Jobs
     {
         public JobBorgConnectActivate(
             ILogger<IJob> logger,
-            IHttpApiFactory httpFactory, IDal<JobLog, JobLogModel> dalJobLog,
+            IHttpApiFactory httpFactory, 
+            IDal<JobLog, JobLogModel> dalJobLog,
+            UserDAL dalUser,
             IConfiguration configuration,
             MailRelayService mailRelayService) : 
-            base(logger, httpFactory, dalJobLog, configuration, mailRelayService)
+            base(logger, httpFactory, dalJobLog, dalUser, configuration, mailRelayService)
         {
             //wire up run async event
             base.JobRun += JobRunBorg;
@@ -275,17 +277,17 @@ namespace CESMII.Marketplace.JobManager.Jobs
     #region Models associated with this particular job
     internal class JobBorgConnectActivateConfig
     {
-        public BorgAuthorizeConfig AuthorizeConfig { get; set; }
-        public BorgCreateConfig CreateCustomerConfig { get; set; }
+        public AuthorizeConfig AuthorizeConfig { get; set; }
+        public CreateConfig CreateCustomerConfig { get; set; }
     }
 
-    internal class BorgAuthorizeConfig
+    internal class AuthorizeConfig
     {
         public string Url { get; set; }
         public BorgAuthorizeBody Body { get; set; }
     }
 
-    internal class BorgCreateConfig
+    internal class CreateConfig
     {
         public string Url { get; set; }
         public BorgCreateBody Body { get; set; }

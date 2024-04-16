@@ -98,6 +98,10 @@ export const AppSettings = {
         Failed: 4,
         Cancelled: 5
     }
+    ,JobActionType: {
+        Standard: 0,
+        Link: 1
+    }
     //MSAL (Authentication) Config
     , MsalConfig: {
         auth: {

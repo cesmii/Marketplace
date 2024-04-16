@@ -16,6 +16,7 @@ import AdminPubisherEntity from '../views/admin/AdminPubisherEntity'
 import RequestInfo from '../views/RequestInfo'
 import Home from '../views/Home'
 import NotAuthorized from '../views/NotAuthorized'
+import CustomLandingPage from '../views/custom/CustomLandingPage'
 
 import AdminRequestInfoEntity from '../views/admin/AdminRequestInfoEntity'
 import AdminRequestInfoList from '../views/admin/AdminRequestInfoList'
@@ -63,6 +64,9 @@ function Routes() {
             <PublicRoute exact path="/request-info/publisher/:publisherId" component={RequestInfo} />
             <PublicRoute exact path="/contact-us/" component={RequestInfo} />
             <PublicRoute exact path="/contact-us/:type" component={RequestInfo} />
+            
+            {/* Custom pages to support one off scenarios...*/}
+            <PublicRoute exact path="/custom/action/:name/:jobName" component={CustomLandingPage} />
 
             {/* Admin UI order matters in the profile/ routes* - TBD - update to admin versions of the forms...*/}
             <AdminRoute path="/admin/library/list" component={AdminMarketplaceList} roles={[AppSettings.AADAdminRole]} />

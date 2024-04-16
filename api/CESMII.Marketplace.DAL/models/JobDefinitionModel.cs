@@ -17,6 +17,11 @@ namespace CESMII.Marketplace.DAL.Models
         /// </summary>
         public string Name { get; set; }
 
+        /// <summary>
+        /// Friendly display name
+        /// </summary>
+        public string DisplayName { get; set; }
+
         public string TypeName { get; set; }
 
         /// <summary>
@@ -30,6 +35,22 @@ namespace CESMII.Marketplace.DAL.Models
         /// </summary>
         public string Data { get; set; }
         public virtual bool IsActive { get; set; }
+
+        /// <summary>
+        /// The action type will be link to navigate to a custom job page on front end to then do something.
+        /// Or the action type will be execute job which will cause a job to execute on click
+        /// </summary>
+        public JobActionTypeEnum ActionType { get; set; } = JobActionTypeEnum.Standard;
+
+        /// <summary>
+        /// Css Class for the link or button associated with the item. 
+        /// </summary>
+        public string ClassName { get; set; }
+
+        /// <summary>
+        /// Flag for controlling if this job be seen on front end ui when not logged in.
+        /// </summary>
+        public bool RequiresAuthentication { get; set; }
     }
 
     public class JobDefinitionSimpleModel : AbstractModel
@@ -38,7 +59,11 @@ namespace CESMII.Marketplace.DAL.Models
         /// Job description.
         /// </summary>
         public string Name { get; set; }
+        public string DisplayName { get; set; }
         public string IconName { get; set; }
+        public JobActionTypeEnum ActionType { get; set; } = JobActionTypeEnum.Standard;
+        public string ClassName { get; set; }
+        public bool RequiresAuthentication { get; set; }
     }
 
 }

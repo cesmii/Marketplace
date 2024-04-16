@@ -53,6 +53,12 @@
         Cancelled = 11
     }
 
+    public enum JobActionTypeEnum
+    {
+        Standard = 0,
+        Link = 1
+    }
+
     public enum CartStatusEnum
     {
         None = 0,
@@ -62,5 +68,4 @@
         Failed = 4,
         Cancelled = 5
     }
-
 }
