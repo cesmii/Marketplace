@@ -1177,21 +1177,21 @@ function AdminMarketplaceEntity() {
             <>
                 <div className="row mt-2">
                     <div className="col-sm-6 col-lg-4">
-                        <Form.Group>
-                            <Form.Label>Stripe Product Id</Form.Label>
-                            <Form.Control id="paymentProductId" type="" placeholder=""
-                                value={item.paymentProductId == null ? '' : item.paymentProductId} readOnly={true} />
-                        </Form.Group>
-                    </div>
-                </div>
-                <div className="row mt-2">
-                    <div className="col-sm-6 col-lg-4">
                         <div className="d-flex h-100">
                             <Form.Group>
                                 <Form.Check className="align-self-end" type="checkbox" id="allowPurchase" label="Allow Purchase" checked={item.allowPurchase}
                                     onChange={onChange} readOnly={isReadOnly} />
                             </Form.Group>
                         </div>
+                    </div>
+                </div>
+                <div className="row mt-2">
+                    <div className="col-sm-6 col-lg-4">
+                        <Form.Group>
+                            <Form.Label>Stripe Product Id</Form.Label>
+                            <Form.Control id="paymentProductId" type="" placeholder=""
+                                value={item.paymentProductId == null ? '' : item.paymentProductId} readOnly={true} />
+                        </Form.Group>
                     </div>
                 </div>
                 <div className="row mt-2">
@@ -1291,27 +1291,27 @@ function AdminMarketplaceEntity() {
         return (
             <Tab.Container id="admin-marketplace-entity" defaultActiveKey="general" onSelect={tabListener} >
                 <Nav variant="pills" className="row mt-1 px-2 pr-md-3">
-                    <Nav.Item className="col-sm-3 rounded p-0 pl-2" >
+                    <Nav.Item className="col-sm-2 rounded p-0 pl-2" >
                         <Nav.Link eventKey="general" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">General</span>
                         </Nav.Link>
                     </Nav.Item>
-                    <Nav.Item className="col-sm-3 rounded p-0 px-md-0" >
+                    <Nav.Item className="col-sm-2 rounded p-0 px-md-0" >
                         <Nav.Link eventKey="images" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">Images</span>
                         </Nav.Link>
                     </Nav.Item>
-                    <Nav.Item className="col-sm-3 rounded p-0">
+                    <Nav.Item className="col-sm-2 rounded p-0">
                         <Nav.Link eventKey="eCommerce" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">eCommerce</span>
                         </Nav.Link>
                     </Nav.Item>
-                    <Nav.Item className="col-sm-3 rounded p-0">
+                    <Nav.Item className="col-sm-2 rounded p-0">
                         <Nav.Link eventKey="actionLinks" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">Action Links</span>
                         </Nav.Link>
                     </Nav.Item>
-                    <Nav.Item className="col-sm-3 rounded p-0 pr-2">
+                    <Nav.Item className="col-sm-2 rounded p-0 pr-2">
                         <Nav.Link eventKey="relatedItems" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">Related Items</span>
                         </Nav.Link>

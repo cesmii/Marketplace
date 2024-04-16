@@ -75,7 +75,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                             <div className="mb-2" dangerouslySetInnerHTML={{ __html: props.item.abstract }} ></div>
                         }
                         <p className="mb-0" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
-                        {props.item.price != null &&
+                        {(props.item.allowPurchase && props.item.price != null) &&
                             <p className="mt-2 mb-0" ><b className="mr-2" >Price:</b>${props.item.price}</p>
                         }
                         {/*<div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>*/}

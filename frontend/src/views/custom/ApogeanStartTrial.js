@@ -350,6 +350,8 @@ function ApogeanStartTrial(props) {
     // Region: Render
     //-------------------------------------------------------------------
     //return final ui
+    if (props.marketplaceItem == null) return null;
+
     return (
         <>
             {renderMarketplaceHeader(props.marketplaceItem)}
