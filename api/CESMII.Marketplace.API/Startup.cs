@@ -68,12 +68,11 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IMongoRepository<ImageItem>, MongoRepository<ImageItem>>();
             services.AddScoped<IMongoRepository<ImageItemSimple>, MongoRepository<ImageItemSimple>>();
             services.AddScoped<IMongoRepository<SearchKeyword>, MongoRepository<SearchKeyword>>();
-            services.AddScoped<IMongoRepository<ProfileItem>, MongoRepository<ProfileItem>>();
-            services.AddScoped<IMongoRepository<StripeAuditLog>, MongoRepository<StripeAuditLog>>();
-            //eCommerce
-            services.AddScoped<IMongoRepository<Cart>, MongoRepository<Cart>>();
             services.AddScoped<IMongoRepository<ExternalItem>, MongoRepository<ExternalItem>>();
             services.AddScoped<IMongoRepository<ExternalSource>, MongoRepository<ExternalSource>>();
+            //eCommerce
+            services.AddScoped<IMongoRepository<StripeAuditLog>, MongoRepository<StripeAuditLog>>();
+            services.AddScoped<IMongoRepository<Cart>, MongoRepository<Cart>>();
 
             //stock tables
             services.AddScoped<IMongoRepository<Organization>, MongoRepository<Organization>>();
