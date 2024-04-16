@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Net.Mail;
+using System.Net.Http;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
+using CESMII.Marketplace.Data.Repositories;
 using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.DAL.Models;
@@ -17,7 +20,7 @@ using CESMII.Marketplace.Common.Enums;
 using CESMII.Common.SelfServiceSignUp.Services;
 using CESMII.Marketplace.SmipGraphQlClient;
 using CESMII.Marketplace.SmipGraphQlClient.Models;
-using System.Net.Http;
+using CESMII.Marketplace.JobManager.Models;
 
 namespace CESMII.Marketplace.JobManager.Jobs
 {
@@ -28,13 +31,14 @@ namespace CESMII.Marketplace.JobManager.Jobs
     public class JobOnTimeEdgeTrial : JobBase
     {
         public JobOnTimeEdgeTrial(
+            IServiceScopeFactory serviceScopeFactory, 
             ILogger<IJob> logger,
             IHttpApiFactory httpFactory, 
             IDal<JobLog, JobLogModel> dalJobLog,
             UserDAL dalUser,
             IConfiguration configuration,
             MailRelayService mailRelayService) : 
-            base(logger, httpFactory, dalJobLog, dalUser, configuration, mailRelayService)
+            base(serviceScopeFactory, logger, httpFactory, dalJobLog, dalUser, configuration, mailRelayService)
         {
             //wire up run async event
             base.JobRun += JobInitiateTrial;
@@ -234,6 +238,14 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 sbResult.AppendLine("Email is required.");
                 _logger.LogInformation($"JobOnTimeEdgeTrial|ValidatePayload|Email is required.");
             }
+            else
+            {
+                var msgEmailDomain = "";
+                if (!ValidateEmailDomain(payload.FormData?.Email, out msgEmailDomain))
+                {
+                    sbResult.AppendLine(msgEmailDomain);
+                }
+            }
             if (string.IsNullOrEmpty(payload.FormData?.Phone))
             {
                 sbResult.AppendLine("Phone is required.");
@@ -243,6 +255,37 @@ namespace CESMII.Marketplace.JobManager.Jobs
             message = sbResult.ToString();
             return sbResult.Length == 0;
         }
+
+        private bool ValidateEmailDomain(string email, out string message)
+        {
+            var sbResult = new System.Text.StringBuilder();
+            if (string.IsNullOrEmpty(email))
+            {
+                sbResult.AppendLine("Email is required.");
+                _logger.LogError($"JobOnTimeEdgeTrial|ValidateEmailDomain|Email is required.");
+            }
+            else
+            {
+                //wrap in scope so that we don't lose the scope of the dependency injected objects once the 
+                //web api request completes and disposes of the import service object (and its module vars)
+                using (var scope = _serviceScopeFactory.CreateScope())
+                {
+                    //initialize scoped services for DI, initialize job class
+                    var repoBlockedDomains = scope.ServiceProvider.GetService<IMongoRepository<BlockedEmailDomain>>();
+                    var numMatches = repoBlockedDomains.Count(x => email.Trim().ToLower().EndsWith(x.domain.ToLower()));
+
+                    if (numMatches > 0)
+                    {
+                        sbResult.AppendLine("This trial does not permit use of free email domains. Please use a different email.");
+                        _logger.LogWarning($"JobOnTimeEdgeTrial|ValidateEmailDomain|Blocked|Email '{email}' has a blocked email domain and is not permitted.");
+                    }
+                }
+            }
+
+            message = sbResult.ToString();
+            return sbResult.Length == 0;
+        }
+
 
         [System.Obsolete("ValidateSmipSettings de-scoped")]
         private bool ValidateSmipSettings(SmipSettingsOnTimeEdge settings, out string message)
