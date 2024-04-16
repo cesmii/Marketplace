@@ -3,6 +3,10 @@ import { Button } from 'react-bootstrap';
 import { Helmet } from "react-helmet"
 import axiosInstance from "../../services/AxiosService";
 import { loadStripe } from '@stripe/stripe-js';
+import {
+    EmbeddedCheckoutProvider,
+    EmbeddedCheckout
+} from '@stripe/react-stripe-js';
 
 import { AppSettings } from '../../utils/appsettings'
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
@@ -22,10 +26,14 @@ function Cart() {
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_error, setError] = useState({ show: false, message: null, caption: null });
     const [_cartResponse, setCartResponse] = useState(null);
+    //const [_checkoutData, setCheckoutData] = useState({ stripePromise: null, options: null });
+    //const _apiKey = 'pk_test_51Os66lHXjPkvmDZJ927KVzxAVIWaFhySoPDcoGVfxog1SXioudXZCbcaoMysdUrUBu1TgGEUGos0XkLpFyr0HB0Y00IxD721az';
+    //const _sessionId = 'cs_test_b1ajkfkDYOcG6t6sTTHicY7AJB8OygqeTR3OJRC4bYAFg9TAAxOpjmV0CH';
 
     //-------------------------------------------------------------------
     // Region: api calls
     //-------------------------------------------------------------------
+    ///*
     useEffect(() => {
 
         if (_cartResponse == null) return;
@@ -40,8 +48,22 @@ function Cart() {
         return () => {
         };
     }, [_cartResponse]);
+    //*/
+    /*
+    //triggered on return of data from our initialize checkout api call
+    useEffect(() => {
 
+        if (_cartResponse == null) return;
 
+        setLoadingProps({ checkout: { apiKey: _cartResponse.apiKey, sessionId: _cartResponse.sessionId } });
+
+        setCheckoutData({ stripePromise: loadStripe(_cartResponse.apiKey), options: { sessionId: _cartResponse.sessionId } });
+
+        //this will execute on unmount
+        return () => {
+        };
+    }, [_cartResponse]);
+    */
 
     //-------------------------------------------------------------------
     // Region: Event Handling
@@ -49,41 +71,17 @@ function Cart() {
     const onCheckout = () => {
         console.log(generateLogMessageString('onCheckout', CLASS_NAME));
 
-        //TBD - call API to start checkout
-        //TBd - show a processing message and disable cart interactivity
-
-        //do validation
-        //TBD
-        /*
-        const isValid = validateCart(loadingProps.cart);
-        if (!isValid.quantity || !isValid.allowPurchase) {
-            //TBD - show a nice message
-            //hide a spinner, show a message
-            setLoadingProps({
-                isLoading: false, message: null, inlineMessages: [
-                    { id: new Date().getTime(), severity: "success", body: `Checkout started...`, isTimed: true }
-                ]
-            });
-
-            alert("validation failed");
-            return;
-        }
-        */
-
         //show a spinner
         let cart = loadingProps.cart;
         cart.status = AppSettings.CartStatusEnum.Pending;
         const host = window.location.protocol.concat("//").concat(window.location.host);
-        //TBD - refine these once we further understand how to handle each scenario.
-        //cart.returnUrl = host.concat(`/checkout`);
         cart.returnUrl = host.concat(`/checkout/success`);
-        //cart.successUrl = host.concat(`/checkout/success`);
-        //cart.cancelUrl = host.concat(`/checkout/cancel`);
+
         setLoadingProps({ isLoading: true, message: "", cart: cart });
 
         //perform do checkout call
         console.log(generateLogMessageString(`onCheckout`, CLASS_NAME));
-        var url = `ecommerce/checkout/init`;
+        const url = `ecommerce/checkout/init`;
         axiosInstance.post(url, loadingProps.cart)
             .then(resp => {
                 if (resp.data.isSuccess) {
@@ -143,21 +141,38 @@ function Cart() {
         if (!_error.show) return;
 
         return (
-            <>
-                <ConfirmationModal showModal={_error.show} caption={_error.caption} message={_error.message}
-                    icon={{ name: "warning", color: color.trinidad }}
-                    confirm={null}
-                    cancel={{
-                        caption: "OK",
-                        callback: () => {
-                            //console.log(generateLogMessageString(`onErrorMessageOK`, CLASS_NAME));
-                            setError({ show: false, caption: null, message: null });
-                        },
-                        buttonVariant: 'danger'
-                    }} />
-            </>
+            <ConfirmationModal showModal={_error.show} caption={_error.caption} message={_error.message}
+                icon={{ name: "warning", color: color.trinidad }}
+                confirm={null}
+                cancel={{
+                    caption: "OK",
+                    callback: () => {
+                        //console.log(generateLogMessageString(`onErrorMessageOK`, CLASS_NAME));
+                        setError({ show: false, caption: null, message: null });
+                    },
+                    buttonVariant: 'danger'
+                }} />
         );
     };
+
+    const renderCheckout = () => {
+        return null;
+        /*
+        if (_checkoutData == null || _checkoutData.stripePromise == null || _checkoutData.options == null) return;
+
+        return (
+            <div id="checkout">
+                <EmbeddedCheckoutProvider
+                    stripe={_checkoutData.stripePromise}
+                    options={_checkoutData.options}
+                >
+                    <EmbeddedCheckout />
+                </EmbeddedCheckoutProvider>
+            </div>
+        );
+        */
+    }
+
 
     //-------------------------------------------------------------------
     // Region: Render final output
@@ -168,20 +183,25 @@ function Cart() {
                 <title>{`${_caption} | ${AppSettings.Titles.Main}`}</title>
             </Helmet>
             <div className="row" >
-                <div className="col-sm-12 mb-2">
+                <div className="col-sm-12 mb-4">
                     <h1 className="m-0 headline-2">
                         {_caption}
                     </h1>
                 </div>
-            </div>
-            <CartPreview />
-            <div className="row" >
-                <div className="col-sm-12 pt-4 border-top">
-                    <Button variant="secondary" type="button" className="mx-3" onClick={onEmptyCart} >Empty Cart</Button>
-                    <a className="mx-1 ml-auto" href="/library" >Continue Shopping</a>
-                    <Button variant="primary" type="button" className="mx-3" onClick={onCheckout} >Checkout</Button>
+                <div className="col-sm-8 mb-4 mx-auto">
+                    <CartPreview />
                 </div>
             </div>
+            {(loadingProps.cart != null && loadingProps.cart.items != null && loadingProps.cart.items.length > 0) &&
+                <div className="row" >
+                    <div className="col-8 mx-auto pt-4">
+                        <a className="mx-3" href="/library" >Continue Shopping</a>
+                        <Button variant="secondary" type="button" className="mx-3" onClick={onEmptyCart} >Empty Cart</Button>
+                        <Button variant="primary" type="button" className="mx-3" onClick={onCheckout} >Checkout</Button>
+                    </div>
+                </div>
+            }
+            {renderCheckout()}
             {renderErrorMessage()}
         </>
     )
