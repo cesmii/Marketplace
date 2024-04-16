@@ -151,7 +151,7 @@ namespace CESMII.Marketplace.JobManager
                     //log complete message to logger and abbreviated message to user. 
                     _logger.LogCritical(e, $"JobFactory|ExecuteJobInternal|JobLogId:{logId}|Error|{e.Message}");
                     //failed complete message
-                    CreateJobLogMessage(dalJobLog, logId, user.ID, $"Job execution failed: {e.Message}.", TaskStatusEnum.Failed);
+                    CreateJobLogMessage(dalJobLog, logId, user == null ? "" : user.ID, $"Job execution failed: {e.Message}.", TaskStatusEnum.Failed);
                 }
             }
         }

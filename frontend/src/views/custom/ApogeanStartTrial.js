@@ -19,7 +19,6 @@ function ApogeanStartTrial(props) {
     const [_item, setItem] = useState(
         {
             hostUrl: window.location.host,
-            smipSettings: null,
             formData: { firstName: '', lastName: '', email: '', phone: '', companyName: '' }
         });
     const [_isValid, setIsValid] = useState({

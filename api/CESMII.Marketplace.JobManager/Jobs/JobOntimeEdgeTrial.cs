@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Net.Mail;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -14,7 +15,8 @@ using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Common.SelfServiceSignUp.Services;
-using System.Net.Mail;
+using CESMII.Marketplace.SmipGraphQlClient;
+using CESMII.Marketplace.SmipGraphQlClient.Models;
 
 namespace CESMII.Marketplace.JobManager.Jobs
 {
@@ -50,11 +52,9 @@ namespace CESMII.Marketplace.JobManager.Jobs
             //if smip settings is null, still allow trial to go through but inform user
             var jobConfig = JsonConvert.DeserializeObject<JobOnTimeEdgeConfig>(e.Config.Data);
             var payload = JsonConvert.DeserializeObject<JobOnTimeEdgePayload>(e.Payload);
-            var smipSettings = payload.SmipSettings != null ? payload.SmipSettings :
-                                    e.User?.SmipSettings != null ? e.User.SmipSettings : 
-                                    null;
+
             //validate all settings before we proceed
-            var isValid = this.ValidateData(jobConfig, payload, smipSettings, out string errorMessage);
+            var isValid = this.ValidateData(jobConfig, payload, out string errorMessage);
             if (!isValid)
             {
                 base.CreateJobLogMessage($"Validating data...failed. {errorMessage}", TaskStatusEnum.Failed);
@@ -62,18 +62,19 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 return null;
             }
 
-            ////if update profile checked, then update user account info
-            //if (payload.UpdateSmipSettings)
-            //{
-            //    base.CreateJobLogMessage($"Updating user profile SMIP information in Marketplace DB...", TaskStatusEnum.InProgress);
-            //    var usr = _dalUser.GetById(e.User.ID);
-            //    usr.SmipSettings = payload.SmipSettings;
-            //    await _dalUser.Update(usr, e.User.ID);
-            //}
+            //Get/Add organization to SMIP, send org info to onTimeEdge
+            /*de-scoped
+            var org = new SmipOrganizationModel() { displayName = payload.FormData.CompanyName };
+            if (jobConfig.SmipSettings.Enabled)
+            {
+                base.CreateJobLogMessage($"Generating SMIP organization information in SMIP instance...", TaskStatusEnum.InProgress);
+                org = await GenerateSmipData(jobConfig.SmipSettings, org);
+            }
+            */
 
             //get user information from request info type of form.
             base.CreateJobLogMessage($"Preparing user information to submit to OnTime | Edge...", TaskStatusEnum.InProgress);
-            var req = MapToBody(jobConfig.ApogeanApi.SecretKey, payload.FormData);
+            var req = MapToBody(jobConfig.ApogeanApi.SecretKey, payload.FormData, payload.FormData.CompanyName);
 
             //save record of submission to the request info DB.
             //base.CreateJobLogMessage($"TBD - Saving request info user information to Marketplace DB...", TaskStatusEnum.InProgress);
@@ -125,7 +126,37 @@ namespace CESMII.Marketplace.JobManager.Jobs
             return JsonConvert.SerializeObject(isSuccess);
         }
 
-        private bool ValidateData(JobOnTimeEdgeConfig jobConfig, JobOnTimeEdgePayload payload, SmipSettings smipSettings, out string message)
+        [System.Obsolete("GenerateSmipData de-scoped")]
+        private async Task<SmipOrganizationModel> GenerateSmipData(SmipAuthenticatorSettings settings, SmipOrganizationModel org)
+        {
+            var dalSmipOrg = new SmipOrganizationDAL(settings, _logger);
+            await dalSmipOrg.Authenticate();
+
+            var matches = await dalSmipOrg.SearchAsync(org.displayName);
+            if (matches == null || matches.Count == 0) {
+                base.CreateJobLogMessage($"Adding a new organization into the SMIP instance. ", TaskStatusEnum.InProgress);
+                _logger.LogWarning($"JobOnTimeEdgeTrial|GenerateSmipData|{settings.GraphQlUrl}|Adding a new organization into the SMIP instance. Name {org.displayName}");
+                //return await dalSmipOrg.AddAsync(new SmipOrganizationModel() { relativeName });
+                return null;
+            }
+            else if (matches.Count > 1)
+            {
+                base.CreateJobLogMessage($"An error occurred generating organization data in the SMIP instance. There are multiple organizations with name {org.displayName}. Please contact the system administrator.", TaskStatusEnum.Failed);
+                _logger.LogError($"JobOnTimeEdgeTrial|GenerateSmipData|Failed|{settings.GraphQlUrl}|There are multiple organizations with name {org.displayName}");
+                return org;
+            }
+            else if (matches.Count == 1)
+            {
+                return matches[0];
+            }
+            else
+            {
+                return org;
+                //return await dalSmipOrg.AddAsync(new SmipOrganizationModel() { relativeName });
+            }
+        }
+
+        private bool ValidateData(JobOnTimeEdgeConfig jobConfig, JobOnTimeEdgePayload payload, out string message)
         {
             var sbResult = new System.Text.StringBuilder();
 
@@ -137,8 +168,14 @@ namespace CESMII.Marketplace.JobManager.Jobs
             var isValidPayload = this.ValidatePayload(payload, out errorMessagePayload);
             if (!string.IsNullOrEmpty(errorMessagePayload)) sbResult.AppendLine(errorMessagePayload);
 
+            /*de-scoped
+            var errorMessageSmip = "";
+            var isValidSmip = this.ValidateSmipSettings(jobConfig.SmipSettings, out errorMessageSmip);
+            if (!string.IsNullOrEmpty(errorMessageSmip)) sbResult.AppendLine(errorMessagePayload);
+            */
+
             message = sbResult.ToString();
-            return isValidJobConfig && isValidPayload;
+            return isValidJobConfig && isValidPayload; //&& isValidSmip;
         }
 
         private bool ValidateJobConfig(JobOnTimeEdgeConfig jobConfig, out string message)
@@ -177,8 +214,6 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 _logger.LogError($"JobOnTimeEdgeTrial|ValidatePayload|payload is missing.");
             }
             
-            //TBD - determine if SMIP settings is being included here. 
-            
             if (string.IsNullOrEmpty(payload.FormData?.FirstName))
             {
                 sbResult.AppendLine("First Name is required.");
@@ -209,13 +244,49 @@ namespace CESMII.Marketplace.JobManager.Jobs
             return sbResult.Length == 0;
         }
 
-        private OnTimeEdgeRequestModel MapToBody(string secretKey, OnTimeEdgeUserModel model)
+        [System.Obsolete("ValidateSmipSettings de-scoped")]
+        private bool ValidateSmipSettings(SmipSettingsOnTimeEdge settings, out string message)
+        {
+            var sbResult = new System.Text.StringBuilder();
+            if (settings == null)
+            {
+                sbResult.AppendLine("The SMIP Settings are missing. Please contact the system administrator.");
+                _logger.LogError($"JobOnTimeEdgeTrial|ValidateJobConfig|jobConfig is missing the SMIP Settings.");
+            }
+            if (string.IsNullOrEmpty(settings.GraphQlUrl))
+            {
+                sbResult.AppendLine("The SMIP Settings GraphQL Url is missing. Please contact the system administrator.");
+                _logger.LogError($"JobOnTimeEdgeTrial|ValidateJobConfig|The jobConfig.SmipSettings.GraphQlUrl is missing.");
+            }
+            if (string.IsNullOrEmpty(settings.UserName))
+            {
+                sbResult.AppendLine("The SMIP Settings user name is missing. Please contact the system administrator.");
+                _logger.LogError($"JobOnTimeEdgeTrial|ValidateJobConfig|The jobConfig.SmipSettings.UserName is missing.");
+            }
+            if (string.IsNullOrEmpty(settings.Authenticator))
+            {
+                sbResult.AppendLine("The SMIP Settings authenticator is missing. Please contact the system administrator.");
+                _logger.LogError($"JobOnTimeEdgeTrial|ValidateJobConfig|The jobConfig.SmipSettings.Authenticator is missing.");
+            }
+            if (string.IsNullOrEmpty(settings.AuthenticatorRole))
+            {
+                sbResult.AppendLine("The SMIP Settings AuthenticatorRole is missing. Please contact the system administrator.");
+                _logger.LogError($"JobOnTimeEdgeTrial|ValidateJobConfig|The jobConfig.SmipSettings.AuthenticatorRole is missing.");
+            }
+
+            message = sbResult.ToString();
+            return sbResult.Length == 0;
+        }
+
+        private OnTimeEdgeRequestModel MapToBody(string secretKey, OnTimeEdgeUserModel model, string organizationName)
         {
             return new OnTimeEdgeRequestModel()
             {
                 firstName = model.FirstName,
                 lastName = model.LastName,
-                organization = model.CompanyName,
+                //TBD - work w/ Apogean to get this part changed. 
+                //organization = org,
+                organization = organizationName,
                 email = model.Email,
                 phone = model.Phone,
                 secretKey = secretKey
@@ -275,7 +346,6 @@ namespace CESMII.Marketplace.JobManager.Jobs
     {
         public string HostUrl { get; set; }
         public OnTimeEdgeUserModel FormData { get; set; }
-        public SmipSettingsOnTimeEdge SmipSettings { get; set; }
     }
 
     internal class JobOnTimeEdgeConfig
@@ -337,7 +407,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
         public string status { get; set; }
     }
 
-    internal class SmipSettingsOnTimeEdge : SmipSettings
+    internal class SmipSettingsOnTimeEdge : SmipAuthenticatorSettings
     {
         /// <summary>
         /// Allow job to skip over SMIP step if needed
