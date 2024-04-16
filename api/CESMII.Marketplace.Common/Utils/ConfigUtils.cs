@@ -93,5 +93,24 @@
             }
         }
 
+        public CloudLibraryConfig CloudLibSettings
+        {
+            get
+            {
+                var result = new CloudLibraryConfig();
+                _configuration.GetSection("CloudLibConfig").Bind(result);
+                return result;
+            }
+        }
+
+        public StripeConfig StripeSettings
+        {
+            get
+            {
+                var result = new StripeConfig();
+                _configuration.GetSection("StripeSettings").Bind(result);
+                return result;
+            }
+        }
     }
 }

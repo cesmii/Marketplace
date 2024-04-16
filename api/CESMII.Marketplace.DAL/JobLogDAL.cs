@@ -31,8 +31,11 @@
             this.MapToEntity(ref entity, model);
             //do this after mapping to enforce isactive is true on add
             entity.IsActive = true;
-            entity.CreatedById = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(userId));
-            entity.UpdatedById = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(userId));
+            if (userId != null)
+            {
+                entity.CreatedById = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(userId));
+                entity.UpdatedById = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(userId));
+            }
 
             //this will add and call saveChanges
             await _repo.AddAsync(entity);
@@ -46,7 +49,10 @@
             var entity = _repo.FindByCondition(x => x.ID == model.ID).FirstOrDefault();
             this.MapToEntity(ref entity, model);
             entity.Updated = DateTime.UtcNow;
-            entity.UpdatedById = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(userId));
+            if (userId != null)
+            {
+                entity.UpdatedById = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(userId));
+            }
 
             await _repo.UpdateAsync(entity);
             return 1;

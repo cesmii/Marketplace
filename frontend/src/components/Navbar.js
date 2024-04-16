@@ -13,6 +13,7 @@ import { useLoadingContext } from './contexts/LoadingContext';
 import { AppSettings } from '../utils/appsettings';
 import { doLogout, useLoginStatus } from './OnLoginHandler';
 import LoginButton from './LoginButton';
+import CartIcon from './eCommerce/CartIcon';
 
 import './styles/Navbar.scss'
 
@@ -75,6 +76,7 @@ function Navbar() {
                             {/*        href="/about">About</a>*/}
                             <a className={`nav-link py-1 px-2 ${history.location.pathname.indexOf("/contact-us/") > -1 ? "active" : ""}`}
                                 href="/contact-us/contribute">Contribute</a>
+                            {/*<CartIcon /> */}
                             <LoginButton />
                             {renderAdminMenu()}
                         </div>

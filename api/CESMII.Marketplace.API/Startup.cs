@@ -1,34 +1,19 @@
 using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Logging;
 
-using NLog;
-using NLog.Extensions.Logging;
-using NLog.Fluent;
-
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Utils;
-using CESMII.Marketplace.Api.Shared.Utils;
-using CESMII.Marketplace.Data.Contexts;
 using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.Data.Repositories;
 using CESMII.Marketplace.DAL;
@@ -40,6 +25,8 @@ using CESMII.Marketplace.Api.Shared.Extensions;
 using CESMII.Common.CloudLibClient;
 using CESMII.Common.SelfServiceSignUp.Services;
 using CESMII.Common.SelfServiceSignUp.Models;
+using CESMII.Marketplace.Service;
+using CESMII.Marketplace.Api.Shared.Middlewares;
 using CESMII.Marketplace.DAL.ExternalSources;
 
 namespace CESMII.Marketplace.Api
@@ -83,6 +70,9 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IMongoRepository<SearchKeyword>, MongoRepository<SearchKeyword>>();
             services.AddScoped<IMongoRepository<ExternalItem>, MongoRepository<ExternalItem>>();
             services.AddScoped<IMongoRepository<ExternalSource>, MongoRepository<ExternalSource>>();
+            //eCommerce
+            services.AddScoped<IMongoRepository<StripeAuditLog>, MongoRepository<StripeAuditLog>>();
+            services.AddScoped<IMongoRepository<Cart>, MongoRepository<Cart>>();
 
             //stock tables
             services.AddScoped<IMongoRepository<Organization>, MongoRepository<Organization>>();
@@ -106,6 +96,10 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IDal<JobLog, JobLogModel>, JobLogDAL>();
             services.AddScoped<IDal<JobDefinition, JobDefinitionModel>, JobDefinitionDAL>();
             services.AddScoped<IDal<SearchKeyword, SearchKeywordModel>, SearchKeywordDAL>();
+            services.AddScoped<IDal<StripeAuditLog, StripeAuditLogModel>, StripeAuditLogDAL>();
+            //eCommerce
+            services.AddScoped<IDal<Cart, CartModel>, CartDAL>();
+            services.AddScoped<IECommerceService<CartModel>, StripeService>();
             services.AddScoped<IDal<ExternalSource, ExternalSourceModel>, ExternalSourceDAL>();
 
             // Configuration, utils, one off objects
@@ -291,6 +285,8 @@ namespace CESMII.Marketplace.Api
             // Enable authentications (Jwt in our case)
             app.UseAuthentication();
 
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
+            app.UseMiddleware<RequestResponseLoggingMiddleware>();
             app.UseMiddleware<UserAzureADMapping>();
 
             app.UseAuthorization();

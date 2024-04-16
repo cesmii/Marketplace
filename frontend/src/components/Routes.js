@@ -16,6 +16,7 @@ import AdminPubisherEntity from '../views/admin/AdminPubisherEntity'
 import RequestInfo from '../views/RequestInfo'
 import Home from '../views/Home'
 import NotAuthorized from '../views/NotAuthorized'
+import CustomLandingPage from '../views/custom/CustomLandingPage'
 
 import AdminRequestInfoEntity from '../views/admin/AdminRequestInfoEntity'
 import AdminRequestInfoList from '../views/admin/AdminRequestInfoList'
@@ -33,6 +34,11 @@ import AdminExternalSourceEntity from '../views/admin/AdminExternalSourceEntity'
 import SitemapGenerator from '../views/admin/SitemapGenerator'
 import AccountProfile from '../views/AccountProfile'
 import LoginSuccess from '../views/LoginSuccess'
+//eCommerce 
+import Cart from '../views/ecommerce/Cart'
+import Checkout from '../views/ecommerce/Checkout'
+import CheckoutComplete from '../views/ecommerce/CheckoutComplete'
+
 import { AppSettings } from '../utils/appsettings'
 import ExternalSourceEntity from '../views/ExternalSourceEntity'
 
@@ -63,6 +69,9 @@ function Routes() {
             <PublicRoute exact path="/request-info/publisher/:publisherId" component={RequestInfo} />
             <PublicRoute exact path="/contact-us/" component={RequestInfo} />
             <PublicRoute exact path="/contact-us/:type" component={RequestInfo} />
+            
+            {/* Custom pages to support one off scenarios...*/}
+            <PublicRoute exact path="/custom/action/:name/:jobName" component={CustomLandingPage} />
 
             {/* Admin UI order matters in the profile/ routes* - TBD - update to admin versions of the forms...*/}
             <AdminRoute path="/admin/library/list" component={AdminMarketplaceList} roles={[AppSettings.AADAdminRole]} />
@@ -87,6 +96,11 @@ function Routes() {
             <AdminRoute path="/admin/externalsource/:id" component={AdminExternalSourceEntity} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/admin/sitemap/generate" component={SitemapGenerator} roles={[AppSettings.AADAdminRole]} />
             <AdminRoute path="/account" component={AccountProfile} />
+
+            {/* eCommerce Routes */}
+            <PublicRoute exact path="/checkout/:type" component={CheckoutComplete} />
+            <PublicRoute exact path="/cart" component={Cart} />
+            <PublicRoute exact path="/checkoutold" component={Checkout} />
 
             <PublicRoute path="/notpermitted" component={NotAuthorized} />
             <PublicRoute path="/notauthorized" component={NotAuthorized} />

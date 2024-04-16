@@ -271,17 +271,16 @@
                     IsActive = entity.IsActive,
                     ImagePortrait = entity.ImagePortraitId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImagePortraitId.ToString()), _imagesAll),
                     ImageBanner = entity.ImageBannerId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageBannerId.ToString()), _imagesAll),
-                    ImageLandscape = entity.ImageLandscapeId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageLandscapeId.ToString()), _imagesAll)
+                    ImageLandscape = entity.ImageLandscapeId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageLandscapeId.ToString()), _imagesAll),
+                    //eCommerce fields
+                    AllowPurchase = entity.AllowPurchase,
+                    PaymentProductId = entity.PaymentProductId,
+                    Price = entity.Price
                 };
                 //get additional data under certain scenarios
                 if (verbose)
                 {
-                    if (_jobDefinitionAll.Any())
-                    {
-                        result.JobDefinitions = _jobDefinitionAll
-                            .Where(x => x.MarketplaceItemId.ToString().Equals(entity.ID) && x.IsActive)
-                            .Select(x => new JobDefinitionSimpleModel { ID = x.ID, Name = x.Name, IconName = x.IconName }).ToList();
-                    }
+                    result.JobDefinitions = MapToModelJobDefinitions(entity.ID, _jobDefinitionAll);
 
                     //get list of marketplace items associated with this list of ids, map to return object
                     var relatedItems = MapToModelRelatedItems(entity.RelatedItems).Result;
@@ -301,6 +300,24 @@
             {
                 return null;
             }
+
+        }
+
+        protected static List<JobDefinitionSimpleModel> MapToModelJobDefinitions(string marketplaceItemId, List<JobDefinition> allItems)
+        {
+            if (!allItems.Any()) return null;
+
+            return allItems
+                .Where(x => x.MarketplaceItemId.ToString().Equals(marketplaceItemId) && x.IsActive)
+                .Select(x => new JobDefinitionSimpleModel { 
+                    ID = x.ID, 
+                    Name = x.Name, 
+                    DisplayName = x.DisplayName, 
+                    IconName = x.IconName, 
+                    ClassName = x.ClassName,
+                    ActionType = (JobActionTypeEnum)x.ActionType,
+                    RequiresAuthentication = x.RequiresAuthentication
+                }).ToList();
 
         }
 

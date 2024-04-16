@@ -81,7 +81,7 @@ namespace CESMII.Marketplace.JobManager
                 }
             }
             };
-            var logId = await _dalJobLog.Add(logItem, user.ID);
+            var logId = await _dalJobLog.Add(logItem, user == null ? null : user?.ID);
 
             Task backgroundTask = null;
 
@@ -129,6 +129,7 @@ namespace CESMII.Marketplace.JobManager
             {
                 //initialize scoped services for DI, initialize job class
                 var dalJobLog = scope.ServiceProvider.GetService<IDal<JobLog, JobLogModel>>();
+                var dalUser = scope.ServiceProvider.GetService<UserDAL>();
                 var logger = scope.ServiceProvider.GetService<ILogger<IJob>>();
                 var httpFactory = scope.ServiceProvider.GetService<IHttpApiFactory>();
                 var configuration = scope.ServiceProvider.GetService<IConfiguration>();
@@ -137,7 +138,7 @@ namespace CESMII.Marketplace.JobManager
                 try
                 {
                     //instantiate job class
-                    var job = InstantiateJob(jobDef.TypeName, logger, httpFactory, dalJobLog, configuration, mailRelay);
+                    var job = InstantiateJob(jobDef.TypeName, logger, httpFactory, dalJobLog, dalUser, configuration, mailRelay);
 
                     //initialize job
                     job.Initialize(jobDef, payload, logId, user);
@@ -150,7 +151,7 @@ namespace CESMII.Marketplace.JobManager
                     //log complete message to logger and abbreviated message to user. 
                     _logger.LogCritical(e, $"JobFactory|ExecuteJobInternal|JobLogId:{logId}|Error|{e.Message}");
                     //failed complete message
-                    CreateJobLogMessage(dalJobLog, logId, user.ID, $"Job execution failed: {e.Message}.", TaskStatusEnum.Failed);
+                    CreateJobLogMessage(dalJobLog, logId, user == null ? "" : user.ID, $"Job execution failed: {e.Message}.", TaskStatusEnum.Failed);
                 }
             }
         }

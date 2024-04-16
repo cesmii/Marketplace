@@ -4,6 +4,7 @@ import color from '../../components/Constants';
 
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
 import DownloadNodesetModal from '../../components/DownloadNodesetModal';
+import AddCartButton from '../../components/eCommerce/AddCartButton';
 import { RenderImageBg } from '../../services/MarketplaceService';
 import { AppSettings } from '../../utils/appsettings';
 import { formatItemPublishDate, generateLogMessageString, renderMenuColorIcon, renderMenuColorMaterialIcon } from '../../utils/UtilityService';
@@ -53,6 +54,11 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
         setDownloadModal(false);
     };
 
+    const onAddCart = (itm, quantity) => {
+        console.log(generateLogMessageString(`onAddCart`, CLASS_NAME));
+        if (props.onAddCart) props.onAddCart(itm, quantity);
+    };
+
     //-------------------------------------------------------------------
     // Region: Render helpers
     //-------------------------------------------------------------------
@@ -68,8 +74,9 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                         {props.item.abstract != null &&
                             <div className="mb-2" dangerouslySetInnerHTML={{ __html: props.item.abstract }} ></div>
                         }
-                        {props.item.publishDate != null &&
-                            <p className="mb-0" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
+                        <p className="mb-0" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
+                        {(props.item.allowPurchase && props.item.price != null) &&
+                            <p className="mt-2 mb-0" ><b className="mr-2" >Price:</b>${props.item.price}</p>
                         }
                         {/*<div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderCategoryItem(props.item)}</div>*/}
@@ -82,6 +89,8 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                             </p>
                         }
                         {renderJobDefinitions()}
+
+                        <AddCartButton item={props.item} onAdd={onAddCart} className="mt-2" />
                     </div>
                 </div>
             </>
@@ -140,7 +149,6 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
         );
     };
 
-
     const renderActionLinks = () => {
 
         if (props.item.actionLinks == null || props.item.actionLinks.length === 0) return;
@@ -158,11 +166,11 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
 
     const renderJobDefinitions = () => {
 
-        if (!props.isAuthenticated || !props.isAuthorized || props.item.jobDefinitions == null || props.item.jobDefinitions.length === 0) return;
+        if (props.item.jobDefinitions == null || props.item.jobDefinitions.length === 0) return;
 
         return props.item.jobDefinitions.map((x) => {
             return (
-                <MarketplaceItemJobLauncher key={x.id} className={`mr-2 mt-2`} isAuthenticated={props.isAuthenticated} jobDefinitionId={x.id} marketplaceItemId={props.item.id} jobName={x.name} payload={x.payload} iconName={x.iconName} />
+                <MarketplaceItemJobLauncher key={x.id} isAuthenticated={props.isAuthenticated} jobDefinition={x} marketplaceItemId={props.item.id} marketplaceItemName={props.item.name} />
             );
         });
     };

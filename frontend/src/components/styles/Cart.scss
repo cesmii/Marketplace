@@ -1,0 +1,27 @@
+@import "./constants";
+
+.btn-icon-outline {
+    position:relative;
+
+    &:hover {
+        background-color: color("cararra");
+        color: color("shark");
+        border: color("cararra");
+
+        .footnote {
+            background-color: color("cararra");
+            color: color("shark");
+            border: color("cararra");
+        }
+    }
+
+    .footnote {
+        position: absolute;
+        bottom: 0px;
+        right: 0px;
+
+        span {position:relative;
+              text-align:center;
+        }
+    }
+}
