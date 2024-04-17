@@ -8,5 +8,6 @@
     {
         [Required(ErrorMessage = "Required")]
         public string Name { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 }
