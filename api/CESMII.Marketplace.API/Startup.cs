@@ -83,8 +83,8 @@ namespace CESMII.Marketplace.Api
 
             //DAL objects
             services.AddScoped<UserDAL>();  //this one has extra methods outside of the IDal interface
-            services.AddScoped<OrganizationDAL>();
             services.AddScoped<IUserSignUpData, UserSignUpData>();
+            services.AddScoped<IDal<Organization, OrganizationModel>, OrganizationDAL>();
             services.AddScoped<IDal<MarketplaceItem, MarketplaceItemModel>, MarketplaceDAL>();
             services.AddScoped<IDal<MarketplaceItem, AdminMarketplaceItemModel>, AdminMarketplaceDAL>();
             services.AddScoped<IDal<LookupItem, LookupItemModel>, LookupDAL>();

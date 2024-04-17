@@ -10,18 +10,19 @@ using CESMII.Marketplace.Api.Shared.Models;
 using CESMII.Marketplace.Api.Shared.Controllers;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Api.Shared.Extensions;
+using CESMII.Marketplace.Service;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
     [Authorize, Route("api/[controller]")]
     public class AuthController : BaseController<AuthController>
     {
-        private OrganizationDAL _dalOrganization;
+        private ICommonService<OrganizationModel> _svcOrganization;
 
-        public AuthController(UserDAL dal, OrganizationDAL dalOrg, ConfigUtil config, ILogger<AuthController> logger) 
+        public AuthController(UserDAL dal, ICommonService<OrganizationModel> svcOrganization, ConfigUtil config, ILogger<AuthController> logger) 
             : base(config, logger, dal)
         {
-            _dalOrganization = dalOrg;
+            _svcOrganization = svcOrganization;
         }
 
         [HttpPost, Route("onAADLogin")]
@@ -174,20 +175,21 @@ namespace CESMII.Marketplace.Api.Controllers
                 if (um.Organization == null && um.SelfServiceSignUp_Organization_Name != null)
                 {
                     // Name to search for
-                    string strFindOrgName = um.SelfServiceSignUp_Organization_Name;
+                    string orgName = um.SelfServiceSignUp_Organization_Name;
 
                     // Search for organization
-                    var listMatchOrganizationName = _dalOrganization.Where(x => x.Name.ToLower().Equals(strFindOrgName.ToLower()));
+                    var filter = new PagerFilterSimpleModel() { Query = orgName, Skip = 0, Take = 9999 };
+                    var listMatchOrganizationName = _svcOrganization.Search(filter).Data;
                     if (listMatchOrganizationName.Count == 0)
                     {
-                        // Nothing in public.organization? Create a new record.
+                        // Nothing in organization table. Create a new record.
                         OrganizationModel om = new OrganizationModel()
                         {
-                            Name = strFindOrgName
+                            Name = orgName
                         };
 
-                        var idNewOrg = _dalOrganization.Add(om, null).Result;
-                        om = _dalOrganization.GetById(idNewOrg);
+                        var idNewOrg = _svcOrganization.Add(om, null).Result;
+                        om = _svcOrganization.GetById(idNewOrg);
                         um.Organization = om;
                         bUpdateUser = true;         // Synch UserModel changes
                     }
@@ -201,7 +203,7 @@ namespace CESMII.Marketplace.Api.Controllers
                     {
                         // More than one -- oops. A problem.
                         bErrorCondition = true;
-                        strError = $"InitLocalUser||More than one organization record found with Name = {strFindOrgName}. {listMatchOrganizationName.Count} records found.";
+                        strError = $"InitLocalUser||More than one organization record found with Name = {orgName}. {listMatchOrganizationName.Count} records found.";
                         _logger.LogWarning(strError);
                     }
                 }

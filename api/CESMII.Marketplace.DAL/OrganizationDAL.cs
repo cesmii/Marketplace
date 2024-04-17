@@ -12,10 +12,8 @@
 
     public class OrganizationDAL : BaseDAL<Organization, OrganizationModel>, IDal<Organization, OrganizationModel>
     {
-        protected IMongoRepository<Organization> _OrgRepo;  // Do I need this? I'm not sure.
         public OrganizationDAL(IMongoRepository<Organization> repo) : base(repo)
         {
-            _OrgRepo = repo;
         }
 
         /// <summary>
@@ -25,7 +23,7 @@
         /// <returns></returns>
         public override OrganizationModel GetById(string id)
         {
-            var entity = _OrgRepo.FindByCondition(u => u.ID == id).FirstOrDefault();
+            var entity = _repo.FindByCondition(u => u.ID == id).FirstOrDefault();
             return MapToModel(entity);
         }
 
@@ -34,10 +32,10 @@
         /// </summary>
         /// <param name="predicate"></param>
         /// <returns></returns>
-        public new List<OrganizationModel> Where(Expression<Func<Organization, bool>> predicate, int? skip = null, int? take = null,
+        public List<OrganizationModel> Where(Expression<Func<Organization, bool>> predicate, int? skip = null, int? take = null,
             bool returnCount = false, bool verbose = false)
         {
-            var data = _OrgRepo.FindByCondition(predicate);
+            var data = _repo.FindByCondition(predicate);
 
             var retValues = new System.Collections.Generic.List<OrganizationModel>();
 
@@ -51,7 +49,8 @@
 
         public async Task<string> Add(OrganizationModel model, string strInput)
         {
-            Organization entity = MapToEntity(model);
+            var entity = new Organization();
+            MapToEntity(ref entity, model);
 
             // This will add and call saveChanges
             await _repo.AddAsync(entity);
@@ -72,21 +71,20 @@
             return 1;
         }
 
-        public OrganizationModel MapToModel(Organization entity)
+        protected override OrganizationModel MapToModel(Organization entity, bool verbose = false)
         {
+            if (entity == null) return null;
+
             return new OrganizationModel
             {
                 ID = entity.ID,
                 Name = entity.Name
             };
         }
-        public Organization MapToEntity(OrganizationModel model)
+        protected override void MapToEntity(ref Organization entity, OrganizationModel model)
         {
-            return new Organization
-            {
-                ID = model.ID,
-                Name = model.Name
-            };
+            entity.ID = model.ID;
+            entity.Name = model.Name;
         }
     }
 }
