@@ -94,6 +94,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 //call the Zapier catch hook API to intialize start trial flow
                 var config = new HttpApiConfig()
                 {
+                    BaseAddress = "",
                     Url = jobConfig.ApogeanApi.Url,
                     Body = new StringContent(JsonConvert.SerializeObject(req)),
                     ContentType = "application/json",
