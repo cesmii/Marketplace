@@ -677,6 +677,7 @@ function AdminMarketplaceEntity() {
         console.log(generateLogMessageString('onAddActionLink', CLASS_NAME));
         //we need to be aware of newly added rows and those will be signified by a negative -id. 
         var id = (-1) * (item.actionLinks == null ? 1 : item.actionLinks.length + 1);
+        if (item.actionLinks == null) item.actionLinks = [];
         item.actionLinks.push({ id: id, caption: '', url: '', target: '_self', iconName: 'settings' });
         setItem(JSON.parse(JSON.stringify(item)));
     }
