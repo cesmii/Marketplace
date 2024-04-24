@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -9,13 +6,10 @@ using Microsoft.Extensions.Logging;
 
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Enums;
-using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.DAL;
-using CESMII.Marketplace.Api.Shared.Utils;
 using CESMII.Marketplace.Api.Shared.Models;
 using CESMII.Marketplace.Api.Shared.Controllers;
-using CESMII.Marketplace.Api.Shared.Extensions;
 using CESMII.Marketplace.Service;
 using Stripe;
 
@@ -35,22 +29,23 @@ namespace CESMII.Marketplace.Api.Controllers
         }
 
         [HttpPost, Route("checkout/init")]
-        // [Authorize(Policy = nameof(PermissionEnum.UserAzureADMapped))]
+        [Authorize(Policy = nameof(PermissionEnum.UserAzureADMapped))]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         [ProducesResponseType(400)]
         public async Task<IActionResult> Checkout([FromBody] CartModel model)
         {
-            var result = await _svc.DoCheckout(model, "");
+            var result = await _svc.DoCheckout(model, LocalUser.Organization.Name, UserID);
             if (result == null)
             {
                 return BadRequest($"Could not initialize checkout.");
             }
-            return Ok(new ResultMessageWithDataModel() {
+            return Ok(new ResultMessageWithDataModel()
+            {
                 Data = result,
                 IsSuccess = true,
                 Message = "Check out started..."
-            } );
-        }
+            });
+        }        
 
         [HttpGet, Route("products")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Product>))]

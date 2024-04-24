@@ -14,7 +14,7 @@ namespace CESMII.Marketplace.Service
         /// </summary>
         /// <param name="code"></param>
         /// <returns></returns>
-        Task<CheckoutInitModel> DoCheckout(TModel item, string userId);
+        Task<CheckoutInitModel> DoCheckout(TModel item, string organizationName, string userId);
 
         /// <summary>
         /// Get all products from the Stripe product catalog.

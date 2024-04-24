@@ -10,6 +10,7 @@ using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.Service.Models;
 using Stripe.FinancialConnections;
+using CESMII.Marketplace.Api.Shared.Models;
 
 namespace CESMII.Marketplace.Service
 {
@@ -19,17 +20,19 @@ namespace CESMII.Marketplace.Service
         private readonly IDal<Cart, CartModel> _dal;
         private readonly IDal<StripeAuditLog, StripeAuditLogModel> _stripeLogDal;
         private readonly ILogger<StripeService> _logger;
+        private readonly ICommonService<OrganizationModel> _organizationService;
         private readonly StripeConfig _config;
 
-        public StripeService(IDal<Cart, CartModel> dal, ILogger<StripeService> logger, IDal<StripeAuditLog, StripeAuditLogModel> stripeLogDal, ConfigUtil configUtil)
+        public StripeService(ICommonService<OrganizationModel> organizationService, IDal<Cart, CartModel> dal, ILogger<StripeService> logger, IDal<StripeAuditLog, StripeAuditLogModel> stripeLogDal, ConfigUtil configUtil)
         {
             _dal = dal;
+            _organizationService = organizationService;
             _stripeLogDal = stripeLogDal;
             _logger = logger;
             _config = configUtil.StripeSettings;
         }
 
-        public async Task<CheckoutInitModel> DoCheckout(CartModel item, string userId)
+        public async Task<CheckoutInitModel> DoCheckout(CartModel item, string organizationName, string userId)
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
 
@@ -52,7 +55,6 @@ namespace CESMII.Marketplace.Service
 
                 options.LineItems.Add(new SessionLineItemOptions
                 {
-                    // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
                     Price = price.Id,
                     Quantity = cartItem.Quantity,
                 });
@@ -60,13 +62,43 @@ namespace CESMII.Marketplace.Service
 
             try
             {
+                if (item.Credits > 0)
+                {
+                    var organization = GetOrganizationByName(organizationName);
+                    if (organization == null || item.Credits > organization.Credits)
+                    {
+                        _logger.LogError("StripeService|DoCheckout|Cannot use credits.");
+                        throw new ArgumentException("Cannot use credits.");
+                    }
+
+                    var couponService = new CouponService();
+                    var coupon = await couponService.CreateAsync(new CouponCreateOptions { 
+                        AmountOff = item.Credits, 
+                        Duration = "once", 
+                        Currency = "usd", 
+                        MaxRedemptions = 1 });
+
+                    organization.Credits -= item.Credits;
+
+                    await _organizationService.Update(organization, userId);
+
+                    var discount = new SessionDiscountOptions { Coupon = coupon.Id };
+                    options.Discounts = new List<SessionDiscountOptions> { discount };
+                }
+
                 var service = new Stripe.Checkout.SessionService();
-                Stripe.Checkout.Session session = await service.CreateAsync(options);
-                await _stripeLogDal.Add(new StripeAuditLogModel { Type = "CheckoutSessionCreation", Message = session.ToJson() }, userId);
+                var session = await service.CreateAsync(options);
+                await _stripeLogDal.Add(new StripeAuditLogModel { 
+                    Type = "CheckoutSessionCreation", 
+                    Message = session.ToJson(), 
+                    CartModel = item, 
+                    Session = session,
+                    SessionCreateOptions = options
+                }, userId);
 
                 return new CheckoutInitModel() { 
                     ApiKey = _config.PublishKey,
-                    SessionId = session.Id
+                    SessionId = session.ClientSecret
                 };
             } catch(Exception ex)
             {
@@ -257,6 +289,20 @@ namespace CESMII.Marketplace.Service
             await _dal.Delete(id, userId);
         }
 
+        private OrganizationModel? GetOrganizationByName(string organizationName)
+        {
+            // Search for organization
+            var filter = new PagerFilterSimpleModel() { Query = organizationName, Skip = 0, Take = 9999 };
+            var listMatchOrganizations = _organizationService.Search(filter).Data;
+
+            if (listMatchOrganizations != null && listMatchOrganizations.Count == 1)
+            {
+                return listMatchOrganizations[0];
+            }
+
+            return null;
+        }
+
         private async Task<IEnumerable<Price>> GetPricesByProductId(string paymentProductId)
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
@@ -264,23 +310,26 @@ namespace CESMII.Marketplace.Service
             // Fetch all prices
             var priceService = new PriceService();
             var prices = await priceService.ListAsync(
-                new PriceListOptions ()
+                new PriceListOptions { Active = true, Product = paymentProductId }
             );
 
-            return prices.Where(price => price.ProductId == paymentProductId);
+            return prices.ToList();
         }
 
-        private async Task<Price> GetPriceByProductId(string paymentProductId)
+        private async Task<Price?> GetPriceByProductId(string paymentProductId)
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
 
             // Fetch all prices
             var priceService = new PriceService();
             var prices = await priceService.ListAsync(
-                new PriceListOptions()
+                new PriceListOptions { Active = true, Product = paymentProductId }
             );
 
-            return prices.FirstOrDefault(price => price.ProductId == paymentProductId);
+            if (prices == null)
+                return null;
+
+            return prices.FirstOrDefault();
         }
 
         public async Task<IEnumerable<PaymentIntent>> GetPayments()

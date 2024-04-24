@@ -19,6 +19,8 @@
 
         public string UpdatedById { get; set; }
 
+        public long Credits { get; set; }
+
         [DisplayFormat(DataFormatString = "{0:d}")]
         public DateTime? Updated { get; set; }
         public bool IsActive { get; set; }

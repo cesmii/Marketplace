@@ -26,9 +26,6 @@ function Cart() {
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_error, setError] = useState({ show: false, message: null, caption: null });
     const [_cartResponse, setCartResponse] = useState(null);
-    //const [_checkoutData, setCheckoutData] = useState({ stripePromise: null, options: null });
-    //const _apiKey = 'pk_test_51Os66lHXjPkvmDZJ927KVzxAVIWaFhySoPDcoGVfxog1SXioudXZCbcaoMysdUrUBu1TgGEUGos0XkLpFyr0HB0Y00IxD721az';
-    //const _sessionId = 'cs_test_b1ajkfkDYOcG6t6sTTHicY7AJB8OygqeTR3OJRC4bYAFg9TAAxOpjmV0CH';
 
     //-------------------------------------------------------------------
     // Region: api calls
@@ -36,34 +33,48 @@ function Cart() {
     ///*
     useEffect(() => {
 
+        var url = `credit`;
+        axiosInstance.get(url)
+            .then(resp => {
+                if (resp.data.isSuccess) {
+                    var cart = loadingProps.cart;
+
+                    if (cart == null || cart.items == null) return;
+
+                    cart.credits = resp.data.data;
+
+                    setLoadingProps({ user: { credit: resp.data.data, usedcredit: resp.data.data, total: 0 } });
+                }
+                else {
+                    //update spinner, messages
+                    setError({ show: true, caption: 'Credits - Error', message: resp.data.message });
+                }
+            })
+            .catch(error => {
+                //hide a spinner, show a message
+                setLoadingProps({
+                    isLoading: false, message: null, inlineMessages: [
+                        { id: new Date().getTime(), severity: "danger", body: `An error occurred during fetching credits.`, isTimed: false }
+                    ]
+                });
+                console.log(error);
+                //scroll back to top
+                window.scroll({
+                    top: 0,
+                    left: 0,
+                    behavior: 'smooth',
+                });
+            });
+
+
         if (_cartResponse == null) return;
 
         setLoadingProps({ checkout: { apiKey: _cartResponse.apiKey, sessionId: _cartResponse.sessionId } });
 
-        loadStripe(_cartResponse.apiKey).then(resp => {
-            resp.redirectToCheckout({ sessionId: _cartResponse.sessionId });
-        });
-
-        //this will execute on unmount
         return () => {
         };
     }, [_cartResponse]);
-    //*/
-    /*
-    //triggered on return of data from our initialize checkout api call
-    useEffect(() => {
-
-        if (_cartResponse == null) return;
-
-        setLoadingProps({ checkout: { apiKey: _cartResponse.apiKey, sessionId: _cartResponse.sessionId } });
-
-        setCheckoutData({ stripePromise: loadStripe(_cartResponse.apiKey), options: { sessionId: _cartResponse.sessionId } });
-
-        //this will execute on unmount
-        return () => {
-        };
-    }, [_cartResponse]);
-    */
+    
 
     //-------------------------------------------------------------------
     // Region: Event Handling
@@ -78,6 +89,10 @@ function Cart() {
         cart.returnUrl = host.concat(`/checkout/success`);
 
         setLoadingProps({ isLoading: true, message: "", cart: cart });
+
+        if (loadingProps.user != null) { 
+            cart.credits = loadingProps.user.usedcredit;
+        }
 
         //perform do checkout call
         console.log(generateLogMessageString(`onCheckout`, CLASS_NAME));
@@ -100,7 +115,6 @@ function Cart() {
                     setError({ show: true, caption: 'Checkout - Error', message: resp.data.message });
                     setLoadingProps({ isLoading: false, message: null });
                 }
-
             })
             .catch(error => {
                 //hide a spinner, show a message
@@ -156,21 +170,23 @@ function Cart() {
     };
 
     const renderCheckout = () => {
-        return null;
-        /*
-        if (_checkoutData == null || _checkoutData.stripePromise == null || _checkoutData.options == null) return;
+        if (_cartResponse == null) return;
+
+        if (_cartResponse.apiKey == null || _cartResponse.sessionId == null) return;
+
+        const stripePromise = loadStripe(_cartResponse.apiKey);
+
+        const options = {
+            clientSecret: _cartResponse.sessionId,
+        };
 
         return (
             <div id="checkout">
-                <EmbeddedCheckoutProvider
-                    stripe={_checkoutData.stripePromise}
-                    options={_checkoutData.options}
-                >
+                <EmbeddedCheckoutProvider stripe={stripePromise} options={options}>
                     <EmbeddedCheckout />
                 </EmbeddedCheckoutProvider>
             </div>
         );
-        */
     }
 
 
@@ -182,17 +198,19 @@ function Cart() {
             <Helmet>
                 <title>{`${_caption} | ${AppSettings.Titles.Main}`}</title>
             </Helmet>
-            <div className="row" >
-                <div className="col-sm-12 mb-4">
-                    <h1 className="m-0 headline-2">
-                        {_caption}
-                    </h1>
+            {(_cartResponse == null) &&
+                <div className="row" >
+                    <div className="col-sm-12 mb-4">
+                        <h1 className="m-0 headline-2">
+                            {_caption}
+                        </h1>
+                    </div>
+                    <div className="col-sm-8 mb-4 mx-auto">
+                        <CartPreview />
+                    </div>
                 </div>
-                <div className="col-sm-8 mb-4 mx-auto">
-                    <CartPreview />
-                </div>
-            </div>
-            {(loadingProps.cart != null && loadingProps.cart.items != null && loadingProps.cart.items.length > 0) &&
+            }
+            {(_cartResponse == null && loadingProps.cart != null && loadingProps.cart.items != null && loadingProps.cart.items.length > 0) &&
                 <div className="row" >
                     <div className="col-8 mx-auto pt-4">
                         <a className="mx-3" href="/library" >Continue Shopping</a>
@@ -200,7 +218,7 @@ function Cart() {
                         <Button variant="primary" type="button" className="mx-3" onClick={onCheckout} >Checkout</Button>
                     </div>
                 </div>
-            }
+            }           
             {renderCheckout()}
             {renderErrorMessage()}
         </>

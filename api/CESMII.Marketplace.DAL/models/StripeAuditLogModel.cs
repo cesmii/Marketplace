@@ -1,5 +1,4 @@
-﻿using CESMII.Marketplace.DAL.Models;
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace CESMII.Marketplace.DAL.Models
@@ -16,5 +15,11 @@ namespace CESMII.Marketplace.DAL.Models
 
         [DisplayFormat(DataFormatString = "{0:d}")]
         public DateTime Created { get; set; }
+
+        public CartModel CartModel { get; set; }
+
+        public Stripe.Checkout.Session Session { get; set; }
+
+        public Stripe.Checkout.SessionCreateOptions SessionCreateOptions { get; set; }
     }
 }

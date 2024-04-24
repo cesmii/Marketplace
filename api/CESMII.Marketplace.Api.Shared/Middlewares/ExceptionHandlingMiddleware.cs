@@ -25,7 +25,7 @@ namespace CESMII.Marketplace.Api.Shared.Middlewares
             }
             catch (Exception ex)
             {
-                _logger.LogError($"An unexpected error occurred: {ex}");
+                _logger.LogError(ex, $"An unexpected error occurred: {ex}");
 
                 // Set response status code
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
