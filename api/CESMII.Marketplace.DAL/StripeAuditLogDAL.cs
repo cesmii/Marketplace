@@ -113,9 +113,8 @@ namespace CESMII.Marketplace.DAL
             // Discount details has actual price, discount price, final price
             // Coupon details, coupon id, price
             // 
-
-            entity.Data = model.SessionCreateOptions.ToJson();
-            entity.Session = model.Session.ToJson();
+            entity.Data = model.SessionCreateOptions == null ? null : model.SessionCreateOptions.ToJson();
+            entity.Session = model.Session == null ? null : model.Session.ToJson();
         }
     }
 }

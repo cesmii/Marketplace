@@ -150,7 +150,7 @@ function MarketplaceTileList(props) {
                     `/library/${itm.name}`;
 
             return (
-                <div key={itm.id} className={`${colCssClass} pb-4`}>
+                <div key={`tile-${counter}-${itm.id}`} className={`${colCssClass} pb-4`}>
                     <a href={url} className="tile-link" >
                         {tile}
                     </a>

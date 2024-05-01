@@ -21,4 +21,11 @@ namespace CESMII.Marketplace.Service.Models
         public string SessionId { get; set; }
         public string ApiKey { get; set; }
     }
+
+    public class CheckoutStatusModel
+    {
+        public string SessionId { get; set; }
+        public string Status { get; set; }
+        public dynamic Data { get; set; }
+    }
 }
