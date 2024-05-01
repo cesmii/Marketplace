@@ -2,12 +2,16 @@
 using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Data.Entities;
-using CESMII.Marketplace.Service;
 
-namespace CESMII.SMRoadmap.Service
+namespace CESMII.Marketplace.Service
 {
 
-    public class OrganizationService : ICommonService<OrganizationModel>
+    public interface IOrganizationService<TModel>: ICommonService<TModel> where TModel : AbstractModel
+    {
+        TModel GetByName(string name);
+    }
+
+    public class OrganizationService : IOrganizationService<OrganizationModel>
     {
         private readonly IDal<Organization, OrganizationModel> _dal;
 
@@ -67,6 +71,20 @@ namespace CESMII.SMRoadmap.Service
 
         public OrganizationModel GetById(string id) {
             return _dal.GetById(id);
+        }
+
+        public OrganizationModel GetByName(string name)
+        {
+            // Search for organization
+            var filter = new PagerFilterSimpleModel() { Query = name, Skip = 0, Take = 9999 };
+            var listMatchOrganizations = this.Search(filter).Data;
+
+            if (listMatchOrganizations != null && listMatchOrganizations.Count == 1)
+            {
+                return listMatchOrganizations[0];
+            }
+
+            return null;
         }
 
         public async Task<string> Add(OrganizationModel item, string userId) {

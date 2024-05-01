@@ -27,54 +27,74 @@ function Cart() {
     const [_error, setError] = useState({ show: false, message: null, caption: null });
     const [_cartResponse, setCartResponse] = useState(null);
 
+    const [_stripePromise, setStripePromise] = useState(null); //loadStripe("pk_test_51Os66lHXjPkvmDZJ927KVzxAVIWaFhySoPDcoGVfxog1SXioudXZCbcaoMysdUrUBu1TgGEUGos0XkLpFyr0HB0Y00IxD721az"));
+
     //-------------------------------------------------------------------
-    // Region: api calls
+    // Region: api call - fetch credit on load
     //-------------------------------------------------------------------
     ///*
     useEffect(() => {
+        async function fetchCredits() {
+            const url = `ecommerce/credits`;
+            axiosInstance.get(url)
+                .then(resp => {
+                    if (resp.data.isSuccess) {
+                        var cart = loadingProps.cart;
 
-        var url = `credit`;
-        axiosInstance.get(url)
-            .then(resp => {
-                if (resp.data.isSuccess) {
-                    var cart = loadingProps.cart;
+                        if (cart == null || cart.items == null) return;
 
-                    if (cart == null || cart.items == null) return;
+                        cart.credits = resp.data.data;
 
-                    cart.credits = resp.data.data;
-
-                    setLoadingProps({ user: { credit: resp.data.data, usedcredit: resp.data.data, total: 0 } });
-                }
-                else {
-                    //update spinner, messages
-                    setError({ show: true, caption: 'Credits - Error', message: resp.data.message });
-                }
-            })
-            .catch(error => {
-                //hide a spinner, show a message
-                setLoadingProps({
-                    isLoading: false, message: null, inlineMessages: [
-                        { id: new Date().getTime(), severity: "danger", body: `An error occurred during fetching credits.`, isTimed: false }
-                    ]
+                        setLoadingProps({ user: { credit: resp.data.data, usedcredit: resp.data.data, total: 0 } });
+                    }
+                    else {
+                        //update spinner, messages
+                        setError({ show: true, caption: 'Credits - Error', message: resp.data.message });
+                    }
+                })
+                .catch(error => {
+                    //hide a spinner, show a message
+                    setLoadingProps({
+                        isLoading: false, message: null, inlineMessages: [
+                            { id: new Date().getTime(), severity: "danger", body: `An error occurred during fetching credits.`, isTimed: false }
+                        ]
+                    });
+                    console.log(error);
+                    //scroll back to top
+                    window.scroll({
+                        top: 0,
+                        left: 0,
+                        behavior: 'smooth',
+                    });
                 });
-                console.log(error);
-                //scroll back to top
-                window.scroll({
-                    top: 0,
-                    left: 0,
-                    behavior: 'smooth',
-                });
-            });
+        }
 
+        if (loadingProps.cart == null || loadingProps.cart?.items == null) return;
+
+        fetchCredits();
+
+        return () => {
+        };
+    }, [loadingProps.cart]);
+    
+
+    //-------------------------------------------------------------------
+    // Region: on checkout init - prepare for embedding Stripe checkout form
+    //-------------------------------------------------------------------
+    useEffect(() => {
 
         if (_cartResponse == null) return;
 
         setLoadingProps({ checkout: { apiKey: _cartResponse.apiKey, sessionId: _cartResponse.sessionId } });
 
+        //only load once
+        if (_stripePromise == null) {
+            setStripePromise(loadStripe(_cartResponse.apiKey));
+        }
+
         return () => {
         };
-    }, [_cartResponse]);
-    
+    }, [_cartResponse, _stripePromise]);
 
     //-------------------------------------------------------------------
     // Region: Event Handling
@@ -86,7 +106,7 @@ function Cart() {
         let cart = loadingProps.cart;
         cart.status = AppSettings.CartStatusEnum.Pending;
         const host = window.location.protocol.concat("//").concat(window.location.host);
-        cart.returnUrl = host.concat(`/checkout/success`);
+        cart.returnUrl = host.concat(`/checkout/complete`);
 
         setLoadingProps({ isLoading: true, message: "", cart: cart });
 
@@ -174,7 +194,7 @@ function Cart() {
 
         if (_cartResponse.apiKey == null || _cartResponse.sessionId == null) return;
 
-        const stripePromise = loadStripe(_cartResponse.apiKey);
+        //const stripePromise = loadStripe(_cartResponse.apiKey);
 
         const options = {
             clientSecret: _cartResponse.sessionId,
@@ -182,7 +202,9 @@ function Cart() {
 
         return (
             <div id="checkout">
-                <EmbeddedCheckoutProvider stripe={stripePromise} options={options}>
+                <EmbeddedCheckoutProvider
+                    stripe={_stripePromise}
+                    options={options}>
                     <EmbeddedCheckout />
                 </EmbeddedCheckoutProvider>
             </div>
@@ -199,26 +221,36 @@ function Cart() {
                 <title>{`${_caption} | ${AppSettings.Titles.Main}`}</title>
             </Helmet>
             {(_cartResponse == null) &&
+                <>
                 <div className="row" >
-                    <div className="col-sm-12 mb-4">
+                    <div className="col-sm-6 mt-4 mx-auto text-center">
                         <h1 className="m-0 headline-2">
                             {_caption}
                         </h1>
                     </div>
-                    <div className="col-sm-8 mb-4 mx-auto">
+                </div>
+                <div className="row" >
+                    <div className="col-sm-6 mb-4 mx-auto">
                         <CartPreview />
                     </div>
                 </div>
+                </>
             }
             {(_cartResponse == null && loadingProps.cart != null && loadingProps.cart.items != null && loadingProps.cart.items.length > 0) &&
+                <>
                 <div className="row" >
-                    <div className="col-8 mx-auto pt-4">
-                        <a className="mx-3" href="/library" >Continue Shopping</a>
+                    <div className="col-7 mx-auto pt-2 text-center">
                         <Button variant="secondary" type="button" className="mx-3" onClick={onEmptyCart} >Empty Cart</Button>
                         <Button variant="primary" type="button" className="mx-3" onClick={onCheckout} >Checkout</Button>
                     </div>
                 </div>
-            }           
+                <div className="row" >
+                    <div className="col-7 mx-auto pt-4 text-center">
+                        <a className="mx-3" href="/library" >Continue Shopping</a>
+                    </div>
+                </div>
+                </>
+            }
             {renderCheckout()}
             {renderErrorMessage()}
         </>

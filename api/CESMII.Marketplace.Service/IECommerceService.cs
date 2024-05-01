@@ -14,7 +14,20 @@ namespace CESMII.Marketplace.Service
         /// </summary>
         /// <param name="code"></param>
         /// <returns></returns>
-        Task<CheckoutInitModel> DoCheckout(TModel item, string organizationName, string userId);
+        Task<CheckoutInitModel> DoCheckout(TModel item, UserModel user);
+
+        /// <summary>
+        /// Get checkout status from Stripe
+        /// </summary>
+        /// <returns></returns>
+        Task<CheckoutStatusModel> GetCheckoutStatus(string sessionId);
+
+        /// <summary>
+        /// Initiate the checkout flow with Stripe - for anonymous user
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        Task<CheckoutInitModel> DoCheckoutAnonymous(TModel item);
 
         /// <summary>
         /// Get all products from the Stripe product catalog.

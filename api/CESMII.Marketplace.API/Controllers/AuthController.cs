@@ -17,9 +17,9 @@ namespace CESMII.Marketplace.Api.Controllers
     [Authorize, Route("api/[controller]")]
     public class AuthController : BaseController<AuthController>
     {
-        private ICommonService<OrganizationModel> _svcOrganization;
+        private IOrganizationService<OrganizationModel> _svcOrganization;
 
-        public AuthController(UserDAL dal, ICommonService<OrganizationModel> svcOrganization, ConfigUtil config, ILogger<AuthController> logger) 
+        public AuthController(UserDAL dal, IOrganizationService<OrganizationModel> svcOrganization, ConfigUtil config, ILogger<AuthController> logger) 
             : base(config, logger, dal)
         {
             _svcOrganization = svcOrganization;

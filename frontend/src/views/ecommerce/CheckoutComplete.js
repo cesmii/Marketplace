@@ -164,7 +164,7 @@ function CheckoutComplete() {
                     break;
                 case AppSettings.CartStatusEnum.Pending:
                     msg = 'Checkout is in progress...';
-                    link = (<Button className="btn btn-primary" onClick={() => { setCheckStatusCounter(_checkStatusCounter++) }} >Update Checkout Status</Button>);
+                    link = (<Button className="btn btn-primary" onClick={() => { setCheckStatusCounter(_checkStatusCounter+1) }} >Update Checkout Status</Button>);
                     break;
                 case AppSettings.CartStatusEnum.Shopping:
                 case AppSettings.CartStatusEnum.None:

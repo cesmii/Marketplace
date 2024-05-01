@@ -20,21 +20,25 @@ namespace CESMII.Marketplace.Api.Controllers
     public class ECommerceController : BaseController<ECommerceController>
     {
         private readonly IECommerceService<CartModel> _svc;
+        private readonly IOrganizationService<OrganizationModel> _svcOrganization;
 
-        public ECommerceController(IECommerceService<CartModel> svc, UserDAL dalUser,
+        public ECommerceController(IECommerceService<CartModel> svc, IOrganizationService<OrganizationModel> svcOrganization, 
+            UserDAL dalUser,
             ConfigUtil config, ILogger<ECommerceController> logger)
             : base(config, logger, dalUser)
         {
             _svc = svc;
+            _svcOrganization = svcOrganization;
         }
 
         [HttpPost, Route("checkout/init")]
-        [Authorize(Policy = nameof(PermissionEnum.UserAzureADMapped))]
         [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
         [ProducesResponseType(400)]
         public async Task<IActionResult> Checkout([FromBody] CartModel model)
         {
-            var result = await _svc.DoCheckout(model, LocalUser.Organization.Name, UserID);
+            var result = await (User.Identity.IsAuthenticated ?
+                    _svc.DoCheckout(model, LocalUser) :
+                    _svc.DoCheckoutAnonymous(model));
             if (result == null)
             {
                 return BadRequest($"Could not initialize checkout.");
@@ -45,7 +49,75 @@ namespace CESMII.Marketplace.Api.Controllers
                 IsSuccess = true,
                 Message = "Check out started..."
             });
-        }        
+        }
+
+        [HttpPost, Route("checkout/status")]
+        [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> CheckoutStatus([FromBody] IdStringModel model)
+        {
+            var result = await _svc.GetCheckoutStatus(model.ID);
+            if (result == null)
+            {
+                return Ok(new ResultMessageWithDataModel()
+                {
+                    Data = null,
+                    IsSuccess = true,
+                    Message = "Check out status unknown..."
+                });
+            }
+
+            return Ok(new ResultMessageWithDataModel()
+            {
+                Data = result.Data,
+                IsSuccess = true,
+                Message = $"Check out status is {result.Status}."
+            });
+        }
+
+        /// <summary>
+        /// Allow Anonymous or Authorized user to call this.
+        /// if anonymous, then null credits returned.
+        /// If authorized, the remaining credit balance is returned.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet, Route("credits")]
+        [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
+        [ProducesResponseType(400)]
+        public IActionResult GetAvailableCredits()
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Ok(new ResultMessageWithDataModel()
+                {
+                    Data = null,
+                    IsSuccess = true,
+                    Message = "Anonymous user, no credits available."
+                });
+            }
+            // TODO call salesforce api to get credits.
+
+            // Search for organization
+            //var filter = new PagerFilterSimpleModel() { Query = LocalUser.Organization.Name, Skip = 0, Take = 9999 };
+            //var listMatchOrganizationName = _svcOrganization.Search(filter).Data;
+            var org = _svcOrganization.GetByName(LocalUser.Organization.Name);
+
+            if (org == null)
+            {
+                return Ok(new ResultMessageWithDataModel()
+                {
+                    Data = null,
+                    IsSuccess = false,
+                    Message = "Credits not found. The organization for this user could not be found."
+                });
+            }
+            return Ok(new ResultMessageWithDataModel()
+            {
+                Data = org.Credits,
+                IsSuccess = true,
+                Message = "Credits fetched..."
+            });
+        }
 
         [HttpGet, Route("products")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Product>))]

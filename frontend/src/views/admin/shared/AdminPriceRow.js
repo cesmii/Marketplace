@@ -11,10 +11,11 @@ function AdminPriceRow(props) { //props are item, showActions
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const _billingPeriods = [{ id: 'OneTime', caption: 'OneTime' }, { id: 'Yearly', caption: 'Yearly' }, { id: 'Monthly', caption: 'Monthly' }];
+    const _billingPeriods = [{ id: 'OneTime', caption: 'One Time' }, { id: 'Yearly', caption: 'Yearly' }, { id: 'Monthly', caption: 'Monthly' }];
     const [_isValid, setIsValid] = useState({
         amount: true,
-        description: true
+        description: true,
+        billingPeriod: true
     });
 
     //-------------------------------------------------------------------
@@ -24,24 +25,21 @@ function AdminPriceRow(props) { //props are item, showActions
     const onChange = (e) => {
         //console.log(generateLogMessageString(`onChange||e:${e.target}`, CLASS_NAME));
 
-        switch (e.target.id) {
-            case "amount":
-                validateForm_amount(e);
-                break;
-            case "description":
-                validateForm_description(e);
-                break;
-            default:
-                break;
-        }
-
         //note you must update the state value for the input to be read only. It is not enough to simply have the onChange handler.
         switch (e.target.id) {
             case "amount":
             case "description":
-            case "billingPeriod":
             case "priceId":
                 props.item[e.target.id] = e.target.value;
+                break;
+            case "billingPeriod":
+                props.item[e.target.id] = e.target.value;
+                /*TBD - cut over to this.
+                if (e.target.value.toString() === "-1") props.item[e.target.id] = null;
+                else {
+                    props.item[e.target.id] = { id: e.target.value, name: e.target.options[e.target.selectedIndex].text };
+                }
+                */
                 break;
             default:
                 return;
@@ -74,10 +72,16 @@ function AdminPriceRow(props) { //props are item, showActions
         setIsValid({ ..._isValid, description: isValid });
     };
 
+    const validateForm_billingPeriod = (e) => {
+        var isValid = e.target.value.toString() !== "-1";
+        setIsValid({ ..._isValid, status: isValid });
+    };
+
+
     //-------------------------------------------------------------------
     // Region: Render helpers
     //-------------------------------------------------------------------
-    const renderBillingPeriods = () => {
+    const renderBillingPeriod = () => {
 
         //show drop down list for edit, copy mode
         const options = _billingPeriods.map((item) => {
@@ -86,9 +90,9 @@ function AdminPriceRow(props) { //props are item, showActions
 
         return (
             <Form.Group>
-                <Form.Label>Billing Period</Form.Label>
                 <Form.Control id="billingPeriod" as="select" value={props.item.billingPeriod == null ? "OneTime" : props.item.billingPeriod}
-                    className={`minimal pr-5`}
+                    className={(!_isValid.billingPeriod ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
+                    onBlur={validateForm_billingPeriod}
                     onChange={onChange} >
                     {options}
                 </Form.Control>
@@ -101,24 +105,24 @@ function AdminPriceRow(props) { //props are item, showActions
     // Region: Render final output
     //-------------------------------------------------------------------
     let cssClass = props.cssClass + (props.isHeader ? " bottom header" : " center border-top");
-    if (!_isValid.amount || !_isValid.description) {
+    if (!_isValid.amount || !_isValid.description || !_isValid.billingPeriod) {
         cssClass += ' alert alert-danger';
     }
 
     if (props.isHeader) {
         return (
             <div className={`row my-1 p-0 py-1 d-flex align-items-center ${cssClass}`}>
-                <div className="col-sm-5 font-weight-bold" >
-                    Amount
+                <div className="col-sm-3 font-weight-bold" >
+                    Billing Period
                 </div>
                 <div className="col-sm-4 font-weight-bold" >
                     Description
                 </div>
-                <div className="col-sm-3 text-right font-weight-bold" >
-                    Billing Period
+                <div className="col-sm-3 font-weight-bold" >
+                    Amount
                 </div>
                 <div className="col-sm-2 text-right font-weight-bold" >
-                    Price Id
+                    Delete
                 </div>
             </div>
         );
@@ -129,35 +133,23 @@ function AdminPriceRow(props) { //props are item, showActions
 
     return (
         <div className={`row my-1 p-0 py-1 d-flex align-items-center ${cssClass}`}>
-            <div className="col-sm-5" >
+            <div className="col-sm-3" >
+                {renderBillingPeriod()}
+            </div>
+            <div className="col-sm-4" >
                 <Form.Group>
-                    <Form.Label>Amount*</Form.Label>
-                    {!_isValid.amount &&
-                        <span className="invalid-field-message inline">
-                            Required
-                        </span>
-                    }
-                    <Form.Control id="amount" className={(!_isValid.amount ? 'invalid-field minimal pr-5' : 'minimal pr-5')} type="" placeholder={`Enter amount`}
-                        value={props.item.amount} onBlur={validateForm_amount} onChange={onChange} />
-                </Form.Group>
-            </div>            
-            <div className="col-sm-5" >
-                <Form.Group>
-                    <Form.Label>Description*</Form.Label>
-                    {!_isValid.description &&
-                        <span className="invalid-field-message inline">
-                            Required
-                        </span>
-                    }
                     <Form.Control id="description" className={(!_isValid.description ? 'invalid-field minimal pr-5' : 'minimal pr-5')} type="" placeholder={`Enter description`}
                         value={props.item.description} onBlur={validateForm_description} onChange={onChange} />
                 </Form.Group>
             </div>   
+            <div className="col-sm-3" >
+                <Form.Group>
+                    <Form.Control id="amount" className={(!_isValid.amount ? 'invalid-field minimal pr-5' : 'minimal pr-5')} type="" placeholder={`Enter amount`}
+                        value={props.item.amount} onBlur={validateForm_amount} onChange={onChange} />
+                </Form.Group>
+            </div>
             <div className="col-sm-2 text-right pt-1" >
                 <button className="btn btn-icon-outline circle ml-auto" title="Delete Item" onClick={onDelete} ><i className="material-icons">close</i></button>
-            </div>
-            <div className="col-sm-5" >
-                {renderBillingPeriods()}
             </div>
         </div>
     );

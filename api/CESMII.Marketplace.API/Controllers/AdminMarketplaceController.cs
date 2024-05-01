@@ -149,8 +149,12 @@ namespace CESMII.Marketplace.Api.Controllers
 
             if (model.AllowPurchase && model.Prices.Count == 0)
             {
-                _logger.LogWarning("AdminMarketplaceController|Update|Price is missing");
-                return BadRequest("AdminMarketplaceController|Update|Price is missing");
+                _logger.LogWarning("AdminMarketplaceController|Update|When Allow purchase is selected, at least one price is required.");
+                return Ok(new ResultMessageWithDataModel()
+                {
+                    IsSuccess = false,
+                    Message = $"When Allow purchase is selected, at least one price is required."
+                });
             }
 
             var record = _dal.GetById(model.ID);
@@ -186,7 +190,7 @@ namespace CESMII.Marketplace.Api.Controllers
                     }
                 } catch (Exception ex)
                 {
-                    _logger.LogError(ex, "AdminMarketplaceController|Update|Failed to update the product in Stripe");
+                    _logger.LogError(ex, $"AdminMarketplaceController|Update|Failed to update the marketplace item '{model.Name}' ({model.ID}) in Stripe.");
                 }
 
                 var result = await _dal.Update(model, UserID);

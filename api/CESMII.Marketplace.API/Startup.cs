@@ -28,7 +28,6 @@ using CESMII.Common.SelfServiceSignUp.Models;
 using CESMII.Marketplace.Service;
 using CESMII.Marketplace.Api.Shared.Middlewares;
 using CESMII.Marketplace.DAL.ExternalSources;
-using CESMII.SMRoadmap.Service;
 
 namespace CESMII.Marketplace.Api
 {
@@ -99,7 +98,7 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IDal<SearchKeyword, SearchKeywordModel>, SearchKeywordDAL>();
             services.AddScoped<IDal<StripeAuditLog, StripeAuditLogModel>, StripeAuditLogDAL>();
             //eCommerce
-            services.AddScoped<ICommonService<OrganizationModel>, OrganizationService>();
+            services.AddScoped<IOrganizationService<OrganizationModel>, OrganizationService>();
             services.AddScoped<IDal<Cart, CartModel>, CartDAL>();
             services.AddScoped<IECommerceService<CartModel>, StripeService>();
             services.AddScoped<IDal<ExternalSource, ExternalSourceModel>, ExternalSourceDAL>();

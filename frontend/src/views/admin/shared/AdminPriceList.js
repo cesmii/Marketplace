@@ -54,6 +54,14 @@ function AdminPriceList(props) {
         );
     }
 
+    const renderItemsGridHeader = () => {
+        if (props.items == null || props.items.length === 0) return;
+
+        return (
+            <AdminPriceRow key="header" item={null} isHeader={true} cssClass={`admin-item-row`} />
+        )
+    }
+
     //render the main grid
     const renderItemsGrid = () => {
         if (props.items == null || props.items.length === 0) {
@@ -66,8 +74,8 @@ function AdminPriceList(props) {
             )
         }
 
-        return props.items.map((item) => {
-            const key = `${item.id}-${item.id}`;
+        return props.items.map((item, counter) => {
+            const key = `price-${counter}`;
             return (
                 <AdminPriceRow key={key} item={item} cssClass={`admin-item-row`}
                     type={props.type} onChangeItem={props.onChangeItem} onDelete={props.onDelete} />
@@ -89,6 +97,7 @@ function AdminPriceList(props) {
                 </span>
             }
 
+            {renderItemsGridHeader()}
             {renderItemsGrid()}
             <div className={`row my-1 p-0 py-1`}>
                 <div className="col-sm-12 border-top bg-light py-1" >

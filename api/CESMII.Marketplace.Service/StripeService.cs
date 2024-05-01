@@ -14,16 +14,18 @@ using CESMII.Marketplace.Api.Shared.Models;
 
 namespace CESMII.Marketplace.Service
 {
-    // TBD - Remarks - Note this is prototype / sample code that is not fully implemented and not yet tested. Work in progress.
+    // TBD - How do we hook to an oncompleted event and then send confirmation email once onComplete is done.
+    // Note there is a check status method that has the email. If there is a Stripe event or callback, then we get
+    // the session object and get the customer email.  
     public class StripeService : IECommerceService<CartModel>
     {
         private readonly IDal<Cart, CartModel> _dal;
         private readonly IDal<StripeAuditLog, StripeAuditLogModel> _stripeLogDal;
         private readonly ILogger<StripeService> _logger;
-        private readonly ICommonService<OrganizationModel> _organizationService;
+        private readonly IOrganizationService<OrganizationModel> _organizationService;
         private readonly StripeConfig _config;
 
-        public StripeService(ICommonService<OrganizationModel> organizationService, IDal<Cart, CartModel> dal, ILogger<StripeService> logger, IDal<StripeAuditLog, StripeAuditLogModel> stripeLogDal, ConfigUtil configUtil)
+        public StripeService(IOrganizationService<OrganizationModel> organizationService, IDal<Cart, CartModel> dal, ILogger<StripeService> logger, IDal<StripeAuditLog, StripeAuditLogModel> stripeLogDal, ConfigUtil configUtil)
         {
             _dal = dal;
             _organizationService = organizationService;
@@ -32,30 +34,36 @@ namespace CESMII.Marketplace.Service
             _config = configUtil.StripeSettings;
         }
 
-        public async Task<CheckoutInitModel> DoCheckout(CartModel item, string organizationName, string userId)
+        public async Task<CheckoutInitModel> DoCheckoutAnonymous(CartModel item)
+        {
+            return await DoCheckout(item, null);
+        }
+
+        public async Task<CheckoutInitModel> DoCheckout(CartModel item, UserModel user)
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
 
             var options = new Stripe.Checkout.SessionCreateOptions
             {
-                UiMode = "embedded",                
-                ReturnUrl = item.ReturnUrl,
+                UiMode = "embedded",
+                //append check out session id
+                ReturnUrl = item.ReturnUrl.TrimEnd(Convert.ToChar("/")) + "/{CHECKOUT_SESSION_ID}",
                 LineItems = new List<SessionLineItemOptions>()
             };
 
-            foreach(var cartItem in item.Items)
+            foreach (var cartItem in item.Items)
             {
-                if (cartItem.MarketplaceItem.PaymentPriceId == null)
+                if (string.IsNullOrEmpty(cartItem.MarketplaceItem.PaymentPriceId))
                 {
-                    _logger.LogError("StripeService|DoCheckout|Cannot get price with payment price id.");
-                    throw new ArgumentException("Cannot get price with payment price id.");
+                    _logger.LogError($"StripeService|DoCheckout|Cannot get price with null or empty payment price id.|Item: {cartItem.MarketplaceItem.Name}");
+                    throw new ArgumentException($"Cannot get price with null or empty payment price id for {cartItem.MarketplaceItem.Name}.");
                 }
 
                 var price = await GetPriceById(cartItem.MarketplaceItem.PaymentPriceId);
                 if (price == null)
                 {
-                    _logger.LogError("StripeService|DoCheckout|Cannot get price with payment price id.");
-                    throw new ArgumentException("Cannot get price with payment price id.");
+                    _logger.LogError($"StripeService|DoCheckout|Cannot get Stripe price for |Item: {cartItem.MarketplaceItem.Name} with payment price id {cartItem.MarketplaceItem.PaymentPriceId}.");
+                    throw new ArgumentException($"Cannot get Stripe price info for {cartItem.MarketplaceItem.Name}.");
                 }
 
                 options.Mode = price.Type == "one_time" ? "payment" : "subscription";
@@ -69,9 +77,10 @@ namespace CESMII.Marketplace.Service
 
             try
             {
-                if (item.Credits > 0)
+                //an anonymous user may be checking out. they won't have credits. that is an ok scenario.
+                if (user != null && item.Credits > 0)
                 {
-                    var organization = GetOrganizationByName(organizationName);
+                    var organization = _organizationService.GetByName(user.Organization.Name);
                     if (organization == null || item.Credits > organization.Credits)
                     {
                         _logger.LogError("StripeService|DoCheckout|Cannot use credits.");
@@ -79,15 +88,18 @@ namespace CESMII.Marketplace.Service
                     }
 
                     var couponService = new CouponService();
-                    var coupon = await couponService.CreateAsync(new CouponCreateOptions { 
-                        AmountOff = item.Credits, 
-                        Duration = "once", 
-                        Currency = "usd", 
-                        MaxRedemptions = 1 });
+                    var coupon = await couponService.CreateAsync(new CouponCreateOptions
+                    {
+                        AmountOff = item.Credits,
+                        Duration = "once",
+                        Currency = "usd",
+                        MaxRedemptions = 1,
+                        Name = "Credits Applied"
+                    });
 
                     organization.Credits -= item.Credits;
 
-                    await _organizationService.Update(organization, userId);
+                    await _organizationService.Update(organization, user.ID);
 
                     var discount = new SessionDiscountOptions { Coupon = coupon.Id };
                     options.Discounts = new List<SessionDiscountOptions> { discount };
@@ -95,24 +107,43 @@ namespace CESMII.Marketplace.Service
 
                 var service = new Stripe.Checkout.SessionService();
                 var session = await service.CreateAsync(options);
-                await _stripeLogDal.Add(new StripeAuditLogModel { 
-                    Type = "CheckoutSessionCreation", 
-                    Message = session.ToJson(), 
-                    CartModel = item, 
+                await _stripeLogDal.Add(new StripeAuditLogModel
+                {
+                    Type = "CheckoutSessionCreation",
+                    Message = session.ToJson(),
+                    CartModel = item,
                     Session = session,
                     SessionCreateOptions = options
-                }, userId);
+                }, user == null ? null : user.ID);
 
-                return new CheckoutInitModel() { 
+                return new CheckoutInitModel()
+                {
                     ApiKey = _config.PublishKey,
                     SessionId = session.ClientSecret
                 };
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "StripeService|DoCheckout|Error occured while checkout.");
-                
+
                 throw;
             }
+        }
+
+        public async Task<CheckoutStatusModel> GetCheckoutStatus(string sessionId)
+        {
+            StripeConfiguration.ApiKey = _config.SecretKey;
+
+            var svcSession = new Stripe.Checkout.SessionService();
+            var data = svcSession.Get(sessionId);
+
+            if (data == null)
+            {
+                _logger.LogWarning($"StripeService|GetCheckoutStatus|No checkout sessions found with id {sessionId}.");
+                return null;
+            }
+
+            return new CheckoutStatusModel() { SessionId = sessionId, Status = data.Status, Data = data };
         }
 
         public async Task<IEnumerable<Product>> GetProducts()
@@ -158,7 +189,7 @@ namespace CESMII.Marketplace.Service
 
             return product;
         }
-        
+
         public async Task<bool> DeleteProduct(string paymentProductId)
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
@@ -211,7 +242,7 @@ namespace CESMII.Marketplace.Service
                 Name = item.DisplayName ?? string.Empty,
                 Description = item.Abstract == null ? string.Empty : item.Abstract.Replace("<p>", "").Replace("</p>", ""),
             };
-            
+
             var serviceProduct = new ProductService();
 
             //check for product 
@@ -256,11 +287,11 @@ namespace CESMII.Marketplace.Service
             var itemUpdate = new ProductUpdateOptions
             {
                 Name = item.DisplayName ?? string.Empty,
-                Description = item.Abstract == null ? string.Empty : item.Abstract.Replace("<p>","").Replace("</p>", ""),
+                Description = item.Abstract == null ? string.Empty : item.Abstract.Replace("<p>", "").Replace("</p>", ""),
             };
 
             var serviceProduct = new ProductService();
-            
+
             //check for product 
             var product = await serviceProduct.UpdateAsync(item.PaymentProductId, itemUpdate);
 
@@ -309,20 +340,6 @@ namespace CESMII.Marketplace.Service
         public async Task Delete(string id, string userId)
         {
             await _dal.Delete(id, userId);
-        }
-
-        private OrganizationModel? GetOrganizationByName(string organizationName)
-        {
-            // Search for organization
-            var filter = new PagerFilterSimpleModel() { Query = organizationName, Skip = 0, Take = 9999 };
-            var listMatchOrganizations = _organizationService.Search(filter).Data;
-
-            if (listMatchOrganizations != null && listMatchOrganizations.Count == 1)
-            {
-                return listMatchOrganizations[0];
-            }
-
-            return null;
         }
 
         private async Task<IEnumerable<Stripe.Price>> GetPricesByProductId(string paymentProductId)

@@ -81,20 +81,20 @@ return;
         if (props.onValidate != null) props.onValidate(props.item.marketplaceItem?.id, result);
     };
 
-    const onetimeForm = (price, showRadio) => {
+    const renderOneTimePriceForm = (price, showRadio) => {
         return (
             <Form.Group>
                 <Form.Row>
                     {showRadio &&
                         <Form.Check type={"radio"} >
-                            <Form.Check.Input type={"radio"} name="group1" id={`price-${price.priceId}`} checked={price.isSelected}
+                            <Form.Check.Input type={"radio"} name="rbgPriceSelection" id={`price-${price.priceId}`} checked={price.isSelected}
                                 onClick={(e) => {
                                     if (e.target.checked) {
                                         props.item.marketplaceItem.paymentPriceId = price.priceId;
                                     }
                                 }}
                             />
-                            <Form.Check.Label>Price</Form.Check.Label>
+                        <Form.Check.Label>{price.description}</Form.Check.Label>
                         </Form.Check>
                     }
                     {!showRadio &&
@@ -135,24 +135,24 @@ return;
         );
     };
 
-    const onetimeBody = (price) => {
+    const renderOneTimePrice = (price) => {
         if (price.billingPeriod == "OneTime") {
             return (
                 <Card body className='elevated my-1'>
-                    {onetimeForm(price, true)}
+                    {renderOneTimePriceForm(price, true)}
                 </Card>
             );
         }
     };
 
-    const reccuringBody = (price) => {
-        if (price.billingPeriod == "Yearly" || price.billingPeriod == "SixMonths") {
+    const renderRecurringPrice = (price) => {
+        if (price.billingPeriod == "Yearly" || price.billingPeriod == "SixMonths" || price.billingPeriod == "Monthly" ) {
             return (
                 <Card body className='elevated my-1'>
                     <Form.Group>                        
                         <Form.Row>
                             <Form.Check type={"radio"}>
-                                <Form.Check.Input type={"radio"} name="group1" id={`price-${price.priceId}`} checked={price.isSelected}
+                                <Form.Check.Input type={"radio"} name="rbgPriceSelection" id={`price-${price.priceId}`} checked={price.isSelected}
                                     onClick={(e) => {
                                         if (e.target.checked) {
                                             props.item.marketplaceItem.paymentPriceId = price.priceId;
@@ -175,15 +175,15 @@ return;
     // Region: Render Helpers
     //-------------------------------------------------------------------
     const renderForm = () => {
-        if (props == null || props.item.marketplaceItem == null) {
+        if (props == null || props.item.marketplaceItem?.prices == null) {
             return;
         }
 
         const mainBodySubscription = props.item.marketplaceItem.prices.map((price, i) => {
             return (
                 <Fragment key={i}>
-                    {reccuringBody(price)}
-                    {onetimeBody(price, true)}                        
+                    {renderRecurringPrice(price)}
+                    {renderOneTimePrice(price, true)}                        
                 </Fragment>
             );            
         });
@@ -196,7 +196,7 @@ return;
 
             return (
                 <div >
-                    {onetimeForm(props.item.marketplaceItem.prices[0], false)}
+                    {renderOneTimePriceForm(props.item.marketplaceItem.prices[0], false)}
                 </div>
             );
         }
