@@ -112,7 +112,7 @@
         #region eCommerce Fields
         public bool AllowPurchase { get; set; }
         public string PaymentProductId { get; set; }
-        public long Price { get; set; }
+        public List<ProductPrice> Prices { get; set; } = new List<ProductPrice>();
         #endregion
 
     }
@@ -172,5 +172,15 @@
         public string Target { get; set; }
     }
 
-
+    /// <summary>
+    /// This contains the structure to use for prices to a marketplace item. 
+    /// </summary>
+    [BsonIgnoreExtraElements]
+    public class ProductPrice
+    {
+        public long Amount { get; set; }
+        public string BillingPeriod { get; set; }
+        public string Description { get; set; }
+        public string PriceId { get; set; }
+    }
 }

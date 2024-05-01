@@ -275,7 +275,7 @@
                     //eCommerce fields
                     AllowPurchase = entity.AllowPurchase,
                     PaymentProductId = entity.PaymentProductId,
-                    Price = entity.Price
+                    Prices = entity.Prices
                 };
                 //get additional data under certain scenarios
                 if (verbose)

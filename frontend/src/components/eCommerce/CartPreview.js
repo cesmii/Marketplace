@@ -4,7 +4,7 @@ import { Form, Col } from 'react-bootstrap'
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
 import { generateLogMessageString } from '../../utils/UtilityService';
 import { removeCartItem, updateCart } from '../../utils/CartUtil';
-import CartItem from './CartItem';
+import CartItem from './MarketplaceCartItem';
 
 const CLASS_NAME = "CartPreview";
 
@@ -150,7 +150,6 @@ function CartPreview() {
                 </Fragment>
             );
         });
-
 
         return (
             <div className="mb-2">

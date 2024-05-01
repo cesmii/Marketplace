@@ -116,7 +116,7 @@
         #region eCommerce Fields
         public bool AllowPurchase { get; set; } = true;
         public string PaymentProductId { get; set; }
-        public long Price { get; set; }
+        public List<Data.Entities.ProductPrice> Prices { get; set; } = new List<ProductPrice>();
         #endregion
 
         /// <summary>
@@ -222,6 +222,8 @@
     {
         //TBD - append to this model
         public string PaymentProductId { get; set; }
+
+        public string PaymentPriceId { get; set; }
     }
 
 

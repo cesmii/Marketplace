@@ -218,14 +218,13 @@ namespace CESMII.Marketplace.DAL
                         PaymentProductId = mktplItem?.PaymentProductId
                     }, 
                     Credits = entity.Credits,
-                    Price = entity.Price,
                     Quantity = entity.Quantity
                 });
             }
             return result
                 .OrderBy(x => x.MarketplaceItem.DisplayName)
                 .ThenBy(x => x.MarketplaceItem.Name)
-                .ThenByDescending(x => x.Quantity * (x.Price + x.Credits))
+                //.ThenByDescending(x => x.Quantity * (x.Price + x.Credits))
                 .ToList();
         }
 
@@ -248,7 +247,6 @@ namespace CESMII.Marketplace.DAL
                     MarketplaceItemId = MongoDB.Bson.ObjectId.Parse(model.MarketplaceItem.ID),
                     Credits = model.Credits,
                     Quantity = model.Quantity,
-                    Price = model.Price,
                     StripeId = model.MarketplaceItem.PaymentProductId
                 } );
             }

@@ -147,7 +147,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest("Marketplace|Update|Invalid model");
             }
 
-            if (model.AllowPurchase && model.Price == 0)
+            if (model.AllowPurchase && model.Prices.Count == 0)
             {
                 _logger.LogWarning("AdminMarketplaceController|Update|Price is missing");
                 return BadRequest("AdminMarketplaceController|Update|Price is missing");
@@ -267,7 +267,7 @@ namespace CESMII.Marketplace.Api.Controllers
                     Message = $"Name '{model.Name}' is not unique. Please enter a unique name."
                 });
             }
-            else if (model.AllowPurchase && model.Price == 0)
+            else if (model.AllowPurchase && model.Prices.Count == 0)
             {
                 _logger.LogWarning("AdminMarketplaceController|Add|Price is missing");
                 return BadRequest("AdminMarketplaceController|Add|Price is missing");

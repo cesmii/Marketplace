@@ -20,6 +20,7 @@ import ConfirmationModal from '../../components/ConfirmationModal';
 import { WysiwygEditor } from '../../components/WysiwygEditor';
 import AdminImageList from './shared/AdminImageList';
 import AdminRelatedItemList from './shared/AdminRelatedItemList';
+import AdminPriceList from './shared/AdminPriceList';
 import AdminActionLinkList from './shared/AdminActionLinkList'
 
 import { SVGIcon } from "../../components/SVGIcon";
@@ -616,7 +617,7 @@ function AdminMarketplaceEntity() {
         //trigger api call to get latest. 
         setRefreshImageData(true);
     }
-
+    
     //-------------------------------------------------------------------
     // Region: Event handler - related items, related external items
     //-------------------------------------------------------------------
@@ -646,6 +647,16 @@ function AdminMarketplaceEntity() {
         match.caption = arg.caption;
         match.target = arg.target;
         match.iconName = arg.iconName;
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    const onChangePrice = (arg) => {
+        console.log(generateLogMessageString('onChangePrice', CLASS_NAME));
+        var match = item.prices.find(x => x.id === arg.id);
+        match.amount = arg.amount;
+        match.billingPeriod = arg.billingPeriod;
+        match.description = arg.description;
+        match.priceId = arg.priceId;
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
@@ -681,6 +692,14 @@ function AdminMarketplaceEntity() {
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
+    const onAddPrice = () => {
+        console.log(generateLogMessageString('onAddPrice', CLASS_NAME));
+        //we need to be aware of newly added rows and those will be signified by a negative -id. 
+        var id = (-1) * (item.prices == null ? 1 : item.prices.length + 1);
+        item.prices.push({ id: id, amount: 0, billingPeriod: 'OneTime', description: '', priceId: '' });
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
     const onDeleteRelatedItem = (id) => {
         console.log(generateLogMessageString('onDeleteRelatedItem', CLASS_NAME));
         //make a copy of the array 
@@ -698,6 +717,12 @@ function AdminMarketplaceEntity() {
     const onDeleteActionLink = (id) => {
         console.log(generateLogMessageString('onDeleteActionLink', CLASS_NAME));
         item.actionLinks = item.actionLinks.filter(x => x.id !== id);
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    const onDeletePrice = (id) => {
+        console.log(generateLogMessageString('onDeletePrice', CLASS_NAME));
+        item.prices = item.prices.filter(x => x.id !== id);
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
@@ -998,6 +1023,22 @@ function AdminMarketplaceEntity() {
         );
     };
 
+    const renderPrices = () => {
+        return (
+            <>
+                <div className="row mt-2">
+                    <div className="col-12">
+                        <AdminPriceList caption="Prices" captionAdd="Add Price"
+                            items={item.prices} itemsLookup={_itemsLookup?.lookupItems?.filter(x => x.id !== item.id)}
+                            type={AppSettings.itemTypeCode.smApp} onChangeItem={onChangePrice}
+                            onAdd={onAddPrice} onDelete={onDeletePrice}
+                            />
+                    </div>
+                </div>
+            </>
+        );
+    };
+
     const renderActionLinks = () => {
         return (
             <div className="row">
@@ -1194,13 +1235,14 @@ function AdminMarketplaceEntity() {
                         </Form.Group>
                     </div>
                 </div>
-                <div className="row mt-2">
-                    <div className="col-sm-6 col-lg-4">
-                        <Form.Group>
-                            <Form.Label>Price</Form.Label>
-                            <Form.Control id="price" type="" placeholder="" value={item.price == null ? '' : item.price} onChange={onChange} readOnly={isReadOnly || !item.allowPurchase} />
-                        </Form.Group>
-                    </div>
+                <div >
+                    {renderPrices()}
+                    {/*<div className="col-sm-6 col-lg-4">*/}
+                    {/*    <Form.Group>*/}
+                    {/*        <Form.Label>Price</Form.Label>*/}
+                    {/*        <Form.Control id="price" type="" placeholder="" value={item.price == null ? '' : item.price} onChange={onChange} readOnly={isReadOnly || !item.allowPurchase} />*/}
+                    {/*    </Form.Group>*/}
+                    {/*</div>*/}
                 </div>
             </>
         );

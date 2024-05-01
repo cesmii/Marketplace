@@ -268,7 +268,7 @@
                     //new eCommerce fields
                     AllowPurchase = entity.AllowPurchase,
                     PaymentProductId = entity.PaymentProductId,
-                    Price = entity.Price
+                    Prices = entity.Prices
                 };
                 if (verbose)
                 {
@@ -450,7 +450,7 @@
             //new eCommerce fields
             entity.AllowPurchase = model.AllowPurchase;
             entity.PaymentProductId = model.PaymentProductId;
-            entity.Price = model.Price;
+            entity.Prices = model.Prices;
         }
 
         /// <summary>

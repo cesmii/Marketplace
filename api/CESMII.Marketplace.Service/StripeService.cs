@@ -38,24 +38,31 @@ namespace CESMII.Marketplace.Service
 
             var options = new Stripe.Checkout.SessionCreateOptions
             {
-                UiMode = "embedded",
-                Mode = "payment",
+                UiMode = "embedded",                
                 ReturnUrl = item.ReturnUrl,
                 LineItems = new List<SessionLineItemOptions>()
             };
 
             foreach(var cartItem in item.Items)
             {
-                var price = await GetPriceByProductId(cartItem.MarketplaceItem.PaymentProductId);
+                if (cartItem.MarketplaceItem.PaymentPriceId == null)
+                {
+                    _logger.LogError("StripeService|DoCheckout|Cannot get price with payment price id.");
+                    throw new ArgumentException("Cannot get price with payment price id.");
+                }
+
+                var price = await GetPriceById(cartItem.MarketplaceItem.PaymentPriceId);
                 if (price == null)
                 {
-                    _logger.LogError("StripeService|DoCheckout|Cannot get price with payment product id.");
-                    throw new ArgumentException("Cannot get price with payment product id.");
+                    _logger.LogError("StripeService|DoCheckout|Cannot get price with payment price id.");
+                    throw new ArgumentException("Cannot get price with payment price id.");
                 }
+
+                options.Mode = price.Type == "one_time" ? "payment" : "subscription";
 
                 options.LineItems.Add(new SessionLineItemOptions
                 {
-                    Price = price.Id,
+                    Price = cartItem.MarketplaceItem.PaymentPriceId,
                     Quantity = cartItem.Quantity,
                 });
             }
@@ -121,7 +128,7 @@ namespace CESMII.Marketplace.Service
             return products;
         }
 
-        public async Task<IEnumerable<Price>> GetPrices()
+        public async Task<IEnumerable<Stripe.Price>> GetPrices()
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
 
@@ -182,7 +189,7 @@ namespace CESMII.Marketplace.Service
             return true;
         }
 
-        public async Task<Price> DeletePrice(Price price)
+        public async Task<Stripe.Price> DeletePrice(Stripe.Price price)
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
 
@@ -203,7 +210,6 @@ namespace CESMII.Marketplace.Service
             {
                 Name = item.DisplayName ?? string.Empty,
                 Description = item.Abstract == null ? string.Empty : item.Abstract.Replace("<p>", "").Replace("</p>", ""),
-                DefaultPriceData = new ProductDefaultPriceDataOptions { UnitAmountDecimal = item.Price, Currency = "usd" }
             };
             
             var serviceProduct = new ProductService();
@@ -213,6 +219,22 @@ namespace CESMII.Marketplace.Service
 
             _logger.LogInformation($"StripeService|AddProduct|Product added: {product.Id}|{product.Name}.");
             await _stripeLogDal.Add(new StripeAuditLogModel { Type = "AddProduct", Message = product.ToJson() }, "");
+
+            var priceService = new PriceService();
+            foreach (var price in item.Prices)
+            {
+                var priceOption = new PriceCreateOptions
+                {
+                    Product = product.Id,
+                    UnitAmountDecimal = price.Amount,
+                    Nickname = price.Description,
+                    Currency = "usd",
+                };
+                // TODO add subscription type.
+
+                var newPrice = await priceService.CreateAsync(priceOption);
+                price.PriceId = newPrice.Id;
+            }
 
             //TBD - now set price for item - pull info from marketplace item
             //TBD - update product id into paymentProductId field and either save here or save in calling method.
@@ -235,7 +257,6 @@ namespace CESMII.Marketplace.Service
             {
                 Name = item.DisplayName ?? string.Empty,
                 Description = item.Abstract == null ? string.Empty : item.Abstract.Replace("<p>","").Replace("</p>", ""),
-                //DefaultPrice = //update marketplace item to support passing price
             };
 
             var serviceProduct = new ProductService();
@@ -245,20 +266,21 @@ namespace CESMII.Marketplace.Service
 
             _logger.LogInformation($"StripeService|UpdateProduct|Product updated: {product.Id}|{product.Name}.");
 
-            var prices = await GetPricesByProductId(item.PaymentProductId);
-            if (prices.Count(pr => pr.UnitAmountDecimal == item.Price) == 0)
-            {
-                var servicePrice = new PriceService();
-                var optionsPrice = new PriceCreateOptions
-                {
-                    UnitAmount = item.Price,
-                    Currency = "usd",
-                    Product = item.PaymentProductId,
-                    Active = true
-                };
+            // TODO Prices
+            //var prices = await GetPricesByProductId(item.PaymentProductId);
+            //if (prices.Count(pr => pr.UnitAmountDecimal == item.Price) == 0)
+            //{
+            //    var servicePrice = new PriceService();
+            //    var optionsPrice = new PriceCreateOptions
+            //    {
+            //        UnitAmount = item.Price,
+            //        Currency = "usd",
+            //        Product = item.PaymentProductId,
+            //        Active = true
+            //    };
 
-                product.DefaultPrice = await servicePrice.CreateAsync(optionsPrice);
-            }
+            //    product.DefaultPrice = await servicePrice.CreateAsync(optionsPrice);
+            //}
 
             _logger.LogInformation($"StripeService|UpdateProduct|Product price updated: {product.Id}|{product.Name}.");
             await _stripeLogDal.Add(new StripeAuditLogModel { Type = "UpdateProduct", Message = product.ToJson() }, "");
@@ -303,7 +325,7 @@ namespace CESMII.Marketplace.Service
             return null;
         }
 
-        private async Task<IEnumerable<Price>> GetPricesByProductId(string paymentProductId)
+        private async Task<IEnumerable<Stripe.Price>> GetPricesByProductId(string paymentProductId)
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
 
@@ -316,7 +338,21 @@ namespace CESMII.Marketplace.Service
             return prices.ToList();
         }
 
-        private async Task<Price?> GetPriceByProductId(string paymentProductId)
+        private async Task<Stripe.Price?> GetPriceById(string paymentPriceId)
+        {
+            StripeConfiguration.ApiKey = _config.SecretKey;
+
+            // Fetch all prices
+            var priceService = new PriceService();
+            var price = await priceService.GetAsync(paymentPriceId);
+
+            if (price == null)
+                return null;
+
+            return price;
+        }
+
+        private async Task<Stripe.Price?> GetPriceByProductId(string paymentProductId)
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
 

@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button'
 
 import { useLoadingContext } from "../contexts/LoadingContext";
 import { generateLogMessageString } from '../../utils/UtilityService';
-import CartItem from './CartItem';
+import CartItem from './MarketplaceCartItem';
 import { updateCart } from '../../utils/CartUtil';
 import _icon from '../img/icon-cesmii-white.png'
 import '../styles/Modal.scss';
@@ -91,8 +91,8 @@ function CartAddModal(props) {
                         <span className="headline-3">Add to Cart</span>
                     </Modal.Title>
                 </Modal.Header>
-                <Modal.Body className="my-1 py-2">
-                    <CartItem item={_item} isAdd={true} onChange={onChange} onValidate={onValidate} className="col-8 mx-auto" />
+                <Modal.Body >                    
+                    <CartItem item={_item} isAdd={true} onChange={onChange} onValidate={onValidate} />                                      
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="text-solo" className="mx-1" onClick={onCancel} >Cancel</Button>
