@@ -19,7 +19,10 @@
 
         public string UpdatedById { get; set; }
 
-        public long Credits { get; set; }
+        [Obsolete("This will go away in favor of a bool to use or not use credits.")]
+        public long? Credits { get; set; }
+
+        public bool UseCredits { get; set; } = false;
 
         [DisplayFormat(DataFormatString = "{0:d}")]
         public DateTime? Updated { get; set; }

@@ -230,7 +230,7 @@ function Cart() {
                     </div>
                 </div>
                 <div className="row" >
-                    <div className="col-sm-6 mb-4 mx-auto">
+                    <div className="col-sm-6 mt-3 mb-4 mx-auto">
                         <CartPreview />
                     </div>
                 </div>

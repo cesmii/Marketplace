@@ -6,7 +6,7 @@
 //-------------------------------------------------------------------
 // add to cart
 //-------------------------------------------------------------------
-export function updateCart(cart, item, quantity, overwrite = false) {
+export function updateCart(cart, item, quantity, selectedPrice, overwrite = false) {
 
     if (cart == null) cart = {};
     if (cart.items == null) cart.items = [];
@@ -14,10 +14,11 @@ export function updateCart(cart, item, quantity, overwrite = false) {
     //loop through cart and see if item is there. If not, add, if there, add new quantity to existing.
     let cartItem = cart.items.find(x => { return x.marketplaceItem?.id === item?.id; });
     if (cartItem == null) {
-        cartItem = { marketplaceItem: item, quantity: quantity };
+        cartItem = { marketplaceItem: item, quantity: quantity, selectedPrice: selectedPrice };
         cart.items.push(cartItem);
     }
     else {
+        cartItem.selectedPrice = selectedPrice;
         cartItem.quantity = overwrite ? quantity : cartItem.quantity + quantity;
     }
     return cart;

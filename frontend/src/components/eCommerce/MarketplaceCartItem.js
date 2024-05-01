@@ -1,10 +1,9 @@
-import React, { useState, useEffect, Fragment } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Form, Col, Card } from 'react-bootstrap'
 import { validateCartItem_Quantity } from '../../utils/CartUtil';
 import { generateLogMessageString } from '../../utils/UtilityService';
 import _icon from '../img/icon-cesmii-white.png'
 import '../styles/Modal.scss';
-import { useLoadingContext } from "../contexts/LoadingContext";
 
 const CLASS_NAME = "CartItem";
 
@@ -13,9 +12,9 @@ function CartItem(props) {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_isValid, setIsValid] = useState({ required: true, range: true, numeric: true });
     const [_quantity, setQuantity] = useState(null);
+    const [_selectedPrice, setSelectedPrice] = useState(null);
 
     //-------------------------------------------------------------------
     // Region: Hooks
@@ -23,18 +22,20 @@ function CartItem(props) {
     useEffect(() => {
         setQuantity(props.item.quantity);
 
-        if (props.item.marketplaceItem.paymentPriceId != null) {
-            props.item.marketplaceItem.prices.map((price, i) => {
-                if (price.priceId == props.item.marketplaceItem.paymentPriceId) {
-                    price.isSelected = true;
-                }
-            });
-        }
         //this will execute on unmount
         return () => {
             //console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
         };
     }, [props.item.quantity]);
+
+    useEffect(() => {
+        setSelectedPrice(props.item.selectedPrice);
+
+        //this will execute on unmount
+        return () => {
+            //console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
+        };
+    }, [props.item.selectedPrice]);
 
     //-------------------------------------------------------------------
     // Region: Event Handling
@@ -45,7 +46,7 @@ function CartItem(props) {
 
         //note you must update the state value for the input to be read only. It is not enough to simply have the onChange handler.
         //note the use of the name property rather than id because of the row grid type nature of this component.
-        switch (e.target.name) {
+        switch (e.target.id) {
             case "quantity":
                 //update the state
                 let qty = 0;
@@ -59,12 +60,18 @@ function CartItem(props) {
                     qty = parseInt(e.target.value);
                 }
                 if (props.onChange != null) props.onChange(props.item.marketplaceItem, qty);
-
+                break;
             default:
                 console.log(e);
-return;
+                return;
         }
     }
+
+    const onSelectPrice = (price) => {
+        //console.log(generateLogMessageString(`onEntityChange||e:${e.target}`, CLASS_NAME));
+        if (props.onSelectPrice != null) props.onSelectPrice(props.item.marketplaceItem, price);
+    }
+
 
     const onRemoveItem = (e) => {
         console.log(generateLogMessageString('onRemoveItem', CLASS_NAME));
@@ -81,95 +88,93 @@ return;
         if (props.onValidate != null) props.onValidate(props.item.marketplaceItem?.id, result);
     };
 
-    const renderOneTimePriceForm = (price, showRadio) => {
+    const renderSelectItem = (price, counter) => {
+        const id = `${price.billingPeriod}-${price.description}-${price.amount}-${counter}`;
+        return (
+            <Form.Check type={"radio"} >
+                <Form.Check.Input type={"radio"} name="rbgPriceSelection" id={id} checked={price == null ? false : price.isSelected}
+                    onClick={(e) => {
+                        if (e.target.checked) {
+                            onSelectPrice(price);
+                        }
+                    }}
+                />
+                <Form.Check.Label htmlFor={id} >{price.description}</Form.Check.Label>
+            </Form.Check>
+        )
+    }
+
+    const renderQuantity = () => {
+        return (
+            <div className="row" >
+                <div className="col-8 col-lg-9 text-right align-content-center" >
+                    <Form.Label htmlFor={`quantity`} >Quantity</Form.Label>
+                    {!_isValid.required &&
+                        <span className="invalid-field-message inline">
+                            Required
+                        </span>
+                    }
+                    {!_isValid.range &&
+                        <span className="invalid-field-message inline">
+                            Enter a number greater than 0
+                        </span>
+                    }
+                    {!_isValid.numeric &&
+                        <span className="invalid-field-message inline">
+                            Enter a valid integer
+                        </span>
+                    }
+                </div>
+                <div className="col-4 col-lg-3 align-content-center" >
+                    <Form.Control id="quantity" className={`minimal text-right ${!(_isValid.required || _isValid.numeric || _isValid.range) ? 'invalid-field' : ''}`}
+                        value={_quantity == null ? '' : _quantity} onBlur={validateForm_quantity} onChange={onChange} />
+                </div>
+            </div>
+        );
+    };
+
+    const renderPriceItem = (price, counter, showRadio) => {
         return (
             <Form.Group>
                 <Form.Row>
                     {showRadio &&
-                        <Form.Check type={"radio"} >
-                            <Form.Check.Input type={"radio"} name="rbgPriceSelection" id={`price-${price.priceId}`} checked={price.isSelected}
-                                onClick={(e) => {
-                                    if (e.target.checked) {
-                                        props.item.marketplaceItem.paymentPriceId = price.priceId;
-                                    }
-                                }}
-                            />
-                        <Form.Check.Label>{price.description}</Form.Check.Label>
-                        </Form.Check>
+                        renderSelectItem(price, counter)
                     }
                     {!showRadio &&
                         <Col className='d-flex'>
-                            <Form.Label>Price</Form.Label>
+                        <Form.Label>{price.description}</Form.Label>
                         </Col>
                     }
                     <Col className='d-flex'>
                         <Form.Label className='ml-auto'>${price.amount}</Form.Label>
                     </Col>
                 </Form.Row>
-                
-                <Form.Row >
-                    <Col>
-                        <Form.Label htmlFor={`quantity_${props.item.marketplaceItem?.id}`}>Quantity</Form.Label>
-                        {!_isValid.required &&
-                            <span className="invalid-field-message inline">
-                                Required
-                            </span>
-                        }
-                        {!_isValid.range &&
-                            <span className="invalid-field-message inline">
-                                Enter a number greater than 0
-                            </span>
-                        }
-                        {!_isValid.numeric &&
-                            <span className="invalid-field-message inline">
-                                Enter a valid integer
-                            </span>
-                        }
-                    </Col>
-                    <Col>
-                        <Form.Control id={`quantity_${props.item.marketplaceItem?.id}`} name="quantity" className={`minimal text-right ${!(_isValid.required || _isValid.numeric || _isValid.range) ? 'invalid-field' : ''}`}
-                            value={_quantity == null ? '' : _quantity} onBlur={validateForm_quantity} onChange={onChange} />
-                    </Col>
-                </Form.Row>
             </Form.Group>
         );
     };
-
-    const renderOneTimePrice = (price) => {
-        if (price.billingPeriod == "OneTime") {
-            return (
-                <Card body className='elevated my-1'>
-                    {renderOneTimePriceForm(price, true)}
-                </Card>
-            );
-        }
-    };
-
-    const renderRecurringPrice = (price) => {
+    /*
+    const renderRecurringPrice = (price, showRadio) => {
         if (price.billingPeriod == "Yearly" || price.billingPeriod == "SixMonths" || price.billingPeriod == "Monthly" ) {
             return (
-                <Card body className='elevated my-1'>
-                    <Form.Group>                        
-                        <Form.Row>
-                            <Form.Check type={"radio"}>
-                                <Form.Check.Input type={"radio"} name="rbgPriceSelection" id={`price-${price.priceId}`} checked={price.isSelected}
-                                    onClick={(e) => {
-                                        if (e.target.checked) {
-                                            props.item.marketplaceItem.paymentPriceId = price.priceId;
-                                        }
-                                    }}
-                                />
-                                <Form.Check.Label>{price.description}</Form.Check.Label>
-                            </Form.Check>
+                <Form.Group>                        
+                    <Form.Row>
+                        {showRadio &&
+                            renderSelectItem(price)
+                        }
+                        {!showRadio &&
                             <Col className='d-flex'>
-                                <Form.Label className='ml-auto' >${price.amount}</Form.Label>
+                            <Form.Label>{price.description}</Form.Label>
                             </Col>
-                        </Form.Row>
-                    </Form.Group>
-                </Card>
+                        }
+                        <Col className='d-flex'>
+                            <Form.Label className='ml-auto' >${price.amount}</Form.Label>
+                        </Col>
+                    </Form.Row>
+                </Form.Group>
             );
         }
     };
+    */
 
     //-------------------------------------------------------------------
     // Region: Render Helpers
@@ -179,31 +184,33 @@ return;
             return;
         }
 
+        //if we only have one price option, then just display the one
+        if (props.item.marketplaceItem.prices.length == 1) {
+            const selectedPrice = props.item.marketplaceItem.prices[0];
+            props.item.marketplaceItem.selectedPrice = selectedPrice;
+
+            return (
+                <>
+                    {renderPriceItem(selectedPrice, 1, false)}
+                    {renderQuantity()}
+                </>
+            );
+        }
+
+        //multiple price options
         const mainBodySubscription = props.item.marketplaceItem.prices.map((price, i) => {
             return (
-                <Fragment key={i}>
-                    {renderRecurringPrice(price)}
-                    {renderOneTimePrice(price, true)}                        
-                </Fragment>
+                <Card body key={i}className='elevated my-1 rounded'>
+                    {renderPriceItem(price, i, true)}
+                </Card>
             );            
         });
 
-        if (props.item.marketplaceItem.prices.length == 1 &&
-            props.item.marketplaceItem.prices[0].billingPeriod == "OneTime") {
-
-            props.item.marketplaceItem.paymentPriceId = props.item.marketplaceItem.prices[0].priceId;
-
-
-            return (
-                <div >
-                    {renderOneTimePriceForm(props.item.marketplaceItem.prices[0], false)}
-                </div>
-            );
-        }
         return (
-            <div >
+            <>
                 {mainBodySubscription}
-            </div>
+                {renderQuantity()}
+            </>
         );
     };
 
@@ -214,32 +221,28 @@ return;
 
     //return final ui
     return (
-        <Form.Group >
-            <Form.Row>
-                <Col>
-                    <div className="pb-0">
-                        <span className="font-weight-bold mb-1" >{props.item.marketplaceItem.displayName}</span>
-                        {(props.showAbstract && props.item.marketplaceItem.abstract != null) &&
-                            <div dangerouslySetInnerHTML={{ __html: props.item.marketplaceItem.abstract }} ></div>
-                        }                       
-                    </div>
-                </Col>
-                <Col>
-                    {!props.isAdd &&
-                        <Col className='w-25' >
-                            <button className="btn btn-icon-outline circle ml-auto" title="Remove item from cart" onClick={onRemoveItem} >
-                                <i className="material-icons">close</i>
-                            </button>
-                        </Col>
-                    }
-                </Col>
-            </Form.Row>
-            <Form.Row >
-                <Col className='d-flex'>
+        <>
+            <div className="row">
+                <div className={props.isAdd ? 'col-12' : 'col-11'}>
+                    <span className="font-weight-bold mb-1" >{props.item.marketplaceItem.displayName}</span>
+                    {(props.showAbstract && props.item.marketplaceItem.abstract != null) &&
+                        <div dangerouslySetInnerHTML={{ __html: props.item.marketplaceItem.abstract }} ></div>
+                    }                       
+                </div>
+                {!props.isAdd &&
+                <div className="col-1">
+                        <button className="btn btn-icon-outline circle ml-auto" title="Remove item from cart" onClick={onRemoveItem} >
+                            <i className="material-icons">close</i>
+                        </button>
+                </div>
+                }
+            </div>
+            <div className="row">
+                <div className="col-12">
                     {renderForm()}
-                </Col>
-            </Form.Row>
-       </Form.Group>
+                </div>
+            </div>
+       </>
     )
 }
 

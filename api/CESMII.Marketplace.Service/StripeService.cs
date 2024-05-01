@@ -39,7 +39,7 @@ namespace CESMII.Marketplace.Service
             return await DoCheckout(item, null);
         }
 
-        public async Task<CheckoutInitModel> DoCheckout(CartModel item, UserModel user)
+        public async Task<CheckoutInitModel> DoCheckout(CartModel cart, UserModel user)
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
 
@@ -47,22 +47,22 @@ namespace CESMII.Marketplace.Service
             {
                 UiMode = "embedded",
                 //append check out session id
-                ReturnUrl = item.ReturnUrl.TrimEnd(Convert.ToChar("/")) + "/{CHECKOUT_SESSION_ID}",
+                ReturnUrl = cart.ReturnUrl.TrimEnd(Convert.ToChar("/")) + "/{CHECKOUT_SESSION_ID}",
                 LineItems = new List<SessionLineItemOptions>()
             };
 
-            foreach (var cartItem in item.Items)
+            foreach (var cartItem in cart.Items)
             {
-                if (string.IsNullOrEmpty(cartItem.MarketplaceItem.PaymentPriceId))
+                if (cartItem.SelectedPrice == null)
                 {
                     _logger.LogError($"StripeService|DoCheckout|Cannot get price with null or empty payment price id.|Item: {cartItem.MarketplaceItem.Name}");
                     throw new ArgumentException($"Cannot get price with null or empty payment price id for {cartItem.MarketplaceItem.Name}.");
                 }
 
-                var price = await GetPriceById(cartItem.MarketplaceItem.PaymentPriceId);
+                var price = await GetPriceById(cartItem.SelectedPrice.PriceId);
                 if (price == null)
                 {
-                    _logger.LogError($"StripeService|DoCheckout|Cannot get Stripe price for |Item: {cartItem.MarketplaceItem.Name} with payment price id {cartItem.MarketplaceItem.PaymentPriceId}.");
+                    _logger.LogError($"StripeService|DoCheckout|Cannot get Stripe price for |Item: {cartItem.MarketplaceItem.Name} with payment price id {cartItem.SelectedPrice.PriceId}.");
                     throw new ArgumentException($"Cannot get Stripe price info for {cartItem.MarketplaceItem.Name}.");
                 }
 
@@ -70,7 +70,7 @@ namespace CESMII.Marketplace.Service
 
                 options.LineItems.Add(new SessionLineItemOptions
                 {
-                    Price = cartItem.MarketplaceItem.PaymentPriceId,
+                    Price = cartItem.SelectedPrice.PriceId,
                     Quantity = cartItem.Quantity,
                 });
             }
@@ -78,26 +78,30 @@ namespace CESMII.Marketplace.Service
             try
             {
                 //an anonymous user may be checking out. they won't have credits. that is an ok scenario.
-                if (user != null && item.Credits > 0)
+                if (user != null && cart.UseCredits)
                 {
+                    //if they want to use credits && have credits to use, apply here. 
                     var organization = _organizationService.GetByName(user.Organization.Name);
-                    if (organization == null || item.Credits > organization.Credits)
+                    if (organization == null || organization.Credits <= 0)
                     {
                         _logger.LogError("StripeService|DoCheckout|Cannot use credits.");
                         throw new ArgumentException("Cannot use credits.");
                     }
 
+                    //take lesser of credits available or total cost
+                    var numCredits = CalculateCredits(organization.Credits, cart);
+
                     var couponService = new CouponService();
                     var coupon = await couponService.CreateAsync(new CouponCreateOptions
                     {
-                        AmountOff = item.Credits,
+                        AmountOff = numCredits,
                         Duration = "once",
                         Currency = "usd",
                         MaxRedemptions = 1,
                         Name = "Credits Applied"
                     });
 
-                    organization.Credits -= item.Credits;
+                    organization.Credits -= numCredits;
 
                     await _organizationService.Update(organization, user.ID);
 
@@ -111,7 +115,7 @@ namespace CESMII.Marketplace.Service
                 {
                     Type = "CheckoutSessionCreation",
                     Message = session.ToJson(),
-                    CartModel = item,
+                    CartModel = cart,
                     Session = session,
                     SessionCreateOptions = options
                 }, user == null ? null : user.ID);
@@ -128,6 +132,14 @@ namespace CESMII.Marketplace.Service
 
                 throw;
             }
+        }
+
+        private long CalculateCredits(long credits, CartModel cart)
+        {
+            if (!cart.UseCredits) return 0;
+            //sum total cost, note subscription cost is just whatever the amount is
+            var totalCost = cart.Items.Sum(x => x.SelectedPrice.Amount * x.Quantity);
+            return credits >= totalCost ? totalCost : credits;
         }
 
         public async Task<CheckoutStatusModel> GetCheckoutStatus(string sessionId)

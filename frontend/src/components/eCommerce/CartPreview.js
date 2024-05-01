@@ -120,7 +120,7 @@ function CartPreview() {
         const mainBody = cart?.items.map((item, i) => {
             return (
                 <Fragment key={i} >
-                    <CartItem item={item} isAdd={false} onChange={onChange}
+                    <CartItem item={item} isAdd={false} onChange={onChange} showSelectedPriceOnly={true}
                         onValidate={onValidate} onRemoveItem={onRemoveItem} showAbstract={true} className="col-12 mx-auto" />
                     <hr />
                 </Fragment>

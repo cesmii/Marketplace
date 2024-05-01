@@ -222,8 +222,6 @@
     {
         //TBD - append to this model
         public string PaymentProductId { get; set; }
-
-        public string PaymentPriceId { get; set; }
     }
 
 

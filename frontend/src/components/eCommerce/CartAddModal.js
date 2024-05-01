@@ -18,7 +18,7 @@ function CartAddModal(props) {
     //-------------------------------------------------------------------
     const [showModal, setShowModal] = useState(props.showModal);
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const [_item, setItem] = useState({marketplaceItem: props.item, quantity: 1});
+    const [_item, setItem] = useState({marketplaceItem: props.item, quantity: 1, selectedPrice: null });
     const [_isValid, setIsValid] = useState(true);
 
     //-------------------------------------------------------------------
@@ -52,7 +52,7 @@ function CartAddModal(props) {
         }
 
         //add the item to the cart and save context
-        let cart = updateCart(loadingProps.cart, _item.marketplaceItem, _item.quantity);
+        let cart = updateCart(loadingProps.cart, _item.marketplaceItem, _item.quantity, _item.selectedPrice);
         setLoadingProps({ cart: cart });
         if (props.onAdd) props.onAdd();
     };
@@ -65,9 +65,14 @@ function CartAddModal(props) {
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
-    const onChange = (item, qty) => {
+    const onChange = (itm, qty) => {
         console.log(generateLogMessageString('onChange', CLASS_NAME));
-        setItem({ marketplaceItem: item, quantity: qty });
+        setItem({ ..._item, marketplaceItem: itm, quantity: qty });
+    };
+
+    const onSelectPrice = (itm, price) => {
+        console.log(generateLogMessageString('onSelectPrice', CLASS_NAME));
+        setItem({ ..._item, marketplaceItem: itm, selectedPrice: price });
     };
 
     //-------------------------------------------------------------------
@@ -91,8 +96,8 @@ function CartAddModal(props) {
                         <span className="headline-3">Add to Cart</span>
                     </Modal.Title>
                 </Modal.Header>
-                <Modal.Body >                    
-                    <CartItem item={_item} isAdd={true} onChange={onChange} onValidate={onValidate} />                                      
+                <Modal.Body >
+                    <CartItem item={_item} isAdd={true} onChange={onChange} onSelectPrice={onSelectPrice} onValidate={onValidate} />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="text-solo" className="mx-1" onClick={onCancel} >Cancel</Button>

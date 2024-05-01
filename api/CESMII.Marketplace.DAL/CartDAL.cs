@@ -245,7 +245,7 @@ namespace CESMII.Marketplace.DAL
             {
                 result.Add(new CartItem() { 
                     MarketplaceItemId = MongoDB.Bson.ObjectId.Parse(model.MarketplaceItem.ID),
-                    Credits = model.Credits,
+                    Credits = model.Credits.HasValue ? model.Credits.Value : 0,
                     Quantity = model.Quantity,
                     StripeId = model.MarketplaceItem.PaymentProductId
                 } );
