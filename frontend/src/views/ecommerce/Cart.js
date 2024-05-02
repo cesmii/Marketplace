@@ -229,8 +229,8 @@ function Cart() {
                         </h1>
                     </div>
                 </div>
-                <div className="row" >
-                    <div className="col-sm-6 mt-3 mb-4 mx-auto">
+                <div className="row my-3 mx-2 mx-lg-0" >
+                    <div className="col-12 col-md-10 col-lg-6 my-2 p-3 p-md-4 mx-sm-auto bg-white rounded border">
                         <CartPreview />
                     </div>
                 </div>
@@ -240,7 +240,7 @@ function Cart() {
                 <>
                 <div className="row" >
                     <div className="col-7 mx-auto pt-2 text-center">
-                        <Button variant="secondary" type="button" className="mx-3" onClick={onEmptyCart} >Empty Cart</Button>
+                        <Button variant="secondary" type="button" className="mx-3 mb-3" onClick={onEmptyCart} >Empty Cart</Button>
                         <Button variant="primary" type="button" className="mx-3" onClick={onCheckout} >Checkout</Button>
                     </div>
                 </div>

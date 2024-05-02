@@ -44,7 +44,7 @@ function CartPreview() {
 
         var cart = JSON.parse(JSON.stringify(loadingProps.cart));
         cart.useCredits = e.target.checked;
-        setLoadingProps({ cart: cart});
+        setLoadingProps({ cart: cart });
     };
 
     //-------------------------------------------------------------------
@@ -66,8 +66,18 @@ function CartPreview() {
 
 
     //-------------------------------------------------------------------
-    // Region: Get data 
+    // Region: helper methods
     //-------------------------------------------------------------------
+    const calculateSubTotal = (cart) => {
+        return cart.items.reduce((total, itm) => total + itm.selectedPrice.amount * itm.quantity, 0)
+    }
+    const calculateCredits = (cart) => {
+        if (_useCredits) {
+            const subTotal = calculateSubTotal(cart);
+            return loadingProps.user.credit >= subTotal ? subTotal : loadingProps.user.credit;
+        }
+        return null;
+    }
 
     //-------------------------------------------------------------------
     // Region: Render helpers
@@ -104,6 +114,46 @@ function CartPreview() {
         );
     }
 
+    const renderTotals = (cart) => {
+
+        const subTotal = calculateSubTotal(cart);
+        const credits = calculateCredits(cart);
+        const total = credits == null ? subTotal : subTotal - credits;
+
+        return (
+            <>
+                {credits != null && 
+                <>
+                    <div className="row m-0 pt-1 mt-1 border-bottom font-weight-bold">
+                        <div className="col-8">
+                            Sub-Total
+                        </div>
+                        <div className="col-4 text-right">
+                            ${subTotal}
+                        </div>
+                    </div>
+                    <div className="row m-0 pt-1 mt-1 border-bottom font-weight-bold">
+                        <div className="col-8">
+                            Credits Applied
+                        </div>
+                        <div className="col-4 text-right">
+                            ${credits}
+                        </div>
+                    </div>
+                </>
+                }
+                <div className="row m-0 pt-1 mt-1 font-weight-bold">
+                    <div className="col-8">
+                        Total
+                    </div>
+                    <div className="col-4 text-right">
+                        ${total}
+                    </div>
+                </div>
+            </>
+        );
+    }
+
     const renderUseCredits = (cart) => {
 
         if (cart?.items == null || cart?.items.length === 0 ||
@@ -112,8 +162,8 @@ function CartPreview() {
         }
 
         return (
-            <div className="text-center">
-                <p>Your organization has <b>{loadingProps.user.credit} {loadingProps.user.credit === 1? 'credit' : 'credits' }</b> available to apply to this purchase.</p>
+            <div className="text-center border-top mt-3 pt-2">
+                <p>Your organization has <b>${loadingProps.user.credit} {loadingProps.user.credit === 1? 'credit' : 'credits' }</b> available to apply to this purchase.</p>
                 <Form.Group>
                     <Form.Check className="align-self-end" type="checkbox" id="useCredits" label="Use credits for this purchase?" 
                         checked={_useCredits} onChange={onChangeChecked} />
@@ -128,6 +178,7 @@ function CartPreview() {
     return (
         <>
             {renderCartItems(loadingProps.cart)}
+            {renderTotals(loadingProps.cart)}
             {renderUseCredits(loadingProps.cart)}
         </>
     )

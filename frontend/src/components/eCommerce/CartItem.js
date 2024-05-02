@@ -193,7 +193,7 @@ function CartItem(props) {
         const pricesHtml = pricesFiltered.map((price, i) => {
             return (
                 <Fragment key={i} >
-                    {props.item.marketplaceItem.prices.length === 1 ?
+                    {pricesFiltered.length === 1 ?
                         //if we only have one price option, then just display the one w/o the elevated card
                         renderPriceItem(price, i, false)
                         :
@@ -222,8 +222,8 @@ function CartItem(props) {
     //return final ui
     return (
         <>
-            <div className="row">
-                <div className={props.isAdd ? 'col-12' : 'col-11'}>
+            <div className="row m-0">
+                <div className={props.isAdd ? 'col-12 pl-0' : 'col-11 pl-0'}>
                     <span className="font-weight-bold mb-1" >{props.item.marketplaceItem.displayName}</span>
                     {(props.showAbstract && props.item.marketplaceItem.abstract != null) &&
                         <div dangerouslySetInnerHTML={{ __html: props.item.marketplaceItem.abstract }} ></div>
@@ -237,7 +237,7 @@ function CartItem(props) {
                     </div>
                 }
             </div>
-            <div className="row">
+            <div className="row m-0">
                 <div className="col-12">
                     {renderPrices()}
                 </div>
