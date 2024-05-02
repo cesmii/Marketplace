@@ -65,14 +65,9 @@ function CartAddModal(props) {
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
-    const onChange = (itm, qty) => {
+    const onChange = (itm, qty, price) => {
         console.log(generateLogMessageString('onChange', CLASS_NAME));
-        setItem({ ..._item, marketplaceItem: itm, quantity: qty });
-    };
-
-    const onSelectPrice = (itm, price) => {
-        console.log(generateLogMessageString('onSelectPrice', CLASS_NAME));
-        setItem({ ..._item, marketplaceItem: itm, selectedPrice: price });
+        setItem({ ..._item, marketplaceItem: itm, quantity: qty, selectedPrice: price });
     };
 
     //-------------------------------------------------------------------
@@ -97,7 +92,7 @@ function CartAddModal(props) {
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body >
-                    <CartItem item={_item} isAdd={true} onChange={onChange} onSelectPrice={onSelectPrice} onValidate={onValidate} />
+                    <CartItem item={_item} isAdd={true} onChange={onChange} showSelectedPriceOnly={false} onValidate={onValidate} />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="text-solo" className="mx-1" onClick={onCancel} >Cancel</Button>

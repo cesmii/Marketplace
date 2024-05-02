@@ -81,10 +81,10 @@ function CartPreview() {
         if (loadingProps.onValidate != null) loadingProps.onValidate(loadingProps.user.usedcredit, result);
     };
 
-    const onChange = (item, qty) => {
+    const onChange = (item, qty, price) => {
         console.log(generateLogMessageString(`onChange`, CLASS_NAME));
         //add the item to the cart and save context
-        let cart = updateCart(loadingProps.cart, item, qty, true); //overwrite existing amount
+        let cart = updateCart(loadingProps.cart, item, qty, price, true); //overwrite existing amount
         setLoadingProps({ cart: cart });
     };
 

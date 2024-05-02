@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Fragment } from 'react'
 import { Form, Col, Card } from 'react-bootstrap'
 import { validateCartItem_Quantity } from '../../utils/CartUtil';
 import { generateLogMessageString } from '../../utils/UtilityService';
@@ -14,7 +14,6 @@ function CartItem(props) {
     //-------------------------------------------------------------------
     const [_isValid, setIsValid] = useState({ required: true, range: true, numeric: true });
     const [_quantity, setQuantity] = useState(null);
-    const [_selectedPrice, setSelectedPrice] = useState(null);
 
     //-------------------------------------------------------------------
     // Region: Hooks
@@ -28,14 +27,14 @@ function CartItem(props) {
         };
     }, [props.item.quantity]);
 
-    useEffect(() => {
-        setSelectedPrice(props.item.selectedPrice);
-
-        //this will execute on unmount
-        return () => {
-            //console.log(generateLogMessageString('useEffect||Cleanup', CLASS_NAME));
-        };
-    }, [props.item.selectedPrice]);
+    //-------------------------------------------------------------------
+    // Region: helper methods
+    //-------------------------------------------------------------------
+    //we don't have a unique id, combine fields to produce a unique id
+    const getPriceId = (price, counter = 0) => {
+        if (price == null) return null;
+        return `${price.priceId}-${price.billingPeriod}-${price.description}-${price.amount}-${counter}`;
+    }
 
     //-------------------------------------------------------------------
     // Region: Event Handling
@@ -59,7 +58,7 @@ function CartItem(props) {
                 else {
                     qty = parseInt(e.target.value);
                 }
-                if (props.onChange != null) props.onChange(props.item.marketplaceItem, qty);
+                if (props.onChange != null) props.onChange(props.item.marketplaceItem, qty, props.item.selectedPrice);
                 break;
             default:
                 console.log(e);
@@ -69,9 +68,8 @@ function CartItem(props) {
 
     const onSelectPrice = (price) => {
         //console.log(generateLogMessageString(`onEntityChange||e:${e.target}`, CLASS_NAME));
-        if (props.onSelectPrice != null) props.onSelectPrice(props.item.marketplaceItem, price);
+        if (props.onChange != null) props.onChange(props.item.marketplaceItem, props.item.quantity, price);
     }
-
 
     const onRemoveItem = (e) => {
         console.log(generateLogMessageString('onRemoveItem', CLASS_NAME));
@@ -89,11 +87,12 @@ function CartItem(props) {
     };
 
     const renderSelectItem = (price, counter) => {
-        const id = `${price.billingPeriod}-${price.description}-${price.amount}-${counter}`;
+        const id = getPriceId(price, counter);
+        const selectedId = getPriceId(props.item?.selectedPrice, counter);
         return (
             <Form.Check type={"radio"} >
-                <Form.Check.Input type={"radio"} name="rbgPriceSelection" id={id} checked={price == null ? false : price.isSelected}
-                    onClick={(e) => {
+                <Form.Check.Input type={"radio"} name="rbgPriceSelection" id={id} checked={id == selectedId}
+                    onChange={(e) => {
                         if (e.target.checked) {
                             onSelectPrice(price);
                         }
@@ -179,36 +178,37 @@ function CartItem(props) {
     //-------------------------------------------------------------------
     // Region: Render Helpers
     //-------------------------------------------------------------------
-    const renderForm = () => {
+    const renderPrices = () => {
         if (props == null || props.item.marketplaceItem?.prices == null) {
             return;
         }
 
-        //if we only have one price option, then just display the one
-        if (props.item.marketplaceItem.prices.length == 1) {
-            const selectedPrice = props.item.marketplaceItem.prices[0];
-            props.item.marketplaceItem.selectedPrice = selectedPrice;
+        //if only show selected, trim down list to selected item only
+        var pricesFiltered = props.item.marketplaceItem.prices.filter((x, counter) => {
+            const id = getPriceId(x, counter);
+            const selectedId = getPriceId(props.item?.selectedPrice, counter);
+            return !props.showSelectedPriceOnly ? true : id === selectedId;
+        });
 
+        const pricesHtml = pricesFiltered.map((price, i) => {
             return (
-                <>
-                    {renderPriceItem(selectedPrice, 1, false)}
-                    {renderQuantity()}
-                </>
-            );
-        }
-
-        //multiple price options
-        const mainBodySubscription = props.item.marketplaceItem.prices.map((price, i) => {
-            return (
-                <Card body key={i}className='elevated my-1 rounded'>
-                    {renderPriceItem(price, i, true)}
-                </Card>
+                <Fragment key={i} >
+                    {props.item.marketplaceItem.prices.length === 1 ?
+                    //if we only have one price option, then just display the one w/o the elevated card
+                    renderPriceItem(price, i, false)
+                    :
+                    //else - multiple price options w/ card layout
+                    <Card body key={i} className='elevated my-1 rounded'>
+                        {renderPriceItem(price, i, true)}
+                    </Card>
+                    }
+                </Fragment>
             );            
         });
 
         return (
             <>
-                {mainBodySubscription}
+                {pricesHtml}
                 {renderQuantity()}
             </>
         );
@@ -239,7 +239,7 @@ function CartItem(props) {
             </div>
             <div className="row">
                 <div className="col-12">
-                    {renderForm()}
+                    {renderPrices()}
                 </div>
             </div>
        </>
