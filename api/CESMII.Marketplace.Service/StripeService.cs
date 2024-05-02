@@ -263,20 +263,9 @@ namespace CESMII.Marketplace.Service
             _logger.LogInformation($"StripeService|AddProduct|Product added: {product.Id}|{product.Name}.");
             await _stripeLogDal.Add(new StripeAuditLogModel { Type = "AddProduct", Message = product.ToJson() }, "");
 
-            var priceService = new PriceService();
             foreach (var price in item.Prices)
             {
-                var priceOption = new PriceCreateOptions
-                {
-                    Product = product.Id,
-                    UnitAmountDecimal = price.Amount,
-                    Nickname = price.Description,
-                    Currency = "usd",
-                };
-                // TODO add subscription type.
-
-                var newPrice = await priceService.CreateAsync(priceOption);
-                price.PriceId = newPrice.Id;
+                await AddStripePrice(item, price);
             }
 
             //TBD - now set price for item - pull info from marketplace item
@@ -295,6 +284,21 @@ namespace CESMII.Marketplace.Service
                 throw new ArgumentException("Cannot update product with null payment product id.");
             }
 
+            // TODO Prices
+            var stripPrices = await GetPricesByProductId(item.PaymentProductId);
+
+            foreach (var price in item.Prices)
+            {
+                if (!string.IsNullOrEmpty(price.PriceId) && stripPrices.Count(pr => pr.Id == price.PriceId && pr.UnitAmountDecimal == price.Amount) == 1)
+                {
+                    continue;
+                }
+
+                await AddStripePrice(item, price);
+            }
+
+            // TODO Delete removed prices.
+
             //map stuff from marketplace item to ProductUpdateOptions object
             var itemUpdate = new ProductUpdateOptions
             {
@@ -309,26 +313,35 @@ namespace CESMII.Marketplace.Service
 
             _logger.LogInformation($"StripeService|UpdateProduct|Product updated: {product.Id}|{product.Name}.");
 
-            // TODO Prices
-            //var prices = await GetPricesByProductId(item.PaymentProductId);
-            //if (prices.Count(pr => pr.UnitAmountDecimal == item.Price) == 0)
-            //{
-            //    var servicePrice = new PriceService();
-            //    var optionsPrice = new PriceCreateOptions
-            //    {
-            //        UnitAmount = item.Price,
-            //        Currency = "usd",
-            //        Product = item.PaymentProductId,
-            //        Active = true
-            //    };
-
-            //    product.DefaultPrice = await servicePrice.CreateAsync(optionsPrice);
-            //}
-
-            _logger.LogInformation($"StripeService|UpdateProduct|Product price updated: {product.Id}|{product.Name}.");
             await _stripeLogDal.Add(new StripeAuditLogModel { Type = "UpdateProduct", Message = product.ToJson() }, "");
 
             return product;
+        }
+
+        private static async Task AddStripePrice(AdminMarketplaceItemModel item, ProductPrice price)
+        {
+            var priceService = new PriceService();
+
+            var priceOption = new PriceCreateOptions
+            {
+                Product = item.PaymentProductId,
+                UnitAmountDecimal = price.Amount,
+                Nickname = price.Description,
+                Currency = "usd",
+            };
+
+            // TODO add subscription type.
+            if (price.BillingPeriod == "Yearly")
+            {
+                priceOption.Recurring = new PriceRecurringOptions { Interval = "year", IntervalCount = 1 };
+            }
+            else if (price.BillingPeriod == "Monthly")
+            {
+                priceOption.Recurring = new PriceRecurringOptions { Interval = "month", IntervalCount = 1 };
+            }
+
+            var newPrice = await priceService.CreateAsync(priceOption);
+            price.PriceId = newPrice.Id;
         }
 
         public Task<bool> UpdateAllProducts(MarketplaceItemModel item, string userId)
