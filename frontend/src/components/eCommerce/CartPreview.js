@@ -2,7 +2,7 @@ import React, { useState, Fragment, useEffect } from 'react'
 import { Form } from 'react-bootstrap'
 
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
-import { generateLogMessageString } from '../../utils/UtilityService';
+import { formatCurrency, generateLogMessageString } from '../../utils/UtilityService';
 import { removeCartItem, updateCart } from '../../utils/CartUtil';
 import CartItem from './CartItem';
 
@@ -124,20 +124,20 @@ function CartPreview() {
             <>
                 {credits != null && 
                 <>
-                    <div className="row m-0 pt-1 mt-1 border-bottom font-weight-bold">
+                    <div className="row m-0 py-1 mt-1 border-bottom">
                         <div className="col-8">
                             Sub-Total
                         </div>
                         <div className="col-4 text-right">
-                            ${subTotal}
+                            <span className="pr-2" >{formatCurrency(subTotal)}</span>
                         </div>
                     </div>
-                    <div className="row m-0 pt-1 mt-1 border-bottom font-weight-bold">
+                    <div className="row m-0 py-1 mt-1 border-bottom">
                         <div className="col-8">
                             Credits Applied
                         </div>
                         <div className="col-4 text-right">
-                            ${credits}
+                            <span className="pr-2" >{formatCurrency(credits)}</span>
                         </div>
                     </div>
                 </>
@@ -147,7 +147,7 @@ function CartPreview() {
                         Total
                     </div>
                     <div className="col-4 text-right">
-                        ${total}
+                        <span className="pr-2" >{formatCurrency(total)}</span>
                     </div>
                 </div>
             </>
@@ -163,7 +163,7 @@ function CartPreview() {
 
         return (
             <div className="text-center border-top mt-3 pt-2">
-                <p>Your organization has <b>${loadingProps.user.credit} {loadingProps.user.credit === 1? 'credit' : 'credits' }</b> available to apply to this purchase.</p>
+                <p>Your organization has <b>{formatCurrency(loadingProps.user.credit)} {loadingProps.user.credit === 1? 'credit' : 'credits' }</b> available to apply to this purchase.</p>
                 <Form.Group>
                     <Form.Check className="align-self-end" type="checkbox" id="useCredits" label="Use credits for this purchase?" 
                         checked={_useCredits} onChange={onChangeChecked} />

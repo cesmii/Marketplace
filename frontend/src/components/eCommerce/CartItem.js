@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Fragment } from 'react'
 import { Form, Col, Card } from 'react-bootstrap'
 import { validateCartItem_Quantity } from '../../utils/CartUtil';
-import { generateLogMessageString } from '../../utils/UtilityService';
+import { formatCurrency, generateLogMessageString } from '../../utils/UtilityService';
 import _icon from '../img/icon-cesmii-white.png'
 import '../styles/Modal.scss';
 
@@ -145,7 +145,7 @@ function CartItem(props) {
                         </Col>
                     }
                     <Col className='d-flex'>
-                        <Form.Label className='ml-auto'>${price.amount}</Form.Label>
+                        <Form.Label className='ml-auto pr-2'>{formatCurrency(price.amount)}</Form.Label>
                     </Col>
                 </Form.Row>
             </Form.Group>
