@@ -91,7 +91,7 @@ function AdminPriceRow(props) { //props are item, showActions
         return (
             <Form.Group>
                 <Form.Control id="billingPeriod" as="select" value={props.item.billingPeriod == null ? "OneTime" : props.item.billingPeriod}
-                    className={(!_isValid.billingPeriod ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
+                    className={(!_isValid.billingPeriod ? 'invalid-field minimal py-1' : 'minimal py-1')}
                     onBlur={validateForm_billingPeriod}
                     onChange={onChange} >
                     {options}
@@ -111,17 +111,20 @@ function AdminPriceRow(props) { //props are item, showActions
 
     if (props.isHeader) {
         return (
-            <div className={`row my-1 p-0 py-1 d-flex align-items-center ${cssClass}`}>
-                <div className="col-sm-3 font-weight-bold" >
+            <div className={`row p-0 m-0 align-items-center ${cssClass}`}>
+                <div className="col-4 col-sm-2 font-weight-bold pl-1 pr-0" >
                     Billing Period
                 </div>
-                <div className="col-sm-4 font-weight-bold" >
+                <div className="col-4 col-sm-4 font-weight-bold pl-1 pr-0" >
                     Description
                 </div>
-                <div className="col-sm-3 font-weight-bold" >
+                <div className="col-3 col-sm-2 font-weight-bold pl-1 pr-1 text-right" >
                     Amount
                 </div>
-                <div className="col-sm-2 text-right font-weight-bold" >
+                <div className="col-4 col-sm-2 font-weight-bold pl-1 pr-0" >
+                    Stripe Price Id
+                </div>
+                <div className="col-4 col-sm-2 text-right font-weight-bold pl-1 pr-1" >
                     Delete
                 </div>
             </div>
@@ -132,23 +135,26 @@ function AdminPriceRow(props) { //props are item, showActions
     if (props.item === null || props.item === {}) return null;
 
     return (
-        <div className={`row my-1 p-0 py-1 d-flex align-items-center ${cssClass}`}>
-            <div className="col-sm-3" >
+        <div className={`row p-0 m-0 align-items-center ${cssClass}`}>
+            <div className="col-4 col-sm-2 pl-1 pr-0 my-0" >
                 {renderBillingPeriod()}
             </div>
-            <div className="col-sm-4" >
+            <div className="col-4 col-sm-4 pl-1 pr-0 my-0" >
                 <Form.Group>
-                    <Form.Control id="description" className={(!_isValid.description ? 'invalid-field minimal pr-5' : 'minimal pr-5')} type="" placeholder={`Enter description`}
+                    <Form.Control id="description" className={(!_isValid.description ? 'invalid-field minimal py-1' : 'minimal py-1')} type="" placeholder={`Enter description`}
                         value={props.item.description} onBlur={validateForm_description} onChange={onChange} />
                 </Form.Group>
             </div>   
-            <div className="col-sm-3" >
+            <div className="col-3 col-sm-2 pl-1 pr-0 my-0" >
                 <Form.Group>
-                    <Form.Control id="amount" className={(!_isValid.amount ? 'invalid-field minimal pr-5' : 'minimal pr-5')} type="" placeholder={`Enter amount`}
+                    <Form.Control id="amount" className={`minimal py-1 text-right ${!_isValid.amount ? 'invalid-field' : ''}`} type="" placeholder={`Enter amount`}
                         value={props.item.amount} onBlur={validateForm_amount} onChange={onChange} />
                 </Form.Group>
             </div>
-            <div className="col-sm-2 text-right pt-1" >
+            <div className="col-4 col-sm-2" >
+                {props.item.priceId}
+            </div>
+            <div className="col-4 col-sm-2 text-right pt-1 pl-1 pr-1 my-0" >
                 <button className="btn btn-icon-outline circle ml-auto" title="Delete Item" onClick={onDelete} ><i className="material-icons">close</i></button>
             </div>
         </div>
