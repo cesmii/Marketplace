@@ -1,3 +1,9 @@
+/*
+ *----------------------------------------------------------------------- 
+ *-----------------------------------------------------------------------
+ * GOING AWAY - Moved all code over to CartItem.js
+ *----------------------------------------------------------------------- 
+ *-----------------------------------------------------------------------
 import React, { useState, useEffect, Fragment } from 'react'
 import { Form, Col, Card } from 'react-bootstrap'
 import { validateCartItem_Quantity } from '../../utils/CartUtil';
@@ -151,29 +157,6 @@ function CartItem(props) {
             </Form.Group>
         );
     };
-    /*
-    const renderRecurringPrice = (price, showRadio) => {
-        if (price.billingPeriod == "Yearly" || price.billingPeriod == "SixMonths" || price.billingPeriod == "Monthly" ) {
-            return (
-                <Form.Group>                        
-                    <Form.Row>
-                        {showRadio &&
-                            renderSelectItem(price)
-                        }
-                        {!showRadio &&
-                            <Col className='d-flex'>
-                            <Form.Label>{price.description}</Form.Label>
-                            </Col>
-                        }
-                        <Col className='d-flex'>
-                            <Form.Label className='ml-auto' >${price.amount}</Form.Label>
-                        </Col>
-                    </Form.Row>
-                </Form.Group>
-            );
-        }
-    };
-    */
 
     //-------------------------------------------------------------------
     // Region: Render Helpers
@@ -247,3 +230,5 @@ function CartItem(props) {
 }
 
 export default CartItem;
+
+*/

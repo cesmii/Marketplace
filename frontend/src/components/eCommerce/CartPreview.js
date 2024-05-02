@@ -4,7 +4,7 @@ import { Form, Col } from 'react-bootstrap'
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
 import { generateLogMessageString } from '../../utils/UtilityService';
 import { removeCartItem, updateCart } from '../../utils/CartUtil';
-import CartItem from './MarketplaceCartItem';
+import CartItem from './CartItem';
 
 const CLASS_NAME = "CartPreview";
 

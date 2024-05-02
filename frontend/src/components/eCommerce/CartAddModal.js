@@ -4,7 +4,7 @@ import Button from 'react-bootstrap/Button'
 
 import { useLoadingContext } from "../contexts/LoadingContext";
 import { generateLogMessageString } from '../../utils/UtilityService';
-import CartItem from './MarketplaceCartItem';
+import CartItem from './CartItem';
 import { updateCart } from '../../utils/CartUtil';
 import _icon from '../img/icon-cesmii-white.png'
 import '../styles/Modal.scss';
