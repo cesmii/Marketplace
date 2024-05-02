@@ -1,5 +1,5 @@
 import React, { useState, Fragment, useEffect } from 'react'
-import { Form, Col } from 'react-bootstrap'
+import { Form } from 'react-bootstrap'
 
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
 import { generateLogMessageString } from '../../utils/UtilityService';
@@ -15,17 +15,17 @@ function CartPreview() {
     //-------------------------------------------------------------------
     const [_isValid, setIsValid] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
-    const [_usedCredit, setUsedCredit] = useState(0);
+    const [_useCredits, setUseCredits] = useState(false);
 
+    //-------------------------------------------------------------------
+    // Region: hooks
+    //-------------------------------------------------------------------
     useEffect(() => {
-        if (loadingProps == null || loadingProps.user == null || loadingProps.user.usedcredit == null)
-            return;
-
-        setUsedCredit(loadingProps.user.usedcredit);
+        setUseCredits(loadingProps?.cart == null ? false : loadingProps.cart.useCredits);
 
         return () => {
         };
-    }, [loadingProps]);
+    }, [loadingProps?.cart?.useCredits]);
 
     //-------------------------------------------------------------------
     // Region: Get data 
@@ -39,48 +39,17 @@ function CartPreview() {
         setIsValid(isValid.required && isValid.numeric && isValid.range);
     };
 
-    const onCreditChange = (e) => {
-        switch (e.target.name) {
-            case "usercredit":
-                //update the state
-                let cred = 0;
-                if (e.target.value == '') {
-                    cred = null;
-                }
-                else if (isNaN(parseInt(e.target.value))) {
-                    cred = null;
-                }
-                else {
-                    cred = parseInt(e.target.value);
-                }
+    const onChangeChecked = (e) => {
+        console.log(generateLogMessageString('onChangeChecked', CLASS_NAME));
 
-                if (loadingProps == null || loadingProps.user == null || loadingProps.user.usedcredit == null)
-                    return;
-
-                if (cred > loadingProps.user.credit)
-                    return;
-
-                setLoadingProps({ user: { credit: loadingProps.user.credit, usedcredit: cred, total: 0 } });
-            default:
-                return;
-        }
+        var cart = JSON.parse(JSON.stringify(loadingProps.cart));
+        cart.useCredits = e.target.checked;
+        setLoadingProps({ cart: cart});
     };
 
     //-------------------------------------------------------------------
     // Region: Validation
     //-------------------------------------------------------------------
-    const validateForm_credit = (e) => {
-        const result = parseInt(e.target.value);
-
-        if (loadingProps == null || loadingProps.user == null || loadingProps.user.usedcredit == null)
-            return;
-
-        if (result > loadingProps.user.credit)
-            return;
-
-        if (loadingProps.onValidate != null) loadingProps.onValidate(loadingProps.user.usedcredit, result);
-    };
-
     const onChange = (item, qty, price) => {
         console.log(generateLogMessageString(`onChange`, CLASS_NAME));
         //add the item to the cart and save context
@@ -135,26 +104,19 @@ function CartPreview() {
         );
     }
 
-    const renderCredits = (checkout) => {
+    const renderUseCredits = (cart) => {
 
-        if (checkout.cart?.items == null || checkout.cart?.items.length === 0 ||
-            checkout.user?.credit == null || checkout.user.credit === 0) {
+        if (cart?.items == null || cart?.items.length === 0 ||
+            loadingProps.user?.credit == null || loadingProps.user.credit === 0) {
             return null;
         }
 
         return (
-            <div>
-                <Form.Group className="mb-3 d-flex align-items-center">
-                    <Form.Row className="d-flex align-items-center">
-                        <Form.Label className="w-25" >Credits</Form.Label>
-                        <Col className="w-25" >
-                            <Form.Control name="usercredit" className="minimal px-2 text-right"
-                                value={_usedCredit} onChange={onCreditChange} onBlur={validateForm_credit} />
-                        </Col>
-                        <Col >
-                            <Form.Label htmlFor="credit" >out of {checkout.user.credit}</Form.Label>
-                        </Col>
-                    </Form.Row>
+            <div className="text-center">
+                <p>Your organization has <b>{loadingProps.user.credit} {loadingProps.user.credit === 1? 'credit' : 'credits' }</b> available to apply to this purchase.</p>
+                <Form.Group>
+                    <Form.Check className="align-self-end" type="checkbox" id="useCredits" label="Use credits for this purchase?" 
+                        checked={_useCredits} onChange={onChangeChecked} />
                 </Form.Group>
             </div>
         );
@@ -166,7 +128,7 @@ function CartPreview() {
     return (
         <>
             {renderCartItems(loadingProps.cart)}
-            {renderCredits(loadingProps)}
+            {renderUseCredits(loadingProps.cart)}
         </>
     )
 }

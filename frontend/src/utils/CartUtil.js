@@ -61,6 +61,11 @@ export function removeCartItem(cart, marketplaceItemId) {
     let x = cart.items.findIndex(x => { return x.marketplaceItem?.id === marketplaceItemId; });
     if (x < 0) return;
     cart.items.splice(x, 1);
+
+    //if cart is empty, reset useCredits flag
+    if (cart.items.length === 0) {
+        cart.useCredits = false;
+    }
     return cart;
 }
 
