@@ -241,11 +241,11 @@ function Cart() {
                 <div className="row" >
                     <div className="col-7 mx-auto pt-2 text-center">
                         <Button variant="secondary" type="button" className="mx-3 mb-3" onClick={onEmptyCart} >Empty Cart</Button>
-                        <Button variant="primary" type="button" className="mx-3" onClick={onCheckout} >Checkout</Button>
+                        <Button variant="primary" type="button" className="mx-3 mb-3 " onClick={onCheckout} >Checkout</Button>
                     </div>
                 </div>
                 <div className="row" >
-                    <div className="col-7 mx-auto pt-4 text-center">
+                    <div className="col-7 mx-auto pt-1 text-center">
                         <a className="mx-3" href="/library" >Continue Shopping</a>
                     </div>
                 </div>

@@ -116,7 +116,9 @@ function CartPreview() {
 
     const renderTotals = (cart) => {
 
-        const subTotal = calculateSubTotal(cart);
+        if (cart == null || cart.items == null || cart.items.length === 0) return;
+
+            const subTotal = calculateSubTotal(cart);
         const credits = calculateCredits(cart);
         const total = credits == null ? subTotal : subTotal - credits;
 
