@@ -1,17 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 
 using CESMII.Marketplace.Common;
-using CESMII.Marketplace.Common.Enums;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.Api.Shared.Models;
 using CESMII.Marketplace.Api.Shared.Controllers;
 using CESMII.Marketplace.Service;
 using Stripe;
+using System.IO;
+using System;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
@@ -119,6 +119,147 @@ namespace CESMII.Marketplace.Api.Controllers
             });
         }
 
+        [HttpGet, Route("cart")]
+        [ProducesResponseType(200, Type = typeof(Product))]
+        [ProducesResponseType(400)]
+        public IActionResult GetCart()
+        {
+            var result = User.Identity.IsAuthenticated ?
+                    _svc.GetByUserId(UserID) :
+                    null;
+
+            if (result == null)
+            {
+                return Ok(new ResultMessageWithDataModel()
+                {
+                    IsSuccess = false,
+                    Message = "CartModel not found.",
+                });
+            }
+
+            return Ok(new ResultMessageWithDataModel()
+            {
+                IsSuccess = true,
+                Message = "CartModel.",
+                Data = result
+            });
+        }
+
+        /// <summary>
+        /// Add an Cart item.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost, Route("cart/add")]
+        [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
+        public async Task<IActionResult> Add([FromBody] CartModel model)
+        {
+            if (model == null)
+            {
+                _logger.LogWarning("ECommerceController|Add|Invalid model");
+                return BadRequest("Marketplace|Add|Invalid model");
+            }
+            else
+            {
+                string modelId;
+                if (string.IsNullOrEmpty(model.ID))
+                {
+                    modelId = await _svc.Add(model, UserID);
+                }
+                else
+                {
+                    await _svc.Update(model, UserID);
+                    modelId = model.ID;
+                }
+
+                if (String.IsNullOrEmpty(modelId))
+                {
+                    _logger.LogWarning($"ECommerceController|Add|Could not add CartModel");
+                    return BadRequest("Could not add CartModel. Invalid id.");
+                }
+                _logger.LogInformation($"ECommerceController|Add|Add CartModel item. Id:{model.ID}.");
+
+                var result = _svc.GetById(modelId);
+
+                return Ok(new ResultMessageWithDataModel()
+                {
+                    IsSuccess = true,
+                    Message = "Item was added.",
+                    Data = result
+                });
+            }
+        }
+
+        /// <summary>
+        /// Update an existing Cart item.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost, Route("cart/update")]
+        [ProducesResponseType(200, Type = typeof(ResultMessageWithDataModel))]
+        public async Task<IActionResult> Update([FromBody] CartModel model)
+        {
+            if (model == null)
+            {
+                _logger.LogWarning("ECommerceController|Update|Invalid model");
+                return BadRequest("CartModel|Update|Invalid model");
+            }
+
+            var record = _svc.GetById(model.ID);
+            if (record == null)
+            {
+                _logger.LogWarning($"ECommerceController|Update|No records found matching this ID: {model.ID}");
+                return BadRequest($"No records found matching this ID: {model.ID}");
+            }            
+            else
+            {
+                if (model.Items.Count > 0)
+                {
+                    var result = await _svc.Update(model, UserID);
+                    if (result < 0)
+                    {
+                        _logger.LogWarning($"ECommerceController|Update|Could not update CartModel. Invalid id:{model.ID}.");
+                        return BadRequest("Could not update profile CartModel. Invalid id.");
+                    }
+
+                    _logger.LogInformation($"ECommerceController|Update|Updated CartModel. Id:{model.ID}.");
+                    return Ok(new ResultMessageWithDataModel()
+                    {
+                        IsSuccess = true,
+                        Message = "Item was updated.",
+                        Data = model
+                    });
+                }
+                else
+                {
+                    await _svc.Delete(model.ID, UserID);
+
+                    return Ok(new ResultMessageWithDataModel()
+                    {
+                        IsSuccess = true,
+                        Message = "Item was updated."
+                    });
+                }
+            }
+        }
+
+        /// <summary>
+        /// Delete an existing Cart. 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [HttpPost, Route("cart/delete")]
+        [ProducesResponseType(200, Type = typeof(ResultMessageModel))]
+        public async Task<IActionResult> Delete([FromBody] IdStringModel model)
+        {           
+            await _svc.Delete(model.ID, UserID);
+            
+            _logger.LogInformation($"ECommerceController|Delete|Deleted marketplaceItem. Id:{model.ID}.");
+
+            //return success message object
+            return Ok(new ResultMessageModel() { IsSuccess = true, Message = "Item was deleted." });
+        }       
+
         [HttpGet, Route("products")]
         [ProducesResponseType(200, Type = typeof(IEnumerable<Product>))]
         [ProducesResponseType(400)]
@@ -169,6 +310,24 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest($"Could not fetch Prices.");
             }
             return Ok(result);
+        }
+
+        [HttpPost("webhook")]
+        public async Task<IActionResult> WebHook()
+        {
+            try
+            {
+                var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+                var header = Request.Headers["Stripe-Signature"];
+
+                await _svc.StripeWebhook(json, header);
+                return Ok();
+            }
+            catch (StripeException e)
+            {
+                Console.WriteLine(e.StripeError.Message);
+                return BadRequest();
+            }
         }
     }
 }

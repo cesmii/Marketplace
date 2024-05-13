@@ -185,10 +185,12 @@ namespace CESMII.Marketplace.DAL
                     Created = entity.Created,
                     Updated = entity.Updated,
                     CreatedById = entity.CreatedById.ToString(),
-                    UpdatedById = entity.UpdatedById.ToString(),
+                    UpdatedById = entity.UpdatedById?.ToString(),
                     Status = (Common.Enums.CartStatusEnum)entity.Status,
                     Items = MapToModelCartItems(entity.Items),
-                    IsActive = entity.IsActive
+                    IsActive = entity.IsActive,
+                    SessionId= entity.SessionId,
+                    OraganizationId = entity.OraganizationId,
                 };
 
                 return result;
@@ -215,10 +217,12 @@ namespace CESMII.Marketplace.DAL
                         ID = entity.MarketplaceItemId.ToString(),
                         DisplayName = mktplItem?.DisplayName,
                         Name = mktplItem?.Name, 
-                        PaymentProductId = mktplItem?.PaymentProductId
+                        Abstract= mktplItem?.Abstract,
+                        PaymentProductId = entity.StripeId
                     }, 
                     Credits = entity.Credits,
-                    Quantity = entity.Quantity
+                    Quantity = entity.Quantity,
+                    SelectedPrice = entity.SelectedPrice
                 });
             }
             return result
@@ -233,6 +237,8 @@ namespace CESMII.Marketplace.DAL
             entity.Name = model.Name;
             entity.Completed = model.Completed;
             entity.Status = model.Status;
+            entity.SessionId= model.SessionId;
+            entity.OraganizationId= model.OraganizationId;
             entity.Items = MapToEntityCartItem(model.Items);
         }
 
@@ -247,6 +253,7 @@ namespace CESMII.Marketplace.DAL
                     MarketplaceItemId = MongoDB.Bson.ObjectId.Parse(model.MarketplaceItem.ID),
                     Credits = model.Credits.HasValue ? model.Credits.Value : 0,
                     Quantity = model.Quantity,
+                    SelectedPrice = model.SelectedPrice,
                     StripeId = model.MarketplaceItem.PaymentProductId
                 } );
             }

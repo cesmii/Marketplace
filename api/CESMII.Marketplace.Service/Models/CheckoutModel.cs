@@ -18,6 +18,7 @@ namespace CESMII.Marketplace.Service.Models
     /// </summary>
     public class CheckoutInitModel
     {
+        public string ClientSecret { get; set; }
         public string SessionId { get; set; }
         public string ApiKey { get; set; }
     }

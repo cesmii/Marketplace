@@ -145,7 +145,7 @@ function CartItem(props) {
                         </Col>
                     }
                     <Col className='d-flex'>
-                        <Form.Label className='ml-auto pr-2'>{formatCurrency(price.amount)}</Form.Label>
+                        <Form.Label className='ml-auto pr-2'>{price.amount != null ? formatCurrency(price.amount) : 0}</Form.Label>
                     </Col>
                 </Form.Row>
             </Form.Group>
@@ -179,8 +179,13 @@ function CartItem(props) {
     // Region: Render Helpers
     //-------------------------------------------------------------------
     const renderPrices = () => {
-        if (props == null || props.item.marketplaceItem?.prices == null) {
+        if (props == null) {
             return;
+        }
+
+        if (props.item.marketplaceItem.prices == null || props.item.marketplaceItem.prices == 0) {
+            props.item.marketplaceItem.prices = [];
+            props.item.marketplaceItem.prices.push(props.item.selectedPrice);
         }
 
         //if only show selected, trim down list to selected item only

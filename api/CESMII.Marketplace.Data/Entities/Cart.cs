@@ -22,6 +22,9 @@ namespace CESMII.Marketplace.Data.Entities
 
         public List<CartItem> Items { get; set; }
 
+        public string SessionId { get; set; }
+
+        public string OraganizationId { get; set; }
     }
 
 }

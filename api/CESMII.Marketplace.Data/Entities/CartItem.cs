@@ -27,7 +27,12 @@ namespace CESMII.Marketplace.Data.Entities
         /// <remarks>Purchase may be a combination of credits and price</remarks>
         public int Credits { get; set; }
 
-
+        /// <summary>
+        /// The info of the price id being used for this purchase. 
+        /// This is an object we maintain on the marketplace item and is 
+        /// selected by the user during add to cart process.
+        /// </summary>
+        public ProductPrice SelectedPrice { get; set; }
     }
 
 }

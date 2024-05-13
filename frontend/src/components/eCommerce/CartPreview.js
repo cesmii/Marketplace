@@ -1,6 +1,9 @@
 import React, { useState, Fragment, useEffect } from 'react'
 import { Form } from 'react-bootstrap'
+import axiosInstance from "../../services/AxiosService";
 
+import { useLoginStatus } from '../../components/OnLoginHandler';
+import { AppSettings } from '../../utils/appsettings';
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
 import { formatCurrency, generateLogMessageString } from '../../utils/UtilityService';
 import { removeCartItem, updateCart } from '../../utils/CartUtil';
@@ -16,6 +19,8 @@ function CartPreview() {
     const [_isValid, setIsValid] = useState(true);
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_useCredits, setUseCredits] = useState(false);
+    const [_error, setError] = useState({ show: false, message: null, caption: null });
+    const { isAuthenticated } = useLoginStatus(null, [AppSettings.AADAdminRole]);
 
     //-------------------------------------------------------------------
     // Region: hooks
@@ -44,7 +49,41 @@ function CartPreview() {
 
         var cart = JSON.parse(JSON.stringify(loadingProps.cart));
         cart.useCredits = e.target.checked;
-        setLoadingProps({ cart: cart });
+        // If User authenticated, save the cart items in the database
+        if (isAuthenticated) {
+            updateCartItem(cart);
+        } else {
+            setLoadingProps({ cart: cart });
+        }
+    };
+
+    const updateCartItem = (cart) => {
+        const url = `ecommerce/cart/update`;
+        axiosInstance.post(url, cart)
+            .then(resp => {
+                if (resp.data.isSuccess) {
+                    setLoadingProps({ cart: resp.data.data });
+                }
+                else {
+                    //update spinner, messages
+                    setError({ show: true, caption: 'Cart - Error', message: resp.data.message });
+                }
+            })
+            .catch(error => {
+                //hide a spinner, show a message
+                setLoadingProps({
+                    isLoading: false, message: null, inlineMessages: [
+                        { id: new Date().getTime(), severity: "danger", body: `An error occurred during adding item to cart credits.`, isTimed: false }
+                    ]
+                });
+                console.log(error);
+                //scroll back to top
+                window.scroll({
+                    top: 0,
+                    left: 0,
+                    behavior: 'smooth',
+                });
+            });
     };
 
     //-------------------------------------------------------------------
@@ -54,14 +93,24 @@ function CartPreview() {
         console.log(generateLogMessageString(`onChange`, CLASS_NAME));
         //add the item to the cart and save context
         let cart = updateCart(loadingProps.cart, item, qty, price, true); //overwrite existing amount
-        setLoadingProps({ cart: cart });
+        // If User authenticated, save the cart items in the database
+        if (isAuthenticated) {
+            updateCartItem(cart);
+        } else {
+            setLoadingProps({ cart: cart });
+        }
     };
 
     const onRemoveItem = (id) => {
         console.log(generateLogMessageString('onRemoveItem', CLASS_NAME));
         //TBD - consider showing confirmation modal first.
         let cart = removeCartItem(loadingProps.cart, id);
-        setLoadingProps({ cart: cart });
+        // If User authenticated, save the cart items in the database
+        if (isAuthenticated) {
+            updateCartItem(cart);
+        } else {
+            setLoadingProps({ cart: cart });
+        }
     };
 
 
@@ -69,7 +118,7 @@ function CartPreview() {
     // Region: helper methods
     //-------------------------------------------------------------------
     const calculateSubTotal = (cart) => {
-        return cart.items.reduce((total, itm) => total + itm.selectedPrice.amount * itm.quantity, 0)
+        return cart.items.reduce((total, itm) => itm.selectedPrice != null ? (total + itm.selectedPrice.amount * itm.quantity):0, 0)
     }
     const calculateCredits = (cart) => {
         if (_useCredits) {

@@ -31,6 +31,8 @@
         public DateTime? Completed { get; set; }
 
         public string ReturnUrl { get; set; }
+        public string SessionId { get; set; }
+        public string OraganizationId { get; set; }
 
         public virtual List<CartItemModel> Items { get; set; }
     }

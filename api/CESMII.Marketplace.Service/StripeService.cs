@@ -2,6 +2,7 @@
 
 using Stripe;
 using Stripe.Checkout;
+using Stripe.FinancialConnections;
 
 using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.DAL.Models;
@@ -9,8 +10,6 @@ using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.Service.Models;
-using Stripe.FinancialConnections;
-using CESMII.Marketplace.Api.Shared.Models;
 
 namespace CESMII.Marketplace.Service
 {
@@ -39,7 +38,7 @@ namespace CESMII.Marketplace.Service
             return await DoCheckout(item, null);
         }
 
-        public async Task<CheckoutInitModel> DoCheckout(CartModel cart, UserModel user)
+        public async Task<CheckoutInitModel> DoCheckout(CartModel cart, UserModel? user)
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
 
@@ -48,7 +47,8 @@ namespace CESMII.Marketplace.Service
                 UiMode = "embedded",
                 //append check out session id
                 ReturnUrl = cart.ReturnUrl.TrimEnd(Convert.ToChar("/")) + "/{CHECKOUT_SESSION_ID}",
-                LineItems = new List<SessionLineItemOptions>()
+                LineItems = new List<SessionLineItemOptions>(),
+                ExpiresAt= DateTime.UtcNow.AddMinutes(30),                
             };
 
             foreach (var cartItem in cart.Items)
@@ -77,11 +77,12 @@ namespace CESMII.Marketplace.Service
 
             try
             {
+                OrganizationModel? organization = null;
                 //an anonymous user may be checking out. they won't have credits. that is an ok scenario.
                 if (user != null && cart.UseCredits)
                 {
                     //if they want to use credits && have credits to use, apply here. 
-                    var organization = _organizationService.GetByName(user.Organization.Name);
+                    organization = _organizationService.GetByName(user.Organization.Name);
                     if (organization == null || organization.Credits <= 0)
                     {
                         _logger.LogError("StripeService|DoCheckout|Cannot use credits.");
@@ -101,10 +102,6 @@ namespace CESMII.Marketplace.Service
                         Name = "Credits Applied"
                     });
 
-                    organization.Credits -= numCredits;
-
-                    await _organizationService.Update(organization, user.ID);
-
                     var discount = new SessionDiscountOptions { Coupon = coupon.Id };
                     options.Discounts = new List<SessionDiscountOptions> { discount };
                 }
@@ -120,10 +117,22 @@ namespace CESMII.Marketplace.Service
                     SessionCreateOptions = options
                 }, user == null ? null : user.ID);
 
+                // Update sessionId and OrganizationId for Webhook
+                if (user != null)
+                {
+                    cart.SessionId = session.Id;
+
+                    if (organization != null)
+                        cart.OraganizationId = organization.ID;
+
+                    await _dal.Update(cart, user.ID);
+                }
+
                 return new CheckoutInitModel()
                 {
                     ApiKey = _config.PublishKey,
-                    SessionId = session.ClientSecret
+                    SessionId = session.Id,
+                    ClientSecret = session.ClientSecret,
                 };
             }
             catch (Exception ex)
@@ -132,6 +141,49 @@ namespace CESMII.Marketplace.Service
 
                 throw;
             }
+        }
+
+        public async Task<bool> StripeWebhook(string json, string header)
+        {
+            var stripeEvent = EventUtility.ConstructEvent(json, header, _config.WebhookSecretKey);
+
+            // Handle the event
+            if (stripeEvent.Type == Events.CheckoutSessionCompleted)
+            {
+                var session = stripeEvent.Data.Object as Stripe.Checkout.Session;
+                if (session == null)
+                    return false;
+
+                var cart = GetBySessionId(session.Id);
+
+                await _stripeLogDal.Add(new StripeAuditLogModel
+                {
+                    Type = "CheckoutSessionCompleted",
+                    Message = session.ToJson(),
+                    CartModel = cart,
+                    Session = session
+                }, null);
+
+                if (cart == null)
+                    return true;
+                
+                // Update cart status
+                cart.Status = Common.Enums.CartStatusEnum.Completed;
+                await Update(cart, cart.CreatedById);
+
+                if (string.IsNullOrEmpty(cart.OraganizationId))
+                    return true;
+
+                var organization = _organizationService.GetById(cart.OraganizationId);
+                if (organization == null)
+                    return true;
+
+                // Update organization credits to zero.
+                organization.Credits = 0;
+                await _organizationService.Update(organization, cart.CreatedById);
+            }
+
+            return false;
         }
 
         private long CalculateCredits(long credits, CartModel cart)
@@ -259,6 +311,7 @@ namespace CESMII.Marketplace.Service
 
             //check for product 
             Product product = await serviceProduct.CreateAsync(itemAdd);
+            item.PaymentProductId = product.Id;
 
             _logger.LogInformation($"StripeService|AddProduct|Product added: {product.Id}|{product.Name}.");
             await _stripeLogDal.Add(new StripeAuditLogModel { Type = "AddProduct", Message = product.ToJson() }, "");
@@ -289,7 +342,7 @@ namespace CESMII.Marketplace.Service
 
             foreach (var price in item.Prices)
             {
-                if (!string.IsNullOrEmpty(price.PriceId) && stripPrices.Count(pr => pr.Id == price.PriceId && pr.UnitAmountDecimal == price.Amount) == 1)
+                if (!string.IsNullOrEmpty(price.PriceId) && stripPrices.Count(pr => pr.Id == price.PriceId && pr.UnitAmountDecimal == Convert.ToDecimal(price.Amount + "00")) == 1)
                 {
                     continue;
                 }
@@ -298,6 +351,16 @@ namespace CESMII.Marketplace.Service
             }
 
             // TODO Delete removed prices.
+            // Archive the prices which are deleted or updated.
+            foreach (var stripePrice in stripPrices)
+            {
+                if (item.Prices.Count(pr => stripePrice.Id == pr.PriceId && stripePrice.UnitAmountDecimal == Convert.ToDecimal(pr.Amount + "00")) == 1)
+                {
+                    continue;
+                }
+
+                await ArchiveStripePrice(stripePrice);
+            }
 
             //map stuff from marketplace item to ProductUpdateOptions object
             var itemUpdate = new ProductUpdateOptions
@@ -325,7 +388,7 @@ namespace CESMII.Marketplace.Service
             var priceOption = new PriceCreateOptions
             {
                 Product = item.PaymentProductId,
-                UnitAmountDecimal = price.Amount,
+                UnitAmountDecimal = Convert.ToDecimal(price.Amount + "00"),
                 Nickname = price.Description,
                 Currency = "usd",
             };
@@ -344,9 +407,29 @@ namespace CESMII.Marketplace.Service
             price.PriceId = newPrice.Id;
         }
 
+        private static async Task ArchiveStripePrice(Price price)
+        { 
+            var priceService = new PriceService();
+            await priceService.UpdateAsync(price.Id, new PriceUpdateOptions {Active = false });
+        }
+
+
         public Task<bool> UpdateAllProducts(MarketplaceItemModel item, string userId)
         {
             throw new NotImplementedException();
+        }
+
+        public CartModel? GetByUserId(string userId)
+        {
+            var usid = MongoDB.Bson.ObjectId.Parse(userId);
+            var cartModels = _dal.Where(x => x.CreatedById == usid && x.IsActive, null, null, false, false).Data;
+            return cartModels == null ||cartModels.Count == 0 ? null : cartModels[0] ;
+        }
+
+        public CartModel? GetBySessionId(string sessionId)
+        {
+            var cartModels = _dal.Where(x => x.SessionId == sessionId, null, null, false, false).Data;
+            return cartModels == null || cartModels.Count == 0 ? null : cartModels[0];
         }
 
         public CartModel GetById(string id)

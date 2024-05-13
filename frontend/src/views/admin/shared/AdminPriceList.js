@@ -78,7 +78,7 @@ function AdminPriceList(props) {
             const key = `price-${counter}`;
             return (
                 <AdminPriceRow key={key} item={item} cssClass={`admin-item-row`}
-                    type={props.type} onChangeItem={props.onChangeItem} onDelete={props.onDelete} />
+                    type={props.type} onChangeItem={props.onChangeItem} onDeletePrice={props.onDeletePrice} />
             );
         });
     }

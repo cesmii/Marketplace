@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react'
 import Modal from 'react-bootstrap/Modal'
 import Button from 'react-bootstrap/Button'
 
+import axiosInstance from "../../services/AxiosService";
+import { useLoginStatus } from '../../components/OnLoginHandler';
+import { AppSettings } from '../../utils/appsettings';
 import { useLoadingContext } from "../contexts/LoadingContext";
 import { generateLogMessageString } from '../../utils/UtilityService';
 import CartItem from './CartItem';
@@ -20,6 +23,8 @@ function CartAddModal(props) {
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_item, setItem] = useState({marketplaceItem: props.item, quantity: 1, selectedPrice: null });
     const [_isValid, setIsValid] = useState(true);
+    const [_error, setError] = useState({ show: false, message: null, caption: null });
+    const { isAuthenticated } = useLoginStatus(null, [AppSettings.AADAdminRole]);
 
     //-------------------------------------------------------------------
     // Region: Hooks
@@ -42,6 +47,37 @@ function CartAddModal(props) {
         if (props.onCancel != null) props.onCancel();
     };
 
+    async function AddCart(cart) {
+        const url = `ecommerce/cart/add`;
+        axiosInstance.post(url, cart)
+            .then(resp => {
+                if (resp.data.isSuccess) {
+                    console.log(resp.data.data);
+                    setLoadingProps({ cart: resp.data.data });
+                    if (props.onAdd) props.onAdd();
+                }
+                else {
+                    //update spinner, messages
+                    setError({ show: true, caption: 'Cart - Error', message: resp.data.message });
+                }
+            })
+            .catch(error => {
+                //hide a spinner, show a message
+                setLoadingProps({
+                    isLoading: false, message: null, inlineMessages: [
+                        { id: new Date().getTime(), severity: "danger", body: `An error occurred during adding item to cart credits.`, isTimed: false }
+                    ]
+                });
+                console.log(error);
+                //scroll back to top
+                window.scroll({
+                    top: 0,
+                    left: 0,
+                    behavior: 'smooth',
+                });
+            });
+    }
+
     const onAdd = () => {
         console.log(generateLogMessageString('onAdd', CLASS_NAME));
 
@@ -53,8 +89,13 @@ function CartAddModal(props) {
 
         //add the item to the cart and save context
         let cart = updateCart(loadingProps.cart, _item.marketplaceItem, _item.quantity, _item.selectedPrice);
-        setLoadingProps({ cart: cart });
-        if (props.onAdd) props.onAdd();
+        //If user authencated, save the cart items in to the database
+        if (isAuthenticated) {
+            AddCart(cart);
+        } else {
+            setLoadingProps({ cart: cart });
+            if (props.onAdd) props.onAdd();
+        }
     };
 
     const onValidate = (id, isValid) => {

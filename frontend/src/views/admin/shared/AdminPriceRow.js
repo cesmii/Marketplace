@@ -51,11 +51,11 @@ function AdminPriceRow(props) { //props are item, showActions
 
     //called when an item is selected in the panel
     const onDelete = () => {
-        console.log(generateLogMessageString(`onDelete||${props.item.caption}`, CLASS_NAME));
+        console.log(generateLogMessageString(`onDeletePrice||${props.item.caption}`, CLASS_NAME));
 
         //update state for other components to see
-        if (props.onDelete != null) {
-            props.onDelete(props.item.id);
+        if (props.onDeletePrice != null) {
+            props.onDeletePrice(props.item.description);
         }
     }
 

@@ -9,6 +9,7 @@ import {
 } from '@stripe/react-stripe-js';
 
 import { AppSettings } from '../../utils/appsettings'
+import { useLoginStatus } from '../../components/OnLoginHandler';
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
 import { generateLogMessageString } from '../../utils/UtilityService';
 import CartPreview from '../../components/eCommerce/CartPreview';
@@ -26,7 +27,7 @@ function Cart() {
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_error, setError] = useState({ show: false, message: null, caption: null });
     const [_cartResponse, setCartResponse] = useState(null);
-
+    const { isAuthenticated } = useLoginStatus(null, [AppSettings.AADAdminRole]);
     const [_stripePromise, setStripePromise] = useState(null); //loadStripe("pk_test_51Os66lHXjPkvmDZJ927KVzxAVIWaFhySoPDcoGVfxog1SXioudXZCbcaoMysdUrUBu1TgGEUGos0XkLpFyr0HB0Y00IxD721az"));
 
     //-------------------------------------------------------------------
@@ -69,7 +70,7 @@ function Cart() {
                 });
         }
 
-        if (loadingProps.cart == null || loadingProps.cart?.items == null) return;
+        if (!isAuthenticated || loadingProps.cart == null || loadingProps.cart?.items == null) return;
 
         fetchCredits();
 
@@ -158,8 +159,40 @@ function Cart() {
     const onEmptyCart = () => {
         console.log(generateLogMessageString('onEmptyCart', CLASS_NAME));
         //TBD - consider showing confirmation modal first.
-        const cart = null;
-        setLoadingProps({ cart: cart });
+
+        // If User authenticated, Then remove the cart items from database
+        if (isAuthenticated) {
+            const url = `ecommerce/cart/delete`;
+            axiosInstance.post(url, { id: loadingProps.cart.id })
+                .then(resp => {
+                    if (resp.data.isSuccess) {
+                        const cart = null;
+                        setLoadingProps({ cart: cart });
+                    }
+                    else {
+                        //update spinner, messages
+                        setError({ show: true, caption: 'Cart - Error', message: resp.data.message });
+                    }
+                })
+                .catch(error => {
+                    //hide a spinner, show a message
+                    setLoadingProps({
+                        isLoading: false, message: null, inlineMessages: [
+                            { id: new Date().getTime(), severity: "danger", body: `An error occurred during adding item to cart credits.`, isTimed: false }
+                        ]
+                    });
+                    console.log(error);
+                    //scroll back to top
+                    window.scroll({
+                        top: 0,
+                        left: 0,
+                        behavior: 'smooth',
+                    });
+                });
+        } else {
+            const cart = null;
+            setLoadingProps({ cart: cart });
+        }
     };
 
     //-------------------------------------------------------------------
@@ -192,12 +225,10 @@ function Cart() {
     const renderCheckout = () => {
         if (_cartResponse == null) return;
 
-        if (_cartResponse.apiKey == null || _cartResponse.sessionId == null) return;
-
-        //const stripePromise = loadStripe(_cartResponse.apiKey);
+        if (_cartResponse.apiKey == null || _cartResponse.clientSecret == null) return;
 
         const options = {
-            clientSecret: _cartResponse.sessionId,
+            clientSecret: _cartResponse.clientSecret,
         };
 
         return (

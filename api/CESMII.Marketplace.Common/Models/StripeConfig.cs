@@ -5,6 +5,7 @@
     {
         public string PublishKey { get; set; }
         public string SecretKey { get; set; }
+        public string WebhookSecretKey { get; set; }
         /// <summary>
         /// Allow config setting to turn off checkout at a global level
         /// </summary>

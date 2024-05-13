@@ -1,8 +1,6 @@
 ﻿namespace CESMII.Marketplace.DAL.Models
 {
-    using CESMII.Marketplace.Common.Enums;
     using CESMII.Marketplace.Data.Entities;
-    using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
 
@@ -116,7 +114,7 @@
         #region eCommerce Fields
         public bool AllowPurchase { get; set; } = true;
         public string PaymentProductId { get; set; }
-        public List<Data.Entities.ProductPrice> Prices { get; set; } = new List<ProductPrice>();
+        public List<ProductPrice> Prices { get; set; } = new List<ProductPrice>();
         #endregion
 
         /// <summary>
@@ -173,6 +171,7 @@
     {
         public string Name { get; set; }
         public string DisplayName { get; set; }
+        public string Abstract { get; set; }
     }
 
     /// <summary>

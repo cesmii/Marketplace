@@ -10,6 +10,14 @@ namespace CESMII.Marketplace.Service
     public interface IECommerceService<TModel> where TModel : CartModel
     {
         /// <summary>
+        /// Stripe will publish events to Weebhook
+        /// </summary>
+        /// <param name="json"></param>
+        /// <param name="header"></param>
+        /// <returns></returns>
+        Task<bool> StripeWebhook(string json, string header);
+
+        /// <summary>
         /// Initiate the checkout flow with Stripe
         /// </summary>
         /// <param name="code"></param>
@@ -108,6 +116,14 @@ namespace CESMII.Marketplace.Service
         /// <param name="id"></param>
         /// <returns></returns>
         TModel GetById(string id);
+
+        /// <summary>
+        /// Get cart
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        CartModel? GetByUserId(string userId);
+
         /// <summary>
         /// Add cart
         /// </summary>

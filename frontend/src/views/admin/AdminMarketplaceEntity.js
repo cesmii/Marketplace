@@ -722,7 +722,7 @@ function AdminMarketplaceEntity() {
 
     const onDeletePrice = (id) => {
         console.log(generateLogMessageString('onDeletePrice', CLASS_NAME));
-        item.prices = item.prices.filter(x => x.id !== id);
+        item.prices = item.prices.filter(x => x.description !== id);
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
@@ -1024,19 +1024,21 @@ function AdminMarketplaceEntity() {
     };
 
     const renderPrices = () => {
-        return (
-            <>
-                <div className="row mt-2">
-                    <div className="col-12">
-                        <AdminPriceList caption="Prices" captionAdd="Add Price"
-                            items={item.prices} itemsLookup={_itemsLookup?.lookupItems?.filter(x => x.id !== item.id)}
-                            type={AppSettings.itemTypeCode.smApp} onChangeItem={onChangePrice}
-                            onAdd={onAddPrice} onDelete={onDeletePrice}
+        if (item.allowPurchase) {
+            return (
+                <>
+                    <div className="row mt-2">
+                        <div className="col-12">
+                            <AdminPriceList caption="Prices" captionAdd="Add Price"
+                                items={item.prices} itemsLookup={_itemsLookup?.lookupItems?.filter(x => x.id !== item.id)}
+                                type={AppSettings.itemTypeCode.smApp} onChangeItem={onChangePrice}
+                                onAdd={onAddPrice} onDeletePrice={onDeletePrice}
                             />
+                        </div>
                     </div>
-                </div>
-            </>
-        );
+                </>
+            );
+        } else { return <div/>}
     };
 
     const renderActionLinks = () => {

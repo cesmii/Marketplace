@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { Helmet } from "react-helmet"
 
 import { AppSettings } from '../../utils/appsettings'
+import { useLoginStatus } from '../../components/OnLoginHandler';
 import { useLoadingContext } from "../../components/contexts/LoadingContext";
 import { generateLogMessageString } from '../../utils/UtilityService';
 import axiosInstance from '../../services/AxiosService';
@@ -25,6 +26,7 @@ function CheckoutComplete() {
     const [_checkoutSession, setCheckoutSession] = useState(null);
     const [_status, setStatus] = useState(null);
     const [_checkStatusCounter, setCheckStatusCounter] = useState(0);
+    const { isAuthenticated } = useLoginStatus(null, [AppSettings.AADAdminRole]);
 
     //-------------------------------------------------------------------
     // Region: hooks 
@@ -93,11 +95,54 @@ function CheckoutComplete() {
 
         //fetch checkout completion status
         if (checkoutSessionId != null) {
-            fetchStatus();
+            //fetchStatus();
         }
 
     }, [checkoutSessionId, _checkStatusCounter]);
 
+    useEffect(() => {
+        async function ClearCart() {
+            const url = `ecommerce/cart/delete`;
+            axiosInstance.post(url, { id: loadingProps.cart.id })
+                .then(resp => {
+                    if (resp.data.isSuccess) {
+                        setLoadingProps({
+                            isLoading: false,
+                            cart: null,
+                            message: ""
+                        });
+                    }
+                })
+                .catch(error => {
+                    //hide a spinner, show a message
+                    setLoadingProps({
+                        isLoading: false, message: null, inlineMessages: [
+                            { id: new Date().getTime(), severity: "danger", body: `An error occurred during adding item to cart credits.`, isTimed: false }
+                        ]
+                    });
+                    console.log(error);
+                    //scroll back to top
+                    window.scroll({
+                        top: 0,
+                        left: 0,
+                        behavior: 'smooth',
+                    });
+                });
+        }
+
+        // Is User is authenticated and cart is not empty.
+        // Clear the cart items in the database
+        if (isAuthenticated && loadingProps.cart != null && loadingProps.cart.id != null) {
+            ClearCart();
+        } else {
+            setLoadingProps({
+                isLoading: false,
+                cart: null,
+                message: ""
+            });
+        }
+
+    }, [loadingProps.checkout, loadingProps.cart]);
 
     //-------------------------------------------------------------------
     // Region: Event Handling of child component events

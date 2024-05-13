@@ -179,14 +179,16 @@ namespace CESMII.Marketplace.Api.Controllers
                 //if Stripe fails, catch exception, log exception, and still save to our db
                 try
                 {
-                    if (string.IsNullOrEmpty(model.PaymentProductId))
+                    if (model.AllowPurchase)
                     {
-                        var newlyCreatedProduct = await _stripeService.AddProduct(model, UserID);
-                        model.PaymentProductId = newlyCreatedProduct.Id;
-                    }
-                    else
-                    {
-                        await _stripeService.UpdateProduct(model, UserID);
+                        if (string.IsNullOrEmpty(model.PaymentProductId))
+                        {
+                            await _stripeService.AddProduct(model, UserID);
+                        }
+                        else
+                        {
+                            await _stripeService.UpdateProduct(model, UserID);
+                        }
                     }
                 } catch (Exception ex)
                 {
@@ -226,7 +228,7 @@ namespace CESMII.Marketplace.Api.Controllers
             try
             {
                 var adminMarketplaceItem = _dal.GetById(model.ID);
-                if (adminMarketplaceItem !=null && adminMarketplaceItem.IsActive && !string.IsNullOrEmpty(adminMarketplaceItem.PaymentProductId))
+                if (adminMarketplaceItem !=null && adminMarketplaceItem.IsActive && adminMarketplaceItem.AllowPurchase && !string.IsNullOrEmpty(adminMarketplaceItem.PaymentProductId))
                 {
                     await _stripeService.DeleteProduct(adminMarketplaceItem.PaymentProductId);
                 }
@@ -283,8 +285,10 @@ namespace CESMII.Marketplace.Api.Controllers
                 //if Stripe fails, catch exception, log exception, and still save to our db
                 try
                 {
-                    var newlyCreatedProduct = await _stripeService.AddProduct(model, UserID);
-                    model.PaymentProductId = newlyCreatedProduct.Id;
+                    if (model.AllowPurchase)
+                    {
+                        await _stripeService.AddProduct(model, UserID);
+                    }
                 }
                 catch (Exception ex)
                 {
