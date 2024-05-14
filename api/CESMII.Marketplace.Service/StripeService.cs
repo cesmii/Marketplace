@@ -191,7 +191,7 @@ namespace CESMII.Marketplace.Service
             if (!cart.UseCredits) return 0;
             //sum total cost, note subscription cost is just whatever the amount is
             var totalCost = cart.Items.Sum(x => x.SelectedPrice.Amount * x.Quantity);
-            return credits >= totalCost ? totalCost : credits;
+            return credits >= totalCost ? totalCost : Convert.ToInt64(credits + "00");
         }
 
         public async Task<CheckoutStatusModel> GetCheckoutStatus(string sessionId)
