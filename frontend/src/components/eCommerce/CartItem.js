@@ -154,7 +154,7 @@ function CartItem(props) {
                 {price.description != null &&
                     <Form.Row>
                     <Col className='d-flex'>
-                        <span className="text-muted" >{price.description}</span>
+                        <Form.Label className="text-muted" >{price.description}</Form.Label>
                     </Col>
                     </Form.Row>
                 }

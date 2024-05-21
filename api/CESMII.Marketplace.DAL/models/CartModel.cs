@@ -3,8 +3,8 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
-    using CESMII.Marketplace.Data.Entities;
     using CESMII.Marketplace.Common.Enums;
+    using CESMII.Marketplace.Common.Models;
 
     public class CartModel : AbstractModel
     {
@@ -22,7 +22,7 @@
         /// <summary>
         /// This will be populated if user decides to pursue checkout as a guest.
         /// </summary>
-        public GuestUserCheckoutModel GuestUser { get; set; }
+        public GuestUserModel GuestUser { get; set; }
 
         public bool UseCredits { get; set; } = false;
 

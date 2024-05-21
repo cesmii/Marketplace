@@ -122,13 +122,9 @@ function Cart() {
             .then(resp => {
                 if (resp.data.isSuccess) {
                     //hide a spinner, show a message
-                    setLoadingProps({
-                        isLoading: false, message: null, inlineMessages: [
-                            { id: new Date().getTime(), severity: "success", body: `Checkout started...`, isTimed: true }
-                        ]
-                    });
+                    setLoadingProps({isLoading: false});
 
-                    //TBD - now redirect to checkout page and show the embedded Stripe form
+                    //now redirect to checkout page and show the embedded Stripe form
                     setCartResponse(resp.data.data);
                 }
                 else {

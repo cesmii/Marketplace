@@ -88,7 +88,20 @@ namespace CESMII.Marketplace.Service
                 //options.CustomerEmail - set this.
                 //options.CustomText.AfterSubmit
                 //options.CustomText.Submit
-                //options.CustomText.TermsOfServiceAcceptance
+
+                if (!string.IsNullOrEmpty(cartItem.MarketplaceItem.ECommerce.TermsOfService))
+                {
+                    if (options.CustomText == null) options.CustomText = new SessionCustomTextOptions();
+                    SessionCustomTextTermsOfServiceAcceptanceOptions terms = new() { Message = cartItem.MarketplaceItem.ECommerce.TermsOfService };
+                    options.CustomText.TermsOfServiceAcceptance = new SessionCustomTextTermsOfServiceAcceptanceOptions() 
+                        { Message = cartItem.MarketplaceItem.ECommerce.TermsOfService };
+
+                    if (cartItem.MarketplaceItem.ECommerce.TermsOfServiceIsRequired)
+                    {
+                        if (options.ConsentCollection == null) options.ConsentCollection = new SessionConsentCollectionOptions();
+                        options.ConsentCollection = new SessionConsentCollectionOptions() { TermsOfService = "required" };
+                    }
+                }
                 //
                 //options.LineItems[0].AdjustableQuantity
                 if (user == null && cart.GuestUser != null)

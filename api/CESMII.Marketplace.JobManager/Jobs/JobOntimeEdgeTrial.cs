@@ -278,7 +278,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             return sbResult.Length == 0;
         }
 
-        private OnTimeEdgeRequestModel MapToBody(string secretKey, OnTimeEdgeUserModel model, string organizationName)
+        private OnTimeEdgeRequestModel MapToBody(string secretKey, GuestUserModel model, string organizationName)
         {
             return new OnTimeEdgeRequestModel()
             {
@@ -345,7 +345,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
     internal class JobOnTimeEdgePayload
     {
         public string HostUrl { get; set; }
-        public OnTimeEdgeUserModel FormData { get; set; }
+        public GuestUserModel FormData { get; set; }
     }
 
     internal class JobOnTimeEdgeConfig
@@ -360,19 +360,6 @@ namespace CESMII.Marketplace.JobManager.Jobs
         public bool Enabled { get; set; }
         public string Url { get; set; }
         public string SecretKey { get; set; }
-    }
-
-
-    /// <summary>
-    /// Structure of the data we receive from our front end
-    /// </summary>
-    internal class OnTimeEdgeUserModel
-    {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string CompanyName { get; set; }
-        public string Email { get; set; }
-        public string Phone { get; set; }
     }
 
     /// <summary>

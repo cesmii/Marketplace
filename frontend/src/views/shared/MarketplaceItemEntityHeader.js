@@ -75,7 +75,9 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                             <div className="mb-2" dangerouslySetInnerHTML={{ __html: props.item.abstract }} ></div>
                         }
                         <p className="mb-0" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
-                        { renderPrices() }
+                        {renderPrices()}
+                        <AddCartButton item={props.item} onAdd={onAddCart} className="mt-3 mr-2" />
+                        {renderJobDefinitions()}
                         {/*<div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderCategoryItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderMetaTagItem(props.item)}</div>*/}
@@ -86,9 +88,6 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                                     {renderMenuColorMaterialIcon('visibility', color.cornflower, 'mr-1')}View Specifications</Button>
                             </p>
                         }
-                        {renderJobDefinitions()}
-
-                        <AddCartButton item={props.item} onAdd={onAddCart} className="mt-2" />
                     </div>
                 </div>
             </>
@@ -168,7 +167,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
 
         return props.item.jobDefinitions.map((x) => {
             return (
-                <MarketplaceItemJobLauncher key={x.id} isAuthenticated={props.isAuthenticated} jobDefinition={x} marketplaceItemId={props.item.id} marketplaceItemName={props.item.name} />
+                <MarketplaceItemJobLauncher key={x.id} className="mt-3" isAuthenticated={props.isAuthenticated} jobDefinition={x} marketplaceItemId={props.item.id} marketplaceItemName={props.item.name} />
             );
         });
     };
