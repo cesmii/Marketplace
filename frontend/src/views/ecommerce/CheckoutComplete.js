@@ -65,6 +65,7 @@ function CheckoutComplete() {
                         setLoadingProps({
                             isLoading: false,
                             cart: resp.data.data.status === "complete" ? null : loadingProps.cart,
+                            checkout: resp.data.data.status === "complete" ? null : loadingProps.checkout,
                             message: ""
                         });
                     }
@@ -101,7 +102,7 @@ function CheckoutComplete() {
     }, [checkoutSessionId, _checkStatusCounter]);
 
     useEffect(() => {
-        async function ClearCart() {
+        async function clearCart() {
             const url = `ecommerce/cart/delete`;
             axiosInstance.post(url, { id: loadingProps.cart.id })
                 .then(resp => {
@@ -133,7 +134,7 @@ function CheckoutComplete() {
         // Is User is authenticated and cart is not empty.
         // Clear the cart items in the database
         if (isAuthenticated && loadingProps.cart != null && loadingProps.cart.id != null) {
-            ClearCart();
+            clearCart();
         } else {
             setLoadingProps({
                 isLoading: false,

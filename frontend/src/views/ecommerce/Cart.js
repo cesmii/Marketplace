@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from 'react'
+import { useHistory } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
 import { Helmet } from "react-helmet"
-import axiosInstance from "../../services/AxiosService";
-import { loadStripe } from '@stripe/stripe-js';
-import {
-    EmbeddedCheckoutProvider,
-    EmbeddedCheckout
-} from '@stripe/react-stripe-js';
 
+import axiosInstance from "../../services/AxiosService";
 import { AppSettings } from '../../utils/appsettings'
 import { useLoginStatus } from '../../components/OnLoginHandler';
 import { useLoadingContext } from '../../components/contexts/LoadingContext';
@@ -23,12 +19,81 @@ function Cart() {
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
+    const history = useHistory();
     const _caption = 'Shopping Cart';
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_error, setError] = useState({ show: false, message: null, caption: null });
-    const [_cartResponse, setCartResponse] = useState(null);
     const { isAuthenticated } = useLoginStatus(null, [AppSettings.AADAdminRole]);
-    const [_stripePromise, setStripePromise] = useState(null); //loadStripe("pk_test_51Os66lHXjPkvmDZJ927KVzxAVIWaFhySoPDcoGVfxog1SXioudXZCbcaoMysdUrUBu1TgGEUGos0XkLpFyr0HB0Y00IxD721az"));
+
+    //-------------------------------------------------------------------
+    // Region: hooks - checkout status - if user leaves and comes back to cart page, return to the 
+    //  checkout screen and do not make them start over if we are in progress on checkout.
+    //-------------------------------------------------------------------
+    useEffect(() => {
+        console.log(generateLogMessageString(`useEffect-cart-fetchStatus`, CLASS_NAME));
+
+        async function fetchStatus() {
+            setLoadingProps({ isLoading: true, message: "" });
+
+            const url = `ecommerce/checkout/status`;
+            axiosInstance.post(url, { id: loadingProps.checkout.sessionId })
+                .then(resp => {
+
+                    if (resp.data.isSuccess) {
+
+                        if (resp.data.data != null) {
+                            console.log(generateLogMessageString(`fetchStatus|checkout status|${resp.data.data.status}`, CLASS_NAME));
+                            switch (resp.data.data.status) {
+                                case "complete":
+                                    setLoadingProps({isLoading: false, cart: null, checkout: null});
+                                    return;
+                                case "open":
+                                    console.log(generateLogMessageString(`fetchStatus||redirect to checkout`, CLASS_NAME));
+                                    setLoadingProps({ isLoading: false });
+                                    history.push('/checkout');
+                                    return;
+                                case "expired":
+                                    console.warn(generateLogMessageString(`fetchStatus|checkout status|${resp.data.data.status}`, CLASS_NAME));
+                                    setLoadingProps({ isLoading: false, checkout: null });
+                                    return;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    else {
+                        setLoadingProps({
+                            isLoading: false, message: null, inlineMessages: [
+                                { id: new Date().getTime(), severity: "danger", body: resp.data.message, isTimed: true }
+                            ]
+                        });
+                    }
+                })
+                .catch(error => {
+                    //hide a spinner, show a message
+                    setLoadingProps({
+                        isLoading: false, message: null, inlineMessages: [
+                            { id: new Date().getTime(), severity: "danger", body: `An error occurred checking status.`, isTimed: false }
+                        ]
+                    });
+                    console.log(error);
+                    //scroll back to top
+                    window.scroll({
+                        top: 0,
+                        left: 0,
+                        behavior: 'smooth',
+                    });
+                });
+        }
+
+        if (loadingProps.checkout?.sessionId != null) {
+            fetchStatus();
+        }
+
+        return () => {
+        };
+
+    }, [loadingProps.checkout?.sessionId]);
 
     //-------------------------------------------------------------------
     // Region: api call - fetch credit on load
@@ -80,24 +145,6 @@ function Cart() {
     
 
     //-------------------------------------------------------------------
-    // Region: on checkout init - prepare for embedding Stripe checkout form
-    //-------------------------------------------------------------------
-    useEffect(() => {
-
-        if (_cartResponse == null) return;
-
-        setLoadingProps({ checkout: { apiKey: _cartResponse.apiKey, sessionId: _cartResponse.sessionId } });
-
-        //only load once
-        if (_stripePromise == null) {
-            setStripePromise(loadStripe(_cartResponse.apiKey));
-        }
-
-        return () => {
-        };
-    }, [_cartResponse, _stripePromise]);
-
-    //-------------------------------------------------------------------
     // Region: Event Handling
     //-------------------------------------------------------------------
     const onCheckout = () => {
@@ -121,11 +168,9 @@ function Cart() {
         axiosInstance.post(url, loadingProps.cart)
             .then(resp => {
                 if (resp.data.isSuccess) {
-                    //hide a spinner, show a message
-                    setLoadingProps({isLoading: false});
-
-                    //now redirect to checkout page and show the embedded Stripe form
-                    setCartResponse(resp.data.data);
+                    //hide a spinner, set checkout data to trigger load of embedded stripe form
+                    setLoadingProps({ isLoading: false, checkout: resp.data.data });
+                    history.push('/checkout');
                 }
                 else {
                     //update spinner, messages
@@ -218,26 +263,6 @@ function Cart() {
         );
     };
 
-    const renderCheckout = () => {
-        if (_cartResponse == null) return;
-
-        if (_cartResponse.apiKey == null || _cartResponse.clientSecret == null) return;
-
-        const options = {
-            clientSecret: _cartResponse.clientSecret,
-        };
-
-        return (
-            <div id="checkout">
-                <EmbeddedCheckoutProvider
-                    stripe={_stripePromise}
-                    options={options}>
-                    <EmbeddedCheckout />
-                </EmbeddedCheckoutProvider>
-            </div>
-        );
-    }
-
 
     //-------------------------------------------------------------------
     // Region: Render final output
@@ -247,7 +272,7 @@ function Cart() {
             <Helmet>
                 <title>{`${_caption} | ${AppSettings.Titles.Main}`}</title>
             </Helmet>
-            {(_cartResponse == null) &&
+            {(loadingProps.checkout == null) &&
                 <>
                 <div className="row" >
                     <div className="col-sm-6 mt-4 mx-auto text-center">
@@ -263,7 +288,7 @@ function Cart() {
                 </div>
                 </>
             }
-            {(_cartResponse == null && loadingProps.cart != null && loadingProps.cart.items != null && loadingProps.cart.items.length > 0) &&
+            {(loadingProps.checkout == null && loadingProps.cart?.items != null && loadingProps.cart.items.length > 0) &&
                 <>
                 <div className="row" >
                     <div className="col-7 mx-auto pt-2 text-center">
@@ -278,7 +303,6 @@ function Cart() {
                 </div>
                 </>
             }
-            {renderCheckout()}
             {renderErrorMessage()}
         </>
     )
