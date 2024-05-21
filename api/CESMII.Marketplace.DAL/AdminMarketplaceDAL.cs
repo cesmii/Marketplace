@@ -34,9 +34,9 @@
         //default type - use if none assigned yet.
         private readonly MongoDB.Bson.BsonObjectId _smItemTypeIdDefault;
 
-        public AdminMarketplaceDAL(IMongoRepository<MarketplaceItem> repo, 
-            IMongoRepository<LookupItem> repoLookup, 
-            IMongoRepository<Publisher> repoPublisher, 
+        public AdminMarketplaceDAL(IMongoRepository<MarketplaceItem> repo,
+            IMongoRepository<LookupItem> repoLookup,
+            IMongoRepository<Publisher> repoPublisher,
             IMongoRepository<ImageItemSimple> repoImages,
             IExternalDAL<MarketplaceItemModel> cloudLibDAL,
             ConfigUtil configUtil
@@ -128,7 +128,7 @@
                 skip, take,
                 new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
                 new OrderByExpression<MarketplaceItem>() { Expression = x => x.Name });
-            var count = returnCount ? _repo.Count( x => x.IsActive )  : 0;
+            var count = returnCount ? _repo.Count(x => x.IsActive) : 0;
 
             //trigger the query to execute then we can limit what related data we query against
             var data = query.ToList();
@@ -222,7 +222,7 @@
         {
             MarketplaceItem entity = _repo.FindByCondition(x => x.ID == id).FirstOrDefault();
             entity.Updated = DateTime.UtcNow;
-            entity.UpdatedById = MongoDB.Bson.ObjectId.Parse(userId); 
+            entity.UpdatedById = MongoDB.Bson.ObjectId.Parse(userId);
             entity.IsActive = false;
 
             await _repo.UpdateAsync(entity);
@@ -238,7 +238,7 @@
                 {
                     ID = entity.ID,
                     //ensure this value is always without spaces and is lowercase. 
-                    Name = entity.Name.ToLower().Trim().Replace(" ","-").Replace("_", "-"),  
+                    Name = entity.Name.ToLower().Trim().Replace(" ", "-").Replace("_", "-"),
                     DisplayName = entity.DisplayName,
                     IsFeatured = entity.IsFeatured,
                     IsVerified = entity.IsVerified,
@@ -264,11 +264,9 @@
                     ccName1 = entity._ccName1,
                     ccName2 = entity._ccName2,
                     ccEmail1 = entity._ccEmail1,
-                    ccEmail2 = entity._ccEmail2, 
+                    ccEmail2 = entity._ccEmail2,
                     //new eCommerce fields
-                    AllowPurchase = entity.AllowPurchase,
-                    PaymentProductId = entity.PaymentProductId,
-                    Prices = entity.Prices,
+                    ECommerce = entity.ECommerce,
                     Emails = entity.Emails
                 };
                 if (verbose)
@@ -413,7 +411,7 @@
             entity.IndustryVerticals = model.IndustryVerticals
                 .Where(x => x.Selected) //only include selected rows
                 .Select(x => new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.ID))).ToList();
-            entity.PublisherId =  new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.Publisher.ID));
+            entity.PublisherId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(model.Publisher.ID));
             entity.PublishDate = model.PublishDate;
             entity.ImagePortraitId = model.ImagePortrait == null ?
                 MongoDB.Bson.ObjectId.Parse(Common.Constants.BSON_OBJECTID_EMPTY) :
@@ -428,7 +426,8 @@
             //replace child collection of items - ids are preserved
             entity.RelatedItems = model.RelatedItems == null ? null : model.RelatedItems
                 .Where(x => x.RelatedType != null) //only include selected rows
-                .Select(x => new RelatedItem() {
+                .Select(x => new RelatedItem()
+                {
                     MarketplaceItemId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedId)),
                     RelatedTypeId = new MongoDB.Bson.BsonObjectId(MongoDB.Bson.ObjectId.Parse(x.RelatedType.ID)),
                 }).ToList();
@@ -449,9 +448,7 @@
             entity._ccEmail2 = model.ccEmail2;
 
             //new eCommerce fields
-            entity.AllowPurchase = model.AllowPurchase;
-            entity.PaymentProductId = model.PaymentProductId;
-            entity.Prices = model.Prices;
+            entity.ECommerce = model.ECommerce;
             entity.Emails = model.Emails;
         }
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Net.Mail;
+using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
 
 using Stripe;
@@ -12,8 +13,6 @@ using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.Service.Models;
 using CESMII.Common.SelfServiceSignUp.Services;
-
-using System.Net.Mail;
 
 namespace CESMII.Marketplace.Service
 {
@@ -56,7 +55,7 @@ namespace CESMII.Marketplace.Service
                 //append check out session id
                 ReturnUrl = cart.ReturnUrl.TrimEnd(Convert.ToChar("/")) + "/{CHECKOUT_SESSION_ID}",
                 LineItems = new List<SessionLineItemOptions>(),
-                ExpiresAt= DateTime.UtcNow.AddMinutes(30),                
+                ExpiresAt = DateTime.UtcNow.AddMinutes(30),
             };
 
             foreach (var cartItem in cart.Items)
@@ -81,6 +80,21 @@ namespace CESMII.Marketplace.Service
                     Price = cartItem.SelectedPrice.PriceId,
                     Quantity = cartItem.Quantity,
                 });
+
+                //options.ClientReferenceId
+                //options.ConsentCollection
+                //options.ConsentCollection.TermsOfService - checkbox
+                //options.Customer - Add StripeCustomerId to our UserModel
+                //options.CustomerEmail - set this.
+                //options.CustomText.AfterSubmit
+                //options.CustomText.Submit
+                //options.CustomText.TermsOfServiceAcceptance
+                //
+                //options.LineItems[0].AdjustableQuantity
+                if (user == null && cart.GuestUser != null)
+                {
+                    //set customer info this way
+                }
             }
 
             try
@@ -174,13 +188,13 @@ namespace CESMII.Marketplace.Service
 
                 if (cart == null)
                     return true;
-                
+
                 // Update cart status
                 cart.Status = Common.Enums.CartStatusEnum.Completed;
                 await Update(cart, cart.CreatedById);
 
                 await SendEmails(controller, cart);
-                
+
                 if (string.IsNullOrEmpty(cart.OraganizationId))
                     return true;
 
@@ -198,7 +212,7 @@ namespace CESMII.Marketplace.Service
 
         private async Task SendEmails(Controller controller, CartModel cart)
         {
-            foreach(var cartItem in cart.Items)
+            foreach (var cartItem in cart.Items)
             {
                 await SendMail(controller, cartItem.MarketplaceItem);
             }
@@ -208,14 +222,17 @@ namespace CESMII.Marketplace.Service
         {
             try
             {
-                var requestInfoModel = new RequestInfoModel { 
-                    MarketplaceItem = new MarketplaceItemModel { DisplayName = marketplaceItem.DisplayName, Abstract = string.Empty },
+                var requestInfoModel = new RequestInfoModel
+                {
+                    MarketplaceItem = new MarketplaceItemModel { DisplayName = marketplaceItem.DisplayName, Abstract = marketplaceItem.Abstract },
                     Description = "Successful completed checkout",
-                    FirstName = string.Empty, LastName = string.Empty,
-                    Email= string.Empty, Phone= string.Empty,
-                 };
+                    FirstName = string.Empty,
+                    LastName = string.Empty,
+                    Email = string.Empty,
+                    Phone = string.Empty,
+                };
                 var body = await Api.Shared.Extensions.ViewExtensions.RenderViewAsync(controller, "~/Views/Template/MarketplaceItemECommerce.cshtml", requestInfoModel);
-                
+
                 var message = new MailMessage
                 {
                     From = new MailAddress(_mailConfig.MailFromAddress),
@@ -224,7 +241,7 @@ namespace CESMII.Marketplace.Service
                     IsBodyHtml = true,
                 };
 
-                foreach(var email in marketplaceItem.Emails)
+                foreach (var email in marketplaceItem.Emails)
                 {
                     message.To.Add(new MailAddress(email.EmailAddress, email.RecipientName));
                 }
@@ -233,7 +250,7 @@ namespace CESMII.Marketplace.Service
                 {
                     message.Bcc.Add(new MailAddress(email));
                 }
-            
+
                 await _mailRelayService.SendEmail(message);
             }
             catch (Exception ex)
@@ -367,12 +384,12 @@ namespace CESMII.Marketplace.Service
 
             //check for product 
             Product product = await serviceProduct.CreateAsync(itemAdd);
-            item.PaymentProductId = product.Id;
+            item.ECommerce.PaymentProductId = product.Id;
 
             _logger.LogInformation($"StripeService|AddProduct|Product added: {product.Id}|{product.Name}.");
             await _stripeLogDal.Add(new StripeAuditLogModel { Type = "AddProduct", Message = product.ToJson() }, "");
 
-            foreach (var price in item.Prices)
+            foreach (var price in item.ECommerce.Prices)
             {
                 await AddStripePrice(item, price);
             }
@@ -387,16 +404,16 @@ namespace CESMII.Marketplace.Service
             StripeConfiguration.ApiKey = _config.SecretKey;
 
             //cannot updateProduct if paymentProductId is null or empty
-            if (string.IsNullOrEmpty(item.PaymentProductId))
+            if (string.IsNullOrEmpty(item.ECommerce.PaymentProductId))
             {
                 _logger.LogError("StripeService|UpdateProduct|Cannot update product with null payment product id.");
                 throw new ArgumentException("Cannot update product with null payment product id.");
             }
 
             // TODO Prices
-            var stripPrices = await GetPricesByProductId(item.PaymentProductId);
+            var stripPrices = await GetPricesByProductId(item.ECommerce.PaymentProductId);
 
-            foreach (var price in item.Prices)
+            foreach (var price in item.ECommerce.Prices)
             {
                 if (!string.IsNullOrEmpty(price.PriceId) && stripPrices.Count(pr => pr.Id == price.PriceId && pr.UnitAmountDecimal == Convert.ToDecimal(price.Amount + "00")) == 1)
                 {
@@ -410,7 +427,7 @@ namespace CESMII.Marketplace.Service
             // Archive the prices which are deleted or updated.
             foreach (var stripePrice in stripPrices)
             {
-                if (item.Prices.Count(pr => stripePrice.Id == pr.PriceId && stripePrice.UnitAmountDecimal == Convert.ToDecimal(pr.Amount + "00")) == 1)
+                if (item.ECommerce.Prices.Count(pr => stripePrice.Id == pr.PriceId && stripePrice.UnitAmountDecimal == Convert.ToDecimal(pr.Amount + "00")) == 1)
                 {
                     continue;
                 }
@@ -428,7 +445,7 @@ namespace CESMII.Marketplace.Service
             var serviceProduct = new ProductService();
 
             //check for product 
-            var product = await serviceProduct.UpdateAsync(item.PaymentProductId, itemUpdate);
+            var product = await serviceProduct.UpdateAsync(item.ECommerce.PaymentProductId, itemUpdate);
 
             _logger.LogInformation($"StripeService|UpdateProduct|Product updated: {product.Id}|{product.Name}.");
 
@@ -443,9 +460,9 @@ namespace CESMII.Marketplace.Service
 
             var priceOption = new PriceCreateOptions
             {
-                Product = item.PaymentProductId,
+                Product = item.ECommerce.PaymentProductId,
                 UnitAmountDecimal = Convert.ToDecimal(price.Amount + "00"),
-                Nickname = price.Description,
+                Nickname = price.Caption,
                 Currency = "usd",
             };
 
@@ -464,9 +481,9 @@ namespace CESMII.Marketplace.Service
         }
 
         private static async Task ArchiveStripePrice(Price price)
-        { 
+        {
             var priceService = new PriceService();
-            await priceService.UpdateAsync(price.Id, new PriceUpdateOptions {Active = false });
+            await priceService.UpdateAsync(price.Id, new PriceUpdateOptions { Active = false });
         }
 
 
@@ -479,7 +496,7 @@ namespace CESMII.Marketplace.Service
         {
             var usid = MongoDB.Bson.ObjectId.Parse(userId);
             var cartModels = _dal.Where(x => x.CreatedById == usid && x.IsActive, null, null, false, false).Data;
-            return cartModels == null ||cartModels.Count == 0 ? null : cartModels[0] ;
+            return cartModels == null || cartModels.Count == 0 ? null : cartModels[0];
         }
 
         public CartModel? GetBySessionId(string sessionId)

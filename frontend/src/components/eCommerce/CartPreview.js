@@ -93,11 +93,14 @@ function CartPreview() {
         console.log(generateLogMessageString(`onChange`, CLASS_NAME));
         //add the item to the cart and save context
         let cart = updateCart(loadingProps.cart, item, qty, price, true); //overwrite existing amount
+        setLoadingProps({ cart: cart });
+    };
+
+    const onUpdateCart = () => {
+        console.log(generateLogMessageString(`onUpdateCart`, CLASS_NAME));
         // If User authenticated, save the cart items in the database
         if (isAuthenticated) {
-            updateCartItem(cart);
-        } else {
-            setLoadingProps({ cart: cart });
+            updateCartItem({ cart: loadingProps.cart });
         }
     };
 
@@ -149,7 +152,7 @@ function CartPreview() {
             return (
                 <Fragment key={i} >
                     <CartItem item={item} isAdd={false} onChange={onChange} showSelectedPriceOnly={true}
-                        onValidate={onValidate} onRemoveItem={onRemoveItem} showAbstract={true} className="col-12 mx-auto" />
+                        onValidate={onValidate} onUpdateCart={onUpdateCart} onRemoveItem={onRemoveItem} showAbstract={false} className="col-12 mx-auto" />
                     <hr />
                 </Fragment>
             );

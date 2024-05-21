@@ -28,7 +28,7 @@
         public string DisplayName { get; set; }
 
         public string Version { get; set; }
-        
+
         /// <summary>
         /// Namespace URI. Only applies to profiles pulled from CloudLib
         /// </summary>
@@ -58,7 +58,7 @@
         /// TBD - May need to convert this to list.
         /// </summary>
         public virtual UserModel Author { get; set; }
-        
+
         /// <summary>
         /// The author may not be someone within the system. In this case, show as a simple string field.
         /// TBD - May need to convert this to list.
@@ -112,9 +112,7 @@
         public string ccEmail2 { get; set; }
 
         #region eCommerce Fields
-        public bool AllowPurchase { get; set; } = true;
-        public string PaymentProductId { get; set; }
-        public List<ProductPrice> Prices { get; set; } = new List<ProductPrice>();
+        public ECommerce ECommerce { get; set; } = new ECommerce();
         public List<Email> Emails { get; set; } = new List<Email>();
         #endregion
 
@@ -128,7 +126,7 @@
         /// The value is determined at runtime in the DAL based on where we get the data from.
         /// Default to false. 
         /// </summary>
-        public bool IsExternal { get { return (ExternalSource != null && !string.IsNullOrEmpty(ExternalSource.SourceId));  } }
+        public bool IsExternal { get { return (ExternalSource != null && !string.IsNullOrEmpty(ExternalSource.SourceId)); } }
 
         public override string ToString() => $"{DisplayName} {ID}";
 
@@ -168,7 +166,7 @@
     /// A very simple marketplace item used for related data and lookup scenarios
     /// where keeping data small is helpful
     /// </summary>
-    public class MarketplaceItemSimpleModel: AbstractModel
+    public class MarketplaceItemSimpleModel : AbstractModel
     {
         public string Name { get; set; }
         public string DisplayName { get; set; }
@@ -220,9 +218,7 @@
     /// </summary>
     public class MarketplaceItemCheckoutModel : MarketplaceItemSimpleModel
     {
-        //TBD - append to this model
-        public string PaymentProductId { get; set; }
-
+        public ECommerce ECommerce { get; set; }
         public List<Email> Emails { get; set; }
     }
 

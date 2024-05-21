@@ -14,7 +14,7 @@ function AdminPriceRow(props) { //props are item, showActions
     const _billingPeriods = [{ id: 'OneTime', caption: 'One Time' }, { id: 'Yearly', caption: 'Yearly' }, { id: 'Monthly', caption: 'Monthly' }];
     const [_isValid, setIsValid] = useState({
         amount: true,
-        description: true,
+        caption: true,
         billingPeriod: true
     });
 
@@ -28,6 +28,7 @@ function AdminPriceRow(props) { //props are item, showActions
         //note you must update the state value for the input to be read only. It is not enough to simply have the onChange handler.
         switch (e.target.id) {
             case "amount":
+            case "caption":
             case "description":
             case "priceId":
                 props.item[e.target.id] = e.target.value;
@@ -55,7 +56,7 @@ function AdminPriceRow(props) { //props are item, showActions
 
         //update state for other components to see
         if (props.onDeletePrice != null) {
-            props.onDeletePrice(props.item.description);
+            props.onDeletePrice(props.item.caption);
         }
     }
 
@@ -67,9 +68,9 @@ function AdminPriceRow(props) { //props are item, showActions
         setIsValid({ ..._isValid, amount: isValid });
     };
 
-    const validateForm_description = (e) => {
+    const validateForm_caption = (e) => {
         const isValid = e.target.value.toString() !== "";
-        setIsValid({ ..._isValid, description: isValid });
+        setIsValid({ ..._isValid, caption: isValid });
     };
 
     const validateForm_billingPeriod = (e) => {
@@ -105,7 +106,7 @@ function AdminPriceRow(props) { //props are item, showActions
     // Region: Render final output
     //-------------------------------------------------------------------
     let cssClass = props.cssClass + (props.isHeader ? " bottom header" : " center border-top");
-    if (!_isValid.amount || !_isValid.description || !_isValid.billingPeriod) {
+    if (!_isValid.amount || !_isValid.caption || !_isValid.billingPeriod) {
         cssClass += ' alert alert-danger';
     }
 
@@ -116,12 +117,12 @@ function AdminPriceRow(props) { //props are item, showActions
                     Billing Period
                 </div>
                 <div className="col-4 col-sm-4 font-weight-bold pl-1 pr-0" >
-                    Description
+                    Caption
                 </div>
                 <div className="col-3 col-sm-2 font-weight-bold pl-1 pr-1 text-right" >
                     Amount
                 </div>
-                <div className="col-4 col-sm-2 font-weight-bold pl-1 pr-0" >
+                <div className="col-4 col-sm-2 font-weight-bold pl-1 pr-0 text-center" >
                     Stripe Price Id
                 </div>
                 <div className="col-4 col-sm-2 text-right font-weight-bold pl-1 pr-1" >
@@ -141,8 +142,8 @@ function AdminPriceRow(props) { //props are item, showActions
             </div>
             <div className="col-4 col-sm-4 pl-1 pr-0 my-0" >
                 <Form.Group>
-                    <Form.Control id="description" className={(!_isValid.description ? 'invalid-field minimal py-1' : 'minimal py-1')} type="" placeholder={`Enter description`}
-                        value={props.item.description} onBlur={validateForm_description} onChange={onChange} />
+                    <Form.Control id="caption" className={(!_isValid.caption ? 'invalid-field minimal py-1' : 'minimal py-1')} type="" placeholder={`Enter caption`}
+                        value={props.item.caption} onBlur={validateForm_caption} onChange={onChange} />
                 </Form.Group>
             </div>   
             <div className="col-3 col-sm-2 pl-1 pr-0 my-0" >
@@ -151,12 +152,24 @@ function AdminPriceRow(props) { //props are item, showActions
                         value={props.item.amount} onBlur={validateForm_amount} onChange={onChange} />
                 </Form.Group>
             </div>
-            <div className="col-4 col-sm-2" >
-                {props.item.priceId}
+            <div className="col-4 col-sm-3" >
+                {props.item.priceId != null &&
+                    <Form.Group>
+                        <Form.Control id="priceId" className={`minimal py-1 text-right`} type="" readOnly={true}
+                            value={props.item.priceId} />
+                    </Form.Group>
+                }
             </div>
-            <div className="col-4 col-sm-2 text-right pt-1 pl-1 pr-1 my-0" >
+            <div className="col-4 col-sm-1 text-right pt-1 pl-1 pr-1 my-0" >
                 <button className="btn btn-icon-outline circle ml-auto" title="Delete Item" onClick={onDelete} ><i className="material-icons">close</i></button>
             </div>
+            <div className="col-11 pl-1 pr-0 mt-1" >
+                <Form.Group>
+                    <Form.Control id="description" className={'minimal py-1'} type="" placeholder={`Enter description`}
+                        value={props.item.description} onChange={onChange} />
+                </Form.Group>
+            </div>
+
         </div>
     );
 }

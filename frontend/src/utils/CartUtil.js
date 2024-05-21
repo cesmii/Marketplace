@@ -81,7 +81,7 @@ export function validateCart(cart) {
     let result = {quantity: true, allowPurchase: true};
     let x = cart.items.forEach(item => {
         //check item is allowed to be purchased
-        if (!item.marketplaceItem.allowPurchase)
+        if (!item.marketplaceItem.eCommerce.allowPurchase)
         {
             result = { ...result, allowPurchase: false };
         }

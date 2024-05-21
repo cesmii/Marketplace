@@ -75,9 +75,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
                             <div className="mb-2" dangerouslySetInnerHTML={{ __html: props.item.abstract }} ></div>
                         }
                         <p className="mb-0" ><b className="mr-2" >Published:</b>{formatItemPublishDate(props.item)}</p>
-                        {(props.item.allowPurchase && props.item.price != null) &&
-                            <p className="mt-2 mb-0" ><b className="mr-2" >Price:</b>${props.item.price}</p>
-                        }
+                        { renderPrices() }
                         {/*<div className="d-none d-lg-inline" >{renderIndustryVerticalItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderCategoryItem(props.item)}</div>*/}
                         {/*<div className="d-none d-lg-inline" >{renderMetaTagItem(props.item)}</div>*/}
@@ -171,6 +169,18 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
         return props.item.jobDefinitions.map((x) => {
             return (
                 <MarketplaceItemJobLauncher key={x.id} isAuthenticated={props.isAuthenticated} jobDefinition={x} marketplaceItemId={props.item.id} marketplaceItemName={props.item.name} />
+            );
+        });
+    };
+
+    const renderPrices = () => {
+
+        if (props.item.eCommerce == null || !props.item.eCommerce.allowPurchase ||
+            props.item.eCommerce.prices == null || props.item.eCommerce.prices.length == 0) return null;
+
+        return props.item.eCommerce.prices.map((x,i) => {
+            return (
+                <p key={`price-${i}`} className="mt-2 mb-0" ><b className="mr-2" >{x.caption}:</b>${x.amount}</p>
             );
         });
     };

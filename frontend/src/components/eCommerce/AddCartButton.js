@@ -41,7 +41,7 @@ function AddCartButton(props) { //props are item, showActions
     // Region: Render final output
     //-------------------------------------------------------------------
     if (props.item === null || props.item === {}) return null;
-    if (!props.item.allowPurchase) return null;
+    if (!props.item.eCommerce.allowPurchase) return null;
     const css = props.className == null ? '' : props.className;
 
     return (

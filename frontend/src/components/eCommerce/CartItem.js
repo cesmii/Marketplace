@@ -33,7 +33,7 @@ function CartItem(props) {
     //we don't have a unique id, combine fields to produce a unique id
     const getPriceId = (price, counter = 0) => {
         if (price == null) return null;
-        return `${price.priceId}-${price.billingPeriod}-${price.description}-${price.amount}-${counter}`;
+        return `${price.priceId}-${price.billingPeriod}-${price.caption}-${price.amount}-${counter}`;
     }
 
     //-------------------------------------------------------------------
@@ -84,6 +84,9 @@ function CartItem(props) {
         const result = validateCartItem_Quantity(e.target.value);
         setIsValid(result);
         if (props.onValidate != null) props.onValidate(props.item.marketplaceItem?.id, result);
+        //trigger call to APi to udpate if quantity is valid
+        if (result.required && result.numeric && result.range && props.onUpdateCart != null)
+            props.onUpdateCart();
     };
 
     const renderSelectItem = (price, counter) => {
@@ -98,7 +101,7 @@ function CartItem(props) {
                         }
                     }}
                 />
-                <Form.Check.Label htmlFor={id} >{price.description}</Form.Check.Label>
+                <Form.Check.Label htmlFor={id} >{price.caption}</Form.Check.Label>
             </Form.Check>
         )
     }
@@ -141,13 +144,20 @@ function CartItem(props) {
                     }
                     {!showRadio &&
                         <Col className='d-flex'>
-                            <Form.Label>{price.description}</Form.Label>
+                            <Form.Label>{price.caption}</Form.Label>
                         </Col>
                     }
                     <Col className='d-flex'>
                         <Form.Label className='ml-auto pr-2'>{price.amount != null ? formatCurrency(price.amount) : 0}</Form.Label>
                     </Col>
                 </Form.Row>
+                {price.description != null &&
+                    <Form.Row>
+                    <Col className='d-flex'>
+                        <span className="text-muted" >{price.description}</span>
+                    </Col>
+                    </Form.Row>
+                }
             </Form.Group>
         );
     };
@@ -162,7 +172,7 @@ function CartItem(props) {
                         }
                         {!showRadio &&
                             <Col className='d-flex'>
-                            <Form.Label>{price.description}</Form.Label>
+                            <Form.Label>{price.caption}</Form.Label>
                             </Col>
                         }
                         <Col className='d-flex'>
@@ -179,17 +189,17 @@ function CartItem(props) {
     // Region: Render Helpers
     //-------------------------------------------------------------------
     const renderPrices = () => {
-        if (props == null) {
+        if (props.item?.marketplaceItem?.eCommerce == null) {
             return;
         }
 
-        if (props.item.marketplaceItem.prices == null || props.item.marketplaceItem.prices == 0) {
-            props.item.marketplaceItem.prices = [];
-            props.item.marketplaceItem.prices.push(props.item.selectedPrice);
+        if (props.item.marketplaceItem.eCommerce.prices == null || props.item.marketplaceItem.eCommerce.prices == 0) {
+            props.item.marketplaceItem.eCommerce.prices = [];
+            props.item.marketplaceItem.eCommerce.prices.push(props.item.selectedPrice);
         }
 
         //if only show selected, trim down list to selected item only
-        var pricesFiltered = props.item.marketplaceItem.prices.filter((x, counter) => {
+        var pricesFiltered = props.item.marketplaceItem.eCommerce.prices.filter((x, counter) => {
             const id = getPriceId(x, counter);
             const selectedId = getPriceId(props.item?.selectedPrice, counter);
             return !props.showSelectedPriceOnly ? true : id === selectedId;
@@ -233,6 +243,9 @@ function CartItem(props) {
                     {(props.showAbstract && props.item.marketplaceItem.abstract != null) &&
                         <div dangerouslySetInnerHTML={{ __html: props.item.marketplaceItem.abstract }} ></div>
                     }
+                    {(!props.isAdd && props.item.marketplaceItem.eCommerce?.purchaseInstructions != null) &&
+                        <div dangerouslySetInnerHTML={{ __html: props.item.marketplaceItem.eCommerce?.purchaseInstructions }} ></div>
+                    }
                 </div>
                 {!props.isAdd &&
                     <div className="col-1">
@@ -247,6 +260,14 @@ function CartItem(props) {
                     {renderPrices()}
                 </div>
             </div>
+            {!props.isAdd && props.item.marketplaceItem?.eCommerce?.finePrint != null &&
+                <div className="row m-0">
+                    <div className={`border-top pt-2 mt-2 col-12 px-0`}>
+                        <div dangerouslySetInnerHTML={{ __html: props.item.marketplaceItem?.eCommerce?.finePrint }} ></div>
+                    </div>
+                </div>
+            }
+
         </>
     )
 }

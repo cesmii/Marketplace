@@ -84,4 +84,12 @@
 
         public OrganizationModel Organization { get; set; }
     }
+
+    public class GuestUserCheckoutModel
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string OrganizationName { get; set; }
+    }
 }

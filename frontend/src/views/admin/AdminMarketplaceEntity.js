@@ -106,7 +106,7 @@ function AdminMarketplaceEntity() {
 
             //add id client side to help manage which one to delete. this collection has no unique ids. 
             result.data.actionLinks = result.data.actionLinks == null ? null :
-                result.data.actionLinks.map((x, i) => { x.id = i;  return x; });
+                result.data.actionLinks.map((x, i) => { x.id = i; return x; });
 
             //set item state value
             setItem(result.data);
@@ -536,7 +536,6 @@ function AdminMarketplaceEntity() {
             case "description":
             case "abstract":
             case "version":
-            case "price":
             case "metaTagsConcatenated":
             case "ccName1":
             case "ccName2":
@@ -549,7 +548,6 @@ function AdminMarketplaceEntity() {
                 break;
             case "isFeatured":
             case "isVerified":
-            case "allowPurchase":
                 item[e.target.id] = e.target.checked;
                 break;
             case "status":
@@ -559,6 +557,28 @@ function AdminMarketplaceEntity() {
                 else {
                     item[e.target.id] = { id: e.target.value, name: e.target.options[e.target.selectedIndex].text };
                 }
+                break;
+            default:
+                return;
+        }
+        //update the state
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    //on change handler to update state
+    const onChangeECommerce = (e) => {
+        //console.log(generateLogMessageString(`onEntityChange||e:${e.target}`, CLASS_NAME));
+
+        //note you must update the state value for the input to be read only. It is not enough to simply have the onChange handler.
+        switch (e.target.id) {
+            case "finePrint":
+            case "purchaseInstructions":
+            case "termsOfService":
+                item.eCommerce[e.target.id] = e.target.value;
+                break;
+            case "allowPurchase":
+            case "termsOfServiceIsRequired":
+                item.eCommerce[e.target.id] = e.target.checked;
                 break;
             default:
                 return;
@@ -618,7 +638,7 @@ function AdminMarketplaceEntity() {
         //trigger api call to get latest. 
         setRefreshImageData(true);
     }
-    
+
     //-------------------------------------------------------------------
     // Region: Event handler - related items, related external items
     //-------------------------------------------------------------------
@@ -653,9 +673,10 @@ function AdminMarketplaceEntity() {
 
     const onChangePrice = (arg) => {
         console.log(generateLogMessageString('onChangePrice', CLASS_NAME));
-        var match = item.prices.find(x => x.id === arg.id);
+        var match = item.eCommerce.prices.find(x => x.id === arg.id);
         match.amount = arg.amount;
         match.billingPeriod = arg.billingPeriod;
+        match.caption = arg.caption;
         match.description = arg.description;
         match.priceId = arg.priceId;
         setItem(JSON.parse(JSON.stringify(item)));
@@ -675,8 +696,8 @@ function AdminMarketplaceEntity() {
         //Once saved server side, these will be issued ids from db.
         //Depending on how we are adding (single row or multiple rows), the id generation will be different. Both need 
         //a starting point negative id
-        var id = (-1) * (item.relatedItems == null ? 1 : item.relatedItems.length + 1);
         if (item.relatedItems == null) item.relatedItems = [];
+        var id = (-1) * (item.relatedItems.length + 1);
         item.relatedItems.push({ relatedId: id, relatedType: { id: "-1" } });
         setItem(JSON.parse(JSON.stringify(item)));
     }
@@ -687,39 +708,43 @@ function AdminMarketplaceEntity() {
         //Once saved server side, these will be issued ids from db.
         //Depending on how we are adding (single row or multiple rows), the id generation will be different. Both need 
         //a starting point negative id
-        var id = (-1) * (item.relatedItemsExternal == null ? 1 : item.relatedItemsExternal.length + 1);
         if (item.relatedItemsExternal == null) item.relatedItemsExternal = [];
+        var id = (-1) * (item.relatedItemsExternal.length + 1);
         item.relatedItemsExternal.push({ relatedId: id, relatedType: { id: "-1" }, externalSource: null });
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
     const onAddActionLink = () => {
         console.log(generateLogMessageString('onAddActionLink', CLASS_NAME));
-        //we need to be aware of newly added rows and those will be signified by a negative -id. 
-        var id = (-1) * (item.actionLinks == null ? 1 : item.actionLinks.length + 1);
+        if (item.actionLinks == null) item.actionLinks = [];
+        //we need to be aware of newly added rows and those will be signified by a negative -id.
+        var id = (-1) * (item.actionLinks.length + 1);
         item.actionLinks.push({ id: id, caption: '', url: '', target: '_self', iconName: 'settings' });
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
     const onAddPrice = () => {
         console.log(generateLogMessageString('onAddPrice', CLASS_NAME));
-        //we need to be aware of newly added rows and those will be signified by a negative -id. 
-        var id = (-1) * (item.prices == null ? 1 : item.prices.length + 1);
-        item.prices.push({ id: id, amount: 0, billingPeriod: 'OneTime', description: '', priceId: '' });
+        if (item.eCommerce.prices == null) item.eCommerce.prices = [];
+        //we need to be aware of newly added rows and those will be signified by a negative -id.
+        var id = (-1) * (item.eCommerce.prices.length + 1);
+        item.eCommerce.prices.push({ id: id, amount: 0, billingPeriod: 'OneTime', caption: '', description: '', priceId: '' });
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
     const onAddEmail = () => {
         console.log(generateLogMessageString('onAddEmail', CLASS_NAME));
+        if (item.emails == null) item.emails = [];
         //we need to be aware of newly added rows and those will be signified by a negative -id. 
         var id = (-1) * (item.emails == null ? 1 : item.emails.length + 1);
-        item.emails.push({ id: id, recipientName: '', emailAddress:'', publishType:'All' });
+        item.emails.push({ id: id, recipientName: '', emailAddress: '', publishType: 'All' });
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
     const onDeleteRelatedItem = (id) => {
         console.log(generateLogMessageString('onDeleteRelatedItem', CLASS_NAME));
-        //make a copy of the array 
+        if (item.relatedItems == null) item.relatedItems = [];
+        //make a copy of the array
         item.relatedItems = item.relatedItems.filter(x => x.relatedId !== id);
         //item.relatedItems = item.relatedItems.map(x => { return (x.relatedId !== id ? x : null); }).filter(x => x != null);
         setItem(JSON.parse(JSON.stringify(item)));
@@ -727,27 +752,32 @@ function AdminMarketplaceEntity() {
 
     const onDeleteRelatedItemExternal = (id) => {
         console.log(generateLogMessageString('onDeleteRelatedItemExternal', CLASS_NAME));
+        if (item.relatedItemsExternal == null) item.relatedItemsExternal = [];
         item.relatedItemsExternal = item.relatedItemsExternal.filter(x => x.relatedId !== id);
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
     const onDeleteActionLink = (id) => {
         console.log(generateLogMessageString('onDeleteActionLink', CLASS_NAME));
+        if (item.actionLinks == null) item.actionLinks = [];
         item.actionLinks = item.actionLinks.filter(x => x.id !== id);
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
     const onDeletePrice = (id) => {
         console.log(generateLogMessageString('onDeletePrice', CLASS_NAME));
-        item.prices = item.prices.filter(x => x.description !== id);
+        if (item.eCommerce.prices == null) item.eCommerce.prices = [];
+        item.eCommerce.prices = item.eCommerce.prices.filter(x => x.caption !== id);
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
     const onDeleteEmail = (id) => {
         console.log(generateLogMessageString('onDeleteEmail', CLASS_NAME));
+        if (item.emails == null) item.emails = [];
         item.emails = item.emails.filter(x => x.recipientName !== id);
         setItem(JSON.parse(JSON.stringify(item)));
     }
+
     //-------------------------------------------------------------------
     // Region: Render Helpers
     //-------------------------------------------------------------------
@@ -1046,21 +1076,24 @@ function AdminMarketplaceEntity() {
     };
 
     const renderPrices = () => {
-        if (item.allowPurchase) {
-            return (
-                <>
-                    <div className="row mt-2">
-                        <div className="col-12">
-                            <AdminPriceList caption="Prices" captionAdd="Add Price"
-                                items={item.prices} itemsLookup={_itemsLookup?.lookupItems?.filter(x => x.id !== item.id)}
-                                type={AppSettings.itemTypeCode.smApp} onChangeItem={onChangePrice}
-                                onAdd={onAddPrice} onDeletePrice={onDeletePrice}
-                            />
-                        </div>
+        return (
+            <div className="col-12">
+                <Form.Label>Prices</Form.Label>
+                {item.eCommerce.allowPurchase ?
+                    <AdminPriceList captionAdd="Add Price"
+                        items={item.eCommerce.prices} itemsLookup={_itemsLookup?.lookupItems?.filter(x => x.id !== item.id)}
+                        type={AppSettings.itemTypeCode.smApp} onChangeItem={onChangePrice}
+                        onAdd={onAddPrice} onDeletePrice={onDeletePrice}
+                    />
+                    :
+                    <div className="d-block my-3">
+                        <span className="alert alert-info p-2">
+                            To configure prices, click allow purchase.
+                        </span>
                     </div>
-                </>
-            );
-        } else { return <div/>}
+                }
+            </div>
+        );
     };
 
     const renderActionLinks = () => {
@@ -1240,33 +1273,67 @@ function AdminMarketplaceEntity() {
         //console.log(item);
         return (
             <>
-                <div className="row mt-2">
+                <div className="row mt-2 align-items-center">
                     <div className="col-sm-6 col-lg-4">
                         <div className="d-flex h-100">
                             <Form.Group>
-                                <Form.Check className="align-self-end" type="checkbox" id="allowPurchase" label="Allow Purchase" checked={item.allowPurchase}
-                                    onChange={onChange} readOnly={isReadOnly} />
+                                <Form.Check className="align-self-end" type="checkbox" id="allowPurchase" label="Allow Purchase" checked={item.eCommerce.allowPurchase}
+                                    onChange={onChangeECommerce} readOnly={isReadOnly} />
                             </Form.Group>
                         </div>
                     </div>
-                </div>
-                <div className="row mt-2">
-                    <div className="col-sm-6 col-lg-4">
+                    <div className="col-sm-6 col-lg-4 ml-sm-auto">
                         <Form.Group>
                             <Form.Label>Stripe Product Id</Form.Label>
                             <Form.Control id="paymentProductId" type="" placeholder=""
-                                value={item.paymentProductId == null ? '' : item.paymentProductId} readOnly={true} />
+                                value={item.eCommerce.paymentProductId == null ? '' : item.eCommerce.paymentProductId} readOnly={true} />
                         </Form.Group>
                     </div>
                 </div>
-                <div >
+                <div className="row mt-2 py-2 border-top">
                     {renderPrices()}
-                    {/*<div className="col-sm-6 col-lg-4">*/}
-                    {/*    <Form.Group>*/}
-                    {/*        <Form.Label>Price</Form.Label>*/}
-                    {/*        <Form.Control id="price" type="" placeholder="" value={item.price == null ? '' : item.price} onChange={onChange} readOnly={isReadOnly || !item.allowPurchase} />*/}
-                    {/*    </Form.Group>*/}
-                    {/*</div>*/}
+                </div>
+                <div className="row mt-2">
+                    <div className="col-md-12">
+                        <Form.Group>
+                            <Form.Label>Purchase Instructions</Form.Label>
+                            {item.eCommerce.allowPurchase &&
+                                <>
+                                    <span className="small text-muted my-2 d-block">
+                                        This will appear when adding to cart and cart preview just below the item abstract.
+                                    </span>
+                                    <WysiwygEditor id="purchaseInstructions" value={item.eCommerce.purchaseInstructions} onChange={onChangeECommerce} onValidate={validateForm_abstract} className='short' />
+                                </>
+                            }
+                        </Form.Group>
+                        {!item.eCommerce.allowPurchase &&
+                            <div className="d-block my-3">
+                                <span className="alert alert-info p-2">
+                                    To configure purchase instructions, click allow purchase.
+                                </span>
+                            </div>
+                        }
+                    </div>
+                    <div className="col-md-12">
+                        <Form.Group>
+                            <Form.Label>Fine Print</Form.Label>
+                            {item.eCommerce.allowPurchase &&
+                                <>
+                                    <span className="small text-muted my-2 d-block">
+                                        This will appear when adding to cart and cart preview below the item and price information.
+                                    </span>
+                                    <WysiwygEditor id="finePrint" value={item.eCommerce.finePrint} onChange={onChangeECommerce} onValidate={validateForm_abstract} className='short' />
+                                </>
+                            }
+                        </Form.Group>
+                        {!item.eCommerce.allowPurchase &&
+                            <div className="d-block my-3">
+                                <span className="alert alert-info p-2">
+                                    To configure fine print, click allow purchase.
+                                </span>
+                            </div>
+                        }
+                    </div>
                 </div>
             </>
         );
@@ -1326,7 +1393,7 @@ function AdminMarketplaceEntity() {
                     <div className="info-section mb-4 px-1 rounded">
                         <div className="headline-3 mb-2">
                             <span className="pr-2 w-100 d-block rounded">
-                            Meta tags (optional)</span></div>
+                                Meta tags (optional)</span></div>
                         <Form.Group>
                             <Form.Control id="metaTagsConcatenated" as="textarea" style={{ height: '300px' }} placeholder="Enter tags seperated by a comma" value={item.metaTagsConcatenated} onChange={onChange} readOnly={isReadOnly} />
                         </Form.Group>
@@ -1410,14 +1477,14 @@ function AdminMarketplaceEntity() {
                     <Tab.Pane eventKey="general">
                         <Card className="">
                             <Card.Body className="pt-3">
-                                { renderGeneralTab()}
+                                {renderGeneralTab()}
                             </Card.Body>
                         </Card>
                     </Tab.Pane>
                     <Tab.Pane eventKey="images">
                         <Card className="">
                             <Card.Body className="pt-3">
-                                { renderImagesInfo()}
+                                {renderImagesInfo()}
                             </Card.Body>
                         </Card>
                     </Tab.Pane>
@@ -1470,20 +1537,20 @@ function AdminMarketplaceEntity() {
     return (
         <>
             <Helmet>
-                <title>{`${item?.displayName != null ? item?.displayName + ' | ' : '' } Admin | ${AppSettings.Titles.Main}`}</title>
+                <title>{`${item?.displayName != null ? item?.displayName + ' | ' : ''} Admin | ${AppSettings.Titles.Main}`}</title>
             </Helmet>
             <Form noValidate>
-            {renderHeaderRow()}
-            <div className="row" >
-                <div className="col-sm-3" >
-                    {renderMultiSelectAreas()}
+                {renderHeaderRow()}
+                <div className="row" >
+                    <div className="col-sm-3" >
+                        {renderMultiSelectAreas()}
+                    </div>
+                    <div className="col-sm-9 mb-4 tab-container" >
+                        {renderValidationSummary()}
+                        {renderCommonInfo()}
+                        {renderTabbedForm()}
+                    </div>
                 </div>
-                <div className="col-sm-9 mb-4 tab-container" >
-                    {renderValidationSummary()}
-                    {renderCommonInfo()}
-                    {renderTabbedForm()}
-                </div>
-            </div>
             </Form>
             {renderDeleteConfirmation()}
             {renderErrorMessage()}

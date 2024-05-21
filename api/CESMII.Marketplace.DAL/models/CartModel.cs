@@ -19,8 +19,10 @@
 
         public string UpdatedById { get; set; }
 
-        [Obsolete("This will go away in favor of a bool to use or not use credits.")]
-        public long? Credits { get; set; }
+        /// <summary>
+        /// This will be populated if user decides to pursue checkout as a guest.
+        /// </summary>
+        public GuestUserCheckoutModel GuestUser { get; set; }
 
         public bool UseCredits { get; set; } = false;
 

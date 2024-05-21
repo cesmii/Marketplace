@@ -30,7 +30,13 @@ function CartAddModal(props) {
     // Region: Hooks
     //-------------------------------------------------------------------
     useEffect(() => {
-        setItem({ ..._item, marketplaceItem: props.item});
+
+        if (props.item?.eCommerce?.prices == null) return;
+
+        //if exactly one item, set selected price to that value. 
+        const selectedPrice = props.item?.eCommerce?.prices != null && props.item?.eCommerce?.prices.length === 1 ?
+            props.item?.eCommerce?.prices[0] : null;
+        setItem({ ..._item, marketplaceItem: props.item, selectedPrice: selectedPrice });
 
         //this will execute on unmount
         return () => {

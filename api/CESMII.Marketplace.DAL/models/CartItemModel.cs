@@ -19,7 +19,7 @@ namespace CESMII.Marketplace.DAL.Models
         /// Calculated Credits at the time it was added to the cart
         /// </summary>
         /// <remarks>Purchase may be a combination of credits and price</remarks>
-        [System.Obsolete("This will go away in favor of a bool to use or not use credits.")]
-        public int? Credits { get; set; }
+        //[System.Obsolete("This will go away in favor of a bool to use or not use credits.")]
+        //public int? Credits { get; set; }
     }
 }

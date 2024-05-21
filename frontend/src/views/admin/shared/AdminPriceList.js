@@ -88,9 +88,6 @@ function AdminPriceList(props) {
     //-------------------------------------------------------------------
     return (
         <>
-            {(props.caption != null) &&
-                <h3>{props.caption}</h3>
-            }
             {(props.infoText != null) &&
                 <span className="small text-muted">
                     {props.infoText}
