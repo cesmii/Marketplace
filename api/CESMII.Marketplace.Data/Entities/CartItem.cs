@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.Collections.Generic;
 
 namespace CESMII.Marketplace.Data.Entities
 {
@@ -33,6 +34,7 @@ namespace CESMII.Marketplace.Data.Entities
         /// selected by the user during add to cart process.
         /// </summary>
         public ProductPrice SelectedPrice { get; set; }
+        public List<Email> Emails { get; set; }
     }
 
 }

@@ -3,6 +3,7 @@
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Service.Models;
 using Stripe.FinancialConnections;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CESMII.Marketplace.Service
 {
@@ -15,7 +16,7 @@ namespace CESMII.Marketplace.Service
         /// <param name="json"></param>
         /// <param name="header"></param>
         /// <returns></returns>
-        Task<bool> StripeWebhook(string json, string header);
+        Task<bool> StripeWebhook(Controller controller, string json, string header);
 
         /// <summary>
         /// Initiate the checkout flow with Stripe

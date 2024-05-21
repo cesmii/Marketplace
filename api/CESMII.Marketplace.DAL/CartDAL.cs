@@ -218,7 +218,8 @@ namespace CESMII.Marketplace.DAL
                         DisplayName = mktplItem?.DisplayName,
                         Name = mktplItem?.Name, 
                         Abstract= mktplItem?.Abstract,
-                        PaymentProductId = entity.StripeId
+                        PaymentProductId = entity.StripeId,
+                        Emails= entity.Emails,
                     }, 
                     Credits = entity.Credits,
                     Quantity = entity.Quantity,
@@ -254,7 +255,8 @@ namespace CESMII.Marketplace.DAL
                     Credits = model.Credits.HasValue ? model.Credits.Value : 0,
                     Quantity = model.Quantity,
                     SelectedPrice = model.SelectedPrice,
-                    StripeId = model.MarketplaceItem.PaymentProductId
+                    StripeId = model.MarketplaceItem.PaymentProductId,
+                    Emails = model.MarketplaceItem.Emails,
                 } );
             }
             return result;

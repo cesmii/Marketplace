@@ -115,6 +115,7 @@
         public bool AllowPurchase { get; set; } = true;
         public string PaymentProductId { get; set; }
         public List<ProductPrice> Prices { get; set; } = new List<ProductPrice>();
+        public List<Email> Emails { get; set; } = new List<Email>();
         #endregion
 
         /// <summary>
@@ -221,6 +222,8 @@
     {
         //TBD - append to this model
         public string PaymentProductId { get; set; }
+
+        public List<Email> Emails { get; set; }
     }
 
 

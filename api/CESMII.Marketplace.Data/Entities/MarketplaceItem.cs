@@ -113,6 +113,7 @@
         public bool AllowPurchase { get; set; }
         public string PaymentProductId { get; set; }
         public List<ProductPrice> Prices { get; set; } = new List<ProductPrice>();
+        public List<Email> Emails { get; set; } = new List<Email>();
         #endregion
 
     }
@@ -182,5 +183,16 @@
         public string BillingPeriod { get; set; }
         public string Description { get; set; }
         public string PriceId { get; set; }
+    }
+
+    /// <summary>
+    /// This contains the structure to use for prices to a marketplace item. 
+    /// </summary>
+    [BsonIgnoreExtraElements]
+    public class Email
+    {
+        public string RecipientName { get; set; }
+        public string EmailAddress { get; set; }
+        public string PublishType { get; set; }
     }
 }

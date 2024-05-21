@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Mvc;
 
 using Stripe;
 using Stripe.Checkout;
@@ -10,6 +11,9 @@ using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.Service.Models;
+using CESMII.Common.SelfServiceSignUp.Services;
+
+using System.Net.Mail;
 
 namespace CESMII.Marketplace.Service
 {
@@ -23,14 +27,18 @@ namespace CESMII.Marketplace.Service
         private readonly ILogger<StripeService> _logger;
         private readonly IOrganizationService<OrganizationModel> _organizationService;
         private readonly StripeConfig _config;
+        private readonly MailConfig _mailConfig;
+        private readonly MailRelayService _mailRelayService;
 
-        public StripeService(IOrganizationService<OrganizationModel> organizationService, IDal<Cart, CartModel> dal, ILogger<StripeService> logger, IDal<StripeAuditLog, StripeAuditLogModel> stripeLogDal, ConfigUtil configUtil)
+        public StripeService(IOrganizationService<OrganizationModel> organizationService, IDal<Cart, CartModel> dal, ILogger<StripeService> logger, IDal<StripeAuditLog, StripeAuditLogModel> stripeLogDal, ConfigUtil configUtil, MailRelayService mailRelayService)
         {
             _dal = dal;
             _organizationService = organizationService;
             _stripeLogDal = stripeLogDal;
             _logger = logger;
             _config = configUtil.StripeSettings;
+            _mailRelayService = mailRelayService;
+            _mailConfig = configUtil.MailSettings;
         }
 
         public async Task<CheckoutInitModel> DoCheckoutAnonymous(CartModel item)
@@ -143,7 +151,7 @@ namespace CESMII.Marketplace.Service
             }
         }
 
-        public async Task<bool> StripeWebhook(string json, string header)
+        public async Task<bool> StripeWebhook(Controller controller, string json, string header)
         {
             var stripeEvent = EventUtility.ConstructEvent(json, header, _config.WebhookSecretKey);
 
@@ -171,6 +179,8 @@ namespace CESMII.Marketplace.Service
                 cart.Status = Common.Enums.CartStatusEnum.Completed;
                 await Update(cart, cart.CreatedById);
 
+                await SendEmails(controller, cart);
+                
                 if (string.IsNullOrEmpty(cart.OraganizationId))
                     return true;
 
@@ -184,6 +194,52 @@ namespace CESMII.Marketplace.Service
             }
 
             return false;
+        }
+
+        private async Task SendEmails(Controller controller, CartModel cart)
+        {
+            foreach(var cartItem in cart.Items)
+            {
+                await SendMail(controller, cartItem.MarketplaceItem);
+            }
+        }
+
+        private async Task SendMail(Controller controller, MarketplaceItemCheckoutModel marketplaceItem)
+        {
+            try
+            {
+                var requestInfoModel = new RequestInfoModel { 
+                    MarketplaceItem = new MarketplaceItemModel { DisplayName = marketplaceItem.DisplayName, Abstract = string.Empty },
+                    Description = "Successful completed checkout",
+                    FirstName = string.Empty, LastName = string.Empty,
+                    Email= string.Empty, Phone= string.Empty,
+                 };
+                var body = await Api.Shared.Extensions.ViewExtensions.RenderViewAsync(controller, "~/Views/Template/MarketplaceItemECommerce.cshtml", requestInfoModel);
+                
+                var message = new MailMessage
+                {
+                    From = new MailAddress(_mailConfig.MailFromAddress),
+                    Subject = "CESMII | SM Marketplace | Checkout Successful",
+                    Body = body,
+                    IsBodyHtml = true,
+                };
+
+                foreach(var email in marketplaceItem.Emails)
+                {
+                    message.To.Add(new MailAddress(email.EmailAddress, email.RecipientName));
+                }
+
+                foreach (var email in _mailConfig.ECommerceToAddresses)
+                {
+                    message.Bcc.Add(new MailAddress(email));
+                }
+            
+                await _mailRelayService.SendEmail(message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "StripeService|SendEmail|Error occured while sending email.");
+            }
         }
 
         private long CalculateCredits(long credits, CartModel cart)

@@ -320,7 +320,7 @@ namespace CESMII.Marketplace.Api.Controllers
                 var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
                 var header = Request.Headers["Stripe-Signature"];
 
-                await _svc.StripeWebhook(json, header);
+                await _svc.StripeWebhook(this, json, header);
                 return Ok();
             }
             catch (StripeException e)

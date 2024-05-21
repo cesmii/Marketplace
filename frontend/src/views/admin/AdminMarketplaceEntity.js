@@ -21,6 +21,7 @@ import { WysiwygEditor } from '../../components/WysiwygEditor';
 import AdminImageList from './shared/AdminImageList';
 import AdminRelatedItemList from './shared/AdminRelatedItemList';
 import AdminPriceList from './shared/AdminPriceList';
+import AdminEmailList from './shared/AdminEmailList';
 import AdminActionLinkList from './shared/AdminActionLinkList'
 
 import { SVGIcon } from "../../components/SVGIcon";
@@ -660,6 +661,14 @@ function AdminMarketplaceEntity() {
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
+    const onChangeEmail = (arg) => {
+        console.log(generateLogMessageString('onChangeEmail', CLASS_NAME));
+        var match = item.emails.find(x => x.id === arg.id);
+        match.name = arg.name;
+        match.publishType = arg.publishType;
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
     const onAddRelatedItem = () => {
         console.log(generateLogMessageString('onAddRelatedItem', CLASS_NAME));
         //we need to be aware of newly added rows and those will be signified by a negative -id. 
@@ -700,6 +709,14 @@ function AdminMarketplaceEntity() {
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
+    const onAddEmail = () => {
+        console.log(generateLogMessageString('onAddEmail', CLASS_NAME));
+        //we need to be aware of newly added rows and those will be signified by a negative -id. 
+        var id = (-1) * (item.emails == null ? 1 : item.emails.length + 1);
+        item.emails.push({ id: id, recipientName: '', emailAddress:'', publishType:'All' });
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
     const onDeleteRelatedItem = (id) => {
         console.log(generateLogMessageString('onDeleteRelatedItem', CLASS_NAME));
         //make a copy of the array 
@@ -726,6 +743,11 @@ function AdminMarketplaceEntity() {
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
+    const onDeleteEmail = (id) => {
+        console.log(generateLogMessageString('onDeleteEmail', CLASS_NAME));
+        item.emails = item.emails.filter(x => x.recipientName !== id);
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
     //-------------------------------------------------------------------
     // Region: Render Helpers
     //-------------------------------------------------------------------
@@ -1250,6 +1272,23 @@ function AdminMarketplaceEntity() {
         );
     }
 
+    const renderEmailListTab = () => {
+        //console.log(item);
+        return (
+            <>
+                <div className="row mt-2">
+                    <div className="col-12">
+                        <AdminEmailList caption="Emails" captionAdd="Add Email"
+                            items={item.emails} itemsLookup={_itemsLookup?.lookupItems?.filter(x => x.recipientName !== item.recipientName)}
+                            type={AppSettings.itemTypeCode.smApp} onChangeItem={onChangeEmail}
+                            onAdd={onAddEmail} onDeletePrice={onDeleteEmail}
+                        />
+                    </div>
+                </div>
+            </>
+        );
+    }
+
     const renderImagesInfo = () => {
         return (
             <>
@@ -1351,6 +1390,11 @@ function AdminMarketplaceEntity() {
                         </Nav.Link>
                     </Nav.Item>
                     <Nav.Item className="col-sm-2 rounded p-0">
+                        <Nav.Link eventKey="emails" className="text-center text-md-left p-1 px-2 h-100" >
+                            <span className="headline-3">Emails</span>
+                        </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item className="col-sm-2 rounded p-0">
                         <Nav.Link eventKey="actionLinks" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">Action Links</span>
                         </Nav.Link>
@@ -1381,6 +1425,13 @@ function AdminMarketplaceEntity() {
                         <Card className="">
                             <Card.Body className="pt-3">
                                 {renderECommerceTab()}
+                            </Card.Body>
+                        </Card>
+                    </Tab.Pane>
+                    <Tab.Pane eventKey="emails">
+                        <Card className="">
+                            <Card.Body className="pt-3">
+                                {renderEmailListTab()}
                             </Card.Body>
                         </Card>
                     </Tab.Pane>
