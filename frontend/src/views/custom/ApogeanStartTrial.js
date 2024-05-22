@@ -19,11 +19,11 @@ function ApogeanStartTrial(props) {
     const [_item, setItem] = useState(
         {
             hostUrl: window.location.host,
-            formData: { firstName: '', lastName: '', email: '', phone: '', companyName: '' }
+            formData: { firstName: '', lastName: '', email: '', phone: '', organization: {name: ''} }
         });
     const [_isValid, setIsValid] = useState({
         firstName: true, lastName: true, email: true, emailFormat: true,
-        companyName: true, phone: true
+        organization: true, phone: true
     });
 
     //-------------------------------------------------------------------
@@ -64,9 +64,9 @@ function ApogeanStartTrial(props) {
         setIsValid({ ..._isValid, phone: isValid });
     };
 
-    const validateForm_companyName = (e) => {
+    const validateForm_organization = (e) => {
         var isValid = (e.target.value != null && e.target.value.trim().length > 0);
-        setIsValid({ ..._isValid, companyName: isValid });
+        setIsValid({ ..._isValid, organization: isValid });
     };
 
     ////update state for when search click happens
@@ -77,11 +77,11 @@ function ApogeanStartTrial(props) {
         _isValid.lastName = _item.formData.lastName != null && _item.formData.lastName.trim().length > 0;
         _isValid.email = _item.formData.email != null && _item.formData.email.trim().length > 0;
         _isValid.emailFormat = validate_Email(_item.formData.email);
-        _isValid.companyName = _item.formData.companyName != null && _item.formData.companyName.trim().length > 0;
+        _isValid.organization = _item.formData.organization?.name != null && _item.formData.organization?.name.trim().length > 0;
         _isValid.phone = _item.formData.phone != null && _item.formData.phone.trim().length > 0;//I'm not sure about our validation here is it just US numbers or int'l
         setIsValid(JSON.parse(JSON.stringify(_isValid)));
         return (_isValid.firstName && _isValid.lastName && _isValid.email && _isValid.emailFormat &&
-            _isValid.companyName && _isValid.phone);
+            _isValid.organization && _isValid.phone);
     }
 
     //-------------------------------------------------------------------
@@ -115,9 +115,23 @@ function ApogeanStartTrial(props) {
             case "firstName":
             case "lastName":
             case "email":
-            case "companyName":
             case "phone":
                 _item.formData[e.target.id] = e.target.value;
+                break;
+            default:
+                return;
+        }
+        //update the state
+        setItem(JSON.parse(JSON.stringify(_item)));
+    }
+
+    //on change handler to update state
+    const onChangeOrganization = (e) => {
+        //note you must update the state value for the input to be read only. It is not enough to simply have the onChange handler.
+        switch (e.target.id) {
+            case "name":
+                if (_item.organization == null) _item.organization = {};
+                _item.organization[e.target.id] = e.target.value;
                 break;
             default:
                 return;
@@ -301,14 +315,14 @@ function ApogeanStartTrial(props) {
                 <div className="row">
                     <div className="col-md-6">
                         <Form.Group>
-                            <Form.Label htmlFor="companyName" >Company Name</Form.Label>
-                            {!_isValid.companyName &&
+                            <Form.Label htmlFor="name" >Company Name</Form.Label>
+                            {!_isValid.organization &&
                                 <span className="invalid-field-message inline">
                                     Required
                                 </span>
                             }
-                            <Form.Control id="companyName" className={(!_isValid.companyName ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
-                                value={_item.formData.companyName} onBlur={validateForm_companyName} onChange={onChange} />
+                            <Form.Control id="name" className={(!_isValid.organization ? 'invalid-field minimal pr-5' : 'minimal pr-5')}
+                                value={_item.formData.organization?.name} onBlur={validateForm_organization} onChange={onChangeOrganization} />
                         </Form.Group>
                     </div>
                 </div>

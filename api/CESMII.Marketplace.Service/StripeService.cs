@@ -15,6 +15,7 @@ using CESMII.Marketplace.Service.Models;
 using CESMII.Common.SelfServiceSignUp.Services;
 using CESMII.Marketplace.JobManager;
 using CESMII.Marketplace.JobManager.Models;
+using CESMII.Marketplace.Common.Enums;
 
 namespace CESMII.Marketplace.Service
 {
@@ -404,23 +405,20 @@ namespace CESMII.Marketplace.Service
 
         /// <summary>
         /// For each marketplace item in cart, do a custom post checkout method
-        /// to perform custom actions
+        /// to perform custom actions - if a job def is assigned
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
         private async Task OnCheckoutCompleteJob(CartItemModel item, MarketplaceItemCheckoutModel marketplaceItem, UserCheckoutModel user)
         {
-            if (string.IsNullOrEmpty(marketplaceItem.ECommerce.OnCheckoutCompleteJobId)) return;
+            //check if job is assigned for this it
+            var job = _dalJobDefinition.Where(x => x.MarketplaceItemId.ToString().Equals(marketplaceItem.ID) &&
+                        x.ActionType == (int)JobActionTypeEnum.ECommerceOnComplete, null, 1).Data?.First();
+
+            if (job == null) return;
 
             try
             {
-                //check if job requires user to be authorized
-                var job = _dalJobDefinition.GetById(marketplaceItem.ECommerce.OnCheckoutCompleteJobId);
-                if (job == null)
-                {
-                    _logger.LogError($"StripeService|onCheckoutCompleteJob|Job {marketplaceItem.ECommerce.OnCheckoutCompleteJobId} not found. (null)");
-                    return;
-                }
                 if (job.RequiresAuthentication && string.IsNullOrEmpty(user?.ID))
                 {
                     _logger.LogError($"StripeService|onCheckoutCompleteJob|Job requires an authenticated user");

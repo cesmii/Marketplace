@@ -230,7 +230,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 toEmails.Add(new MailAddress(e));
             }
             */
-            var title = isSuccess ? "Purchase Submitted Successfully" : "Purchase Submission Failed";
+            var title = isSuccess ? "Purchase Fulfillment Submitted Successfully" : "Purchase Fulfillment Failed";
                         
             //generate email body
             System.Text.StringBuilder sbBody = new System.Text.StringBuilder();
@@ -270,9 +270,6 @@ namespace CESMII.Marketplace.JobManager.Jobs
     internal class ECommerceOnCompleteModel
     {
         public CartItemModel CartItem { get; set; }
-        /// <summary>
-        /// Only populated if user is purchasing anonymously as a one time guest
-        /// </summary>
         public UserCheckoutModel CheckoutUser { get; set; }
     }
 

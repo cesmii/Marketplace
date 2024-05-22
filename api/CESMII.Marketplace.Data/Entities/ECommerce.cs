@@ -27,8 +27,6 @@
 
         public string TermsOfService { get; set; }
         public bool TermsOfServiceIsRequired { get; set; } = false;
-
-        public string OnCheckoutCompleteJobId { get; set; }
     }
 
     /// <summary>

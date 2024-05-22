@@ -150,7 +150,7 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
 
         if (props.item.actionLinks == null || props.item.actionLinks.length === 0) return;
 
-        return props.item.actionLinks.map((x,i) => {
+        return props.item.actionLinks.map((x, i) => {
             return (
                 <p key={`actionLink-${i}`} className="mt-3 mb-0" >
                     <a className="d-flex align-self-center px-0" href={x.url} target={x.target == null || x.target === '' ? 'self' : x.target} >
@@ -166,9 +166,11 @@ function MarketplaceItemEntityHeader(props) { //props are item, showActions
         if (props.item.jobDefinitions == null || props.item.jobDefinitions.length === 0) return;
 
         return props.item.jobDefinitions.map((x) => {
-            return (
-                <MarketplaceItemJobLauncher key={x.id} className="mt-3" isAuthenticated={props.isAuthenticated} jobDefinition={x} marketplaceItemId={props.item.id} marketplaceItemName={props.item.name} />
-            );
+            if (x.actionType !== AppSettings.JobActionType.ECommerceOnComplete) {
+                return (
+                    <MarketplaceItemJobLauncher key={x.id} className="mt-3" isAuthenticated={props.isAuthenticated} jobDefinition={x} marketplaceItemId={props.item.id} marketplaceItemName={props.item.name} />
+                );
+            }
         });
     };
 

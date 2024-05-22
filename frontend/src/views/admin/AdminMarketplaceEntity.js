@@ -574,7 +574,6 @@ function AdminMarketplaceEntity() {
             case "finePrint":
             case "purchaseInstructions":
             case "termsOfService": 
-            case "onCheckoutCompleteJobId":
                 item.eCommerce[e.target.id] = e.target.value;
                 break;
             case "allowPurchase":
@@ -1357,28 +1356,6 @@ function AdminMarketplaceEntity() {
                             <div className="d-block my-3">
                                 <span className="alert alert-info p-2">
                                     To configure terms of service, click allow purchase.
-                                </span>
-                            </div>
-                        }
-                    </div>
-                </div>
-                <div className="row mt-3">
-                    <div className="col-md-12">
-                        <Form.Group>
-                            <span className="headline-3">On Complete Job Action</span>
-                            {item.eCommerce.allowPurchase &&
-                                <>
-                                    <span className="small text-muted my-2 d-block">
-                                        This is the fully qualified type name used in the checkout on complete action. If a particular item needs to perform some custom set of actions, a class can be written to perform those actions. So, this requires companion code to be written which executes the job properly. (Ex: CESMII.Marketplace.JobManager.Jobs.CESMII.Marketplace.JobManager.Jobs.JobOnTimeEdgePurchase)
-                                    </span>
-                                <Form.Control id="onCheckoutCompleteJobId" type="" placeholder="" value={item.eCommerce.onCheckoutCompleteJobId == null ? '' : item.eCommerce.onCheckoutCompleteJobId} onChange={onChangeECommerce} readOnly={isReadOnly} />
-                                </>
-                            }
-                        </Form.Group>
-                        {!item.eCommerce.allowPurchase &&
-                            <div className="d-block my-3">
-                                <span className="alert alert-info p-2">
-                                    To configure on complete action, click allow purchase.
                                 </span>
                             </div>
                         }

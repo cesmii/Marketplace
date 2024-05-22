@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Helmet } from "react-helmet"
+import { useHistory } from 'react-router-dom';
 
 import { loadStripe } from '@stripe/stripe-js';
 import {
@@ -20,6 +21,7 @@ function Checkout() {
     // Region: Initialization
     //-------------------------------------------------------------------
     const _caption = 'Checkout';
+    const history = useHistory();
     const [_status, setStatus] = useState(null);
     const { loadingProps, setLoadingProps } = useLoadingContext();
     const [_stripePromise, setStripePromise] = useState(null);
@@ -45,13 +47,10 @@ function Checkout() {
     // Region: hooks - checkout status - if user leaves and comes back to cart page, return to the 
     //  checkout screen and do not make them start over if we are in progress on checkout.
     //-------------------------------------------------------------------
-    /*
     useEffect(() => {
         console.log(generateLogMessageString(`useEffect-checkout-fetchStatus`, CLASS_NAME));
 
         async function fetchStatus() {
-            setLoadingProps({ isLoading: true, message: "" });
-
             const url = `ecommerce/checkout/status`;
             axiosInstance.post(url, { id: loadingProps.checkout.sessionId })
                 .then(resp => {
@@ -64,14 +63,12 @@ function Checkout() {
                         else {
                             switch (resp.data.data.status) {
                                 case "complete":
-                                    setStatus(AppSettings.CartStatusEnum.Completed);
-                                    setLoadingProps({ isLoading: false, cart: null, checkout: null });
+                                    history.push(`/checkout/complete/${loadingProps.checkout.sessionId}`);
+                                    //setStatus(AppSettings.CartStatusEnum.Completed);
+                                    //setLoadingProps({ isLoading: false, cart: null, checkout: null });
                                     return;
                                 case "open":
                                     setStatus(AppSettings.CartStatusEnum.Pending);
-                                    //these 2 lines will trigger reload of stripe checkout embedded screen
-                                    setStripePromise(null);
-                                    setLoadingProps({ isLoading: false });
                                     return;
                                 case "expired":
                                     console.warn(generateLogMessageString(`fetchStatus|checkout status|${resp.data.data.status}`, CLASS_NAME));
@@ -119,7 +116,6 @@ function Checkout() {
         };
 
     }, [loadingProps.checkout?.sessionId, _checkStatus]);
-    */
 
     //-------------------------------------------------------------------
     // Region: Get data 
@@ -139,13 +135,28 @@ function Checkout() {
     const renderCheckout = () => {
         if (loadingProps.checkout?.apiKey == null || loadingProps.checkout?.clientSecret == null) {
             return (
-                <div className="col-sm-12 my-5 mx-auto text-center">
-                    <span className="icon-circle primary mx-auto" ><i className="material-icons">shopping_cart</i></span>
-                    <div className="d-block py-4" >
-                        There is no checkout in progress.
+                <>
+                    <div className="row" >
+                        <div className="col-sm-6 mt-4 mx-auto text-center">
+                            <h1 className="m-0 headline-2">
+                                Checkout
+                            </h1>
+                        </div>
                     </div>
-                    <a className="btn btn-primary" href='/cart'>View Your Cart</a>
-                </div>
+                    <div className="row" >
+                        <div className="col-12 col-md-10 col-lg-6 my-2 p-3 p-md-4 mx-sm-auto bg-white rounded border">
+                            <div className="col-sm-12 my-5 mx-auto text-center" >
+                                <span className="icon-circle primary mx-auto" ><i className="material-icons">shopping_cart</i></span>
+                                <div className="text-center mx-auto" >
+                                    <div className="py-4" >
+                                        There is no checkout in progress.
+                                    </div>
+                                    <a className="btn btn-primary" href='/cart'>View Your Cart</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </>
             );
         }
 
@@ -170,7 +181,7 @@ function Checkout() {
             <div id="checkout">
                 <EmbeddedCheckoutProvider
                     stripe={_stripePromise}
-                    options={options}>
+                    options={options} >
                     <EmbeddedCheckout />
                 </EmbeddedCheckoutProvider>
             </div>

@@ -184,8 +184,7 @@ function CheckoutComplete() {
         let msg = '';
         let link = '';
         if (_status == null) {
-            msg = 'There is no checkout in progress.';
-            link = (<a className="btn btn-primary" href='/library'>Shop Now</a>);
+            msg = 'Checking status...';
         }
         else if (_checkoutSession != null)
         {
@@ -198,7 +197,9 @@ function CheckoutComplete() {
                             A confirmation email will be sent to {_checkoutSession?.customerDetails?.email}.
                             </span>
                         }
-                         If you have any questions, please contact us.
+                        <span className="pl-1">
+                            If you have any questions, please contact us.
+                        </span>
                     </p>);
                     link = (<a className="btn btn-primary" href='mailto:devops@cesmii.org'>Contact Us</a>);
                     break;
@@ -251,10 +252,12 @@ function CheckoutComplete() {
                 </div>
             </div>
             <div className="row" >
-                <div className="col-sm-4 my-5 mx-auto text-center">
-                    <span className="icon-circle primary mx-auto" ><i className="material-icons">shopping_cart</i></span>
-                    <div className="d-block py-4" >
-                        {renderCheckoutContent()}
+                <div className="col-12 col-md-10 col-lg-6 my-2 p-3 p-md-4 mx-sm-auto bg-white rounded border">
+                    <div className="col-sm-12 my-5 mx-auto text-center" >
+                        <span className="icon-circle primary mx-auto" ><i className="material-icons">shopping_cart</i></span>
+                        <div className="text-center mx-auto" >
+                            {renderCheckoutContent()}
+                        </div>
                     </div>
                 </div>
             </div>
