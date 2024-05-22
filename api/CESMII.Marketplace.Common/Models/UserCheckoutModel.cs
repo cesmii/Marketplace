@@ -4,7 +4,7 @@
     /// <summary>
     /// Used by multiple areas. Checkout of a guest user, trial for onTimeEdge job
     /// </summary>
-    public class GuestUserModel
+    public class UserCheckoutModel
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }

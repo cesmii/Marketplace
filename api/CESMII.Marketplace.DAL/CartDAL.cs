@@ -191,7 +191,7 @@ namespace CESMII.Marketplace.DAL
                     Items = MapToModelCartItems(entity.Items),
                     IsActive = entity.IsActive,
                     SessionId = entity.SessionId,
-                    OraganizationId = entity.OraganizationId,
+                    OrganizationId = entity.OraganizationId,
                 };
 
                 return result;
@@ -240,7 +240,7 @@ namespace CESMII.Marketplace.DAL
             entity.Completed = model.Completed;
             entity.Status = model.Status;
             entity.SessionId = model.SessionId;
-            entity.OraganizationId = model.OraganizationId;
+            entity.OraganizationId = model.OrganizationId;
             entity.Items = MapToEntityCartItems(model.Items);
         }
 

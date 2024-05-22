@@ -573,7 +573,8 @@ function AdminMarketplaceEntity() {
         switch (e.target.id) {
             case "finePrint":
             case "purchaseInstructions":
-            case "termsOfService":
+            case "termsOfService": 
+            case "onCheckoutCompleteJobId":
                 item.eCommerce[e.target.id] = e.target.value;
                 break;
             case "allowPurchase":
@@ -1078,7 +1079,7 @@ function AdminMarketplaceEntity() {
     const renderPrices = () => {
         return (
             <div className="col-12">
-                <Form.Label>Prices</Form.Label>
+                <span className="headline-3">Prices</span>
                 {item.eCommerce.allowPurchase ?
                     <AdminPriceList captionAdd="Add Price"
                         items={item.eCommerce.prices} itemsLookup={_itemsLookup?.lookupItems?.filter(x => x.id !== item.id)}
@@ -1290,13 +1291,13 @@ function AdminMarketplaceEntity() {
                         </Form.Group>
                     </div>
                 </div>
-                <div className="row mt-2 py-2 border-top">
+                <div className="row mt-3 py-2 border-top">
                     {renderPrices()}
                 </div>
-                <div className="row mt-2">
+                <div className="row mt-3">
                     <div className="col-md-12">
                         <Form.Group>
-                            <Form.Label>Purchase Instructions</Form.Label>
+                            <span className="headline-3">Purchase Instructions</span>
                             {item.eCommerce.allowPurchase &&
                                 <>
                                     <span className="small text-muted my-2 d-block">
@@ -1314,9 +1315,11 @@ function AdminMarketplaceEntity() {
                             </div>
                         }
                     </div>
+                </div>
+                <div className="row mt-3">
                     <div className="col-md-12">
                         <Form.Group>
-                            <Form.Label>Fine Print</Form.Label>
+                            <span className="headline-3">Fine Print</span>
                             {item.eCommerce.allowPurchase &&
                                 <>
                                     <span className="small text-muted my-2 d-block">
@@ -1330,6 +1333,52 @@ function AdminMarketplaceEntity() {
                             <div className="d-block my-3">
                                 <span className="alert alert-info p-2">
                                     To configure fine print, click allow purchase.
+                                </span>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div className="row mt-3">
+                    <div className="col-md-12">
+                        <Form.Group>
+                            <span className="headline-3">Terms of Service</span>
+                            {item.eCommerce.allowPurchase &&
+                                <>
+                                    <Form.Check className="align-self-end" type="checkbox" id="termsOfServiceIsRequired" label="Is Required?" checked={item.eCommerce.termsOfServiceIsRequired}
+                                        onChange={onChangeECommerce} readOnly={isReadOnly} />
+                                    <span className="small text-muted my-2 d-block">
+                                        This will appear near the complete payment button in the Stripe checkout screen. Click 'Is Required' to require user to acknowledge terms before purchasing.
+                                    </span>
+                                    <Form.Control id="termsOfService" as="textarea" style={{ height: '125px' }} placeholder="" value={item.eCommerce.termsOfService} onChange={onChangeECommerce} readOnly={isReadOnly} />
+                                </>
+                            }
+                        </Form.Group>
+                        {!item.eCommerce.allowPurchase &&
+                            <div className="d-block my-3">
+                                <span className="alert alert-info p-2">
+                                    To configure terms of service, click allow purchase.
+                                </span>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div className="row mt-3">
+                    <div className="col-md-12">
+                        <Form.Group>
+                            <span className="headline-3">On Complete Job Action</span>
+                            {item.eCommerce.allowPurchase &&
+                                <>
+                                    <span className="small text-muted my-2 d-block">
+                                        This is the fully qualified type name used in the checkout on complete action. If a particular item needs to perform some custom set of actions, a class can be written to perform those actions. So, this requires companion code to be written which executes the job properly. (Ex: CESMII.Marketplace.JobManager.Jobs.CESMII.Marketplace.JobManager.Jobs.JobOnTimeEdgePurchase)
+                                    </span>
+                                <Form.Control id="onCheckoutCompleteJobId" type="" placeholder="" value={item.eCommerce.onCheckoutCompleteJobId == null ? '' : item.eCommerce.onCheckoutCompleteJobId} onChange={onChangeECommerce} readOnly={isReadOnly} />
+                                </>
+                            }
+                        </Form.Group>
+                        {!item.eCommerce.allowPurchase &&
+                            <div className="d-block my-3">
+                                <span className="alert alert-info p-2">
+                                    To configure on complete action, click allow purchase.
                                 </span>
                             </div>
                         }

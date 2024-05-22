@@ -76,6 +76,7 @@ namespace CESMII.Marketplace.Service
                 ReturnUrl = cart.ReturnUrl.TrimEnd(Convert.ToChar("/")) + "/{CHECKOUT_SESSION_ID}",
                 LineItems = new List<SessionLineItemOptions>(),
                 ExpiresAt = DateTime.UtcNow.AddMinutes(30),
+                ClientReferenceId = cart.ID
             };
 
             foreach (var cartItem in cart.Items)
@@ -112,7 +113,6 @@ namespace CESMII.Marketplace.Service
                 if (!string.IsNullOrEmpty(cartItem.MarketplaceItem.ECommerce.TermsOfService))
                 {
                     if (options.CustomText == null) options.CustomText = new SessionCustomTextOptions();
-                    SessionCustomTextTermsOfServiceAcceptanceOptions terms = new() { Message = cartItem.MarketplaceItem.ECommerce.TermsOfService };
                     options.CustomText.TermsOfServiceAcceptance = new SessionCustomTextTermsOfServiceAcceptanceOptions() 
                         { Message = cartItem.MarketplaceItem.ECommerce.TermsOfService };
 
@@ -130,7 +130,7 @@ namespace CESMII.Marketplace.Service
                     //set customer info this way
                     options.CustomerEmail = user.Email;
                 }
-                if (user == null && cart.GuestUser != null)
+                else if (cart.GuestUser != null)
                 {
                     //set customer info this way
                     options.CustomerEmail = cart.GuestUser.Email;
@@ -185,7 +185,7 @@ namespace CESMII.Marketplace.Service
                     cart.SessionId = session.Id;
 
                     if (organization != null)
-                        cart.OraganizationId = organization.ID;
+                        cart.OrganizationId = organization.ID;
 
                     await _dal.Update(cart, user.ID);
                 }
@@ -236,10 +236,10 @@ namespace CESMII.Marketplace.Service
                 //send notification emails, run on complete jobs if needed
                 await ExecuteOnCompleteActions(controller, cart);
 
-                if (string.IsNullOrEmpty(cart.OraganizationId))
+                if (string.IsNullOrEmpty(cart.OrganizationId))
                     return true;
 
-                var organization = _organizationService.GetById(cart.OraganizationId);
+                var organization = _organizationService.GetById(cart.OrganizationId);
                 if (organization == null)
                     return true;
 
@@ -309,7 +309,7 @@ namespace CESMII.Marketplace.Service
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private async Task OnCheckoutCompleteJob(CartItemModel item, MarketplaceItemCheckoutModel marketplaceItem, UserModel user, GuestUserModel userGuest)
+        private async Task OnCheckoutCompleteJob(CartItemModel item, MarketplaceItemCheckoutModel marketplaceItem, UserModel user, UserCheckoutModel userGuest)
         {
             if (string.IsNullOrEmpty(marketplaceItem.ECommerce.OnCheckoutCompleteJobId)) return;
 

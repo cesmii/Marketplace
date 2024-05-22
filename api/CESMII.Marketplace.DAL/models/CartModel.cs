@@ -22,7 +22,7 @@
         /// <summary>
         /// This will be populated if user decides to pursue checkout as a guest.
         /// </summary>
-        public GuestUserModel GuestUser { get; set; }
+        public UserCheckoutModel GuestUser { get; set; }
 
         public bool UseCredits { get; set; } = false;
 
@@ -34,7 +34,7 @@
 
         public string ReturnUrl { get; set; }
         public string SessionId { get; set; }
-        public string OraganizationId { get; set; }
+        public string OrganizationId { get; set; }
 
         public virtual List<CartItemModel> Items { get; set; }
     }

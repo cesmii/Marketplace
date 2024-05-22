@@ -96,7 +96,7 @@ function CheckoutComplete() {
 
         //fetch checkout completion status
         if (checkoutSessionId != null) {
-            //fetchStatus();
+            fetchStatus();
         }
 
     }, [checkoutSessionId, _checkStatusCounter]);
@@ -198,7 +198,7 @@ function CheckoutComplete() {
                             A confirmation email will be sent to {_checkoutSession?.customerDetails?.email}.
                             </span>
                         }
-                        If you have any questions, please email us.
+                         If you have any questions, please contact us.
                     </p>);
                     link = (<a className="btn btn-primary" href='mailto:devops@cesmii.org'>Contact Us</a>);
                     break;

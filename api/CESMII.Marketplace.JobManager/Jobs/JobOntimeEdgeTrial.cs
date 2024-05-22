@@ -278,7 +278,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             return sbResult.Length == 0;
         }
 
-        private OnTimeEdgeRequestModel MapToBody(string secretKey, GuestUserModel model, string organizationName)
+        private OnTimeEdgeRequestModel MapToBody(string secretKey, UserCheckoutModel model, string organizationName)
         {
             return new OnTimeEdgeRequestModel()
             {
@@ -345,7 +345,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
     internal class JobOnTimeEdgePayload
     {
         public string HostUrl { get; set; }
-        public GuestUserModel FormData { get; set; }
+        public UserCheckoutModel FormData { get; set; }
     }
 
     internal class JobOnTimeEdgeConfig

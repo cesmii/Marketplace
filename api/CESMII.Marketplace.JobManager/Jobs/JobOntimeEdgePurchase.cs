@@ -204,7 +204,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
         }
 
 
-        private OnTimeEdgeRequestModel MapToBody(string secretKey, GuestUserModel model, string organizationName)
+        private OnTimeEdgeRequestModel MapToBody(string secretKey, UserCheckoutModel model, string organizationName)
         {
             return new OnTimeEdgeRequestModel()
             {
@@ -273,7 +273,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
         /// <summary>
         /// Only populated if user is purchasing anonymously as a one time guest
         /// </summary>
-        public GuestUserModel GuestUser { get; set; }
+        public UserCheckoutModel GuestUser { get; set; }
     }
 
     #endregion
