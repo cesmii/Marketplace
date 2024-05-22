@@ -135,7 +135,7 @@ function Cart() {
                 });
         }
 
-        if (!isAuthenticated || loadingProps.cart == null || loadingProps.cart?.items == null) return;
+        if (loadingProps.cart == null || loadingProps.cart?.items == null) return;
 
         fetchCredits();
 

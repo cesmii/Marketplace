@@ -5,30 +5,13 @@
     Layout = "_EmailLayout";
 }
 
-@if (Model.FirstName != null && Model.LastName != null)
-{
 <div>
-    <p>Dear @Model.FirstName @Model.LastName,</p>
+    <p>Dear customer,</p>
     <br />
 </div>
-}
-else if (Model.FirstName != null && Model.LastName == null)
-{
-    <div>
-        <p>Dear @Model.FirstName,</p>
-        <br />
-    </div>
-}
-else if (Model.FirstName == null && Model.LastName != null)
-{
-    <div>
-        <p>Dear @Model.LastName,</p>
-        <br />
-    </div>
-}
 
 <div>
-    <p> Thank you for your request for more information about <b>@Model.MarketplaceItem.DisplayName</b> from the CESMII <a href="https://marketplace.cesmii.net">CESMII Smart Manufacturing Marketplace</a>.</p>
+    <p> Thank you for purchasing <b>@Model.MarketplaceItem.DisplayName</b> Marketplace item. from the CESMII <a href="https://marketplace.cesmii.net">CESMII Smart Manufacturing Marketplace</a>.</p>
     <br />
 </div>
 

@@ -28,7 +28,7 @@ namespace CESMII.Marketplace.Service
         private readonly ILogger<StripeService> _logger;
         private readonly IOrganizationService<OrganizationModel> _organizationService;
         private readonly StripeConfig _config;
-        
+
         //on complete actions
         private readonly MailConfig _mailConfig;
         private readonly MailRelayService _mailRelayService;
@@ -37,11 +37,11 @@ namespace CESMII.Marketplace.Service
         private readonly IDal<JobLog, JobLogModel> _dalJobLog;
 
 
-        public StripeService(IOrganizationService<OrganizationModel> organizationService, 
-            IDal<Cart, CartModel> dal, 
-            ILogger<StripeService> logger, 
-            IDal<StripeAuditLog, StripeAuditLogModel> stripeLogDal, 
-            ConfigUtil configUtil, 
+        public StripeService(IOrganizationService<OrganizationModel> organizationService,
+            IDal<Cart, CartModel> dal,
+            ILogger<StripeService> logger,
+            IDal<StripeAuditLog, StripeAuditLogModel> stripeLogDal,
+            ConfigUtil configUtil,
             MailRelayService mailRelayService,
             IJobFactory jobFactory,
             IDal<JobDefinition, JobDefinitionModel> dalJobDefinition,
@@ -68,6 +68,12 @@ namespace CESMII.Marketplace.Service
         public async Task<CheckoutInitModel> DoCheckout(CartModel cart, UserModel? user)
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
+
+            // For anonymous users, save the cart details first into the database and use that after successful checkout.
+            if (string.IsNullOrEmpty(cart.ID) || user == null)
+            {
+                cart.ID = await _dal.Add(cart, null);
+            }
 
             var options = new Stripe.Checkout.SessionCreateOptions
             {
@@ -113,8 +119,8 @@ namespace CESMII.Marketplace.Service
                 if (!string.IsNullOrEmpty(cartItem.MarketplaceItem.ECommerce.TermsOfService))
                 {
                     if (options.CustomText == null) options.CustomText = new SessionCustomTextOptions();
-                    options.CustomText.TermsOfServiceAcceptance = new SessionCustomTextTermsOfServiceAcceptanceOptions() 
-                        { Message = cartItem.MarketplaceItem.ECommerce.TermsOfService };
+                    options.CustomText.TermsOfServiceAcceptance = new SessionCustomTextTermsOfServiceAcceptanceOptions()
+                    { Message = cartItem.MarketplaceItem.ECommerce.TermsOfService };
 
                     if (cartItem.MarketplaceItem.ECommerce.TermsOfServiceIsRequired)
                     {
@@ -180,15 +186,12 @@ namespace CESMII.Marketplace.Service
                 }, user == null ? null : user.ID);
 
                 // Update sessionId and OrganizationId for Webhook
-                if (user != null)
-                {
-                    cart.SessionId = session.Id;
+                cart.SessionId = session.Id;
 
-                    if (organization != null)
-                        cart.OrganizationId = organization.ID;
+                if (organization != null)
+                    cart.OrganizationId = organization.ID;
 
-                    await _dal.Update(cart, user.ID);
-                }
+                await _dal.Update(cart, user?.ID);
 
                 return new CheckoutInitModel()
                 {
@@ -231,6 +234,7 @@ namespace CESMII.Marketplace.Service
 
                 // Update cart status
                 cart.Status = Common.Enums.CartStatusEnum.Completed;
+                cart.Completed = DateTime.Now;
                 await Update(cart, cart.CreatedById);
 
                 //send notification emails, run on complete jobs if needed
@@ -269,7 +273,7 @@ namespace CESMII.Marketplace.Service
                 var requestInfoModel = new RequestInfoModel
                 {
                     MarketplaceItem = new MarketplaceItemModel { DisplayName = marketplaceItem.DisplayName, Abstract = marketplaceItem.Abstract },
-                    Description = "Successful completed checkout",
+                    Description = "Successfully checkout completed.",
                     FirstName = string.Empty,
                     LastName = string.Empty,
                     Email = string.Empty,
@@ -280,7 +284,7 @@ namespace CESMII.Marketplace.Service
                 var message = new MailMessage
                 {
                     From = new MailAddress(_mailConfig.MailFromAddress),
-                    Subject = "CESMII | SM Marketplace | Checkout Successful",
+                    Subject = "CESMII | SM Marketplace | Marketplace Item purchase notification",
                     Body = body,
                     IsBodyHtml = true,
                 };
@@ -313,25 +317,36 @@ namespace CESMII.Marketplace.Service
         {
             if (string.IsNullOrEmpty(marketplaceItem.ECommerce.OnCheckoutCompleteJobId)) return;
 
-            //check if job requires user to be authorized
-            var job = _dalJobDefinition.GetById(marketplaceItem.ECommerce.OnCheckoutCompleteJobId);
-            if (job == null)
+            try
             {
-                _logger.LogError($"StripeService|onCheckoutCompleteJob|Job {marketplaceItem.ECommerce.OnCheckoutCompleteJobId} not found. (null)");
-                return;
-            }
-            if (job.RequiresAuthentication && user == null)
-            {
-                _logger.LogError($"StripeService|onCheckoutCompleteJob|Job requires an authenticated user");
-                return;
-            }
+                //check if job requires user to be authorized
+                var job = _dalJobDefinition.GetById(marketplaceItem.ECommerce.OnCheckoutCompleteJobId);
+                if (job == null)
+                {
+                    _logger.LogError($"StripeService|onCheckoutCompleteJob|Job {marketplaceItem.ECommerce.OnCheckoutCompleteJobId} not found. (null)");
+                    return;
+                }
+                if (job.RequiresAuthentication && user == null)
+                {
+                    _logger.LogError($"StripeService|onCheckoutCompleteJob|Job requires an authenticated user");
+                    return;
+                }
 
-            //create jobpayload model
-            var payload = new { CartItem = item, GuestUser = userGuest };
-            var jobData = new JobPayloadModel() { JobDefinitionId = job.ID, MarketplaceItemId = marketplaceItem.ID, 
-                Payload = Newtonsoft.Json.JsonConvert.SerializeObject(payload) };
-            //execute job
-            await _jobFactory.ExecuteJob(jobData, user);
+                //create jobpayload model
+                var payload = new { CartItem = item, GuestUser = userGuest };
+                var jobData = new JobPayloadModel()
+                {
+                    JobDefinitionId = job.ID,
+                    MarketplaceItemId = marketplaceItem.ID,
+                    Payload = Newtonsoft.Json.JsonConvert.SerializeObject(payload)
+                };
+                //execute job
+                await _jobFactory.ExecuteJob(jobData, user);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "StripeService|OnCheckoutCompleteJob|Error occured OnCheckoutCompleteJob.");
+            }
         }
         #endregion
 

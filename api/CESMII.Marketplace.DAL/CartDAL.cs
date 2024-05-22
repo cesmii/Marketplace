@@ -44,7 +44,7 @@ namespace CESMII.Marketplace.DAL
                 ID = null
                 , Created = DateTime.UtcNow
                 , Updated = DateTime.UtcNow
-                , CreatedById = MongoDB.Bson.ObjectId.Parse(userId)
+                , CreatedById = string.IsNullOrEmpty(userId) ? null : MongoDB.Bson.ObjectId.Parse(userId)
             };
 
             this.MapToEntity(ref entity, model);
@@ -63,7 +63,7 @@ namespace CESMII.Marketplace.DAL
             var entity = _repo.FindByCondition(x => x.ID == model.ID).FirstOrDefault();
             this.MapToEntity(ref entity, model);
             entity.Updated = DateTime.UtcNow;
-            entity.UpdatedById = MongoDB.Bson.ObjectId.Parse(userId);
+            entity.UpdatedById = string.IsNullOrEmpty(userId) ? null : MongoDB.Bson.ObjectId.Parse(userId);
 
             await _repo.UpdateAsync(entity);
             return 1;
@@ -185,7 +185,7 @@ namespace CESMII.Marketplace.DAL
                     Name = entity.Name,
                     Created = entity.Created,
                     Updated = entity.Updated,
-                    CreatedById = entity.CreatedById.ToString(),
+                    CreatedById = entity.CreatedById?.ToString(),
                     UpdatedById = entity.UpdatedById?.ToString(),
                     Status = (Common.Enums.CartStatusEnum)entity.Status,
                     Items = MapToModelCartItems(entity.Items),
