@@ -12,6 +12,7 @@ using CESMII.Marketplace.Service;
 using Stripe;
 using System.IO;
 using System;
+using CESMII.Marketplace.Common.Models;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
@@ -36,9 +37,18 @@ namespace CESMII.Marketplace.Api.Controllers
         [ProducesResponseType(400)]
         public async Task<IActionResult> Checkout([FromBody] CartModel model)
         {
-            var result = await (User.Identity.IsAuthenticated ?
-                    _svc.DoCheckout(model, LocalUser) :
-                    _svc.DoCheckoutAnonymous(model));
+            if (User.Identity.IsAuthenticated) {
+                model.CheckoutUser = new UserCheckoutModel()
+                {
+                    Email = LocalUser.Email,
+                    FirstName = LocalUser.FirstName,
+                    LastName = LocalUser.LastName,
+                    ID = LocalUser.ID,
+                    Organization = new OrganizationCheckoutModel() { ID = LocalUser.Organization.ID, Name = LocalUser.Organization.Name }
+                };
+            }
+
+            var result = await _svc.DoCheckout(model);
             if (result == null)
             {
                 return BadRequest($"Could not initialize checkout.");

@@ -75,7 +75,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
 
             //get user information from request info type of form.
             base.CreateJobLogMessage($"Preparing user information to submit to OnTime | Edge...", TaskStatusEnum.InProgress);
-            var req = MapToBody(jobConfig.ApogeanApi.SecretKey, payload.FormData, payload.FormData.CompanyName);
+            var req = MapToBody(jobConfig.ApogeanApi.SecretKey, payload.FormData, payload.FormData.Organization.Name);
 
             //save record of submission to the request info DB.
             //base.CreateJobLogMessage($"TBD - Saving request info user information to Marketplace DB...", TaskStatusEnum.InProgress);
@@ -224,7 +224,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 sbResult.AppendLine("Last Name is required.");
                 _logger.LogInformation($"JobOnTimeEdgeTrial|ValidatePayload|LastName is required.");
             }
-            if (string.IsNullOrEmpty(payload.FormData?.CompanyName))
+            if (string.IsNullOrEmpty(payload.FormData?.Organization?.Name))
             {
                 sbResult.AppendLine("Organization is required.");
                 _logger.LogInformation($"JobOnTimeEdgeTrial|ValidatePayload|Organization is required.");
@@ -317,7 +317,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             sbBody.AppendLine("<ul class='p-0 m-0 pl-3'>");
             sbBody.AppendLine($"<li class='m-0 p-0 my-1'>First Name: {payload.FormData.FirstName}</li>");
             sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Last Name: {payload.FormData.LastName}</li>");
-            sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Company Name: {payload.FormData.CompanyName}</li>");
+            sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Company Name: {payload.FormData.Organization?.Name}</li>");
             sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Email: {payload.FormData.Email}</li>");
             sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Phone: {payload.FormData.Phone}</li>");
             sbBody.AppendLine("</ul>");

@@ -60,12 +60,15 @@ namespace CESMII.Marketplace.Service
             _dalJobLog = dalJobLog;
         }
 
-        public async Task<CheckoutInitModel> DoCheckoutAnonymous(CartModel item)
-        {
-            return await DoCheckout(item, null);
-        }
-
-        public async Task<CheckoutInitModel> DoCheckout(CartModel cart, UserModel? user)
+        /// <summary>
+        /// User data is embedded within cart model. 
+        /// If user is a guest, user id is null and org id is null.
+        /// If user is authenticated, we populate that info in the cart.CheckoutUser
+        /// </summary>
+        /// <param name="cart"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public async Task<CheckoutInitModel> DoCheckout(CartModel cart)
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
 
@@ -75,137 +78,39 @@ namespace CESMII.Marketplace.Service
                 //append check out session id
                 ReturnUrl = cart.ReturnUrl.TrimEnd(Convert.ToChar("/")) + "/{CHECKOUT_SESSION_ID}",
                 LineItems = new List<SessionLineItemOptions>(),
-                ExpiresAt = DateTime.UtcNow.AddMinutes(30),
+                ExpiresAt = DateTime.UtcNow.AddMinutes(30) //TODO: make this configurable in appSettings
             };
 
             // For anonymous users, save the cart details first into the database and use that after successful checkout.
-            if (string.IsNullOrEmpty(cart.ID) || user == null)
+            if (string.IsNullOrEmpty(cart.ID) || string.IsNullOrEmpty(cart.CheckoutUser?.ID))
             {
                 cart.ID = await _dal.Add(cart, null);
-                options.ClientReferenceId = cart.ID;
-                options.PhoneNumberCollection = new SessionPhoneNumberCollectionOptions() { Enabled= true };
-
-                options.CustomFields = new List<SessionCustomFieldOptions>
-                {
-                    new SessionCustomFieldOptions
-                    {
-                        Key = "firstName",
-                        Label = new Stripe.Checkout.SessionCustomFieldLabelOptions
-                        {
-                            Type = "custom",
-                            Custom = "First name",
-                        },
-                        Type = "text",
-                    },new SessionCustomFieldOptions
-                    {
-                        Key = "lastName",
-                        Label = new Stripe.Checkout.SessionCustomFieldLabelOptions
-                        {
-                            Type = "custom",
-                            Custom = "Last name",
-                        },
-                        Type = "text",
-                    },new SessionCustomFieldOptions
-                    {
-                        Key = "companyName",
-                        Label = new Stripe.Checkout.SessionCustomFieldLabelOptions
-                        {
-                            Type = "custom",
-                            Custom = "Company name",
-                        },
-                        Type = "text",
-                    }
-                };
             }
+            //update cart id to client reference id - tie this cart to the checkout session
+            options.ClientReferenceId = cart.ID;
 
-            foreach (var cartItem in cart.Items)
+            //show user entry fields in checkout screen if anonymous user
+            if (string.IsNullOrEmpty(cart.CheckoutUser?.ID))
             {
-                if (cartItem.SelectedPrice == null)
-                {
-                    _logger.LogError($"StripeService|DoCheckout|Cannot get price with null or empty payment price id.|Item: {cartItem.MarketplaceItem.Name}");
-                    throw new ArgumentException($"Cannot get price with null or empty payment price id for {cartItem.MarketplaceItem.Name}.");
-                }
-
-                var price = await GetPriceById(cartItem.SelectedPrice.PriceId);
-                if (price == null)
-                {
-                    _logger.LogError($"StripeService|DoCheckout|Cannot get Stripe price for |Item: {cartItem.MarketplaceItem.Name} with payment price id {cartItem.SelectedPrice.PriceId}.");
-                    throw new ArgumentException($"Cannot get Stripe price info for {cartItem.MarketplaceItem.Name}.");
-                }
-
-                options.Mode = price.Type == "one_time" ? "payment" : "subscription";
-
-                options.LineItems.Add(new SessionLineItemOptions
-                {
-                    Price = cartItem.SelectedPrice.PriceId,
-                    Quantity = cartItem.Quantity,
-                });
-
-                //options.ClientReferenceId
-                //options.ConsentCollection
-                //options.ConsentCollection.TermsOfService - checkbox
-                //options.Customer - Add StripeCustomerId to our UserModel
-                //options.CustomerEmail - set this.
-                //options.CustomText.AfterSubmit
-                //options.CustomText.Submit
-
-                if (!string.IsNullOrEmpty(cartItem.MarketplaceItem.ECommerce.TermsOfService))
-                {
-                    if (options.CustomText == null) options.CustomText = new SessionCustomTextOptions();
-                    options.CustomText.TermsOfServiceAcceptance = new SessionCustomTextTermsOfServiceAcceptanceOptions()
-                    { Message = cartItem.MarketplaceItem.ECommerce.TermsOfService };
-
-                    if (cartItem.MarketplaceItem.ECommerce.TermsOfServiceIsRequired)
-                    {
-                        if (options.ConsentCollection == null) options.ConsentCollection = new SessionConsentCollectionOptions();
-                        options.ConsentCollection = new SessionConsentCollectionOptions() { TermsOfService = "required" };
-                    }
-                }
-
-                //
-                //options.LineItems[0].AdjustableQuantity
-                if (user != null)
-                {
-                    //set customer info this way
-                    options.CustomerEmail = user.Email;
-                }
-                else if (cart.GuestUser != null)
-                {
-                    //set customer info this way
-                    options.CustomerEmail = cart.GuestUser.Email;
-                }
+                PrepareCustomFields(options);
             }
+            //set customer info this way
+            if (!string.IsNullOrEmpty(cart.CheckoutUser?.Email))
+            {
+                options.CustomerEmail = cart.CheckoutUser.Email;
+            }
+
+            //prepare cart items
+            await PrepareCartItems(cart, options);
 
             try
             {
-                OrganizationModel? organization = null;
-                //an anonymous user may be checking out. they won't have credits. that is an ok scenario.
-                if (user != null && cart.UseCredits)
-                {
-                    //if they want to use credits && have credits to use, apply here. 
-                    organization = _organizationService.GetByName(user.Organization.Name);
-                    if (organization == null || organization.Credits <= 0)
-                    {
-                        _logger.LogError("StripeService|DoCheckout|Cannot use credits.");
-                        throw new ArgumentException("Cannot use credits.");
-                    }
+                cart.CreditsApplied = null; //just make sure nothing is assigning this. We calc and assign here.
 
-                    //take lesser of credits available or total cost
-                    var numCredits = CalculateCredits(organization.Credits, cart);
-
-                    var couponService = new CouponService();
-                    var coupon = await couponService.CreateAsync(new CouponCreateOptions
-                    {
-                        AmountOff = numCredits,
-                        Duration = "once",
-                        Currency = "usd",
-                        MaxRedemptions = 1,
-                        Name = "Credits Applied"
-                    });
-
-                    var discount = new SessionDiscountOptions { Coupon = coupon.Id };
-                    options.Discounts = new List<SessionDiscountOptions> { discount };
-                }
+                OrganizationModel? organization = !string.IsNullOrEmpty(cart.CheckoutUser?.Organization?.Name) ?
+                        _organizationService.GetByName(cart.CheckoutUser.Organization.Name) : null;
+                //prepare credits
+                await PrepareCredits(cart, options, organization);
 
                 var service = new Stripe.Checkout.SessionService();
                 var session = await service.CreateAsync(options);
@@ -216,16 +121,17 @@ namespace CESMII.Marketplace.Service
                     CartModel = cart,
                     Session = session,
                     SessionCreateOptions = options
-                }, user == null ? null : user.ID);
+                }, string.IsNullOrEmpty(cart.CheckoutUser?.ID) ? null : cart.CheckoutUser.ID);
 
-                // Update sessionId and OrganizationId for Webhook
+                // Update sessionId, credits applied (potentially assigned above) and OrganizationId for Webhook
                 cart.SessionId = session.Id;
+                if (organization != null && cart.CheckoutUser != null)
+                {
+                    cart.CheckoutUser.Organization.ID = organization.ID;
+                }
+                await _dal.Update(cart, cart.CheckoutUser?.ID);
 
-                if (organization != null)
-                    cart.OrganizationId = organization.ID;
-
-                await _dal.Update(cart, user?.ID);
-
+                //
                 return new CheckoutInitModel()
                 {
                     ApiKey = _config.PublishKey,
@@ -268,59 +174,205 @@ namespace CESMII.Marketplace.Service
                 // Update cart status
                 cart.Status = Common.Enums.CartStatusEnum.Completed;
                 cart.Completed = DateTime.Now;
+                //if it was anonymous, then pull Checkoutuser info from Stripe
+                if (string.IsNullOrEmpty(cart.CheckoutUser?.ID))
+                {
+                    cart.CheckoutUser = MapToModelUserCheckout(session);
+                }
                 await Update(cart, cart.CreatedById);
 
                 //send notification emails, run on complete jobs if needed
-                await ExecuteOnCompleteActions(controller, cart, session);
+                await ExecuteOnCompleteActions(controller, cart);
 
-                if (string.IsNullOrEmpty(cart.OrganizationId))
+                if (string.IsNullOrEmpty(cart.CheckoutUser.Organization?.ID))
                     return true;
 
-                var organization = _organizationService.GetById(cart.OrganizationId);
+                var organization = _organizationService.GetById(cart.CheckoutUser.Organization.ID);
                 if (organization == null)
                     return true;
 
-                // Update organization credits to zero.
-                organization.Credits = 0;
+                // Update/deduct organization credits to deduct amount used.
+                if (cart.CreditsApplied.HasValue)
+                {
+                    organization.Credits -= cart.CreditsApplied.Value;
+                }
                 await _organizationService.Update(organization, cart.CreatedById);
             }
 
             return false;
         }
 
-        #region onCheckoutComplete Methods 
-        private async Task ExecuteOnCompleteActions(Controller controller, CartModel cart, Stripe.Checkout.Session session)
+
+        #region doCheckout helper methods
+        private static void PrepareCustomFields(Stripe.Checkout.SessionCreateOptions options)
         {
+            //set custom fields data using checkout user data
+            options.PhoneNumberCollection = new SessionPhoneNumberCollectionOptions() { Enabled = true };
+            options.CustomFields = new List<SessionCustomFieldOptions>
+            {
+                new SessionCustomFieldOptions
+                {
+                    Key = "firstName",
+                    Label = new SessionCustomFieldLabelOptions
+                    {
+                        Type = "custom",
+                        Custom = "First name",
+                    },
+                    Type = "text",
+                },new SessionCustomFieldOptions
+                {
+                    Key = "lastName",
+                    Label = new SessionCustomFieldLabelOptions
+                    {
+                        Type = "custom",
+                        Custom = "Last name",
+                    },
+                    Type = "text",
+                },new SessionCustomFieldOptions
+                {
+                    Key = "companyName",
+                    Label = new Stripe.Checkout.SessionCustomFieldLabelOptions
+                    {
+                        Type = "custom",
+                        Custom = "Company name",
+                    },
+                    Type = "text",
+                }
+            };
+        }
+
+        private async Task PrepareCartItems(CartModel cart, Stripe.Checkout.SessionCreateOptions options)
+        {
+            //prepare cart items
             foreach (var cartItem in cart.Items)
             {
-                await OnCheckoutCompleteJob(cartItem, cartItem.MarketplaceItem, null, cart.GuestUser); //need to get user who created cart if authenticated
-                //if fail, log but keep going - handled below
-                await SendMail(controller, cartItem.MarketplaceItem, session);
+                if (cartItem.SelectedPrice == null)
+                {
+                    _logger.LogError($"StripeService|DoCheckout|Cannot get price with null or empty payment price id.|Item: {cartItem.MarketplaceItem.Name}");
+                    throw new ArgumentException($"Cannot get price with null or empty payment price id for {cartItem.MarketplaceItem.Name}.");
+                }
+
+                var price = await GetPriceById(cartItem.SelectedPrice.PriceId);
+                if (price == null)
+                {
+                    _logger.LogError($"StripeService|DoCheckout|Cannot get Stripe price for |Item: {cartItem.MarketplaceItem.Name} with payment price id {cartItem.SelectedPrice.PriceId}.");
+                    throw new ArgumentException($"Cannot get Stripe price info for {cartItem.MarketplaceItem.Name}.");
+                }
+
+                options.Mode = price.Type == "one_time" ? "payment" : "subscription";
+
+                options.LineItems.Add(new SessionLineItemOptions
+                {
+                    Price = cartItem.SelectedPrice.PriceId,
+                    Quantity = cartItem.Quantity,
+                });
+
+                if (!string.IsNullOrEmpty(cartItem.MarketplaceItem.ECommerce.TermsOfService))
+                {
+                    if (options.CustomText == null) options.CustomText = new SessionCustomTextOptions();
+                    options.CustomText.TermsOfServiceAcceptance = new SessionCustomTextTermsOfServiceAcceptanceOptions()
+                    { Message = cartItem.MarketplaceItem.ECommerce.TermsOfService };
+
+                    if (cartItem.MarketplaceItem.ECommerce.TermsOfServiceIsRequired)
+                    {
+                        if (options.ConsentCollection == null) options.ConsentCollection = new SessionConsentCollectionOptions();
+                        options.ConsentCollection = new SessionConsentCollectionOptions() { TermsOfService = "required" };
+                    }
+                }
             }
         }
 
-        private async Task SendMail(Controller controller, MarketplaceItemCheckoutModel marketplaceItem, Stripe.Checkout.Session session)
+        private async Task PrepareCredits(CartModel cart, Stripe.Checkout.SessionCreateOptions options,
+            OrganizationModel? organization)
         {
+            //an anonymous user may be checking out. they won't have credits. that is an ok scenario.
+            if (!string.IsNullOrEmpty(cart.CheckoutUser?.ID) && cart.UseCredits)
+            {
+                //if they want to use credits && have credits to use, apply here. 
+                if (organization == null || organization.Credits <= 0)
+                {
+                    _logger.LogError("StripeService|DoCheckout|Cannot use credits.");
+                    throw new ArgumentException("Cannot use credits.");
+                }
+
+                //take lesser of credits available or total cost
+                cart.CreditsApplied = CalculateCredits(organization.Credits, cart);
+
+                var couponService = new CouponService();
+                var coupon = await couponService.CreateAsync(new CouponCreateOptions
+                {
+                    AmountOff = cart.CreditsApplied,
+                    Duration = "once",
+                    Currency = "usd",
+                    MaxRedemptions = 1,
+                    Name = "Credits Applied"
+                });
+
+                var discount = new SessionDiscountOptions { Coupon = coupon.Id };
+                options.Discounts = new List<SessionDiscountOptions> { discount };
+            }
+        }
+        #endregion
+
+        #region onCheckoutComplete Methods 
+        private UserCheckoutModel MapToModelUserCheckout(Stripe.Checkout.Session session)
+        {
+            return new UserCheckoutModel() {
+                FirstName = session.CustomFields.FirstOrDefault(cf => cf.Key == "firstName")?.Text.Value,
+                LastName = session.CustomFields.FirstOrDefault(cf => cf.Key == "lastName")?.Text.Value,
+                Organization = new OrganizationCheckoutModel()
+                { Name = session.CustomFields.FirstOrDefault(cf => cf.Key == "companyName")?.Text.Value },
+                Email = session.CustomerDetails?.Email,
+                Phone = session.CustomerDetails?.Phone
+            };
+        }
+
+        private async Task ExecuteOnCompleteActions(Controller controller, CartModel cart)
+        {
+            //TODO: new email template - send one purchase successful email to purchaser with a view like the whole checkout screen
+            await SendMailCheckoutCompleted(controller, cart);
+
+            foreach (var cartItem in cart.Items)
+            {
+                //if fail, log but keep going - handled below
+                await OnCheckoutCompleteJob(cartItem, cartItem.MarketplaceItem, cart.CheckoutUser);
+                await SendMailItemPurchased(controller, cartItem.MarketplaceItem, cart.CheckoutUser);
+            }
+        }
+
+        /// <summary>
+        /// Send this to the person who made the purchase. This should
+        /// have all items in one email and look like our checkout screen.
+        /// </summary>
+        /// <param name="controller"></param>
+        /// <param name="cart"></param>
+        /// <returns></returns>
+        private async Task SendMailCheckoutCompleted(Controller controller, CartModel cart)
+        {
+            //TODO: Check if Stripe can send out a confirmation email instead of us?
+        }
+
+        /// <summary>
+        /// Target Audience is CESMII people and the vendor who is selling item
+        /// </summary>
+        /// <param name="controller"></param>
+        /// <param name="marketplaceItem"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        private async Task SendMailItemPurchased(Controller controller, MarketplaceItemCheckoutModel marketplaceItem, UserCheckoutModel user)
+        {
+            //TODO: pass in cart info so we can include total quantity of item, total price of each items
             try
             {
                 var requestInfoModel = new RequestInfoModel
                 {
                     MarketplaceItem = new MarketplaceItemModel { DisplayName = marketplaceItem.DisplayName, Abstract = marketplaceItem.Abstract },
                     Description = "Successfully checkout completed.",
-                    FirstName = string.Empty,
-                    LastName = string.Empty,
-                    Email = string.Empty,
-                    Phone = string.Empty,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    Phone = user.Phone,
                 };
-
-                if (session.CustomFields.Count > 0)
-                {
-                    requestInfoModel.FirstName = session.CustomFields.FirstOrDefault(cf => cf.Key == "firstName")?.Text.Value;
-                    requestInfoModel.LastName = session.CustomFields.FirstOrDefault(cf => cf.Key == "lastName")?.Text.Value;
-                    requestInfoModel.CompanyName = session.CustomFields.FirstOrDefault(cf => cf.Key == "companyName")?.Text.Value;
-                    requestInfoModel.Email = session.CustomerDetails?.Email;
-                    requestInfoModel.Phone = session.CustomerDetails?.Phone;
-                }
 
                 var body = await Api.Shared.Extensions.ViewExtensions.RenderViewAsync(controller, "~/Views/Template/MarketplaceItemECommerce.cshtml", requestInfoModel);
 
@@ -356,7 +408,7 @@ namespace CESMII.Marketplace.Service
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        private async Task OnCheckoutCompleteJob(CartItemModel item, MarketplaceItemCheckoutModel marketplaceItem, UserModel user, UserCheckoutModel userGuest)
+        private async Task OnCheckoutCompleteJob(CartItemModel item, MarketplaceItemCheckoutModel marketplaceItem, UserCheckoutModel user)
         {
             if (string.IsNullOrEmpty(marketplaceItem.ECommerce.OnCheckoutCompleteJobId)) return;
 
@@ -369,14 +421,14 @@ namespace CESMII.Marketplace.Service
                     _logger.LogError($"StripeService|onCheckoutCompleteJob|Job {marketplaceItem.ECommerce.OnCheckoutCompleteJobId} not found. (null)");
                     return;
                 }
-                if (job.RequiresAuthentication && user == null)
+                if (job.RequiresAuthentication && string.IsNullOrEmpty(user?.ID))
                 {
                     _logger.LogError($"StripeService|onCheckoutCompleteJob|Job requires an authenticated user");
                     return;
                 }
 
                 //create jobpayload model
-                var payload = new { CartItem = item, GuestUser = userGuest };
+                var payload = new { CartItem = item, CheckoutUser = user };
                 var jobData = new JobPayloadModel()
                 {
                     JobDefinitionId = job.ID,
@@ -384,7 +436,7 @@ namespace CESMII.Marketplace.Service
                     Payload = Newtonsoft.Json.JsonConvert.SerializeObject(payload)
                 };
                 //execute job
-                await _jobFactory.ExecuteJob(jobData, user);
+                await _jobFactory.ExecuteJob(jobData, null);
             }
             catch (Exception ex)
             {

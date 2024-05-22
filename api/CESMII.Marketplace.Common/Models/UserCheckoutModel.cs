@@ -2,15 +2,29 @@
 {
 
     /// <summary>
-    /// Used by multiple areas. Checkout of a guest user, trial for onTimeEdge job
+    /// Used by multiple areas. Checkout of a user. 
+    /// If user is anonymous / guest, then the id will be null 
+    /// and organization will just have organization.name.
     /// </summary>
     public class UserCheckoutModel
     {
+        public string ID { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string CompanyName { get; set; }
+        public OrganizationCheckoutModel Organization { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }
 
     }
+
+    /// <summary>
+    /// Simplified version of org for checkout. 
+    /// If guest user, ID will be null and credits will be null
+    /// </summary>
+    public class OrganizationCheckoutModel
+    {
+        public string ID { get; set; }
+        public string Name { get; set; }
+    }
+
 }

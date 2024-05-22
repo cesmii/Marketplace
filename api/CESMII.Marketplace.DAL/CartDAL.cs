@@ -9,6 +9,7 @@ using CESMII.Marketplace.Common;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.Data.Repositories;
+using CESMII.Marketplace.Common.Models;
 
 namespace CESMII.Marketplace.DAL
 {
@@ -41,10 +42,10 @@ namespace CESMII.Marketplace.DAL
         {
             var entity = new Cart
             {
-                ID = null
-                , Created = DateTime.UtcNow
-                , Updated = DateTime.UtcNow
-                , CreatedById = string.IsNullOrEmpty(userId) ? null : MongoDB.Bson.ObjectId.Parse(userId)
+                ID = null,
+                Created = DateTime.UtcNow,
+                Updated = DateTime.UtcNow,
+                CreatedById = string.IsNullOrEmpty(userId) ? null : MongoDB.Bson.ObjectId.Parse(userId)
             };
 
             this.MapToEntity(ref entity, model);
@@ -187,11 +188,11 @@ namespace CESMII.Marketplace.DAL
                     Updated = entity.Updated,
                     CreatedById = entity.CreatedById?.ToString(),
                     UpdatedById = entity.UpdatedById?.ToString(),
-                    Status = (Common.Enums.CartStatusEnum)entity.Status,
+                    CheckoutUser = entity.CheckoutUser,
+                    Status = entity.Status,
                     Items = MapToModelCartItems(entity.Items),
                     IsActive = entity.IsActive,
-                    SessionId = entity.SessionId,
-                    OrganizationId = entity.OraganizationId,
+                    SessionId = entity.SessionId
                 };
 
                 return result;
@@ -240,8 +241,8 @@ namespace CESMII.Marketplace.DAL
             entity.Completed = model.Completed;
             entity.Status = model.Status;
             entity.SessionId = model.SessionId;
-            entity.OraganizationId = model.OrganizationId;
             entity.Items = MapToEntityCartItems(model.Items);
+            entity.CheckoutUser = model.CheckoutUser;
         }
 
         protected List<CartItem> MapToEntityCartItems(List<CartItemModel> items)

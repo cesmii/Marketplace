@@ -61,7 +61,7 @@ namespace CESMII.Marketplace.Service
 
         public OrganizationModel Copy(string id) {
             var result = _dal.GetById(id);
-            if (result == null) return result;
+            if (result == null) return new OrganizationModel();
 
             //clear out key values, then return as a new item
             result.ID = "";

@@ -63,7 +63,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
 
             //get user information from request info type of form.
             base.CreateJobLogMessage($"Preparing user information to submit to OnTime | Edge...", TaskStatusEnum.InProgress);
-            var req = MapToBody(jobConfig.ApogeanApi.SecretKey, payload.GuestUser, payload.GuestUser.CompanyName);
+            var req = MapToBody(jobConfig.ApogeanApi.SecretKey, payload.CheckoutUser, payload.CheckoutUser.Organization.Name);
 
             //save record of submission to the request info DB.
             //base.CreateJobLogMessage($"TBD - Saving request info user information to Marketplace DB...", TaskStatusEnum.InProgress);
@@ -167,28 +167,28 @@ namespace CESMII.Marketplace.JobManager.Jobs
         private bool ValidatePayload(ECommerceOnCompleteModel payload, out string message)
         {
             var sbResult = new System.Text.StringBuilder();
-            if (payload == null || payload.GuestUser == null)
+            if (payload == null || payload.CheckoutUser == null)
             {
                 sbResult.AppendLine("The purchaser information is missing. Please contact the system administrator.");
                 _logger.LogError($"JobOntimeEdgePurchase|ValidatePayload|payload is missing.");
             }
             
-            if (string.IsNullOrEmpty(payload.GuestUser?.FirstName))
+            if (string.IsNullOrEmpty(payload.CheckoutUser?.FirstName))
             {
                 sbResult.AppendLine("First Name is required.");
                 _logger.LogInformation($"JobOntimeEdgePurchase|ValidatePayload|FirstName is required.");
             }
-            if (string.IsNullOrEmpty(payload.GuestUser?.LastName))
+            if (string.IsNullOrEmpty(payload.CheckoutUser?.LastName))
             {
                 sbResult.AppendLine("Last Name is required.");
                 _logger.LogInformation($"JobOntimeEdgePurchase|ValidatePayload|LastName is required.");
             }
-            if (string.IsNullOrEmpty(payload.GuestUser?.CompanyName))
+            if (string.IsNullOrEmpty(payload.CheckoutUser?.Organization?.Name))
             {
                 sbResult.AppendLine("Organization is required.");
                 _logger.LogInformation($"JobOntimeEdgePurchase|ValidatePayload|Organization is required.");
             }
-            if (string.IsNullOrEmpty(payload.GuestUser?.Email))
+            if (string.IsNullOrEmpty(payload.CheckoutUser?.Email))
             {
                 sbResult.AppendLine("Email is required.");
                 _logger.LogInformation($"JobOntimeEdgePurchase|ValidatePayload|Email is required.");
@@ -239,11 +239,11 @@ namespace CESMII.Marketplace.JobManager.Jobs
             sbBody.AppendLine($"<h1>{title} | {marketplaceItem.DisplayName}</h1>");
             sbBody.AppendLine($"<hr class='my-2' />");
             sbBody.AppendLine("<ul class='p-0 m-0 pl-3'>");
-            sbBody.AppendLine($"<li class='m-0 p-0 my-1'>First Name: {payload.GuestUser.FirstName}</li>");
-            sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Last Name: {payload.GuestUser.LastName}</li>");
-            sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Company Name: {payload.GuestUser.CompanyName}</li>");
-            sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Email: {payload.GuestUser.Email}</li>");
-            sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Phone: {payload.GuestUser.Phone}</li>");
+            sbBody.AppendLine($"<li class='m-0 p-0 my-1'>First Name: {payload.CheckoutUser.FirstName}</li>");
+            sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Last Name: {payload.CheckoutUser.LastName}</li>");
+            sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Company Name: {payload.CheckoutUser.Organization.Name}</li>");
+            sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Email: {payload.CheckoutUser.Email}</li>");
+            sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Phone: {payload.CheckoutUser.Phone}</li>");
             sbBody.AppendLine("</ul>");
             sbBody.AppendLine("</div>");
             sbBody.AppendLine("</div>");
@@ -273,7 +273,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
         /// <summary>
         /// Only populated if user is purchasing anonymously as a one time guest
         /// </summary>
-        public UserCheckoutModel GuestUser { get; set; }
+        public UserCheckoutModel CheckoutUser { get; set; }
     }
 
     #endregion
