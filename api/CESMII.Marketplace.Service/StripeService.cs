@@ -69,12 +69,6 @@ namespace CESMII.Marketplace.Service
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
 
-            // For anonymous users, save the cart details first into the database and use that after successful checkout.
-            if (string.IsNullOrEmpty(cart.ID) || user == null)
-            {
-                cart.ID = await _dal.Add(cart, null);
-            }
-
             var options = new Stripe.Checkout.SessionCreateOptions
             {
                 UiMode = "embedded",
@@ -82,8 +76,47 @@ namespace CESMII.Marketplace.Service
                 ReturnUrl = cart.ReturnUrl.TrimEnd(Convert.ToChar("/")) + "/{CHECKOUT_SESSION_ID}",
                 LineItems = new List<SessionLineItemOptions>(),
                 ExpiresAt = DateTime.UtcNow.AddMinutes(30),
-                ClientReferenceId = cart.ID
             };
+
+            // For anonymous users, save the cart details first into the database and use that after successful checkout.
+            if (string.IsNullOrEmpty(cart.ID) || user == null)
+            {
+                cart.ID = await _dal.Add(cart, null);
+                options.ClientReferenceId = cart.ID;
+                options.PhoneNumberCollection = new SessionPhoneNumberCollectionOptions() { Enabled= true };
+
+                options.CustomFields = new List<SessionCustomFieldOptions>
+                {
+                    new SessionCustomFieldOptions
+                    {
+                        Key = "firstName",
+                        Label = new Stripe.Checkout.SessionCustomFieldLabelOptions
+                        {
+                            Type = "custom",
+                            Custom = "First name",
+                        },
+                        Type = "text",
+                    },new SessionCustomFieldOptions
+                    {
+                        Key = "lastName",
+                        Label = new Stripe.Checkout.SessionCustomFieldLabelOptions
+                        {
+                            Type = "custom",
+                            Custom = "Last name",
+                        },
+                        Type = "text",
+                    },new SessionCustomFieldOptions
+                    {
+                        Key = "companyName",
+                        Label = new Stripe.Checkout.SessionCustomFieldLabelOptions
+                        {
+                            Type = "custom",
+                            Custom = "Company name",
+                        },
+                        Type = "text",
+                    }
+                };
+            }
 
             foreach (var cartItem in cart.Items)
             {
@@ -238,7 +271,7 @@ namespace CESMII.Marketplace.Service
                 await Update(cart, cart.CreatedById);
 
                 //send notification emails, run on complete jobs if needed
-                await ExecuteOnCompleteActions(controller, cart);
+                await ExecuteOnCompleteActions(controller, cart, session);
 
                 if (string.IsNullOrEmpty(cart.OrganizationId))
                     return true;
@@ -256,17 +289,17 @@ namespace CESMII.Marketplace.Service
         }
 
         #region onCheckoutComplete Methods 
-        private async Task ExecuteOnCompleteActions(Controller controller, CartModel cart)
+        private async Task ExecuteOnCompleteActions(Controller controller, CartModel cart, Stripe.Checkout.Session session)
         {
             foreach (var cartItem in cart.Items)
             {
                 await OnCheckoutCompleteJob(cartItem, cartItem.MarketplaceItem, null, cart.GuestUser); //need to get user who created cart if authenticated
                 //if fail, log but keep going - handled below
-                await SendMail(controller, cartItem.MarketplaceItem);
+                await SendMail(controller, cartItem.MarketplaceItem, session);
             }
         }
 
-        private async Task SendMail(Controller controller, MarketplaceItemCheckoutModel marketplaceItem)
+        private async Task SendMail(Controller controller, MarketplaceItemCheckoutModel marketplaceItem, Stripe.Checkout.Session session)
         {
             try
             {
@@ -279,6 +312,16 @@ namespace CESMII.Marketplace.Service
                     Email = string.Empty,
                     Phone = string.Empty,
                 };
+
+                if (session.CustomFields.Count > 0)
+                {
+                    requestInfoModel.FirstName = session.CustomFields.FirstOrDefault(cf => cf.Key == "firstName")?.Text.Value;
+                    requestInfoModel.LastName = session.CustomFields.FirstOrDefault(cf => cf.Key == "lastName")?.Text.Value;
+                    requestInfoModel.CompanyName = session.CustomFields.FirstOrDefault(cf => cf.Key == "companyName")?.Text.Value;
+                    requestInfoModel.Email = session.CustomerDetails?.Email;
+                    requestInfoModel.Phone = session.CustomerDetails?.Phone;
+                }
+
                 var body = await Api.Shared.Extensions.ViewExtensions.RenderViewAsync(controller, "~/Views/Template/MarketplaceItemECommerce.cshtml", requestInfoModel);
 
                 var message = new MailMessage

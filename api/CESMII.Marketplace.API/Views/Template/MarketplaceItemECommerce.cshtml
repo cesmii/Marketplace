@@ -23,10 +23,28 @@
 </div>
 
 <div>
-    <h2>Project Description</h2>
+    <h2>Purchase Status</h2>
     <p>@Model.Description</p>
     <br />
 </div>
+
+
+<div>
+    <h2>Customer Info</h2>
+    <p><b>First Name:</b> @Model.FirstName</p>
+    <p><b>Last Name:</b> @Model.LastName</p>
+    <p><b>Email:</b> @Model.Email</p>
+    <p><b>Phone:</b> @Model.Phone</p>
+    <br />
+</div>
+@if (!string.IsNullOrEmpty(Model.CompanyName))
+{
+    <div>
+        <h2>Company Info</h2>
+        <p><b>Company Name:</b> @Model.CompanyName</p>
+        <br />
+    </div>
+}
 
 <div>
     <h2>About CESMII</h2>
