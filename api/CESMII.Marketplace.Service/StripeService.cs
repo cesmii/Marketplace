@@ -13,6 +13,8 @@ using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Models;
 using CESMII.Marketplace.Service.Models;
 using CESMII.Common.SelfServiceSignUp.Services;
+using CESMII.Marketplace.JobManager;
+using CESMII.Marketplace.JobManager.Models;
 
 namespace CESMII.Marketplace.Service
 {
@@ -26,18 +28,36 @@ namespace CESMII.Marketplace.Service
         private readonly ILogger<StripeService> _logger;
         private readonly IOrganizationService<OrganizationModel> _organizationService;
         private readonly StripeConfig _config;
+        
+        //on complete actions
         private readonly MailConfig _mailConfig;
         private readonly MailRelayService _mailRelayService;
+        private readonly IJobFactory _jobFactory;
+        private readonly IDal<JobDefinition, JobDefinitionModel> _dalJobDefinition;
+        private readonly IDal<JobLog, JobLogModel> _dalJobLog;
 
-        public StripeService(IOrganizationService<OrganizationModel> organizationService, IDal<Cart, CartModel> dal, ILogger<StripeService> logger, IDal<StripeAuditLog, StripeAuditLogModel> stripeLogDal, ConfigUtil configUtil, MailRelayService mailRelayService)
+
+        public StripeService(IOrganizationService<OrganizationModel> organizationService, 
+            IDal<Cart, CartModel> dal, 
+            ILogger<StripeService> logger, 
+            IDal<StripeAuditLog, StripeAuditLogModel> stripeLogDal, 
+            ConfigUtil configUtil, 
+            MailRelayService mailRelayService,
+            IJobFactory jobFactory,
+            IDal<JobDefinition, JobDefinitionModel> dalJobDefinition,
+            IDal<JobLog, JobLogModel> dalJobLog)
         {
             _dal = dal;
             _organizationService = organizationService;
             _stripeLogDal = stripeLogDal;
             _logger = logger;
             _config = configUtil.StripeSettings;
+            //
             _mailRelayService = mailRelayService;
             _mailConfig = configUtil.MailSettings;
+            _jobFactory = jobFactory;
+            _dalJobDefinition = dalJobDefinition;
+            _dalJobLog = dalJobLog;
         }
 
         public async Task<CheckoutInitModel> DoCheckoutAnonymous(CartModel item)
@@ -102,11 +122,18 @@ namespace CESMII.Marketplace.Service
                         options.ConsentCollection = new SessionConsentCollectionOptions() { TermsOfService = "required" };
                     }
                 }
+
                 //
                 //options.LineItems[0].AdjustableQuantity
+                if (user != null)
+                {
+                    //set customer info this way
+                    options.CustomerEmail = user.Email;
+                }
                 if (user == null && cart.GuestUser != null)
                 {
                     //set customer info this way
+                    options.CustomerEmail = cart.GuestUser.Email;
                 }
             }
 
@@ -206,7 +233,8 @@ namespace CESMII.Marketplace.Service
                 cart.Status = Common.Enums.CartStatusEnum.Completed;
                 await Update(cart, cart.CreatedById);
 
-                await SendEmails(controller, cart);
+                //send notification emails, run on complete jobs if needed
+                await ExecuteOnCompleteActions(controller, cart);
 
                 if (string.IsNullOrEmpty(cart.OraganizationId))
                     return true;
@@ -223,10 +251,13 @@ namespace CESMII.Marketplace.Service
             return false;
         }
 
-        private async Task SendEmails(Controller controller, CartModel cart)
+        #region onCheckoutComplete Methods 
+        private async Task ExecuteOnCompleteActions(Controller controller, CartModel cart)
         {
             foreach (var cartItem in cart.Items)
             {
+                await OnCheckoutCompleteJob(cartItem, cartItem.MarketplaceItem, null, cart.GuestUser); //need to get user who created cart if authenticated
+                //if fail, log but keep going - handled below
                 await SendMail(controller, cartItem.MarketplaceItem);
             }
         }
@@ -272,6 +303,38 @@ namespace CESMII.Marketplace.Service
             }
         }
 
+        /// <summary>
+        /// For each marketplace item in cart, do a custom post checkout method
+        /// to perform custom actions
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        private async Task OnCheckoutCompleteJob(CartItemModel item, MarketplaceItemCheckoutModel marketplaceItem, UserModel user, GuestUserModel userGuest)
+        {
+            if (string.IsNullOrEmpty(marketplaceItem.ECommerce.OnCheckoutCompleteJobId)) return;
+
+            //check if job requires user to be authorized
+            var job = _dalJobDefinition.GetById(marketplaceItem.ECommerce.OnCheckoutCompleteJobId);
+            if (job == null)
+            {
+                _logger.LogError($"StripeService|onCheckoutCompleteJob|Job {marketplaceItem.ECommerce.OnCheckoutCompleteJobId} not found. (null)");
+                return;
+            }
+            if (job.RequiresAuthentication && user == null)
+            {
+                _logger.LogError($"StripeService|onCheckoutCompleteJob|Job requires an authenticated user");
+                return;
+            }
+
+            //create jobpayload model
+            var payload = new { CartItem = item, GuestUser = userGuest };
+            var jobData = new JobPayloadModel() { JobDefinitionId = job.ID, MarketplaceItemId = marketplaceItem.ID, 
+                Payload = Newtonsoft.Json.JsonConvert.SerializeObject(payload) };
+            //execute job
+            await _jobFactory.ExecuteJob(jobData, user);
+        }
+        #endregion
+
         private long CalculateCredits(long credits, CartModel cart)
         {
             if (!cart.UseCredits) return 0;
@@ -280,6 +343,7 @@ namespace CESMII.Marketplace.Service
             return credits >= totalCost ? totalCost : Convert.ToInt64(credits + "00");
         }
 
+        #region Stripe API Calls
         public async Task<CheckoutStatusModel> GetCheckoutStatus(string sessionId)
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
@@ -504,7 +568,9 @@ namespace CESMII.Marketplace.Service
         {
             throw new NotImplementedException();
         }
+        #endregion
 
+        #region Cart Svc Methods
         public CartModel? GetByUserId(string userId)
         {
             var usid = MongoDB.Bson.ObjectId.Parse(userId);
@@ -535,7 +601,9 @@ namespace CESMII.Marketplace.Service
         {
             await _dal.Delete(id, userId);
         }
+        #endregion
 
+        #region Stripe API helper methods
         private async Task<IEnumerable<Stripe.Price>> GetPricesByProductId(string paymentProductId)
         {
             StripeConfiguration.ApiKey = _config.SecretKey;
@@ -634,5 +702,6 @@ namespace CESMII.Marketplace.Service
 
             return await new Stripe.Checkout.SessionService().ListLineItemsAsync(sessionId);
         }
+        #endregion
     }
 }
