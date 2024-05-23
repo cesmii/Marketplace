@@ -1,0 +1,177 @@
+import React, { useState } from 'react'
+import { Form } from 'react-bootstrap';
+
+//import { AppSettings } from '../../../utils/appsettings';
+import { generateLogMessageString } from '../../../utils/UtilityService';
+
+const CLASS_NAME = "AdminPriceRow";
+
+function AdminPriceRow(props) { //props are item, showActions
+
+    //-------------------------------------------------------------------
+    // Region: Initialization
+    //-------------------------------------------------------------------
+    const _billingPeriods = [{ id: 'OneTime', caption: 'One Time' }, { id: 'Yearly', caption: 'Yearly' }, { id: 'Monthly', caption: 'Monthly' }];
+    const [_isValid, setIsValid] = useState({
+        amount: true,
+        caption: true,
+        billingPeriod: true
+    });
+
+    //-------------------------------------------------------------------
+    // Region: Event Handling of child component events
+    //-------------------------------------------------------------------
+    //on change handler to update state
+    const onChange = (e) => {
+        //console.log(generateLogMessageString(`onChange||e:${e.target}`, CLASS_NAME));
+
+        //note you must update the state value for the input to be read only. It is not enough to simply have the onChange handler.
+        switch (e.target.id) {
+            case "amount":
+            case "caption":
+            case "description":
+            case "priceId":
+                props.item[e.target.id] = e.target.value;
+                break;
+            case "billingPeriod":
+                props.item[e.target.id] = e.target.value;
+                /*TBD - cut over to this.
+                if (e.target.value.toString() === "-1") props.item[e.target.id] = null;
+                else {
+                    props.item[e.target.id] = { id: e.target.value, name: e.target.options[e.target.selectedIndex].text };
+                }
+                */
+                break;
+            default:
+                return;
+        }
+        //update the state
+        if (props.onChangeItem) props.onChangeItem(JSON.parse(JSON.stringify(props.item)));
+    }
+
+
+    //called when an item is selected in the panel
+    const onDelete = () => {
+        console.log(generateLogMessageString(`onDeletePrice||${props.item.caption}`, CLASS_NAME));
+
+        //update state for other components to see
+        if (props.onDeletePrice != null) {
+            props.onDeletePrice(props.item.caption);
+        }
+    }
+
+    //-------------------------------------------------------------------
+    // Region: Event Handling of child component events
+    //-------------------------------------------------------------------
+    const validateForm_amount = (e) => {
+        const isValid = e.target.value.toString() !== "";
+        setIsValid({ ..._isValid, amount: isValid });
+    };
+
+    const validateForm_caption = (e) => {
+        const isValid = e.target.value.toString() !== "";
+        setIsValid({ ..._isValid, caption: isValid });
+    };
+
+    const validateForm_billingPeriod = (e) => {
+        var isValid = e.target.value.toString() !== "-1";
+        setIsValid({ ..._isValid, status: isValid });
+    };
+
+
+    //-------------------------------------------------------------------
+    // Region: Render helpers
+    //-------------------------------------------------------------------
+    const renderBillingPeriod = () => {
+
+        //show drop down list for edit, copy mode
+        const options = _billingPeriods.map((item) => {
+            return (<option key={item.id} value={item.id} >{item.caption}</option>)
+        });
+
+        return (
+            <Form.Group>
+                <Form.Control id="billingPeriod" as="select" value={props.item.billingPeriod == null ? "OneTime" : props.item.billingPeriod}
+                    className={(!_isValid.billingPeriod ? 'invalid-field minimal py-1' : 'minimal py-1')}
+                    onBlur={validateForm_billingPeriod}
+                    onChange={onChange} >
+                    {options}
+                </Form.Control>
+            </Form.Group>
+        )
+    };
+
+    //build the row
+    //-------------------------------------------------------------------
+    // Region: Render final output
+    //-------------------------------------------------------------------
+    let cssClass = props.cssClass + (props.isHeader ? " bottom header" : " center border-top");
+    if (!_isValid.amount || !_isValid.caption || !_isValid.billingPeriod) {
+        cssClass += ' alert alert-danger';
+    }
+
+    if (props.isHeader) {
+        return (
+            <div className={`row p-0 m-0 align-items-center ${cssClass}`}>
+                <div className="col-4 col-sm-2 font-weight-bold pl-1 pr-0" >
+                    Billing Period
+                </div>
+                <div className="col-4 col-sm-4 font-weight-bold pl-1 pr-0" >
+                    Caption
+                </div>
+                <div className="col-3 col-sm-2 font-weight-bold pl-1 pr-1 text-right" >
+                    Amount
+                </div>
+                <div className="col-4 col-sm-2 font-weight-bold pl-1 pr-0 text-center" >
+                    Stripe Price Id
+                </div>
+                <div className="col-4 col-sm-2 text-right font-weight-bold pl-1 pr-1" >
+                    Delete
+                </div>
+            </div>
+        );
+    }
+
+    //item row
+    if (props.item === null || props.item === {}) return null;
+
+    return (
+        <div className={`row p-0 m-0 align-items-center ${cssClass}`}>
+            <div className="col-4 col-sm-2 pl-1 pr-0 my-0" >
+                {renderBillingPeriod()}
+            </div>
+            <div className="col-4 col-sm-4 pl-1 pr-0 my-0" >
+                <Form.Group>
+                    <Form.Control id="caption" className={(!_isValid.caption ? 'invalid-field minimal py-1' : 'minimal py-1')} type="" placeholder={`Enter caption`}
+                        value={props.item.caption} onBlur={validateForm_caption} onChange={onChange} />
+                </Form.Group>
+            </div>   
+            <div className="col-3 col-sm-2 pl-1 pr-0 my-0" >
+                <Form.Group>
+                    <Form.Control id="amount" className={`minimal py-1 text-right ${!_isValid.amount ? 'invalid-field' : ''}`} type="" placeholder={`Enter amount`}
+                        value={props.item.amount} onBlur={validateForm_amount} onChange={onChange} />
+                </Form.Group>
+            </div>
+            <div className="col-4 col-sm-3" >
+                {props.item.priceId != null &&
+                    <Form.Group>
+                        <Form.Control id="priceId" className={`minimal py-1 text-right`} type="" readOnly={true}
+                            value={props.item.priceId} />
+                    </Form.Group>
+                }
+            </div>
+            <div className="col-4 col-sm-1 text-right pt-1 pl-1 pr-1 my-0" >
+                <button className="btn btn-icon-outline circle ml-auto" title="Delete Item" onClick={onDelete} ><i className="material-icons">close</i></button>
+            </div>
+            <div className="col-11 pl-1 pr-0 mt-1" >
+                <Form.Group>
+                    <Form.Control id="description" className={'minimal py-1'} type="" placeholder={`Enter description`}
+                        value={props.item.description} onChange={onChange} />
+                </Form.Group>
+            </div>
+
+        </div>
+    );
+}
+
+export default AdminPriceRow;

@@ -98,9 +98,9 @@ function Routes() {
             <AdminRoute path="/account" component={AccountProfile} />
 
             {/* eCommerce Routes */}
-            <PublicRoute exact path="/checkout/:type" component={CheckoutComplete} />
+            <PublicRoute exact path="/checkout/complete/:checkoutSessionId" component={CheckoutComplete} />
             <PublicRoute exact path="/cart" component={Cart} />
-            <PublicRoute exact path="/checkoutold" component={Checkout} />
+            <PublicRoute exact path="/checkout" component={Checkout} />
 
             <PublicRoute path="/notpermitted" component={NotAuthorized} />
             <PublicRoute path="/notauthorized" component={NotAuthorized} />

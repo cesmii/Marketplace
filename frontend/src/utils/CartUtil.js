@@ -6,7 +6,7 @@
 //-------------------------------------------------------------------
 // add to cart
 //-------------------------------------------------------------------
-export function updateCart(cart, item, quantity, overwrite = false) {
+export function updateCart(cart, item, quantity, selectedPrice, overwrite = false) {
 
     if (cart == null) cart = {};
     if (cart.items == null) cart.items = [];
@@ -14,10 +14,11 @@ export function updateCart(cart, item, quantity, overwrite = false) {
     //loop through cart and see if item is there. If not, add, if there, add new quantity to existing.
     let cartItem = cart.items.find(x => { return x.marketplaceItem?.id === item?.id; });
     if (cartItem == null) {
-        cartItem = { marketplaceItem: item, quantity: quantity };
+        cartItem = { marketplaceItem: item, quantity: quantity, selectedPrice: selectedPrice };
         cart.items.push(cartItem);
     }
     else {
+        cartItem.selectedPrice = selectedPrice;
         cartItem.quantity = overwrite ? quantity : cartItem.quantity + quantity;
     }
     return cart;
@@ -60,6 +61,11 @@ export function removeCartItem(cart, marketplaceItemId) {
     let x = cart.items.findIndex(x => { return x.marketplaceItem?.id === marketplaceItemId; });
     if (x < 0) return;
     cart.items.splice(x, 1);
+
+    //if cart is empty, reset useCredits flag
+    if (cart.items.length === 0) {
+        cart.useCredits = false;
+    }
     return cart;
 }
 
@@ -75,7 +81,7 @@ export function validateCart(cart) {
     let result = {quantity: true, allowPurchase: true};
     let x = cart.items.forEach(item => {
         //check item is allowed to be purchased
-        if (!item.marketplaceItem.allowPurchase)
+        if (!item.marketplaceItem.eCommerce.allowPurchase)
         {
             result = { ...result, allowPurchase: false };
         }

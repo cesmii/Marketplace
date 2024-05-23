@@ -5,6 +5,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 using CESMII.Marketplace.Common.Enums;
+using CESMII.Marketplace.Common.Models;
 
 namespace CESMII.Marketplace.Data.Entities
 {
@@ -21,6 +22,15 @@ namespace CESMII.Marketplace.Data.Entities
         public DateTime? Completed { get; set; }
 
         public List<CartItem> Items { get; set; }
+
+        public string SessionId { get; set; }
+
+        /// <summary>
+        /// This is a simplified form of the user which contains basic 
+        /// info to use within the checkout process. 
+        /// If user is a guest user, user.ID and user.Organization.id will be null
+        /// </summary>
+        public UserCheckoutModel CheckoutUser { get; set; }
 
     }
 

@@ -56,7 +56,8 @@
     public enum JobActionTypeEnum
     {
         Standard = 0,
-        Link = 1
+        Link = 1,
+        ECommerceOnComplete = 2
     }
 
     public enum CartStatusEnum

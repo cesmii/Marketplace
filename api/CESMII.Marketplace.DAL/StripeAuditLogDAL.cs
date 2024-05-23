@@ -1,6 +1,7 @@
 ﻿using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.Data.Repositories;
+using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -105,6 +106,15 @@ namespace CESMII.Marketplace.DAL
             entity.AdditionalInfo = model.AdditionalInfo;
             entity.Created = model.Created;
             entity.Message = model.Message;
+
+            // List of Line Items
+            // Each Line item has Product, Price, Quatity, Product Id, Price Id
+            //
+            // Discount details has actual price, discount price, final price
+            // Coupon details, coupon id, price
+            // 
+            entity.Data = model.SessionCreateOptions == null ? null : model.SessionCreateOptions.ToJson();
+            entity.Session = model.Session == null ? null : model.Session.ToJson();
         }
     }
 }

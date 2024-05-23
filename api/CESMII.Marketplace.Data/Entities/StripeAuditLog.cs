@@ -11,6 +11,10 @@ namespace CESMII.Marketplace.Data.Entities
 
         public string AdditionalInfo { get; set; }
 
+        public string Data { get; set; }
+        public string Session { get; set; }
+
+
         public BsonObjectId CreatedById { get; set; }
 
         public DateTime Created { get; set; }

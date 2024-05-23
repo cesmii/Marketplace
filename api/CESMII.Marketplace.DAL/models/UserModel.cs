@@ -84,4 +84,5 @@
 
         public OrganizationModel Organization { get; set; }
     }
+
 }

@@ -110,9 +110,8 @@
         public string _ccEmail2;
 
         #region eCommerce Fields
-        public bool AllowPurchase { get; set; }
-        public string PaymentProductId { get; set; }
-        public long Price { get; set; }
+        public ECommerce ECommerce { get; set; } = new ECommerce();
+        public List<Email> Emails { get; set; } = new List<Email>();
         #endregion
 
     }
@@ -173,4 +172,14 @@
     }
 
 
+    /// <summary>
+    /// This contains the structure to use for prices to a marketplace item. 
+    /// </summary>
+    [BsonIgnoreExtraElements]
+    public class Email
+    {
+        public string RecipientName { get; set; }
+        public string EmailAddress { get; set; }
+        public string PublishType { get; set; }
+    }
 }

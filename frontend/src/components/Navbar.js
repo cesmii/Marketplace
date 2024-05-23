@@ -76,7 +76,7 @@ function Navbar() {
                             {/*        href="/about">About</a>*/}
                             <a className={`nav-link py-1 px-2 ${history.location.pathname.indexOf("/contact-us/") > -1 ? "active" : ""}`}
                                 href="/contact-us/contribute">Contribute</a>
-                            {/*<CartIcon /> */}
+                            <CartIcon />
                             <LoginButton />
                             {renderAdminMenu()}
                         </div>

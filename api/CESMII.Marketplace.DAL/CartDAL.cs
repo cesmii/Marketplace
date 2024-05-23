@@ -9,6 +9,7 @@ using CESMII.Marketplace.Common;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.Data.Repositories;
+using CESMII.Marketplace.Common.Models;
 
 namespace CESMII.Marketplace.DAL
 {
@@ -41,11 +42,11 @@ namespace CESMII.Marketplace.DAL
         {
             var entity = new Cart
             {
-                ID = null
-                , Created = DateTime.UtcNow
-                , Updated = DateTime.UtcNow
-                , CreatedById = MongoDB.Bson.ObjectId.Parse(userId)
-        };
+                ID = null,
+                Created = DateTime.UtcNow,
+                Updated = DateTime.UtcNow,
+                CreatedById = string.IsNullOrEmpty(userId) ? null : MongoDB.Bson.ObjectId.Parse(userId)
+            };
 
             this.MapToEntity(ref entity, model);
             //do this after mapping to enforce isactive is true on add
@@ -63,7 +64,7 @@ namespace CESMII.Marketplace.DAL
             var entity = _repo.FindByCondition(x => x.ID == model.ID).FirstOrDefault();
             this.MapToEntity(ref entity, model);
             entity.Updated = DateTime.UtcNow;
-            entity.UpdatedById = MongoDB.Bson.ObjectId.Parse(userId);
+            entity.UpdatedById = string.IsNullOrEmpty(userId) ? null : MongoDB.Bson.ObjectId.Parse(userId);
 
             await _repo.UpdateAsync(entity);
             return 1;
@@ -105,7 +106,7 @@ namespace CESMII.Marketplace.DAL
             var data = _repo.FindByCondition(
                 x => x.IsActive,  //is active is a soft delete indicator. IsActive == false means deleted so we filter out those.
                 skip, take,
-                x => x.Name);  
+                x => x.Name);
             var count = returnCount ? _repo.Count(x => x.IsActive) : 0;
 
             //map the data to the final result
@@ -166,7 +167,8 @@ namespace CESMII.Marketplace.DAL
             foreach (var item in entities)
             {
                 //get dependent marketplace items for use in map to model
-                GetDependentData(item.Items.Select(x => x.MarketplaceItemId).ToList()).Wait();
+                GetDependentData(item.Items == null ? new List<MongoDB.Bson.BsonObjectId>() :
+                    item.Items.Select(x => x.MarketplaceItemId).ToList()).Wait();
                 result.Add(MapToModel(item, verbose));
             }
             return result;
@@ -184,11 +186,13 @@ namespace CESMII.Marketplace.DAL
                     Name = entity.Name,
                     Created = entity.Created,
                     Updated = entity.Updated,
-                    CreatedById = entity.CreatedById.ToString(),
-                    UpdatedById = entity.UpdatedById.ToString(),
-                    Status = (Common.Enums.CartStatusEnum)entity.Status,
+                    CreatedById = entity.CreatedById?.ToString(),
+                    UpdatedById = entity.UpdatedById?.ToString(),
+                    CheckoutUser = entity.CheckoutUser,
+                    Status = entity.Status,
                     Items = MapToModelCartItems(entity.Items),
-                    IsActive = entity.IsActive
+                    IsActive = entity.IsActive,
+                    SessionId = entity.SessionId
                 };
 
                 return result;
@@ -214,18 +218,20 @@ namespace CESMII.Marketplace.DAL
                     {
                         ID = entity.MarketplaceItemId.ToString(),
                         DisplayName = mktplItem?.DisplayName,
-                        Name = mktplItem?.Name, 
-                        PaymentProductId = mktplItem?.PaymentProductId
-                    }, 
-                    Credits = entity.Credits,
-                    Price = entity.Price,
-                    Quantity = entity.Quantity
+                        Name = mktplItem?.Name,
+                        Abstract = mktplItem?.Abstract,
+                        //TODO: check if entity.StripeId set properly to PaymentProductId
+                        ECommerce = mktplItem.ECommerce,
+                        Emails = entity.Emails,
+                    },
+                    Quantity = entity.Quantity,
+                    SelectedPrice = entity.SelectedPrice
                 });
             }
             return result
                 .OrderBy(x => x.MarketplaceItem.DisplayName)
                 .ThenBy(x => x.MarketplaceItem.Name)
-                .ThenByDescending(x => x.Quantity * (x.Price + x.Credits))
+                //.ThenByDescending(x => x.Quantity * (x.Price + x.Credits))
                 .ToList();
         }
 
@@ -234,23 +240,26 @@ namespace CESMII.Marketplace.DAL
             entity.Name = model.Name;
             entity.Completed = model.Completed;
             entity.Status = model.Status;
-            entity.Items = MapToEntityCartItem(model.Items);
+            entity.SessionId = model.SessionId;
+            entity.Items = MapToEntityCartItems(model.Items);
+            entity.CheckoutUser = model.CheckoutUser;
         }
 
-        protected List<CartItem> MapToEntityCartItem(List<CartItemModel> items)
+        protected List<CartItem> MapToEntityCartItems(List<CartItemModel> items)
         {
             if (items == null) return null;
 
             var result = new List<CartItem>();
             foreach (var model in items)
             {
-                result.Add(new CartItem() { 
+                result.Add(new CartItem()
+                {
                     MarketplaceItemId = MongoDB.Bson.ObjectId.Parse(model.MarketplaceItem.ID),
-                    Credits = model.Credits,
                     Quantity = model.Quantity,
-                    Price = model.Price,
-                    StripeId = model.MarketplaceItem.PaymentProductId
-                } );
+                    SelectedPrice = model.SelectedPrice,
+                    StripeId = model.MarketplaceItem.ECommerce.PaymentProductId,
+                    Emails = model.MarketplaceItem.Emails
+                });
             }
             return result;
         }
@@ -265,7 +274,8 @@ namespace CESMII.Marketplace.DAL
         {
             var filterMarketplaceItems = MongoDB.Driver.Builders<MarketplaceItem>.Filter.In(x => x.ID, marketplaceIds.Select(y => y.ToString()));
             var fieldList = new List<string>()
-                { nameof(MarketplaceItemSimple.ID), nameof(MarketplaceItemSimple.DisplayName), nameof(MarketplaceItemSimple.Name)};
+                { nameof(MarketplaceItemSimple.ID), nameof(MarketplaceItemSimple.DisplayName), nameof(MarketplaceItemSimple.Name)
+                 , nameof(MarketplaceItem.Abstract), nameof(MarketplaceItem.ECommerce)};
             _marketplaceItemAll = await _repoMarketplaceItem.AggregateMatchAsync(filterMarketplaceItems, fieldList);
         }
 

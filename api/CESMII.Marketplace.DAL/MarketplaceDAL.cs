@@ -22,15 +22,15 @@
         protected List<MarketplaceItemAnalytics> _marketplaceItemAnalyticsAll;
         protected IMongoRepository<ImageItemSimple> _repoImages;  //get image info except the actual source data. 
         protected List<ImageItemSimple> _imagesAll;
-        protected IMongoRepository<JobDefinition> _repoJobDefinition; 
+        protected IMongoRepository<JobDefinition> _repoJobDefinition;
         protected List<JobDefinition> _jobDefinitionAll;
         protected readonly IExternalDAL<MarketplaceItemModel> _cloudLibDAL;
 
         //default type - use if none assigned yet.
         private readonly MongoDB.Bson.BsonObjectId _smItemTypeIdDefault;
 
-        public MarketplaceDAL(IMongoRepository<MarketplaceItem> repo, IMongoRepository<LookupItem> repoLookup, 
-            IMongoRepository<Publisher> repoPublisher, 
+        public MarketplaceDAL(IMongoRepository<MarketplaceItem> repo, IMongoRepository<LookupItem> repoLookup,
+            IMongoRepository<Publisher> repoPublisher,
             IMongoRepository<MarketplaceItemAnalytics> repoAnalytics,
             IMongoRepository<ImageItemSimple> repoImages,
             IMongoRepository<JobDefinition> repoJobDefinition,
@@ -202,7 +202,7 @@
             var query = _repo.FindByCondition(
                 predicate,  //is active is a soft delete indicator. IsActive == false means deleted so we filter out those.
                 skip, take,
-                new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true } ,
+                new OrderByExpression<MarketplaceItem>() { Expression = x => x.IsFeatured, IsDescending = true },
                 new OrderByExpression<MarketplaceItem>() { Expression = x => x.DisplayName });
             var count = returnCount ? _repo.Count(predicate) : 0;
 
@@ -251,7 +251,7 @@
                     DisplayName = entity.DisplayName,
                     Abstract = entity.Abstract,
                     Description = entity.Description,
-                    Type = MapToModelLookupItem(entity.ItemTypeId ?? _smItemTypeIdDefault, 
+                    Type = MapToModelLookupItem(entity.ItemTypeId ?? _smItemTypeIdDefault,
                         _lookupItemsAll.Where(x => x.LookupType.EnumValue.Equals(LookupTypeEnum.SmItemType)).ToList()),
                     AuthorId = entity.AuthorId,
                     Created = entity.Created,
@@ -273,9 +273,8 @@
                     ImageBanner = entity.ImageBannerId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageBannerId.ToString()), _imagesAll),
                     ImageLandscape = entity.ImageLandscapeId == null ? null : MapToModelImageSimple(x => x.ID.Equals(entity.ImageLandscapeId.ToString()), _imagesAll),
                     //eCommerce fields
-                    AllowPurchase = entity.AllowPurchase,
-                    PaymentProductId = entity.PaymentProductId,
-                    Price = entity.Price
+                    ECommerce = entity.ECommerce,
+                    Emails = entity.Emails
                 };
                 //get additional data under certain scenarios
                 if (verbose)
@@ -287,7 +286,7 @@
 
                     //get related profiles from CloudLib
                     var relatedProfiles = MapToModelRelatedItemsExternal(entity.RelatedItemsExternal);
-                    
+
                     //map related items into specific buckets - required, recommended
                     result.RelatedItemsGrouped = GroupAndMergeRelatedItems(relatedItems, relatedProfiles);
 
@@ -309,11 +308,12 @@
 
             return allItems
                 .Where(x => x.MarketplaceItemId.ToString().Equals(marketplaceItemId) && x.IsActive)
-                .Select(x => new JobDefinitionSimpleModel { 
-                    ID = x.ID, 
-                    Name = x.Name, 
-                    DisplayName = x.DisplayName, 
-                    IconName = x.IconName, 
+                .Select(x => new JobDefinitionSimpleModel
+                {
+                    ID = x.ID,
+                    Name = x.Name,
+                    DisplayName = x.DisplayName,
+                    IconName = x.IconName,
                     ClassName = x.ClassName,
                     ActionType = (JobActionTypeEnum)x.ActionType,
                     RequiresAuthentication = x.RequiresAuthentication
@@ -395,7 +395,7 @@
 
             //get list of profile items associated with this list of ids, call CloudLib to get the supporting info for these
             var matches = _cloudLibDAL.GetManyById(items.Select(x => x.ExternalSource?.ID).ToList()).Result.Data;
-            return !matches.Any() ? new List<MarketplaceItemRelatedModel>() : 
+            return !matches.Any() ? new List<MarketplaceItemRelatedModel>() :
                 matches.Select(x => new MarketplaceItemRelatedModel()
                 {
                     //ID = x.ID,
@@ -526,7 +526,7 @@
             _publishersAll = await _repoPublisher.AggregateMatchAsync(filterPubs);
 
             var filterImages = MongoDB.Driver.Builders<ImageItemSimple>.Filter.In(x => x.MarketplaceItemId, marketplaceIds);
-            var fieldList = new List<string>() 
+            var fieldList = new List<string>()
                 { nameof(ImageItemSimple.MarketplaceItemId), nameof(ImageItemSimple.FileName), nameof(ImageItemSimple.Type)};
             _imagesAll = await _repoImages.AggregateMatchAsync(filterImages, fieldList);
 

@@ -147,6 +147,11 @@ export function formatItemPublishDate(item) {
     return formatDate(item.publishDate);
 }
 
+export function formatCurrency(val) {
+    if (val == null || val === '') return null;
+    var usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+    return usd.format(val);
+}
 
 // From ProfileDesigner\frontend\src\views\shared\ProfileEntity.js:
 //Dates will come in two formats:

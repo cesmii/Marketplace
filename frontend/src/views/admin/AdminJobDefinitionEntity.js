@@ -264,7 +264,7 @@ function AdminJobDefinitionEntity() {
 
         setIsValid(JSON.parse(JSON.stringify(_isValid)));
         return (_isValid.name && _isValid.nameFormat && _isValid.displayName && _isValid.typeName && _isValid.typeNameFormat &&
-            _isValid.dataFormat && _isValid.marketplaceItem && _isValid.actionType );
+            _isValid.dataFormat && _isValid.marketplaceItem && _isValid.actionType);
     }
 
     //-------------------------------------------------------------------
@@ -432,6 +432,9 @@ function AdminJobDefinitionEntity() {
                 if (_item.actionType === AppSettings.JobActionType.Link && e.target.value.toString() !== "-1") {
                     actionLink = generateActionLink(e.target.options[e.target.selectedIndex].text, _item.name);
                 }
+                else {
+                    actionLink = null;
+                }
                 break;
             default:
                 return;
@@ -584,6 +587,7 @@ function AdminJobDefinitionEntity() {
         const ddlItems = [];
         ddlItems.push({ key: AppSettings.JobActionType.Standard, caption: "Standard" });
         ddlItems.push({ key: AppSettings.JobActionType.Link, caption: "Link" });
+        ddlItems.push({ key: AppSettings.JobActionType.ECommerceOnComplete, caption: "E-Commerce (on purchase complete)" });
         const options = ddlItems.map((item) => {
             return (<option key={item.key} value={item.key} >{item.caption}</option>)
         });
@@ -690,7 +694,11 @@ function AdminJobDefinitionEntity() {
                         {renderActionType()}
                     </div>
                     <div className="col-md-12 pb-2">
-                        <span className="small text-muted" >When standard is selected, the job will be launched and back end code will execute directly. Link allows for the site to redirect to a custom page and then perform data entry before the sumission of that page executes the job.)</span>
+                        <span className="small text-muted" >
+                            When standard is selected, the job will be launched and back end code will execute directly.
+                            Link allows for the site to redirect to a custom page and then perform data entry before the sumission of that page executes the job.)
+                            E-Commerce (on purchase complete) will cause this job to fire when the purchase transaction has completed for a marketplace item.
+                        </span>
                     </div>
                 </div>
                 {(_item.actionType === AppSettings.JobActionType.Link && _actionLink != null) &&

@@ -3,6 +3,7 @@
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Service.Models;
 using Stripe.FinancialConnections;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CESMII.Marketplace.Service
 {
@@ -10,11 +11,25 @@ namespace CESMII.Marketplace.Service
     public interface IECommerceService<TModel> where TModel : CartModel
     {
         /// <summary>
+        /// Stripe will publish events to Weebhook
+        /// </summary>
+        /// <param name="json"></param>
+        /// <param name="header"></param>
+        /// <returns></returns>
+        Task<bool> StripeWebhook(Controller controller, string json, string header);
+
+        /// <summary>
         /// Initiate the checkout flow with Stripe
         /// </summary>
         /// <param name="code"></param>
         /// <returns></returns>
-        Task<CheckoutInitModel> DoCheckout(TModel item, string userId);
+        Task<CheckoutInitModel> DoCheckout(TModel item);
+
+        /// <summary>
+        /// Get checkout status from Stripe
+        /// </summary>
+        /// <returns></returns>
+        Task<CheckoutStatusModel> GetCheckoutStatus(string sessionId);
 
         /// <summary>
         /// Get all products from the Stripe product catalog.
@@ -95,6 +110,14 @@ namespace CESMII.Marketplace.Service
         /// <param name="id"></param>
         /// <returns></returns>
         TModel GetById(string id);
+
+        /// <summary>
+        /// Get cart
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        CartModel? GetByUserId(string userId);
+
         /// <summary>
         /// Add cart
         /// </summary>

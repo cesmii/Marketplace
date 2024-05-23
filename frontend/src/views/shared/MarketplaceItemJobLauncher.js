@@ -81,7 +81,9 @@ export const MarketplaceItemJobLauncher = (props) => {
     if (props.jobDefinition == null) return null;
     if (props.jobDefinition.requiresAuthentication && !props.isAuthenticated) return null;
 
-    const className = props.jobDefinition.className == null || props.jobDefinition.className === '' ? 'd-flex btn btn-link' : props.jobDefinition.className;
+    let className = props.jobDefinition.className == null || props.jobDefinition.className === '' ? 'd-flex btn btn-link' : props.jobDefinition.className;
+    className += `${props.className == null ? '' : ' ' + props.className}`;
+
     const icon = renderMenuColorMaterialIcon(props.jobDefinition.iconName == null || props.jobDefinition.iconName === '' ? null : props.jobDefinition.iconName, color.cornflower, 'mr-1');
 
     if (props.jobDefinition.actionType === AppSettings.JobActionType.Standard) {
