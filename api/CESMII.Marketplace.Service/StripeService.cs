@@ -79,7 +79,7 @@ namespace CESMII.Marketplace.Service
                 //append check out session id
                 ReturnUrl = cart.ReturnUrl.TrimEnd(Convert.ToChar("/")) + "/{CHECKOUT_SESSION_ID}",
                 LineItems = new List<SessionLineItemOptions>(),
-                ExpiresAt = DateTime.UtcNow.AddMinutes(30) //TODO: make this configurable in appSettings
+                ExpiresAt = DateTime.Now.AddMinutes(30) //TODO: make this configurable in appSettings
             };
 
             // For anonymous users, save the cart details first into the database and use that after successful checkout.
@@ -195,7 +195,7 @@ namespace CESMII.Marketplace.Service
                 // Update/deduct organization credits to deduct amount used.
                 if (cart.CreditsApplied.HasValue)
                 {
-                    organization.Credits -= cart.CreditsApplied.Value;
+                    organization.Credits = Convert.ToInt64(organization.Credits + "00") - cart.CreditsApplied.Value;
                 }
                 await _organizationService.Update(organization, cart.CreatedById);
             }
@@ -411,14 +411,14 @@ namespace CESMII.Marketplace.Service
         /// <returns></returns>
         private async Task OnCheckoutCompleteJob(CartItemModel item, MarketplaceItemCheckoutModel marketplaceItem, UserCheckoutModel user)
         {
-            //check if job is assigned for this it
-            var job = _dalJobDefinition.Where(x => x.MarketplaceItemId.ToString().Equals(marketplaceItem.ID) &&
-                        x.ActionType == (int)JobActionTypeEnum.ECommerceOnComplete, null, 1).Data?.First();
-
-            if (job == null) return;
-
             try
             {
+                //check if job is assigned for this it
+                var job = _dalJobDefinition.Where(x => x.MarketplaceItemId.ToString().Equals(marketplaceItem.ID) &&
+                            x.ActionType == (int)JobActionTypeEnum.ECommerceOnComplete, null, 1).Data.FirstOrDefault();
+
+                if (job == null) return;
+
                 if (job.RequiresAuthentication && string.IsNullOrEmpty(user?.ID))
                 {
                     _logger.LogError($"StripeService|onCheckoutCompleteJob|Job requires an authenticated user");
