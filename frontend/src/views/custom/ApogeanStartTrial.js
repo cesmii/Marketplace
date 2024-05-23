@@ -242,7 +242,7 @@ function ApogeanStartTrial(props) {
     }
 
     const renderForm = () => {
-        const disabled = !(_jobStatus === AppSettings.JobLogStatus.NotStarted);
+        const disabled = !(_jobStatus === AppSettings.JobLogStatus.NotStarted || _jobStatus === AppSettings.JobLogStatus.Failed);
         return (
             <Form noValidate className="mx-3" >
                 <div className="row mb-2">
@@ -338,14 +338,14 @@ function ApogeanStartTrial(props) {
     }
 
     const renderMainContent = () => {
-        if (_jobStatus === AppSettings.JobLogStatus.Failed) return;
+        //if (_jobStatus === AppSettings.JobLogStatus.Failed) return;
 
         return (
             <>
                 <div className="marketplace-list-item border" >
                     <div className="card mb-0 border-0">
                         <div className="card-body">
-                            {(_jobStatus !== AppSettings.JobLogStatus.Completed && _jobStatus !== AppSettings.JobLogStatus.Failed) &&
+                            {(_jobStatus !== AppSettings.JobLogStatus.Completed) &&
                                 <>
                                     {renderForm()}
                                 </>

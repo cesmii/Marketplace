@@ -76,7 +76,7 @@ namespace CESMII.Marketplace.JobManager
             {
                 Messages = new List<JobLogMessage>() {
                 new JobLogMessage() {
-                    Message = $"Starting job '{jobDef.Name}' for '{item.DisplayName}'...",
+                    Message = $"Starting '{jobDef.DisplayName}' for '{item.DisplayName}'...",
                     Created = DateTime.UtcNow
                 }
             }
@@ -138,7 +138,7 @@ namespace CESMII.Marketplace.JobManager
                 try
                 {
                     //instantiate job class
-                    var job = InstantiateJob(jobDef.TypeName, logger, httpFactory, dalJobLog, dalUser, configuration, mailRelay);
+                    var job = InstantiateJob(jobDef.TypeName, _serviceScopeFactory, logger, httpFactory, dalJobLog, dalUser, configuration, mailRelay);
 
                     //initialize job
                     job.Initialize(jobDef, payload, logId, user);

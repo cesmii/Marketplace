@@ -81,6 +81,9 @@ namespace CESMII.Marketplace.Api
             services.AddScoped<IMongoRepository<JobLog>, MongoRepository<JobLog>>();
             services.AddScoped<IMongoRepository<JobDefinition>, MongoRepository<JobDefinition>>();
 
+            //one off tables
+            services.AddScoped<IMongoRepository<JobManager.Models.BlockedEmailDomain>, MongoRepository<JobManager.Models.BlockedEmailDomain>>();
+
             //DAL objects
             services.AddScoped<UserDAL>();  //this one has extra methods outside of the IDal interface
             services.AddScoped<IUserSignUpData, UserSignUpData>();
