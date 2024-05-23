@@ -192,7 +192,8 @@ namespace CESMII.Marketplace.DAL
                     Status = entity.Status,
                     Items = MapToModelCartItems(entity.Items),
                     IsActive = entity.IsActive,
-                    SessionId = entity.SessionId
+                    SessionId = entity.SessionId,
+                    CreditsApplied = entity.CreditsApplied
                 };
 
                 return result;
@@ -241,6 +242,7 @@ namespace CESMII.Marketplace.DAL
             entity.Completed = model.Completed;
             entity.Status = model.Status;
             entity.SessionId = model.SessionId;
+            entity.CreditsApplied = model.CreditsApplied;
             entity.Items = MapToEntityCartItems(model.Items);
             entity.CheckoutUser = model.CheckoutUser;
         }

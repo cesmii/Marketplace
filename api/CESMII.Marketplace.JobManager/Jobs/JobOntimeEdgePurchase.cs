@@ -5,10 +5,12 @@ using System.Threading.Tasks;
 using System.Net.Mail;
 using System.Net.Http;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
+using CESMII.Marketplace.Data.Repositories;
 using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.DAL.Models;
@@ -26,13 +28,14 @@ namespace CESMII.Marketplace.JobManager.Jobs
     public class JobOntimeEdgePurchase : JobBase
     {
         public JobOntimeEdgePurchase(
+            IServiceScopeFactory serviceScopeFactory,
             ILogger<IJob> logger,
-            IHttpApiFactory httpFactory, 
+            IHttpApiFactory httpFactory,
             IDal<JobLog, JobLogModel> dalJobLog,
             UserDAL dalUser,
             IConfiguration configuration,
-            MailRelayService mailRelayService) : 
-            base(logger, httpFactory, dalJobLog, dalUser, configuration, mailRelayService)
+            MailRelayService mailRelayService) :
+            base(serviceScopeFactory, logger, httpFactory, dalJobLog, dalUser, configuration, mailRelayService)
         {
             //wire up run async event
             base.JobRun += JobInitiateLicensing;
@@ -48,7 +51,6 @@ namespace CESMII.Marketplace.JobManager.Jobs
         {
             //3 sources of data - job config - static data, runtime payload data - user entered data and user data - user profile data
             //extract out job config params from payload and convert from JSON to an object we can use within this job
-            //if smip settings is null, still allow purchase to go through but inform user
             var jobConfig = JsonConvert.DeserializeObject<JobOnTimeEdgeConfig>(e.Config.Data);
             var payload = JsonConvert.DeserializeObject<ECommerceOnCompleteModel>(e.Payload);
 
@@ -78,6 +80,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 //call the Zapier catch hook API to intialize start purchase flow
                 var config = new HttpApiConfig()
                 {
+                    BaseAddress = "",
                     Url = jobConfig.ApogeanApi.Url,
                     Body = new StringContent(JsonConvert.SerializeObject(req)),
                     ContentType = "application/json",
@@ -150,7 +153,8 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 sbResult.AppendLine("The ApogeanApi config section is missing. Please contact the system administrator.");
                 _logger.LogError($"JobOntimeEdgePurchase|ValidateJobConfig|ApogeanApi section is missing.");
             }
-            if (string.IsNullOrEmpty(jobConfig.ApogeanApi.Url)) {
+            if (string.IsNullOrEmpty(jobConfig.ApogeanApi.Url))
+            {
                 sbResult.AppendLine("The OnTime Edge url is missing. Please contact the system administrator.");
                 _logger.LogError($"JobOntimeEdgePurchase|ValidateJobConfig|The jobConfig.Url is missing.");
             }
@@ -172,7 +176,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 sbResult.AppendLine("The purchaser information is missing. Please contact the system administrator.");
                 _logger.LogError($"JobOntimeEdgePurchase|ValidatePayload|payload is missing.");
             }
-            
+
             if (string.IsNullOrEmpty(payload.CheckoutUser?.FirstName))
             {
                 sbResult.AppendLine("First Name is required.");
@@ -231,7 +235,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             }
             */
             var title = isSuccess ? "Purchase Fulfillment Submitted Successfully" : "Purchase Fulfillment Failed";
-                        
+
             //generate email body
             System.Text.StringBuilder sbBody = new System.Text.StringBuilder();
             sbBody.AppendLine("<div class='row mb-2'>");

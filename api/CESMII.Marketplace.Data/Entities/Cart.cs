@@ -24,6 +24,7 @@ namespace CESMII.Marketplace.Data.Entities
         public List<CartItem> Items { get; set; }
 
         public string SessionId { get; set; }
+        public long? CreditsApplied { get; set; }
 
         /// <summary>
         /// This is a simplified form of the user which contains basic 
