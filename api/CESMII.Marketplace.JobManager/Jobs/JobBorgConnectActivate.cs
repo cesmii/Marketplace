@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Net.Http;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -25,13 +26,14 @@ namespace CESMII.Marketplace.JobManager.Jobs
     public class JobBorgConnectActivate : JobBase
     {
         public JobBorgConnectActivate(
+            IServiceScopeFactory serviceScopeFactory,
             ILogger<IJob> logger,
             IHttpApiFactory httpFactory, 
             IDal<JobLog, JobLogModel> dalJobLog,
             UserDAL dalUser,
             IConfiguration configuration,
             MailRelayService mailRelayService) : 
-            base(logger, httpFactory, dalJobLog, dalUser, configuration, mailRelayService)
+            base(serviceScopeFactory, logger, httpFactory, dalJobLog, dalUser, configuration, mailRelayService)
         {
             //wire up run async event
             base.JobRun += JobRunBorg;

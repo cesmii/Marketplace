@@ -38,7 +38,10 @@ namespace CESMII.Marketplace.Common
             HttpClient client = _httpClientFactory.CreateClient();
             try
             {
-                client.BaseAddress = new Uri(config.BaseAddress);
+                if (!string.IsNullOrEmpty(config.BaseAddress))
+                {
+                    client.BaseAddress = new Uri(config.BaseAddress);
+                }
 
                 // Add an bearer token if necessary
                 if (!string.IsNullOrEmpty(config.BearerToken))

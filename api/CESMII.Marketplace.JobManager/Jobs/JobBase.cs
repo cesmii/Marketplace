@@ -11,11 +11,13 @@ using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Common.SelfServiceSignUp.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CESMII.Marketplace.JobManager.Jobs
 {
     public abstract class JobBase : IJob, IDisposable
     {
+        protected readonly IServiceScopeFactory _serviceScopeFactory;
         protected readonly ILogger<IJob> _logger;
         protected bool _disposed = false;
         protected readonly IHttpApiFactory _httpFactory;
@@ -29,6 +31,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
         public event JobRunEventHandler JobRun; // event
 
         public JobBase(
+            IServiceScopeFactory serviceScopeFactory,
             ILogger<IJob> logger,
             IHttpApiFactory httpFactory,
             IDal<JobLog, JobLogModel> dalJobLog,
@@ -36,6 +39,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             IConfiguration configuration,
             MailRelayService mailRelayService)
         {
+            _serviceScopeFactory = serviceScopeFactory;
             _logger = logger;
             _httpFactory = httpFactory;
             _dalJobLog = dalJobLog;
