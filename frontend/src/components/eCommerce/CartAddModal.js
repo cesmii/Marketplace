@@ -11,6 +11,8 @@ import CartItem from './CartItem';
 import { updateCart } from '../../utils/CartUtil';
 import _icon from '../img/icon-cesmii-white.png'
 import '../styles/Modal.scss';
+import ConfirmationModal from '../../components/ConfirmationModal';
+import color from '../../components/Constants';
 
 const CLASS_NAME = "CartAddModal";
 
@@ -51,6 +53,33 @@ function CartAddModal(props) {
         console.log(generateLogMessageString('onCancel', CLASS_NAME));
         setShowModal(false);
         if (props.onCancel != null) props.onCancel();
+    };
+
+    //-------------------------------------------------------------------
+    // Region: Get data 
+    //-------------------------------------------------------------------
+
+    //-------------------------------------------------------------------
+    // Region: Render helpers
+    //-------------------------------------------------------------------
+    //render error message as a modal to force user to say ok.
+    const renderErrorMessage = () => {
+
+        if (!_error.show) return;
+
+        return (
+            <ConfirmationModal showModal={_error.show} caption={_error.caption} message={_error.message}
+                icon={{ name: "warning", color: color.trinidad }}
+                confirm={null}
+                cancel={{
+                    caption: "OK",
+                    callback: () => {
+                        //console.log(generateLogMessageString(`onErrorMessageOK`, CLASS_NAME));
+                        setError({ show: false, caption: null, message: null });
+                    },
+                    buttonVariant: 'danger'
+                }} />
+        );
     };
 
     async function AddCart(cart) {
@@ -113,6 +142,31 @@ function CartAddModal(props) {
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
     const onChange = (itm, qty, price) => {
+        if (loadingProps.cart !== null && loadingProps.cart.items !== null && loadingProps.cart.items.length !== 0) {
+            if (price.billingPeriod !== "OneTime") {
+                //loop through cart and see if item is there. If not, add, if there, add new quantity to existing.
+                let cartItem = loadingProps.cart.items.find(x => {
+                    return x.selectedPrice?.billingPeriod === "OneTime"
+                });
+
+                if (cartItem != null) {
+                    setError({ show: true, caption: 'Cart - Error', message: 'Cannot add this item to the cart. Already onetime purchase item added to the cart.'});
+                    return;
+                }
+            }
+            else {
+                //loop through cart and see if item is there. If not, add, if there, add new quantity to existing.
+                let cartItem = loadingProps.cart.items.find(x => {
+                    return x.selectedPrice?.billingPeriod === "Yearly" || x.selectedPrice?.billingPeriod === "Monthly"
+                });
+
+                if (cartItem != null) {
+                    setError({ show: true, caption: 'Cart - Error', message: 'Cannot add this item to the cart. Already subscription purchase item added to the cart.' });
+                    return;
+                }
+            }
+        }
+        
         console.log(generateLogMessageString('onChange', CLASS_NAME));
         setItem({ ..._item, marketplaceItem: itm, quantity: qty, selectedPrice: price });
     };
@@ -146,6 +200,7 @@ function CartAddModal(props) {
                     <Button variant="secondary" type="button" className="mx-3" onClick={onAdd} >Add to Cart</Button>
                 </Modal.Footer>
             </Modal>
+            {renderErrorMessage()}
         </>
     )
 }
