@@ -200,6 +200,23 @@ namespace CESMII.Marketplace.Service
                 }
                 await _organizationService.Update(organization, cart.CreatedById);
             }
+            /* TODO: Should we handle these other event complete scenarios
+                // Handle the event
+                else if (stripeEvent.Type == Events.CheckoutSessionAsyncPaymentSucceeded)
+                {
+                    //do same as checkout session completed?
+                }
+                else if (stripeEvent.Type == Events.CheckoutSessionExpired)
+                {
+                    //remove cart if it is present
+                }
+                // ... handle other event types
+                else
+                {
+                    //add log warning message that an unhandled stripe event was fired.
+                }
+             
+             */
 
             return false;
         }
