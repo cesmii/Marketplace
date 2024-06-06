@@ -16,14 +16,12 @@
     </p>
 </div>
 
-@await Html.PartialAsync(@"/Views/Template/_ECommerceCustomerInfo.cshtml", Model.CheckoutUser);
+@await Html.PartialAsync(@"/Views/Template/_ECommerceCustomerInfo.cshtml", Model.CheckoutUser)
 
 <div>
     <h2 class="mb-0" >Purchased Item</h2>
     <hr class="compact blue"/>
-    @{
-        @await Html.PartialAsync(@"/Views/Template/_ECommerceCartItem.cshtml", Model);
-    }
+    @await Html.PartialAsync(@"/Views/Template/_ECommerceCartItem.cshtml", Model)
 </div>
 
-@await Html.PartialAsync(@"/Views/Template/_AboutCESMII.cshtml");
+@await Html.PartialAsync(@"/Views/Template/_AboutCESMII.cshtml")
