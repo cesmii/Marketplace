@@ -24,7 +24,7 @@
     </p>
 </div>
 
-@await Html.PartialAsync(@"/Views/Template/_ECommerceCustomerInfo.cshtml", Model.Cart.CheckoutUser);
+@await Html.PartialAsync(@"/Views/Template/_ECommerceCustomerInfo.cshtml", _user);
 
 <div>
     <h2 class="mb-0" >Purchased Items</h2>
@@ -32,7 +32,7 @@
     @{
         foreach (var item in Model.Cart.Items)
         {
-            var purchaseItem = new PurchaseNotificationModel() { BaseUrl = Model.BaseUrl, CartItem = item, CheckoutUser = Model.Cart.CheckoutUser };
+            var purchaseItem = new PurchaseNotificationModel() { BaseUrl = Model.BaseUrl, CartItem = item, CheckoutUser = _user };
             @await Html.PartialAsync(@"/Views/Template/_ECommerceCartItem.cshtml", purchaseItem);
         }
     }
