@@ -151,7 +151,7 @@ function CartAddModal(props) {
                 });
 
                 if (cartItem != null) {
-                    setError({ show: true, caption: 'Cart - Error', message: 'Cannot add this item to the cart. Already onetime purchase item added to the cart.'});
+                    setError({ show: true, caption: 'Cart - Error', message: 'Cannot add this item to the cart. You cannot combine subscription purchases with flat fee purchases in the same transaction.' });
                     return;
                 }
             }
@@ -162,7 +162,7 @@ function CartAddModal(props) {
                 });
 
                 if (cartItem != null) {
-                    setError({ show: true, caption: 'Cart - Error', message: 'Cannot add this item to the cart. Already subscription purchase item added to the cart.' });
+                    setError({ show: true, caption: 'Cart - Error', message: 'Cannot add this item to the cart. You cannot combine subscription purchases with flat fee purchases in the same transaction.' });
                     return;
                 }
             }
