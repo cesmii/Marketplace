@@ -183,7 +183,7 @@ namespace CESMII.Marketplace.Service
                 await Update(cart, cart.CreatedById);
 
                 //send notification emails, run on complete jobs if needed
-                await ExecuteOnCompleteActions(controller, cart);
+                await ExecuteOnCompleteActions(controller, cart, session);
 
                 if (string.IsNullOrEmpty(cart.CheckoutUser.Organization?.ID))
                     return true;
@@ -262,6 +262,10 @@ namespace CESMII.Marketplace.Service
 
                 options.Mode = price.Type == "one_time" ? "payment" : "subscription";
 
+                if (options.Mode == "payment") {
+                    options.InvoiceCreation = new SessionInvoiceCreationOptions { Enabled = true };
+                }
+
                 options.LineItems.Add(new SessionLineItemOptions
                 {
                     Price = cartItem.SelectedPrice.PriceId,
@@ -328,10 +332,10 @@ namespace CESMII.Marketplace.Service
             };
         }
 
-        private async Task ExecuteOnCompleteActions(Controller controller, CartModel cart)
+        private async Task ExecuteOnCompleteActions(Controller controller, CartModel cart, Stripe.Checkout.Session session)
         {
             //TODO: new email template - send one purchase successful email to purchaser with a view like the whole checkout screen
-            await SendMailCheckoutCompleted(controller, cart);
+            await SendMailCheckoutCompleted(controller, cart, session);
 
             foreach (var cartItem in cart.Items)
             {
@@ -348,9 +352,25 @@ namespace CESMII.Marketplace.Service
         /// <param name="controller"></param>
         /// <param name="cart"></param>
         /// <returns></returns>
-        private async Task SendMailCheckoutCompleted(Controller controller, CartModel cart)
+        private async Task SendMailCheckoutCompleted(Controller controller, CartModel cart, Stripe.Checkout.Session session)
         {
             //TODO: Check if Stripe can send out a confirmation email instead of us?
+            try
+            {
+                if (string.IsNullOrEmpty(session.InvoiceId))
+                    return;
+
+                //For subscription, Stripe will automatically sends the invoice to the customer.
+                //For onetime payment we need to send explicitly
+                if (session.Mode != "payment")
+                    return;
+
+                var invoice = await new InvoiceService().SendInvoiceAsync(session.InvoiceId, new InvoiceSendOptions {  });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "StripeService|SendMailCheckoutCompleted|Error occured while sending invoice.");
+            }
         }
 
         /// <summary>
