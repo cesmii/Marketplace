@@ -32,7 +32,7 @@
         foreach (var item in Model.Cart.Items)
         {
             var purchaseItem = new PurchaseNotificationModel() { BaseUrl = Model.BaseUrl, CartItem = item, CheckoutUser = _user };
-            await Html.PartialAsync(@"/Views/Template/_ECommerceCartItem.cshtml", purchaseItem);
+            @await Html.PartialAsync(@"/Views/Template/_ECommerceCartItem.cshtml", purchaseItem)
         }
     }
 

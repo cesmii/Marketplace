@@ -294,9 +294,19 @@ namespace CESMII.Marketplace.Service
 
                 if (!string.IsNullOrEmpty(cartItem.MarketplaceItem.ECommerce.TermsOfService))
                 {
-                    if (options.CustomText == null) options.CustomText = new SessionCustomTextOptions();
-                    options.CustomText.TermsOfServiceAcceptance = new SessionCustomTextTermsOfServiceAcceptanceOptions()
-                    { Message = cartItem.MarketplaceItem.ECommerce.TermsOfService };
+                    if (string.IsNullOrEmpty(options.CustomText?.TermsOfServiceAcceptance?.Message))
+                    {
+                        if (options.CustomText == null) options.CustomText = new SessionCustomTextOptions();
+                        options.CustomText.TermsOfServiceAcceptance = new SessionCustomTextTermsOfServiceAcceptanceOptions()
+                        { Message = cartItem.MarketplaceItem.ECommerce.TermsOfService };
+                    }
+                    else
+                    {
+                        //Append the terms for each cart item that may have terms
+                        options.CustomText.TermsOfServiceAcceptance.Message =
+                            options.CustomText.TermsOfServiceAcceptance.Message.TrimEnd().TrimEnd(Convert.ToChar(".")) +
+                            ".  " + cartItem.MarketplaceItem.ECommerce.TermsOfService;
+                    }
 
                     if (options.ConsentCollection == null) options.ConsentCollection = new SessionConsentCollectionOptions();
                     options.ConsentCollection = new SessionConsentCollectionOptions() { TermsOfService = "required" };
