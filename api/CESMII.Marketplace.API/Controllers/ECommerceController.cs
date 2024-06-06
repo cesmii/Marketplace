@@ -340,5 +340,14 @@ namespace CESMII.Marketplace.Api.Controllers
                 return BadRequest();
             }
         }
+
+        [HttpGet, Route("enabled")]
+        [ProducesResponseType(200, Type = typeof(bool))]
+        [ProducesResponseType(400)]
+        public IActionResult IsEnabled()
+        {
+            return Ok(_configUtil.StripeSettings.EnableCheckout);
+        }
+
     }
 }

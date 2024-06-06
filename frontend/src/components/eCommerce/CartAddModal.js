@@ -87,7 +87,6 @@ function CartAddModal(props) {
         axiosInstance.post(url, cart)
             .then(resp => {
                 if (resp.data.isSuccess) {
-                    console.log(resp.data.data);
                     setLoadingProps({ cart: resp.data.data });
                     if (props.onAdd) props.onAdd();
                 }

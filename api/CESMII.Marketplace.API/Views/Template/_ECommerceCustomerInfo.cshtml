@@ -3,13 +3,13 @@
 @{
 }
 
-<div class="divider-bottom">
-    <h2 class="mb-0" >Customer Info</h2>
+<div class="">
+    <h2 class="mb-0" >Customer</h2>
     <hr class="compact blue"/>
 
 @if (!string.IsNullOrEmpty(@Model.FullName))
 {
-    <p><b>Customer Name:</b> @Model.FullName</p>
+    <p><b>Name:</b> @Model.FullName</p>
 }
 
     <p><b>Email:</b> @Model.Email</p>

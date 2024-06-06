@@ -278,9 +278,12 @@ namespace CESMII.Marketplace.Service
                     throw new ArgumentException($"Cannot get Stripe price info for {cartItem.MarketplaceItem.Name}.");
                 }
 
-                options.Mode = price.Type == "one_time" ? "payment" : "subscription";
+                //if any of the items have subscription type, then make mode subscription
+                options.Mode = price.Type == "one_time" && options.Mode != "subscription" ? "payment" : "subscription";
 
                 /* TODO: revisit this. Disable invoice creation within Stripe for now. We may want to re-enable this.
+                options.Mode = price.Type == "one_time" ? "payment" : "subscription";
+
                 if (options.Mode == "payment") {
                     options.InvoiceCreation = new SessionInvoiceCreationOptions { Enabled = true };
                 }
@@ -361,7 +364,7 @@ namespace CESMII.Marketplace.Service
 
         private async Task ExecuteOnCompleteActions(Controller controller, CartModel cart, Stripe.Checkout.Session session)
         {
-            //TODO: new email template - send one purchase successful email to purchaser with a view like the whole checkout screen
+            //send one purchase successful email to purchaser with a view like the whole checkout screen
             await SendEmailReceipt(controller, cart, session);
 
             foreach (var cartItem in cart.Items)

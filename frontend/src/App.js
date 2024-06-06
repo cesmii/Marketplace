@@ -14,6 +14,7 @@ import { AppSettings } from './utils/appsettings'
 import { generateLogMessageString } from './utils/UtilityService'
 import ErrorPage from './components/ErrorPage'
 import { OnLookupLoad } from './components/OnLookupLoad'
+import { OnECommerceLoad } from "./components/OnECommerceLoad"
 import { useRegisterMsalEventCallback } from "./components/OnLoginHandler";
 
 import './App.scss';
@@ -119,6 +120,7 @@ function App() {
     // useEffect - get various lookup data - onlookupLoad component houses the useEffect checks
     //-------------------------------------------------------------------
     OnLookupLoad();
+    OnECommerceLoad();
 
     //-------------------------------------------------------------------
     // Region: add an event callback handler to capture loginredirect message responses

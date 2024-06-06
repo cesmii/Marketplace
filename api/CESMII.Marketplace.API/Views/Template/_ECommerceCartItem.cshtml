@@ -9,7 +9,7 @@
     var _libraryUrl = $"{Model.BaseUrl.TrimEnd(Convert.ToChar("/"))}/library";
 }
 
-<div class="divider-bottom">
+<div class="divider-bottom blue">
     <h2 class="mb-0" ><a href="@_libraryUrl/@_marketplaceItem.Name" >@_marketplaceItem.DisplayName</a> </h2>
     <p><b>Product Info:</b> @HtmlUtil.RemoveHtmlTags(@_marketplaceItem.Abstract)</p>
     <table class="standard" >
