@@ -280,9 +280,11 @@ namespace CESMII.Marketplace.Service
 
                 options.Mode = price.Type == "one_time" ? "payment" : "subscription";
 
+                /* TODO: revisit this. Disable invoice creation within Stripe for now. We may want to re-enable this.
                 if (options.Mode == "payment") {
                     options.InvoiceCreation = new SessionInvoiceCreationOptions { Enabled = true };
                 }
+                */
 
                 options.LineItems.Add(new SessionLineItemOptions
                 {
