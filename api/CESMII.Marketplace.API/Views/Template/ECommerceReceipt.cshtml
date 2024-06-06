@@ -1,4 +1,5 @@
-﻿@using CESMII.Marketplace.Api.Shared.Models
+﻿@using System
+@using CESMII.Marketplace.Api.Shared.Models
 @using CESMII.Marketplace.DAL.Models
 @using CESMII.Common.SelfServiceSignUp.Utils
 @model PurchaseReceiptModel
@@ -14,19 +15,21 @@
 }
 
 <div class="divider-bottom">
-    <p>Dear @_fullName,</p>
+    @if (!string.IsNullorEmpty(_fullName))
+    {
+        <p>Dear @_fullName,</p>
+    }
     <p> Thank you for purchasing <b>@_numItems</b> from the <a href="@Model.BaseUrl">CESMII SM Marketplace</a>.
     The following details your purchase. Please retain for your records. 
     </p>
 </div>
 
 <div class="divider-bottom">
-    <h2>Customer Info:</h2>
-    <hr/>
+    <h2 class="mb-0" >Customer Info:</h2>
+    <hr class="compact blue"/>
     <p><b>Customer Name:</b> @_fullName</p>
     <p><b>Email:</b> @_user.Email</p>
     <p><b>Phone:</b> @_user.Phone</p>
-    <br />
 @if (!string.IsNullOrEmpty(@_user.Organization.Name))
 {
     <p><b>Organization:</b> @_user.Organization.Name</p>
@@ -34,8 +37,8 @@
 </div>
 
 <div>
-    <h2>Purchased Items</h2>
-    <hr/>
+    <h2 class="mb-0" >Purchased Items</h2>
+    <hr class="compact blue"/>
     @{
         foreach (var item in Model.Cart.Items)
         {
@@ -45,7 +48,7 @@
     }
 
     <div class="divider-bottom">
-        <table>
+        <table class="standard" >
             @if (Model.Cart.UseCredits && Model.Cart.CreditsApplied.HasValue)
             {
                 <tr class="divider-bottom">

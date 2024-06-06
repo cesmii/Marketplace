@@ -445,7 +445,7 @@ namespace CESMII.Marketplace.Service
                 var message = new MailMessage
                 {
                     From = new MailAddress(_mailConfig.MailFromAddress),
-                    Subject = $"CESMII | SM Marketplace | {item.MarketplaceItem.DisplayName} purchased ",
+                    Subject = $"CESMII | SM Marketplace | Purchase Notification | {item.MarketplaceItem.DisplayName}",
                     Body = body,
                     IsBodyHtml = true,
                 };

@@ -6,21 +6,19 @@
 
     var _cartItem = Model.CartItem;
     var _marketplaceItem = Model.CartItem.MarketplaceItem;
-    var _user = Model.CheckoutUser;
-    var _fullName = $"{_user.FirstName} {_user.LastName}";
     var _libraryUrl = $"{Model.BaseUrl}/library/";
 }
 
 <div class="divider-bottom">
-    <h2><a href="@_libraryUrl/@_marketplaceItem.Name" >@_marketplaceItem.DisplayName</a> </h2>
+    <h2 class="mb-0" ><a href="@_libraryUrl/@_marketplaceItem.Name" >@_marketplaceItem.DisplayName</a> </h2>
     <p><b>Product Info:</b> @HtmlUtil.RemoveHtmlTags(@_marketplaceItem.Abstract)</p>
-    <table>
+    <table style="min-width:75%; width:500px;">
         <tr>
             <td style="width:75%">
                 <b>@_cartItem.SelectedPrice.Caption</b>
             </td>
             <td style="width:25%; text-align:right;">
-                <b>@_cartItem.SelectedPrice.Amount</b>
+                <b>@_cartItem.SelectedPrice.Amount.ToString("C")</b>
             </td>
         </tr>
         <tr>
