@@ -296,11 +296,8 @@ namespace CESMII.Marketplace.Service
                     options.CustomText.TermsOfServiceAcceptance = new SessionCustomTextTermsOfServiceAcceptanceOptions()
                     { Message = cartItem.MarketplaceItem.ECommerce.TermsOfService };
 
-                    if (cartItem.MarketplaceItem.ECommerce.TermsOfServiceIsRequired)
-                    {
-                        if (options.ConsentCollection == null) options.ConsentCollection = new SessionConsentCollectionOptions();
-                        options.ConsentCollection = new SessionConsentCollectionOptions() { TermsOfService = "required" };
-                    }
+                    if (options.ConsentCollection == null) options.ConsentCollection = new SessionConsentCollectionOptions();
+                    options.ConsentCollection = new SessionConsentCollectionOptions() { TermsOfService = "required" };
                 }
             }
         }

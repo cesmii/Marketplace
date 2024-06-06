@@ -1,16 +1,15 @@
 ﻿@using CESMII.Marketplace.Common.Models
 @model UserCheckoutModel
 @{
-    var _fullName = $"{Model.FirstName} {Model.LastName}";
 }
 
 <div class="divider-bottom">
     <h2 class="mb-0" >Customer Info:</h2>
     <hr class="compact blue"/>
 
-@if (!string.IsNullOrEmpty(@_fullName))
+@if (!string.IsNullOrEmpty(@Model.FullName))
 {
-    <p><b>Customer Name:</b> @_fullName</p>
+    <p><b>Customer Name:</b> @Model.FullName</p>
 }
 
     <p><b>Email:</b> @Model.Email</p>

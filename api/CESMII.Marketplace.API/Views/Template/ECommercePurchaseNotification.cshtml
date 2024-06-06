@@ -5,7 +5,7 @@
     Layout = "_EmailLayout";
 
     var _marketplaceItem = Model.CartItem.MarketplaceItem;
-    var _libraryUrl = $"{Model.BaseUrl}/library/";
+    var _libraryUrl = $"{Model.BaseUrl.TrimEnd(Convert.ToChar("/"))}/library";
     //var _totalCost = Model.CartItem.Sum(x => x.SelectedPrice.Amount * x.Quantity);
 }
 

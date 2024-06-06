@@ -7,17 +7,16 @@
     Layout = "_EmailLayout";
 
     var _user = Model.Cart.CheckoutUser;
-    var _fullName = $"{_user.FirstName} {_user.LastName}";
     var _numItems = Model.Cart.Items.Count == 1 ? Model.Cart.Items[0].MarketplaceItem.DisplayName : $"{Model.Cart.Items.Count} items";
-    var _libraryUrl = $"{Model.BaseUrl}/library/";
+    var _libraryUrl = $"{Model.BaseUrl.TrimEnd(Convert.ToChar("/"))}/library";
     var _totalCost = Model.Cart.Items.Sum(x => x.SelectedPrice.Amount * x.Quantity);
 
 }
 
 <div class="divider-bottom">
-    @if (!string.IsNullOrEmpty(_fullName))
+    @if (!string.IsNullOrEmpty(_user.FullName))
     {
-        <p>Dear @_fullName,</p>
+        <p>Dear @_user.FullName,</p>
     }
     <p> Thank you for purchasing <b>@_numItems</b> from the <a href="@Model.BaseUrl">CESMII SM Marketplace</a>.
     The following details your purchase. Please retain for your records. 

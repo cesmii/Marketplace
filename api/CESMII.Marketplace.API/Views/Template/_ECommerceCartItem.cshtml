@@ -6,7 +6,7 @@
 
     var _cartItem = Model.CartItem;
     var _marketplaceItem = Model.CartItem.MarketplaceItem;
-    var _libraryUrl = $"{Model.BaseUrl}/library/";
+    var _libraryUrl = $"{Model.BaseUrl.TrimEnd(Convert.ToChar("/"))}/library";
 }
 
 <div class="divider-bottom">

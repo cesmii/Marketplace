@@ -41,8 +41,9 @@ namespace CESMII.Marketplace.Api.Controllers
                 model.CheckoutUser = new UserCheckoutModel()
                 {
                     Email = LocalUser.Email,
-                    FirstName = LocalUser.FirstName,
-                    LastName = LocalUser.LastName,
+                    //logged in user only has display name value. 
+                    FirstName = LocalUser.DisplayName,
+                    //LastName = LocalUser.LastName,
                     ID = LocalUser.ID,
                     Organization = new OrganizationCheckoutModel() { ID = LocalUser.Organization.ID, Name = LocalUser.Organization.Name }
                 };

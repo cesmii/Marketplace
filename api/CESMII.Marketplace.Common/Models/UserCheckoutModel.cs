@@ -11,6 +11,14 @@
         public string ID { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        /// <summary>
+        /// Convenience getter. If user is logged in, then both first and last name 
+        /// are present in one of the name fields.
+        /// </summary>
+        public string FullName { get {
+                return $"{FirstName} {LastName}".Trim();
+            } 
+        }
         public OrganizationCheckoutModel Organization { get; set; }
         public string Email { get; set; }
         public string Phone { get; set; }

@@ -234,14 +234,17 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 toEmails.Add(new MailAddress(e));
             }
             */
-            var title = isSuccess ? "Purchase Fulfillment Submitted Successfully" : "Purchase Fulfillment Failed";
+            var title = $"Purchase Fulfillment Notification | {marketplaceItem.DisplayName} | " + (isSuccess ? "Success" : "Failed");
+            var msgIntro = $"The purchase fulfillment data for {marketplaceItem.DisplayName} was <b>" + (isSuccess ? "submitted" : "not submitted") +
+                "</b> to OnTime Edge.";
 
             //generate email body
             System.Text.StringBuilder sbBody = new System.Text.StringBuilder();
             sbBody.AppendLine("<div class='row mb-2'>");
             sbBody.AppendLine("<div class='col-6 mx-auto'>");
-            sbBody.AppendLine($"<h1>{title} | {marketplaceItem.DisplayName}</h1>");
+            sbBody.AppendLine($"<h1>Purchase Fulfillment Notification</h1>");
             sbBody.AppendLine($"<hr class='my-2' />");
+            sbBody.AppendLine($"<p>{msgIntro}</p>");
             sbBody.AppendLine("<ul class='p-0 m-0 pl-3'>");
             sbBody.AppendLine($"<li class='m-0 p-0 my-1'>First Name: {payload.CheckoutUser.FirstName}</li>");
             sbBody.AppendLine($"<li class='m-0 p-0 my-1'>Last Name: {payload.CheckoutUser.LastName}</li>");
@@ -255,7 +258,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             var toEmails = string.Join(",", jobConfig.EmailRecipients.ToArray());
             var message = new MailMessage(_configUtil.MailSettings.MailFromAddress, toEmails)
             {
-                Subject = $"CESMII | SM Marketplace | OnTime Edge | {title}",
+                Subject = $"CESMII | SM Marketplace | {title}",
                 Body = sbBody.ToString(),
                 IsBodyHtml = true
             };
