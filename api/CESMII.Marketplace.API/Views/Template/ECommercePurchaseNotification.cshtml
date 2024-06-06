@@ -5,7 +5,7 @@
 @{
     Layout = "_EmailLayout";
 
-    var _marketplaceItem = @Model.CartItem.MarketplaceItem;
+    var _marketplaceItem = Model.CartItem.MarketplaceItem;
     var _user = Model.CheckoutUser;
     var _fullName = $"{_user.FirstName} {_user.LastName}";
     var _libraryUrl = $"{Model.BaseUrl}/library/";
@@ -26,16 +26,18 @@
     <p><b>Email:</b> @_user.Email</p>
     <p><b>Phone:</b> @_user.Phone</p>
     <br />
-@if (!string.IsNullOrEmpty(_user.Organization.Name))
+@if (!string.IsNullOrEmpty(@_user.Organization.Name))
 {
-    <p><b>Organization:</b> _user.Organization.Name</p>
+    <p><b>Organization:</b> @_user.Organization.Name</p>
 }
 </div>
 
 <div>
     <h2>Purchased Item</h2>
     <hr/>
-    @await Html.PartialAsync("_ECommerceCartItem", @Model);
+    @{
+        @await Html.PartialAsync(@"/Views/Template/_ECommerceCartItem.cshtml", Model);
+    }
 </div>
 
-@await Html.PartialAsync("_AvoutCESMII");
+@await Html.PartialAsync(@"/Views/Template/_AboutCESMII.cshtml");

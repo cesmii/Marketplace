@@ -27,9 +27,9 @@
     <p><b>Email:</b> @_user.Email</p>
     <p><b>Phone:</b> @_user.Phone</p>
     <br />
-@if (!string.IsNullOrEmpty(_user.Organization.Name))
+@if (!string.IsNullOrEmpty(@_user.Organization.Name))
 {
-    <p><b>Organization:</b> _user.Organization.Name</p>
+    <p><b>Organization:</b> @_user.Organization.Name</p>
 }
 </div>
 
@@ -40,7 +40,7 @@
         foreach (var item in Model.Cart.Items)
         {
             var purchaseItem = new PurchaseNotificationModel() { BaseUrl = Model.BaseUrl, CartItem = item, CheckoutUser = Model.Cart.CheckoutUser };
-            await Html.PartialAsync("_ECommerceCartItem", purchaseItem);
+            @await Html.PartialAsync(@"/Views/Template/_ECommerceCartItem.cshtml", purchaseItem);
         }
     }
 
@@ -70,4 +70,4 @@
 </div>
 
 
-@await Html.PartialAsync("_AvoutCESMII");
+@await Html.PartialAsync(@"/Views/Template/_AboutCESMII.cshtml");

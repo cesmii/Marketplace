@@ -467,7 +467,7 @@ namespace CESMII.Marketplace.Service
             try
             {
                 //check if job is assigned for this it
-                var job = _dalJobDefinition.Where(x => x.MarketplaceItemId.ToString().Equals(marketplaceItem.ID) &&
+                var job = _dalJobDefinition.Where(x => x.MarketplaceItemId.ToString().Equals(marketplaceItem.ID) && x.IsActive &&
                             x.ActionType == (int)JobActionTypeEnum.ECommerceOnComplete, null, 1).Data.FirstOrDefault();
 
                 if (job == null) return;

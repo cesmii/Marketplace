@@ -335,7 +335,7 @@ namespace CESMII.Marketplace.Api.Controllers
             }
             catch (StripeException e)
             {
-                Console.WriteLine(e.StripeError.Message);
+                Console.WriteLine(e.Message);
                 return BadRequest();
             }
         }
