@@ -24,17 +24,7 @@
     </p>
 </div>
 
-<div class="divider-bottom">
-    <h2 class="mb-0" >Customer Info:</h2>
-    <hr class="compact blue"/>
-    <p><b>Customer Name:</b> @_fullName</p>
-    <p><b>Email:</b> @_user.Email</p>
-    <p><b>Phone:</b> @_user.Phone</p>
-@if (!string.IsNullOrEmpty(@_user.Organization.Name))
-{
-    <p><b>Organization:</b> @_user.Organization.Name</p>
-}
-</div>
+@await Html.PartialAsync(@"/Views/Template/_ECommerceCustomerInfo.cshtml", Model.CheckoutUser);
 
 <div>
     <h2 class="mb-0" >Purchased Items</h2>
@@ -53,19 +43,19 @@
             {
                 <tr class="divider-bottom">
                     <td style="width:75%">
-                        <b>Credits Applied</b>
+                        <p><b>Credits Applied</b></p>
                     </td>
                     <td style="width:25%; text-align:right;">
-                        <b>@Model.Cart.CreditsApplied</b>
+                        <p><b>@Model.Cart.CreditsApplied</b></p>
                     </td>
                 </tr>
             }
             <tr class="divider-bottom">
                 <td style="width:75%">
-                    <b>Total</b>
+                    <p><b>Total</b></p>
                 </td>
                 <td style="width:25%; text-align:right;">
-                    <b>@_totalCost.ToString("C")</b>
+                    <p><b>@_totalCost.ToString("C")</b></p>
                 </td>
             </tr>
         </table>
