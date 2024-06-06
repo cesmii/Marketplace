@@ -142,7 +142,8 @@ function CartAddModal(props) {
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
     const onChange = (itm, qty, price) => {
-        if (loadingProps.cart !== null && loadingProps.cart.items !== null && loadingProps.cart.items.length !== 0) {
+        console.log(generateLogMessageString('onChange', CLASS_NAME));
+        if (loadingProps.cart != null && loadingProps.cart.items != null && loadingProps.cart.items.length !== 0) {
             if (price.billingPeriod !== "OneTime") {
                 //loop through cart and see if item is there. If not, add, if there, add new quantity to existing.
                 let cartItem = loadingProps.cart.items.find(x => {
@@ -167,7 +168,7 @@ function CartAddModal(props) {
             }
         }
         
-        console.log(generateLogMessageString('onChange', CLASS_NAME));
+        //update state
         setItem({ ..._item, marketplaceItem: itm, quantity: qty, selectedPrice: price });
     };
 

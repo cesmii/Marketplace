@@ -1,0 +1,73 @@
+﻿@using CESMII.Marketplace.Api.Shared.Models
+@using CESMII.Marketplace.DAL.Models
+@using CESMII.Common.SelfServiceSignUp.Utils
+@model PurchaseReceiptModel
+@{
+    Layout = "_EmailLayout";
+
+    var _user = Model.Cart.CheckoutUser;
+    var _fullName = $"{_user.FirstName} {_user.LastName}";
+    var _numItems = Model.Cart.Items.Count == 1 ? Model.Cart.Items[0].MarketplaceItem.DisplayName : $"{Model.Cart.Items.Count} items";
+    var _libraryUrl = $"{Model.BaseUrl}/library/";
+    var _totalCost = Model.Cart.Items.Sum(x => x.SelectedPrice.Amount * x.Quantity);
+
+}
+
+<div class="divider-bottom">
+    <p>Dear @_fullName,</p>
+    <p> Thank you for purchasing <b>@_numItems</b> from the <a href="@Model.BaseUrl">CESMII SM Marketplace</a>.
+    The following details your purchase. Please retain for your records. 
+    </p>
+</div>
+
+<div class="divider-bottom">
+    <h2>Customer Info:</h2>
+    <hr/>
+    <p><b>Customer Name:</b> @_fullName</p>
+    <p><b>Email:</b> @_user.Email</p>
+    <p><b>Phone:</b> @_user.Phone</p>
+    <br />
+@if (!string.IsNullOrEmpty(_user.Organization.Name))
+{
+    <p><b>Organization:</b> _user.Organization.Name</p>
+}
+</div>
+
+<div>
+    <h2>Purchased Items</h2>
+    <hr/>
+    @{
+        foreach (var item in Model.Cart.Items)
+        {
+            var purchaseItem = new PurchaseNotificationModel() { BaseUrl = Model.BaseUrl, CartItem = item, CheckoutUser = Model.Cart.CheckoutUser };
+            await Html.PartialAsync("_ECommerceCartItem", purchaseItem);
+        }
+    }
+
+    <div class="divider-bottom">
+        <table>
+            @if (Model.Cart.UseCredits && Model.Cart.CreditsApplied.HasValue)
+            {
+                <tr class="divider-bottom">
+                    <td style="width:75%">
+                        <b>Credits Applied</b>
+                    </td>
+                    <td style="width:25%; text-align:right;">
+                        <b>@Model.Cart.CreditsApplied</b>
+                    </td>
+                </tr>
+            }
+            <tr class="divider-bottom">
+                <td style="width:75%">
+                    <b>Total</b>
+                </td>
+                <td style="width:25%; text-align:right;">
+                    <b>@_totalCost.ToString("C")</b>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+
+@await Html.PartialAsync("_AvoutCESMII");

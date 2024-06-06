@@ -1,0 +1,43 @@
+﻿@using CESMII.Marketplace.Api.Shared.Models
+@using CESMII.Marketplace.DAL.Models
+@using CESMII.Common.SelfServiceSignUp.Utils
+@model PurchaseNotificationModel
+@{
+
+    var _cartItem = Model.CartItem;
+    var _marketplaceItem = Model.CartItem.MarketplaceItem;
+    var _user = Model.CheckoutUser;
+    var _fullName = $"{_user.FirstName} {_user.LastName}";
+    var _libraryUrl = $"{Model.BaseUrl}/library/";
+}
+
+<div class="divider-bottom">
+    <h2><a href="@_libraryUrl/@_marketplaceItem.Name" >@_marketplaceItem.DisplayName</a> </h2>
+    <p><b>Product Info:</b> @HtmlUtil.RemoveHtmlTags(@_marketplaceItem.Abstract)</p>
+    <table>
+        <tr>
+            <td style="width:75%">
+                <b>@_cartItem.SelectedPrice.Caption</b>
+            </td>
+            <td style="width:25%; text-align:right;">
+                <b>@_cartItem.SelectedPrice.Amount</b>
+            </td>
+        </tr>
+        <tr>
+            <td style="width:75%">
+                <b>@_cartItem.SelectedPrice.Description</b>
+            </td>
+            <td style="width:25%; text-align:right;">
+            </td>
+        </tr>
+        <tr>
+            <td style="width:75%; text-align:right;">
+                <b>Quantity</b>
+            </td>
+            <td style="width:25%; text-align:right;">
+                <b>@_cartItem.Quantity</b>
+            </td>
+        </tr>
+    </table>
+</div>
+

@@ -1,0 +1,41 @@
+﻿@using CESMII.Marketplace.DAL.Models
+@using CESMII.Common.SelfServiceSignUp.Utils
+@using CESMII.Marketplace.Api.Shared.Models
+@model PurchaseNotificationModel
+@{
+    Layout = "_EmailLayout";
+
+    var _marketplaceItem = @Model.CartItem.MarketplaceItem;
+    var _user = Model.CheckoutUser;
+    var _fullName = $"{_user.FirstName} {_user.LastName}";
+    var _libraryUrl = $"{Model.BaseUrl}/library/";
+}
+
+<div class="divider-bottom">
+    <p>Congratulations. A purchase of <a href="@_libraryUrl/@_marketplaceItem.Name" >@_marketplaceItem.DisplayName</a> 
+        was completed on the <a href="@Model.BaseUrl">CESMII SM Marketplace</a>.
+    </p>
+    <p> Thank you for supporting the CESMII SM Marketplace. Please retain for your records. 
+    </p>
+</div>
+
+<div class="divider-bottom">
+    <h2>Customer Info:</h2>
+    <hr/>
+    <p><b>Customer Name:</b> @_fullName</p>
+    <p><b>Email:</b> @_user.Email</p>
+    <p><b>Phone:</b> @_user.Phone</p>
+    <br />
+@if (!string.IsNullOrEmpty(_user.Organization.Name))
+{
+    <p><b>Organization:</b> _user.Organization.Name</p>
+}
+</div>
+
+<div>
+    <h2>Purchased Item</h2>
+    <hr/>
+    @await Html.PartialAsync("_ECommerceCartItem", @Model);
+</div>
+
+@await Html.PartialAsync("_AvoutCESMII");
