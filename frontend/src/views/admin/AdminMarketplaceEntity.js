@@ -577,7 +577,6 @@ function AdminMarketplaceEntity() {
                 item.eCommerce[e.target.id] = e.target.value;
                 break;
             case "allowPurchase":
-            case "termsOfServiceIsRequired":
                 item.eCommerce[e.target.id] = e.target.checked;
                 break;
             default:
@@ -1343,10 +1342,8 @@ function AdminMarketplaceEntity() {
                             <span className="headline-3">Terms of Service</span>
                             {item.eCommerce.allowPurchase &&
                                 <>
-                                    <Form.Check className="align-self-end" type="checkbox" id="termsOfServiceIsRequired" label="Is Required?" checked={item.eCommerce.termsOfServiceIsRequired}
-                                        onChange={onChangeECommerce} readOnly={isReadOnly} />
                                     <span className="small text-muted my-2 d-block">
-                                        This will appear near the complete payment button in the Stripe checkout screen. Click 'Is Required' to require user to acknowledge terms before purchasing.
+                                        This will appear near the complete payment button in the Stripe checkout screen. This will force user to acknowledge terms before purchasing.
                                     </span>
                                     <Form.Control id="termsOfService" as="textarea" style={{ height: '125px' }} placeholder="" value={item.eCommerce.termsOfService} onChange={onChangeECommerce} readOnly={isReadOnly} />
                                 </>

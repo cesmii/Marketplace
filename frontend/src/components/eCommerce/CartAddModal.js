@@ -87,7 +87,6 @@ function CartAddModal(props) {
         axiosInstance.post(url, cart)
             .then(resp => {
                 if (resp.data.isSuccess) {
-                    console.log(resp.data.data);
                     setLoadingProps({ cart: resp.data.data });
                     if (props.onAdd) props.onAdd();
                 }
@@ -142,7 +141,8 @@ function CartAddModal(props) {
     // Region: Event Handling of child component events
     //-------------------------------------------------------------------
     const onChange = (itm, qty, price) => {
-        if (loadingProps.cart !== null && loadingProps.cart.items !== null && loadingProps.cart.items.length !== 0) {
+        console.log(generateLogMessageString('onChange', CLASS_NAME));
+        if (loadingProps.cart != null && loadingProps.cart.items != null && loadingProps.cart.items.length !== 0) {
             if (price.billingPeriod !== "OneTime") {
                 //loop through cart and see if item is there. If not, add, if there, add new quantity to existing.
                 let cartItem = loadingProps.cart.items.find(x => {
@@ -150,7 +150,7 @@ function CartAddModal(props) {
                 });
 
                 if (cartItem != null) {
-                    setError({ show: true, caption: 'Cart - Error', message: 'Cannot add this item to the cart. Already onetime purchase item added to the cart.'});
+                    setError({ show: true, caption: 'Cart - Error', message: 'Cannot add this item to the cart. You cannot combine subscription purchases with flat fee purchases in the same transaction.' });
                     return;
                 }
             }
@@ -161,13 +161,13 @@ function CartAddModal(props) {
                 });
 
                 if (cartItem != null) {
-                    setError({ show: true, caption: 'Cart - Error', message: 'Cannot add this item to the cart. Already subscription purchase item added to the cart.' });
+                    setError({ show: true, caption: 'Cart - Error', message: 'Cannot add this item to the cart. You cannot combine subscription purchases with flat fee purchases in the same transaction.' });
                     return;
                 }
             }
         }
         
-        console.log(generateLogMessageString('onChange', CLASS_NAME));
+        //update state
         setItem({ ..._item, marketplaceItem: itm, quantity: qty, selectedPrice: price });
     };
 

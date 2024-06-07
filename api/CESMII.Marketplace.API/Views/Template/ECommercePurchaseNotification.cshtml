@@ -1,0 +1,27 @@
+﻿@using CESMII.Marketplace.DAL.Models
+@using CESMII.Marketplace.Api.Shared.Models
+@model PurchaseNotificationModel
+@{
+    Layout = "_EmailLayout";
+
+    var _marketplaceItem = Model.CartItem.MarketplaceItem;
+    var _libraryUrl = $"{Model.BaseUrl.TrimEnd(Convert.ToChar("/"))}/library";
+    //var _totalCost = Model.CartItem.Sum(x => x.SelectedPrice.Amount * x.Quantity);
+}
+
+<div class="divider-bottom mb-0" >
+    <p><a href="@_libraryUrl/@_marketplaceItem.Name" >@_marketplaceItem.DisplayName</a> 
+        was purchased on the <a href="@Model.BaseUrl">CESMII SM Marketplace</a>.
+        Thank you for supporting the CESMII SM Marketplace. Please retain for your records. 
+    </p>
+</div>
+
+@await Html.PartialAsync(@"/Views/Template/_ECommerceCustomerInfo.cshtml", Model.CheckoutUser)
+
+<div>
+    <h2 class="mb-0" >Purchased Item</h2>
+    <hr class="compact blue"/>
+    @await Html.PartialAsync(@"/Views/Template/_ECommerceCartItem.cshtml", Model)
+</div>
+
+@await Html.PartialAsync(@"/Views/Template/_AboutCESMII.cshtml")

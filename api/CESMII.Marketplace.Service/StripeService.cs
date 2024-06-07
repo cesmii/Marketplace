@@ -16,6 +16,7 @@ using CESMII.Common.SelfServiceSignUp.Services;
 using CESMII.Marketplace.JobManager;
 using CESMII.Marketplace.JobManager.Models;
 using CESMII.Marketplace.Common.Enums;
+using CESMII.Marketplace.Api.Shared.Models;
 
 namespace CESMII.Marketplace.Service
 {
@@ -199,6 +200,23 @@ namespace CESMII.Marketplace.Service
                 }
                 await _organizationService.Update(organization, cart.CreatedById);
             }
+            /* TODO: Should we handle these other event complete scenarios
+                // Handle the event
+                else if (stripeEvent.Type == Events.CheckoutSessionAsyncPaymentSucceeded)
+                {
+                    //do same as checkout session completed?
+                }
+                else if (stripeEvent.Type == Events.CheckoutSessionExpired)
+                {
+                    //remove cart if it is present
+                }
+                // ... handle other event types
+                else
+                {
+                    //add log warning message that an unhandled stripe event was fired.
+                }
+             
+             */
 
             return false;
         }
@@ -260,11 +278,16 @@ namespace CESMII.Marketplace.Service
                     throw new ArgumentException($"Cannot get Stripe price info for {cartItem.MarketplaceItem.Name}.");
                 }
 
+                //if any of the items have subscription type, then make mode subscription
+                options.Mode = price.Type == "one_time" && options.Mode != "subscription" ? "payment" : "subscription";
+
+                /* TODO: revisit this. Disable invoice creation within Stripe for now. We may want to re-enable this.
                 options.Mode = price.Type == "one_time" ? "payment" : "subscription";
 
                 if (options.Mode == "payment") {
                     options.InvoiceCreation = new SessionInvoiceCreationOptions { Enabled = true };
                 }
+                */
 
                 options.LineItems.Add(new SessionLineItemOptions
                 {
@@ -274,15 +297,22 @@ namespace CESMII.Marketplace.Service
 
                 if (!string.IsNullOrEmpty(cartItem.MarketplaceItem.ECommerce.TermsOfService))
                 {
-                    if (options.CustomText == null) options.CustomText = new SessionCustomTextOptions();
-                    options.CustomText.TermsOfServiceAcceptance = new SessionCustomTextTermsOfServiceAcceptanceOptions()
-                    { Message = cartItem.MarketplaceItem.ECommerce.TermsOfService };
-
-                    if (cartItem.MarketplaceItem.ECommerce.TermsOfServiceIsRequired)
+                    if (string.IsNullOrEmpty(options.CustomText?.TermsOfServiceAcceptance?.Message))
                     {
-                        if (options.ConsentCollection == null) options.ConsentCollection = new SessionConsentCollectionOptions();
-                        options.ConsentCollection = new SessionConsentCollectionOptions() { TermsOfService = "required" };
+                        if (options.CustomText == null) options.CustomText = new SessionCustomTextOptions();
+                        options.CustomText.TermsOfServiceAcceptance = new SessionCustomTextTermsOfServiceAcceptanceOptions()
+                        { Message = cartItem.MarketplaceItem.ECommerce.TermsOfService };
                     }
+                    else
+                    {
+                        //Append the terms for each cart item that may have terms
+                        options.CustomText.TermsOfServiceAcceptance.Message =
+                            options.CustomText.TermsOfServiceAcceptance.Message.TrimEnd().TrimEnd(Convert.ToChar(".")) +
+                            ".  " + cartItem.MarketplaceItem.ECommerce.TermsOfService;
+                    }
+
+                    if (options.ConsentCollection == null) options.ConsentCollection = new SessionConsentCollectionOptions();
+                    options.ConsentCollection = new SessionConsentCollectionOptions() { TermsOfService = "required" };
                 }
             }
         }
@@ -334,14 +364,14 @@ namespace CESMII.Marketplace.Service
 
         private async Task ExecuteOnCompleteActions(Controller controller, CartModel cart, Stripe.Checkout.Session session)
         {
-            //TODO: new email template - send one purchase successful email to purchaser with a view like the whole checkout screen
-            await SendMailCheckoutCompleted(controller, cart, session);
+            //send one purchase successful email to purchaser with a view like the whole checkout screen
+            await SendEmailReceipt(controller, cart, session);
 
             foreach (var cartItem in cart.Items)
             {
                 //if fail, log but keep going - handled below
                 await OnCheckoutCompleteJob(cartItem, cartItem.MarketplaceItem, cart.CheckoutUser);
-                await SendMailItemPurchased(controller, cartItem.MarketplaceItem, cart.CheckoutUser);
+                await SendEmailPurchaseNotification(controller, cartItem, cart.CheckoutUser);
             }
         }
 
@@ -352,9 +382,10 @@ namespace CESMII.Marketplace.Service
         /// <param name="controller"></param>
         /// <param name="cart"></param>
         /// <returns></returns>
-        private async Task SendMailCheckoutCompleted(Controller controller, CartModel cart, Stripe.Checkout.Session session)
+        private async Task SendEmailReceipt(Controller controller, CartModel cart, Stripe.Checkout.Session session)
         {
             //TODO: Check if Stripe can send out a confirmation email instead of us?
+            /*
             try
             {
                 if (string.IsNullOrEmpty(session.InvoiceId))
@@ -371,45 +402,27 @@ namespace CESMII.Marketplace.Service
             {
                 _logger.LogError(ex, "StripeService|SendMailCheckoutCompleted|Error occured while sending invoice.");
             }
-        }
+            */
 
-        /// <summary>
-        /// Target Audience is CESMII people and the vendor who is selling item
-        /// </summary>
-        /// <param name="controller"></param>
-        /// <param name="marketplaceItem"></param>
-        /// <param name="user"></param>
-        /// <returns></returns>
-        private async Task SendMailItemPurchased(Controller controller, MarketplaceItemCheckoutModel marketplaceItem, UserCheckoutModel user)
-        {
             //TODO: pass in cart info so we can include total quantity of item, total price of each items
             try
             {
-                var requestInfoModel = new RequestInfoModel
-                {
-                    MarketplaceItem = new MarketplaceItemModel { DisplayName = marketplaceItem.DisplayName, Abstract = marketplaceItem.Abstract },
-                    Description = "Successfully checkout completed.",
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Email = user.Email,
-                    Phone = user.Phone,
-                };
-
-                var body = await Api.Shared.Extensions.ViewExtensions.RenderViewAsync(controller, "~/Views/Template/MarketplaceItemECommerce.cshtml", requestInfoModel);
+                //receipt for recipient to mirror the cart and purchase info
+                var body = await Api.Shared.Extensions.ViewExtensions.RenderViewAsync(controller,
+                    "~/Views/Template/ECommerceReceipt.cshtml", new PurchaseReceiptModel() { Cart = cart, BaseUrl = _mailConfig.BaseUrl});
 
                 var message = new MailMessage
                 {
                     From = new MailAddress(_mailConfig.MailFromAddress),
-                    Subject = "CESMII | SM Marketplace | Marketplace Item purchase notification",
+                    Subject = $"CESMII | SM Marketplace | Thank you for your purchase ",
                     Body = body,
                     IsBodyHtml = true,
                 };
 
-                foreach (var email in marketplaceItem.Emails)
-                {
-                    message.To.Add(new MailAddress(email.EmailAddress, email.RecipientName));
-                }
+                //send to purchaser
+                message.To.Add(new MailAddress(cart.CheckoutUser.Email));
 
+                //add Bcc of CESMII folks for awareness and troubleshooting
                 foreach (var email in _mailConfig.ECommerceToAddresses)
                 {
                     message.Bcc.Add(new MailAddress(email));
@@ -419,7 +432,56 @@ namespace CESMII.Marketplace.Service
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "StripeService|SendEmail|Error occured while sending email.");
+                _logger.LogError(ex, "StripeService|SendEmailReceipt|Error occured while sending email.");
+            }
+
+        }
+
+        /// <summary>
+        /// Target Audience is CESMII people and the vendor who is selling item
+        /// </summary>
+        /// <param name="controller"></param>
+        /// <param name="marketplaceItem"></param>
+        /// <param name="user"></param>
+        /// <returns></returns>
+        private async Task SendEmailPurchaseNotification(Controller controller, CartItemModel item, UserCheckoutModel user)
+        {
+            //TODO: pass in cart info so we can include total quantity of item, total price of each items
+            try
+            {
+                //notify each vendor and CESMII that an item was purchased. Do this for each item in the cart
+                var body = await Api.Shared.Extensions.ViewExtensions.RenderViewAsync(controller, 
+                    "~/Views/Template/ECommercePurchaseNotification.cshtml", new PurchaseNotificationModel() 
+                    { CartItem = item, CheckoutUser = user, BaseUrl = _mailConfig.BaseUrl });
+
+                var message = new MailMessage
+                {
+                    From = new MailAddress(_mailConfig.MailFromAddress),
+                    Subject = $"CESMII | SM Marketplace | Purchase Notification | {item.MarketplaceItem.DisplayName}",
+                    Body = body,
+                    IsBodyHtml = true,
+                };
+
+                //determine who should receive from vendor 
+                foreach (var email in item.MarketplaceItem.Emails)
+                {
+                    if (email.PublishType?.ToLower() == "ecommerce" || email.PublishType?.ToLower() == "all")
+                    {
+                        message.To.Add(new MailAddress(email.EmailAddress, email.RecipientName));
+                    }
+                }
+
+                //who should receive notification of any item purchased
+                foreach (var email in _mailConfig.ECommerceToAddresses)
+                {
+                    message.CC.Add(new MailAddress(email));
+                }
+
+                await _mailRelayService.SendEmail(message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "StripeService|SendEmailPurchaseNotification|Error occured while sending email.");
             }
         }
 
@@ -434,7 +496,7 @@ namespace CESMII.Marketplace.Service
             try
             {
                 //check if job is assigned for this it
-                var job = _dalJobDefinition.Where(x => x.MarketplaceItemId.ToString().Equals(marketplaceItem.ID) &&
+                var job = _dalJobDefinition.Where(x => x.MarketplaceItemId.ToString().Equals(marketplaceItem.ID) && x.IsActive &&
                             x.ActionType == (int)JobActionTypeEnum.ECommerceOnComplete, null, 1).Data.FirstOrDefault();
 
                 if (job == null) return;

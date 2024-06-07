@@ -26,7 +26,6 @@
         public string FinePrint { get; set; }
 
         public string TermsOfService { get; set; }
-        public bool TermsOfServiceIsRequired { get; set; } = false;
     }
 
     /// <summary>

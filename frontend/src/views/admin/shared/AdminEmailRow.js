@@ -10,7 +10,7 @@ function AdminEmailRow(props) { //props are item, showActions
     //-------------------------------------------------------------------
     // Region: Initialization
     //-------------------------------------------------------------------
-    const _publishType = [{ id: 'All', caption: 'All' }, { id: 'ECommerce', caption: 'ECommerce' }];
+    const _publishType = [{ id: 'all', caption: 'All' }, { id: 'ecommerce', caption: 'ECommerce' }];
     const [_isValid, setIsValid] = useState({
         recipientName: true,
         emailAddress: true,

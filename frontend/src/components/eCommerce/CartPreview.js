@@ -57,7 +57,7 @@ function CartPreview() {
         }
     };
 
-    const updateCartItem = (cart) => {
+    async function updateCartItem (cart) {
         const url = `ecommerce/cart/update`;
         axiosInstance.post(url, cart)
             .then(resp => {
@@ -66,14 +66,14 @@ function CartPreview() {
                 }
                 else {
                     //update spinner, messages
-                    setError({ show: true, caption: 'Cart - Error', message: resp.data.message });
+                    setError({ show: true, caption: 'Update Cart', message: resp.data.message });
                 }
             })
             .catch(error => {
                 //hide a spinner, show a message
                 setLoadingProps({
                     isLoading: false, message: null, inlineMessages: [
-                        { id: new Date().getTime(), severity: "danger", body: `An error occurred during adding item to cart credits.`, isTimed: false }
+                        { id: new Date().getTime(), severity: "danger", body: `An error occurred during updating cart.`, isTimed: false }
                     ]
                 });
                 console.log(error);
@@ -100,7 +100,7 @@ function CartPreview() {
         console.log(generateLogMessageString(`onUpdateCart`, CLASS_NAME));
         // If User authenticated, save the cart items in the database
         if (isAuthenticated) {
-            updateCartItem({ cart: loadingProps.cart });
+            updateCartItem(loadingProps.cart);
         }
     };
 
@@ -108,11 +108,10 @@ function CartPreview() {
         console.log(generateLogMessageString('onRemoveItem', CLASS_NAME));
         //TBD - consider showing confirmation modal first.
         let cart = removeCartItem(loadingProps.cart, id);
+        setLoadingProps({ cart: cart });
         // If User authenticated, save the cart items in the database
         if (isAuthenticated) {
             updateCartItem(cart);
-        } else {
-            setLoadingProps({ cart: cart });
         }
     };
 
