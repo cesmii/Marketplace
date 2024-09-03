@@ -40,9 +40,9 @@ jobs:
     name: 'Build and Deploy React front End'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Use Node.js ${{ env.NODE_VERSION }}
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ env.NODE_VERSION }}
     - name: 'Copy robots.Staging.txt into robots.txt (stage environment only)'
