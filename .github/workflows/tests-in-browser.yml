@@ -25,18 +25,18 @@ env:
   # Project file to use
   PROJECT_NAME: 'CESMII.Marketplace.Api'      
   # set this to the .NET core version to use
-  NETCORE_VERSION: "6.x"
+  NETCORE_VERSION: "6.0.x"
 
 jobs:
   build:
     name: Tests In Browser
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - name: Set up dotnet Core ${{ env.NETCORE_VERSION }}
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.NETCORE_VERSION }}
       - name: Restore dependencies (${{env.SOLUTION_FILE}})
