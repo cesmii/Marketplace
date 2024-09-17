@@ -4,9 +4,7 @@ const CurrentYear = () => {
   const currentYear = new Date().getFullYear();
   
   return (
-    <div>
-      <p>The current year is: {currentYear}</p>
-    </div>
+    <span className="d-inline">{currentYear}</span>
   );
 };
 
