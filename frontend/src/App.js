@@ -35,9 +35,15 @@ function App() {
     //  If a network error occurs (ie API not there), catch it here and handle gracefully.  
     //-------------------------------------------------------------------
     const OnApiResponseError = (err) => {
-        //401 - unauthorized - session expired - due to token expiration or unauthorized attempt
         const url = `${err?.config?.baseURL == null ? '' : err?.config?.baseURL}${err?.config?.url == null ? '' : err?.config?.url}`;
-        if (err.response && err.response.status === 401) {
+        // 404 - not found - fail silently
+        if (err.response && err.response.status === 404) {
+            console.warn(generateLogMessageString(`axiosInstance.interceptors.response||error||${err.response.status}||Url:${url}`, CLASS_NAME));
+            setLoadingProps({ isLoading: false, message: null });
+            return; // Exit early without showing any user-facing message
+        }
+        //401 - unauthorized - session expired - due to token expiration or unauthorized attempt
+        else if (err.response && err.response.status === 401) {
             console.warn(generateLogMessageString(`axiosInstance.interceptors.response||error||${err.response.status}||Url:${url}`, CLASS_NAME));
             setLoadingProps({ isLoading: false, message: null });
         }
