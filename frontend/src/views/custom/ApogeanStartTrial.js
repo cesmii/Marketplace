@@ -127,17 +127,20 @@ function ApogeanStartTrial(props) {
 
     //on change handler to update state
     const onChangeOrganization = (e) => {
-        //note you must update the state value for the input to be read only. It is not enough to simply have the onChange handler.
         switch (e.target.id) {
             case "name":
-                if (_item.organization == null) _item.organization = {};
-                _item.organization[e.target.id] = e.target.value;
+                // Initialize formData if it doesn't exist
+                if (!_item.formData) _item.formData = {};
+                // Initialize organization if it doesn't exist
+                if (!_item.formData.organization) _item.formData.organization = {};
+                // Update the correct path
+                _item.formData.organization.name = e.target.value;
                 break;
             default:
                 return;
         }
-        //update the state
-        setItem(JSON.parse(JSON.stringify(_item)));
+        // Update state with a proper shallow copy
+        setItem({..._item});
     }
 
     //-------------------------------------------------------------------
