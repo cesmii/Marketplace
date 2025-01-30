@@ -56,7 +56,11 @@ function SubscribeForm() {
 
         try {
             // First check if email already exists
-            const searchResponse = await axiosInstance.get('requestinfo/search');
+            const searchResponse = await axiosInstance.post('requestinfo/search', {
+                Query: null,
+                Skip: 0,
+                Take: 1000
+            });
             
             // Filter for subscription requests and check for matching email
             const existingSubscription = searchResponse.data.data.find(item => 
