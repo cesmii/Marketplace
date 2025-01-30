@@ -42,49 +42,81 @@ function SubscribeForm() {
     }
 
     //trigger post to subscribe on click
-    const onSubscribeClick = (e) => {
-
+    const onSubscribeClick = async (e) => {
         console.log(generateLogMessageString(`onSubscribeClick`, CLASS_NAME));
         e.preventDefault();
-
+        
         //do validation
         if (!validateForm()) {
-            //alert("validation failed");
             return;
         }
 
         //show a spinner
         setLoadingProps({ isLoading: true, message: "" });
 
-        //perform insert call
-        axiosInstance.post('requestinfo/add', _item)
-            .then(resp => {
-                //hide a spinner, show a message
-                setLoadingProps({
-                    isLoading: false, message: null, inlineMessages: [
-                        { id: new Date().getTime(), severity: "success", body: `Your inquiry was submitted. `, isTimed: true }
-                    ]
-                });
+        try {
+            // First check if email already exists
+            const searchResponse = await axiosInstance.get('requestinfo/search');
+            
+            // Filter for subscription requests and check for matching email
+            const existingSubscription = searchResponse.data.data.find(item => 
+                item.requestType.code === "subscribe" && 
+                item.email.toLowerCase() === _item.email.toLowerCase()
+            );
 
-                //now refresh the object
-                setItem (JSON.parse(JSON.stringify(AppSettings.requestInfoNew)));
-            })
-            .catch(error => {
-                //hide a spinner, show a message
+            if (existingSubscription) {
                 setLoadingProps({
-                    isLoading: false, message: null, inlineMessages: [
-                        { id: new Date().getTime(), severity: "danger", body: `An error occurred submitting your inquiry.`, isTimed: false }
-                    ]
+                    isLoading: false,
+                    message: null,
+                    inlineMessages: [{
+                        id: new Date().getTime(),
+                        severity: "warning",
+                        body: "This email address is already subscribed to our mailing list.",
+                        isTimed: true
+                    }]
                 });
-                console.log(generateLogMessageString('handleOnSave||error||' + JSON.stringify(error), CLASS_NAME, 'error'));
-                console.log(error);
-                //scroll back to top
-                window.scroll({
-                    top: 0,
-                    left: 0,
-                    behavior: 'smooth',
-                });
+                return;
+            }
+
+            // If no existing subscription found, proceed with adding new subscription
+            const resp = await axiosInstance.post('requestinfo/add', _item);
+            
+            setLoadingProps({
+                isLoading: false,
+                message: null,
+                inlineMessages: [{
+                    id: new Date().getTime(),
+                    severity: "success",
+                    body: "Thank you for subscribing to our email list!",
+                    isTimed: true
+                }]
             });
+            
+            //now refresh the object
+            setItem(JSON.parse(JSON.stringify(AppSettings.requestInfoNew)));
+
+        } catch (error) {
+            setLoadingProps({
+                isLoading: false,
+                message: null,
+                inlineMessages: [{
+                    id: new Date().getTime(),
+                    severity: "danger",
+                    body: "An error occurred submitting your inquiry.",
+                    isTimed: false
+                }]
+            });
+            
+            console.log(generateLogMessageString('handleOnSave||error||' + JSON.stringify(error), CLASS_NAME, 'error'));
+            console.log(error);
+            
+            //scroll back to top
+            window.scroll({
+                top: 0,
+                left: 0,
+                behavior: 'smooth'
+            });
+        }
     };
 
     ////-------------------------------------------------------------------
