@@ -13,7 +13,7 @@ import { AppSettings } from './utils/appsettings';
 
 import './index.css';
 
-require('dotenv').config()
+// require('dotenv').config()
 
 //#region - Analytics
 //Analytics - only run the initialize once, only run in prod
