@@ -1,6 +1,8 @@
 import React from 'react'
 import { AppSettings, LookupData } from '../utils/appsettings';
 import SocialMedia from './SocialMedia';
+import CurrentYear from './CurrentYear';
+import HubspotTracking from './HubspotTracking';
 
 import './styles/Footer.scss';
 import SubscribeForm from './SubscribeForm';
@@ -58,11 +60,12 @@ function Footer() {
                         <div>
                             <span className="headline-3 d-block mb-2">{AppSettings.Titles.Caption}</span>
                             <SocialMedia items={LookupData.socialMediaLinks} />
-                            <span className="muted d-block mt-2" >Copyright &copy;2021-2023 CESMII. All rights reserved.</span>
+                            <span className="muted d-block mt-2" >Copyright &copy;2021-<CurrentYear /> CESMII. All rights reserved.</span>
                         </div>
                     </div>
                 </div>
             </div>
+            <HubspotTracking />
         </footer>
     )
 }

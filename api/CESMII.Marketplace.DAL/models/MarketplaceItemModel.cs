@@ -1,8 +1,6 @@
 ﻿namespace CESMII.Marketplace.DAL.Models
 {
-    using CESMII.Marketplace.Common.Enums;
     using CESMII.Marketplace.Data.Entities;
-    using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
 
@@ -30,7 +28,7 @@
         public string DisplayName { get; set; }
 
         public string Version { get; set; }
-        
+
         /// <summary>
         /// Namespace URI. Only applies to profiles pulled from CloudLib
         /// </summary>
@@ -60,7 +58,7 @@
         /// TBD - May need to convert this to list.
         /// </summary>
         public virtual UserModel Author { get; set; }
-        
+
         /// <summary>
         /// The author may not be someone within the system. In this case, show as a simple string field.
         /// TBD - May need to convert this to list.
@@ -113,6 +111,11 @@
         public string ccName2 { get; set; }
         public string ccEmail2 { get; set; }
 
+        #region eCommerce Fields
+        public ECommerce ECommerce { get; set; } = new ECommerce();
+        public List<Email> Emails { get; set; } = new List<Email>();
+        #endregion
+
         /// <summary>
         /// Id, source id and code related to external source. Can be null.
         /// </summary>
@@ -123,7 +126,7 @@
         /// The value is determined at runtime in the DAL based on where we get the data from.
         /// Default to false. 
         /// </summary>
-        public bool IsExternal { get { return (ExternalSource != null && !string.IsNullOrEmpty(ExternalSource.SourceId));  } }
+        public bool IsExternal { get { return (ExternalSource != null && !string.IsNullOrEmpty(ExternalSource.SourceId)); } }
 
         public override string ToString() => $"{DisplayName} {ID}";
 
@@ -163,10 +166,11 @@
     /// A very simple marketplace item used for related data and lookup scenarios
     /// where keeping data small is helpful
     /// </summary>
-    public class MarketplaceItemSimpleModel: AbstractModel
+    public class MarketplaceItemSimpleModel : AbstractModel
     {
         public string Name { get; set; }
         public string DisplayName { get; set; }
+        public string Abstract { get; set; }
     }
 
     /// <summary>
@@ -206,6 +210,16 @@
 
         public LookupItemModel RelatedType { get; set; }
         public ExternalSourceSimple ExternalSource { get; set; }
+    }
+
+
+    /// <summary>
+    /// A very simple marketplace item with checkout specific data used for checkout processes
+    /// </summary>
+    public class MarketplaceItemCheckoutModel : MarketplaceItemSimpleModel
+    {
+        public ECommerce ECommerce { get; set; }
+        public List<Email> Emails { get; set; }
     }
 
 

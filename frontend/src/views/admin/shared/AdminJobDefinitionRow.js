@@ -1,4 +1,5 @@
 import React from 'react'
+import { AppSettings } from '../../../utils/appsettings';
 
 //const CLASS_NAME = "AdminJobDefinitionRow";
 
@@ -32,6 +33,9 @@ function AdminJobDefinitionRow(props) { //props are item, showActions
                     <th className="" >
                         Name
                     </th>
+                    <th className="" >
+                        Job Action Type
+                    </th>
                     <th className="pr-2 text-right" >
                         Delete
                     </th>
@@ -51,6 +55,17 @@ function AdminJobDefinitionRow(props) { //props are item, showActions
                 </td>
                 <td className="py-2 align-middle" >
                     {props.item.name}
+                </td>
+                <td className="py-2 align-middle" >
+                    {props.item.actionType === AppSettings.JobActionType.Link &&
+                        <>Action Link to custom url</>
+                    }
+                    {props.item.actionType === AppSettings.JobActionType.Standard &&
+                        <>Standard Button</>
+                    }
+                    {props.item.actionType === AppSettings.JobActionType.ECommerceOnComplete &&
+                        <>E-Commerce (on purchase complete)</>
+                    }
                 </td>
                 <td className="py-2 pr-2 text-right align-middle" >
                     <button className="btn btn-icon-outline circle ml-auto" title="Delete Item" onClick={onDeleteItem} ><i className="material-icons">close</i></button>

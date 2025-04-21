@@ -158,6 +158,15 @@ namespace CESMII.Marketplace.Api.Controllers
                     Message = isValidMessage
                 });
             }
+            else if (!IsValidNameUnique(model))
+            {
+                _logger.LogWarning($"AdminJobDefinitionController|Update|Name {model.Name} is already in use.");
+                return Ok(new ResultMessageWithDataModel()
+                {
+                    IsSuccess = false,
+                    Message = $"Name '{model.Name}' is not unique. Please enter a unique name."
+                });
+            }
             else
             {
                 var result = await _dal.Update(model, UserID);
@@ -224,6 +233,15 @@ namespace CESMII.Marketplace.Api.Controllers
                     Message = isValidMessage
                 });
             }
+            else if (!IsValidNameUnique(model))
+            {
+                _logger.LogWarning($"AdminJobDefinitionController|Add|Name {model.Name} is already in use.");
+                return Ok(new ResultMessageWithDataModel()
+                {
+                    IsSuccess = false,
+                    Message = $"Name '{model.Name}' is not unique. Please enter a unique name."
+                });
+            }
             else
             {
                 var result = await _dal.Add(model, UserID);
@@ -281,6 +299,15 @@ namespace CESMII.Marketplace.Api.Controllers
                 _logger.LogWarning($"AdminJobDefinitionController|IsValidDataJson|{e.Message}.");
                 return false;
             }
+        }
+
+        private bool IsValidNameUnique(JobDefinitionModel model)
+        {
+            //name is supposed to be unique. Note name is different than display name.
+            //if we get a match for something other than this id, return false
+            var numItems = _dal.Count(x => x.IsActive && !x.ID.Equals(model.ID) &&
+                x.Name.ToLower().Equals(model.Name.ToLower()));
+            return numItems == 0;
         }
 
 

@@ -1,0 +1,26 @@
+﻿@using CESMII.Marketplace.Common.Models
+@model UserCheckoutModel
+@{
+}
+
+<div class="">
+    <h2 class="mb-0" >Customer</h2>
+    <hr class="compact blue"/>
+
+@if (!string.IsNullOrEmpty(@Model.FullName))
+{
+    <p><b>Name:</b> @Model.FullName</p>
+}
+
+    <p><b>Email:</b> @Model.Email</p>
+
+@if (!string.IsNullOrEmpty(@Model.Phone))
+{
+    <p><b>Phone:</b> @Model.Phone</p>
+}
+
+@if (!string.IsNullOrEmpty(@Model.Organization.Name))
+{
+    <p><b>Organization:</b> @Model.Organization.Name</p>
+}
+</div>

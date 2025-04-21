@@ -1,0 +1,32 @@
+@import "./constants";
+
+.btn-icon-outline {
+    position: relative;
+
+    .footnote {
+        background-color: color("blazeOrange");
+        color: color("white");
+        border-color: color("blazeOrange");
+        border-radius: 3rem;
+        font-size: 0.6rem;
+        position: absolute;
+        bottom: 0px;
+        right: 0px;
+        width: 20px;
+        height: 20px;
+        line-height: 21px;
+        text-align: center;
+    }
+
+    &:hover {
+        background-color: color("cararra");
+        color: color("shark");
+        border: color("cararra");
+    }
+
+    .footnote.large {
+        width: 24px;
+        height: 24px;
+        line-height: 25px;
+    }
+}

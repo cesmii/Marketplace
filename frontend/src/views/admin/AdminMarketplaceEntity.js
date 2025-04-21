@@ -20,6 +20,8 @@ import ConfirmationModal from '../../components/ConfirmationModal';
 import { WysiwygEditor } from '../../components/WysiwygEditor';
 import AdminImageList from './shared/AdminImageList';
 import AdminRelatedItemList from './shared/AdminRelatedItemList';
+import AdminPriceList from './shared/AdminPriceList';
+import AdminEmailList from './shared/AdminEmailList';
 import AdminActionLinkList from './shared/AdminActionLinkList'
 
 import { SVGIcon } from "../../components/SVGIcon";
@@ -104,7 +106,7 @@ function AdminMarketplaceEntity() {
 
             //add id client side to help manage which one to delete. this collection has no unique ids. 
             result.data.actionLinks = result.data.actionLinks == null ? null :
-                result.data.actionLinks.map((x, i) => { x.id = i;  return x; });
+                result.data.actionLinks.map((x, i) => { x.id = i; return x; });
 
             //set item state value
             setItem(result.data);
@@ -478,9 +480,11 @@ function AdminMarketplaceEntity() {
                             { id: new Date().getTime(), severity: "success", body: `Marketplace item was saved`, isTimed: true }
                         ]
                     });
-
                     //now redirect to marketplace item on front end
-                    history.push(`/admin/library/${resp.data.data}`);
+                    if (mode.toLowerCase() === "new")
+                        history.push(`/admin/library/${resp.data.data}`);
+                    else
+                        window.location.reload();
                 }
                 else {
                     //update spinner, messages
@@ -553,6 +557,27 @@ function AdminMarketplaceEntity() {
                 else {
                     item[e.target.id] = { id: e.target.value, name: e.target.options[e.target.selectedIndex].text };
                 }
+                break;
+            default:
+                return;
+        }
+        //update the state
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    //on change handler to update state
+    const onChangeECommerce = (e) => {
+        //console.log(generateLogMessageString(`onEntityChange||e:${e.target}`, CLASS_NAME));
+
+        //note you must update the state value for the input to be read only. It is not enough to simply have the onChange handler.
+        switch (e.target.id) {
+            case "finePrint":
+            case "purchaseInstructions":
+            case "termsOfService": 
+                item.eCommerce[e.target.id] = e.target.value;
+                break;
+            case "allowPurchase":
+                item.eCommerce[e.target.id] = e.target.checked;
                 break;
             default:
                 return;
@@ -645,14 +670,33 @@ function AdminMarketplaceEntity() {
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
+    const onChangePrice = (arg) => {
+        console.log(generateLogMessageString('onChangePrice', CLASS_NAME));
+        var match = item.eCommerce.prices.find(x => x.id === arg.id);
+        match.amount = arg.amount;
+        match.billingPeriod = arg.billingPeriod;
+        match.caption = arg.caption;
+        match.description = arg.description;
+        match.priceId = arg.priceId;
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    const onChangeEmail = (arg) => {
+        console.log(generateLogMessageString('onChangeEmail', CLASS_NAME));
+        var match = item.emails.find(x => x.id === arg.id);
+        match.name = arg.name;
+        match.publishType = arg.publishType;
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
     const onAddRelatedItem = () => {
         console.log(generateLogMessageString('onAddRelatedItem', CLASS_NAME));
         //we need to be aware of newly added rows and those will be signified by a negative -id. 
         //Once saved server side, these will be issued ids from db.
         //Depending on how we are adding (single row or multiple rows), the id generation will be different. Both need 
         //a starting point negative id
-        var id = (-1) * (item.relatedItems == null ? 1 : item.relatedItems.length + 1);
         if (item.relatedItems == null) item.relatedItems = [];
+        var id = (-1) * (item.relatedItems.length + 1);
         item.relatedItems.push({ relatedId: id, relatedType: { id: "-1" } });
         setItem(JSON.parse(JSON.stringify(item)));
     }
@@ -663,23 +707,43 @@ function AdminMarketplaceEntity() {
         //Once saved server side, these will be issued ids from db.
         //Depending on how we are adding (single row or multiple rows), the id generation will be different. Both need 
         //a starting point negative id
-        var id = (-1) * (item.relatedItemsExternal == null ? 1 : item.relatedItemsExternal.length + 1);
         if (item.relatedItemsExternal == null) item.relatedItemsExternal = [];
+        var id = (-1) * (item.relatedItemsExternal.length + 1);
         item.relatedItemsExternal.push({ relatedId: id, relatedType: { id: "-1" }, externalSource: null });
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
     const onAddActionLink = () => {
         console.log(generateLogMessageString('onAddActionLink', CLASS_NAME));
-        //we need to be aware of newly added rows and those will be signified by a negative -id. 
-        var id = (-1) * (item.actionLinks == null ? 1 : item.actionLinks.length + 1);
+        if (item.actionLinks == null) item.actionLinks = [];
+        //we need to be aware of newly added rows and those will be signified by a negative -id.
+        var id = (-1) * (item.actionLinks.length + 1);
         item.actionLinks.push({ id: id, caption: '', url: '', target: '_self', iconName: 'settings' });
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    const onAddPrice = () => {
+        console.log(generateLogMessageString('onAddPrice', CLASS_NAME));
+        if (item.eCommerce.prices == null) item.eCommerce.prices = [];
+        //we need to be aware of newly added rows and those will be signified by a negative -id.
+        var id = (-1) * (item.eCommerce.prices.length + 1);
+        item.eCommerce.prices.push({ id: id, amount: 0, billingPeriod: 'OneTime', caption: '', description: '', priceId: '' });
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    const onAddEmail = () => {
+        console.log(generateLogMessageString('onAddEmail', CLASS_NAME));
+        if (item.emails == null) item.emails = [];
+        //we need to be aware of newly added rows and those will be signified by a negative -id. 
+        var id = (-1) * (item.emails == null ? 1 : item.emails.length + 1);
+        item.emails.push({ id: id, recipientName: '', emailAddress: '', publishType: 'All' });
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
     const onDeleteRelatedItem = (id) => {
         console.log(generateLogMessageString('onDeleteRelatedItem', CLASS_NAME));
-        //make a copy of the array 
+        if (item.relatedItems == null) item.relatedItems = [];
+        //make a copy of the array
         item.relatedItems = item.relatedItems.filter(x => x.relatedId !== id);
         //item.relatedItems = item.relatedItems.map(x => { return (x.relatedId !== id ? x : null); }).filter(x => x != null);
         setItem(JSON.parse(JSON.stringify(item)));
@@ -687,13 +751,29 @@ function AdminMarketplaceEntity() {
 
     const onDeleteRelatedItemExternal = (id) => {
         console.log(generateLogMessageString('onDeleteRelatedItemExternal', CLASS_NAME));
+        if (item.relatedItemsExternal == null) item.relatedItemsExternal = [];
         item.relatedItemsExternal = item.relatedItemsExternal.filter(x => x.relatedId !== id);
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
     const onDeleteActionLink = (id) => {
         console.log(generateLogMessageString('onDeleteActionLink', CLASS_NAME));
+        if (item.actionLinks == null) item.actionLinks = [];
         item.actionLinks = item.actionLinks.filter(x => x.id !== id);
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    const onDeletePrice = (id) => {
+        console.log(generateLogMessageString('onDeletePrice', CLASS_NAME));
+        if (item.eCommerce.prices == null) item.eCommerce.prices = [];
+        item.eCommerce.prices = item.eCommerce.prices.filter(x => x.caption !== id);
+        setItem(JSON.parse(JSON.stringify(item)));
+    }
+
+    const onDeleteEmail = (id) => {
+        console.log(generateLogMessageString('onDeleteEmail', CLASS_NAME));
+        if (item.emails == null) item.emails = [];
+        item.emails = item.emails.filter(x => x.recipientName !== id);
         setItem(JSON.parse(JSON.stringify(item)));
     }
 
@@ -994,6 +1074,27 @@ function AdminMarketplaceEntity() {
         );
     };
 
+    const renderPrices = () => {
+        return (
+            <div className="col-12">
+                <span className="headline-3">Prices</span>
+                {item.eCommerce.allowPurchase ?
+                    <AdminPriceList captionAdd="Add Price"
+                        items={item.eCommerce.prices} itemsLookup={_itemsLookup?.lookupItems?.filter(x => x.id !== item.id)}
+                        type={AppSettings.itemTypeCode.smApp} onChangeItem={onChangePrice}
+                        onAdd={onAddPrice} onDeletePrice={onDeletePrice}
+                    />
+                    :
+                    <div className="d-block my-3">
+                        <span className="alert alert-info p-2">
+                            To configure prices, click allow purchase.
+                        </span>
+                    </div>
+                }
+            </div>
+        );
+    };
+
     const renderActionLinks = () => {
         return (
             <div className="row">
@@ -1167,6 +1268,117 @@ function AdminMarketplaceEntity() {
         );
     }
 
+    const renderECommerceTab = () => {
+        //console.log(item);
+        return (
+            <>
+                <div className="row mt-2 align-items-center">
+                    <div className="col-sm-6 col-lg-4">
+                        <div className="d-flex h-100">
+                            <Form.Group>
+                                <Form.Check className="align-self-end" type="checkbox" id="allowPurchase" label="Allow Purchase" checked={item.eCommerce.allowPurchase}
+                                    onChange={onChangeECommerce} readOnly={isReadOnly} />
+                            </Form.Group>
+                        </div>
+                    </div>
+                    <div className="col-sm-6 col-lg-4 ml-sm-auto">
+                        <Form.Group>
+                            <Form.Label>Stripe Product Id</Form.Label>
+                            <Form.Control id="paymentProductId" type="" placeholder=""
+                                value={item.eCommerce.paymentProductId == null ? '' : item.eCommerce.paymentProductId} readOnly={true} />
+                        </Form.Group>
+                    </div>
+                </div>
+                <div className="row mt-3 py-2 border-top">
+                    {renderPrices()}
+                </div>
+                <div className="row mt-3">
+                    <div className="col-md-12">
+                        <Form.Group>
+                            <span className="headline-3">Purchase Instructions</span>
+                            {item.eCommerce.allowPurchase &&
+                                <>
+                                    <span className="small text-muted my-2 d-block">
+                                        This will appear when adding to cart and cart preview just below the item abstract.
+                                    </span>
+                                    <WysiwygEditor id="purchaseInstructions" value={item.eCommerce.purchaseInstructions} onChange={onChangeECommerce} onValidate={validateForm_abstract} className='short' />
+                                </>
+                            }
+                        </Form.Group>
+                        {!item.eCommerce.allowPurchase &&
+                            <div className="d-block my-3">
+                                <span className="alert alert-info p-2">
+                                    To configure purchase instructions, click allow purchase.
+                                </span>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div className="row mt-3">
+                    <div className="col-md-12">
+                        <Form.Group>
+                            <span className="headline-3">Fine Print</span>
+                            {item.eCommerce.allowPurchase &&
+                                <>
+                                    <span className="small text-muted my-2 d-block">
+                                        This will appear when adding to cart and cart preview below the item and price information.
+                                    </span>
+                                    <WysiwygEditor id="finePrint" value={item.eCommerce.finePrint} onChange={onChangeECommerce} onValidate={validateForm_abstract} className='short' />
+                                </>
+                            }
+                        </Form.Group>
+                        {!item.eCommerce.allowPurchase &&
+                            <div className="d-block my-3">
+                                <span className="alert alert-info p-2">
+                                    To configure fine print, click allow purchase.
+                                </span>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div className="row mt-3">
+                    <div className="col-md-12">
+                        <Form.Group>
+                            <span className="headline-3">Terms of Service</span>
+                            {item.eCommerce.allowPurchase &&
+                                <>
+                                    <span className="small text-muted my-2 d-block">
+                                        This will appear near the complete payment button in the Stripe checkout screen. This will force user to acknowledge terms before purchasing.
+                                    </span>
+                                    <Form.Control id="termsOfService" as="textarea" style={{ height: '125px' }} placeholder="" value={item.eCommerce.termsOfService} onChange={onChangeECommerce} readOnly={isReadOnly} />
+                                </>
+                            }
+                        </Form.Group>
+                        {!item.eCommerce.allowPurchase &&
+                            <div className="d-block my-3">
+                                <span className="alert alert-info p-2">
+                                    To configure terms of service, click allow purchase.
+                                </span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </>
+        );
+    }
+
+    const renderEmailListTab = () => {
+        //console.log(item);
+        return (
+            <>
+                <div className="row mt-2">
+                    <div className="col-12">
+                        <AdminEmailList caption="Emails" captionAdd="Add Email"
+                            items={item.emails} itemsLookup={_itemsLookup?.lookupItems?.filter(x => x.recipientName !== item.recipientName)}
+                            type={AppSettings.itemTypeCode.smApp} onChangeItem={onChangeEmail}
+                            onAdd={onAddEmail} onDeletePrice={onDeleteEmail}
+                        />
+                    </div>
+                </div>
+            </>
+        );
+    }
+
     const renderImagesInfo = () => {
         return (
             <>
@@ -1204,7 +1416,7 @@ function AdminMarketplaceEntity() {
                     <div className="info-section mb-4 px-1 rounded">
                         <div className="headline-3 mb-2">
                             <span className="pr-2 w-100 d-block rounded">
-                            Meta tags (optional)</span></div>
+                                Meta tags (optional)</span></div>
                         <Form.Group>
                             <Form.Control id="metaTagsConcatenated" as="textarea" style={{ height: '300px' }} placeholder="Enter tags seperated by a comma" value={item.metaTagsConcatenated} onChange={onChange} readOnly={isReadOnly} />
                         </Form.Group>
@@ -1252,22 +1464,32 @@ function AdminMarketplaceEntity() {
         return (
             <Tab.Container id="admin-marketplace-entity" defaultActiveKey="general" onSelect={tabListener} >
                 <Nav variant="pills" className="row mt-1 px-2 pr-md-3">
-                    <Nav.Item className="col-sm-3 rounded p-0 pl-2" >
+                    <Nav.Item className="col-sm-2 rounded p-0 pl-2" >
                         <Nav.Link eventKey="general" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">General</span>
                         </Nav.Link>
                     </Nav.Item>
-                    <Nav.Item className="col-sm-3 rounded p-0 px-md-0" >
+                    <Nav.Item className="col-sm-2 rounded p-0 px-md-0" >
                         <Nav.Link eventKey="images" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">Images</span>
                         </Nav.Link>
                     </Nav.Item>
-                    <Nav.Item className="col-sm-3 rounded p-0">
+                    <Nav.Item className="col-sm-2 rounded p-0">
+                        <Nav.Link eventKey="eCommerce" className="text-center text-md-left p-1 px-2 h-100" >
+                            <span className="headline-3">eCommerce</span>
+                        </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item className="col-sm-2 rounded p-0">
+                        <Nav.Link eventKey="emails" className="text-center text-md-left p-1 px-2 h-100" >
+                            <span className="headline-3">Emails</span>
+                        </Nav.Link>
+                    </Nav.Item>
+                    <Nav.Item className="col-sm-2 rounded p-0">
                         <Nav.Link eventKey="actionLinks" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">Action Links</span>
                         </Nav.Link>
                     </Nav.Item>
-                    <Nav.Item className="col-sm-3 rounded p-0 pr-2">
+                    <Nav.Item className="col-sm-2 rounded p-0 pr-2">
                         <Nav.Link eventKey="relatedItems" className="text-center text-md-left p-1 px-2 h-100" >
                             <span className="headline-3">Related Items</span>
                         </Nav.Link>
@@ -1278,14 +1500,28 @@ function AdminMarketplaceEntity() {
                     <Tab.Pane eventKey="general">
                         <Card className="">
                             <Card.Body className="pt-3">
-                                { renderGeneralTab()}
+                                {renderGeneralTab()}
                             </Card.Body>
                         </Card>
                     </Tab.Pane>
                     <Tab.Pane eventKey="images">
                         <Card className="">
                             <Card.Body className="pt-3">
-                                { renderImagesInfo()}
+                                {renderImagesInfo()}
+                            </Card.Body>
+                        </Card>
+                    </Tab.Pane>
+                    <Tab.Pane eventKey="eCommerce">
+                        <Card className="">
+                            <Card.Body className="pt-3">
+                                {renderECommerceTab()}
+                            </Card.Body>
+                        </Card>
+                    </Tab.Pane>
+                    <Tab.Pane eventKey="emails">
+                        <Card className="">
+                            <Card.Body className="pt-3">
+                                {renderEmailListTab()}
                             </Card.Body>
                         </Card>
                     </Tab.Pane>
@@ -1324,20 +1560,20 @@ function AdminMarketplaceEntity() {
     return (
         <>
             <Helmet>
-                <title>{`${item?.displayName != null ? item?.displayName + ' | ' : '' } Admin | ${AppSettings.Titles.Main}`}</title>
+                <title>{`${item?.displayName != null ? item?.displayName + ' | ' : ''} Admin | ${AppSettings.Titles.Main}`}</title>
             </Helmet>
             <Form noValidate>
-            {renderHeaderRow()}
-            <div className="row" >
-                <div className="col-sm-3" >
-                    {renderMultiSelectAreas()}
+                {renderHeaderRow()}
+                <div className="row" >
+                    <div className="col-sm-3" >
+                        {renderMultiSelectAreas()}
+                    </div>
+                    <div className="col-sm-9 mb-4 tab-container" >
+                        {renderValidationSummary()}
+                        {renderCommonInfo()}
+                        {renderTabbedForm()}
+                    </div>
                 </div>
-                <div className="col-sm-9 mb-4 tab-container" >
-                    {renderValidationSummary()}
-                    {renderCommonInfo()}
-                    {renderTabbedForm()}
-                </div>
-            </div>
             </Form>
             {renderDeleteConfirmation()}
             {renderErrorMessage()}

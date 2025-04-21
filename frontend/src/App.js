@@ -14,6 +14,7 @@ import { AppSettings } from './utils/appsettings'
 import { generateLogMessageString } from './utils/UtilityService'
 import ErrorPage from './components/ErrorPage'
 import { OnLookupLoad } from './components/OnLookupLoad'
+import { OnECommerceLoad } from "./components/OnECommerceLoad"
 import { useRegisterMsalEventCallback } from "./components/OnLoginHandler";
 
 import './App.scss';
@@ -34,22 +35,38 @@ function App() {
     //  If a network error occurs (ie API not there), catch it here and handle gracefully.  
     //-------------------------------------------------------------------
     const OnApiResponseError = (err) => {
+        const url = `${err?.config?.baseURL == null ? '' : err?.config?.baseURL}${err?.config?.url == null ? '' : err?.config?.url}`;
+        // 404 - not found - fail silently
+        if (err.response && err.response.status === 404) {
+            console.warn(generateLogMessageString(`axiosInstance.interceptors.response||error||${err.response.status}||Url:${url}`, CLASS_NAME));
+            setLoadingProps({ isLoading: false, message: null });
+            return; // Exit early without showing any user-facing message
+        }
         //401 - unauthorized - session expired - due to token expiration or unauthorized attempt
-        if (err.response && err.response.status === 401) {
-            console.error(generateLogMessageString(`OnApiResponseError||error||${err.response.status}||${err.config.baseURL}${err.config.url}`, CLASS_NAME));
+        else if (err.response && err.response.status === 401) {
+            console.warn(generateLogMessageString(`axiosInstance.interceptors.response||error||${err.response.status}||Url:${url}`, CLASS_NAME));
             setLoadingProps({ isLoading: false, message: null });
         }
         //403 error - user may be allowed to log in but not permitted to perform the API call they are attempting
         else if (err.response && err.response.status === 403) {
-            console.error(generateLogMessageString(`OnApiResponseError||error||${err.response.status}||${err.config.baseURL}${err.config.url}`, CLASS_NAME));
+            console.warn(generateLogMessageString(`axiosInstance.interceptors.response||error||${err.response.status}||Url:${url}`, CLASS_NAME));
             setLoadingProps({
                 isLoading: false, message: null, inlineMessages: [
                     { id: new Date().getTime(), severity: "danger", body: 'You are not permitted to access this area. Please contact your system administrator.', isTimed: true }]
             });
         }
+        //400 error - Bad request - some condition causes code in endpoint to return this - like can't find the record 
+        else if (err.response && err.response.status === 400) {
+            const msg = err?.response?.data != null ? err?.response?.data : 'An error occurred. Please contact your system administrator.';
+            console.warn(generateLogMessageString(`axiosInstance.interceptors.response||error||${err.response.status}||${msg}`, CLASS_NAME));
+            setLoadingProps({
+                isLoading: false, message: null, inlineMessages: [
+                    { id: new Date().getTime(), severity: "danger", body: msg, isTimed: true }]
+            });
+        }
         //no status is our only indicator the API is not up and running
         else if (!err.status) {
-            console.error(generateLogMessageString(`OnApiResponseError||error||${err.config.baseURL}${err.config.url}||${err}`, CLASS_NAME));
+            console.error(generateLogMessageString(`axiosInstance.interceptors.response||error||Url:${url}||${err}`, CLASS_NAME));
             if (err.message != null && err.message.toLowerCase().indexOf('request aborted') > -1) {
                 //do nothing...
             }
@@ -109,6 +126,7 @@ function App() {
     // useEffect - get various lookup data - onlookupLoad component houses the useEffect checks
     //-------------------------------------------------------------------
     OnLookupLoad();
+    OnECommerceLoad();
 
     //-------------------------------------------------------------------
     // Region: add an event callback handler to capture loginredirect message responses

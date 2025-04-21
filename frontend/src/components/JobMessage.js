@@ -212,11 +212,11 @@ function JobMessage() {
 
         switch (msg.status) {
             case AppSettings.JobLogStatus.Failed:
-                return `The job failed. ${msgAppend}`;
+                return `Action failed. ${msgAppend}`;
             case AppSettings.JobLogStatus.Cancelled:
-                return `The job was cancelled. ${msgAppend}`;
+                return `Action cancelled. ${msgAppend}`;
             case AppSettings.JobLogStatus.Completed:
-                return `The job completed. ${msgAppend}`;
+                return `${msgAppend}`;
             case AppSettings.JobLogStatus.InProgress:
             default:
                 return `Processing... ${msgAppend}`;

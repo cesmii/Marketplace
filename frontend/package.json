@@ -6,6 +6,8 @@
     "@azure/msal-browser": "2.30.0",
     "@azure/msal-react": "1.4.9",
     "@material/react-material-icon": "^0.15.0",
+    "@stripe/react-stripe-js": "^2.6.2",
+    "@stripe/stripe-js": "^3.0.10",
     "@testing-library/jest-dom": "^5.11.5",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
@@ -17,7 +19,9 @@
     "env-cmd": "^10.1.0",
     "immutable": "^3.8.2",
     "jquery": "^3.5.1",
+    "path-browserify": "^1.0.1",
     "popper.js": "^1.16.1",
+    "process": "^0.11.10",
     "react": "^16.4.2",
     "react-bootstrap": "^1.4.0",
     "react-dom": "^16.4.2",
@@ -27,17 +31,18 @@
     "react-helmet": "^6.1.0",
     "react-json-editor-ajrm": "^2.5.13",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "4.0.0",
+    "react-scripts": "5.0.1",
     "react-slick": "^0.28.1",
     "sass": "^1.49.11",
     "slick-carousel": "^1.8.1",
+    "stream-browserify": "^3.0.0",
     "web-vitals": "^0.2.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "start-dev": "set PORT=3001 && react-scripts start",
-    "build": "GENERATE_SOURCEMAP=false react-scripts build",
-    "test": "react-scripts test",
+    "start": "react-app-rewired --openssl-legacy-provider start",
+    "start-dev": "set PORT=3001 && react-app-rewired --openssl-legacy-provider start",
+    "build": "GENERATE_SOURCEMAP=false react-app-rewired build",
+    "test": "react-app-rewired test",
     "eject": "react-scripts eject",
     "build:staging": "env-cmd -f .env.staging npm run-script build"
   },
@@ -60,6 +65,7 @@
     ]
   },
   "devDependencies": {
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "react-app-rewired": "^2.2.1"
   }
 }

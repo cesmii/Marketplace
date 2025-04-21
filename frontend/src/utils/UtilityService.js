@@ -147,6 +147,11 @@ export function formatItemPublishDate(item) {
     return formatDate(item.publishDate);
 }
 
+export function formatCurrency(val) {
+    if (val == null || val === '') return null;
+    var usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+    return usd.format(val);
+}
 
 // From ProfileDesigner\frontend\src\views\shared\ProfileEntity.js:
 //Dates will come in two formats:
@@ -650,3 +655,12 @@ export function trimString(val, length = 256) {
     return val.substring(0, lengthAdjusted) + '...';
 }
 
+///--------------------------------------------------------------------------
+/// Dynamically generate a standardized action link
+///--------------------------------------------------------------------------
+export function generateActionLink(marketplaceItemName, jobName) {
+    let result = `/custom/action/{{marketplacename}}/{{jobName}}`;
+    result = marketplaceItemName != null ? result.replace('{{marketplacename}}', marketplaceItemName) : result;
+    result = jobName != null ? result.replace('{{jobName}}', jobName) : result;
+    return result.toLowerCase();
+}

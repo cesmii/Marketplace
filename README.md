@@ -2,10 +2,10 @@
 
 ## Prerequisites
 
-- Install node.js (version > 10.16) - https://nodejs.org/en/
-- Install npm (version > 5.6) - https://www.npmjs.com/ (note I just upgraded to 7.17 =>  npm install -g npm)
+- Install node.js (version > 18.17) - https://nodejs.org/en/
+- Install npm (version > 8.5.4) - https://www.npmjs.com/ (npm install -g npm)
 - React - https://reactjs.org/
-- .NET Core 5, Visual Studio 2019 or equivalent
+- .NET Core 6, Visual Studio 2022 or equivalent
 - DB - Mongo DB - details to follow...
 
 ## Directories
@@ -22,7 +22,7 @@
 2. **Build/Run the front end (Using a node.js prompt):**
 
     ```ps
-    cd \front-end
+    cd \frontend
     npm install
     npm run start
     ```

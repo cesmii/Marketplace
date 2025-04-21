@@ -12,6 +12,7 @@ using CESMII.Marketplace.Data.Entities;
 using CESMII.Marketplace.DAL;
 using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common.Enums;
+using CESMII.Marketplace.Service;
 
 namespace CESMII.Marketplace.Api.Controllers
 {
@@ -20,15 +21,18 @@ namespace CESMII.Marketplace.Api.Controllers
     {
         private readonly IDal<MarketplaceItem, AdminMarketplaceItemModel> _dal;
         private readonly IDal<LookupItem, LookupItemModel> _dalLookup;
+        private readonly IECommerceService<CartModel> _stripeService;
 
         public AdminMarketplaceController(IDal<MarketplaceItem, AdminMarketplaceItemModel> dal,
             IDal<LookupItem, LookupItemModel> dalLookup,
+            IECommerceService<CartModel> stripeService,
             UserDAL dalUser,
             ConfigUtil config, ILogger<AdminMarketplaceController> logger)
             : base(config, logger, dalUser)
         {
             _dal = dal;
             _dalLookup = dalLookup;
+            _stripeService = stripeService;
         }
 
         #region Admin UI
@@ -142,6 +146,17 @@ namespace CESMII.Marketplace.Api.Controllers
                 _logger.LogWarning("AdminMarketplaceController|Update|Invalid model");
                 return BadRequest("Marketplace|Update|Invalid model");
             }
+
+            if (model.ECommerce != null && model.ECommerce.AllowPurchase && model.ECommerce.Prices.Count == 0)
+            {
+                _logger.LogWarning("AdminMarketplaceController|Update|When Allow purchase is selected, at least one price is required.");
+                return Ok(new ResultMessageWithDataModel()
+                {
+                    IsSuccess = false,
+                    Message = $"When Allow purchase is selected, at least one price is required."
+                });
+            }
+
             var record = _dal.GetById(model.ID);
             if (record == null)
             {
@@ -159,6 +174,27 @@ namespace CESMII.Marketplace.Api.Controllers
             }
             else
             {
+                //Call to Stripe service to add/update item
+                //get back Stripe price id and save to our DB.
+                //if Stripe fails, catch exception, log exception, and still save to our db
+                try
+                {
+                    if (model.ECommerce.AllowPurchase)
+                    {
+                        if (string.IsNullOrEmpty(model.ECommerce.PaymentProductId))
+                        {
+                            await _stripeService.AddProduct(model, UserID);
+                        }
+                        else
+                        {
+                            await _stripeService.UpdateProduct(model, UserID);
+                        }
+                    }
+                } catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"AdminMarketplaceController|Update|Failed to update the marketplace item '{model.Name}' ({model.ID}) in Stripe.");
+                }
+
                 var result = await _dal.Update(model, UserID);
                 if (result < 0)
                 {
@@ -186,6 +222,23 @@ namespace CESMII.Marketplace.Api.Controllers
         [ProducesResponseType(200, Type = typeof(ResultMessageModel))]
         public async Task<IActionResult> Delete([FromBody] IdStringModel model)
         {
+            //Call to Stripe service to remove item from catalog - only if it has payment product id
+            //if Stripe fails, catch exception, log exception, and still save to our db
+            try
+            {
+                var adminMarketplaceItem = _dal.GetById(model.ID);
+                if (adminMarketplaceItem !=null && adminMarketplaceItem.IsActive && 
+                    adminMarketplaceItem.ECommerce.AllowPurchase && 
+                    !string.IsNullOrEmpty(adminMarketplaceItem.ECommerce.PaymentProductId))
+                {
+                    await _stripeService.DeleteProduct(adminMarketplaceItem.ECommerce.PaymentProductId);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "AdminMarketplaceController|Delete|Failed to delete the product in Stripe");
+            }
+
             var result = await _dal.Delete(model.ID.ToString(), UserID);
             if (result < 0)
             {
@@ -221,8 +274,28 @@ namespace CESMII.Marketplace.Api.Controllers
                     Message = $"Name '{model.Name}' is not unique. Please enter a unique name."
                 });
             }
+            else if (model.ECommerce.AllowPurchase && model.ECommerce.Prices.Count == 0)
+            {
+                _logger.LogWarning("AdminMarketplaceController|Add|Price is missing");
+                return BadRequest("AdminMarketplaceController|Add|Price is missing");
+            }
             else
             {
+                //Call to Stripe service to add item to catalog
+                //set paymentProductId on our model.PaymentProductId
+                //if Stripe fails, catch exception, log exception, and still save to our db
+                try
+                {
+                    if (model.ECommerce.AllowPurchase)
+                    {
+                        await _stripeService.AddProduct(model, UserID);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "AdminMarketplaceController|Update|Failed to update the product in Stripe");
+                }
+
                 var result = await _dal.Add(model, UserID);
                 if (String.IsNullOrEmpty(result))
                 {

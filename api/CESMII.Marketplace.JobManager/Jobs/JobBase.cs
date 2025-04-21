@@ -11,15 +11,18 @@ using CESMII.Marketplace.DAL.Models;
 using CESMII.Marketplace.Common;
 using CESMII.Marketplace.Common.Enums;
 using CESMII.Common.SelfServiceSignUp.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CESMII.Marketplace.JobManager.Jobs
 {
     public abstract class JobBase : IJob, IDisposable
     {
+        protected readonly IServiceScopeFactory _serviceScopeFactory;
         protected readonly ILogger<IJob> _logger;
         protected bool _disposed = false;
         protected readonly IHttpApiFactory _httpFactory;
         protected readonly IDal<JobLog, JobLogModel> _dalJobLog;
+        protected readonly UserDAL _dalUser;
         protected readonly ConfigUtil _configUtil;
         protected readonly MailRelayService _mailRelayService;
 
@@ -28,15 +31,19 @@ namespace CESMII.Marketplace.JobManager.Jobs
         public event JobRunEventHandler JobRun; // event
 
         public JobBase(
+            IServiceScopeFactory serviceScopeFactory,
             ILogger<IJob> logger,
             IHttpApiFactory httpFactory,
             IDal<JobLog, JobLogModel> dalJobLog,
+            UserDAL dalUser,
             IConfiguration configuration,
             MailRelayService mailRelayService)
         {
+            _serviceScopeFactory = serviceScopeFactory;
             _logger = logger;
             _httpFactory = httpFactory;
             _dalJobLog = dalJobLog;
+            _dalUser = dalUser;
             _configUtil = new ConfigUtil(configuration);
             _mailRelayService = mailRelayService;
         }
@@ -77,7 +84,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
                 logItem.Completed = DateTime.UtcNow;
             }
             logItem.Messages.Add(new JobLogMessage() { Message = message, Created = DateTime.UtcNow, isEncrypted = isEncrypted });
-            _dalJobLog.Update(logItem, _jobEventArgs.User.ID);
+            _dalJobLog.Update(logItem, _jobEventArgs.User == null ? null : _jobEventArgs.User.ID);
         }
 
         protected void SetJobLogResponse(string responseData, string message, TaskStatusEnum status, bool isEncrypted = false)
@@ -92,7 +99,7 @@ namespace CESMII.Marketplace.JobManager.Jobs
             logItem.ResponseData = responseData;
 
             logItem.Messages.Add(new JobLogMessage() { Message = message, Created = DateTime.UtcNow, isEncrypted = isEncrypted });
-            _dalJobLog.Update(logItem, _jobEventArgs.User.ID);
+            _dalJobLog.Update(logItem, _jobEventArgs.User == null ? null : _jobEventArgs.User.ID);
         }
 
         protected async Task<bool> SendEmail(string subject, string body)

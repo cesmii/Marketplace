@@ -169,8 +169,12 @@
                         Name = mktplItem?.Name
                     },
                     Name = entity.Name,
+                    DisplayName = entity.DisplayName,
                     IconName = entity.IconName,
                     TypeName = entity.TypeName,
+                    ActionType = (Common.Enums.JobActionTypeEnum)entity.ActionType,
+                    ClassName = entity.ClassName,
+                    RequiresAuthentication = entity.RequiresAuthentication,
                     Data = !string.IsNullOrEmpty(entity.Data) ? 
                             PasswordUtils.DecryptString(entity.Data, _encryptDecryptKey) : null, 
                     IsActive = entity.IsActive
@@ -189,8 +193,12 @@
         {
             entity.MarketplaceItemId = MongoDB.Bson.ObjectId.Parse(model.MarketplaceItem.ID);
             entity.Name = model.Name;
+            entity.DisplayName = model.DisplayName;
             entity.IconName = model.IconName;
             entity.TypeName = model.TypeName;
+            entity.ActionType = (int)model.ActionType;
+            entity.ClassName = model.ClassName;
+            entity.RequiresAuthentication = model.RequiresAuthentication;
             entity.Data = PasswordUtils.EncryptString(model.Data, _encryptDecryptKey);
         }
 
