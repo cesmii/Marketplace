@@ -2,7 +2,7 @@ import React from 'react'
 import { AppSettings, LookupData } from '../utils/appsettings';
 import SocialMedia from './SocialMedia';
 import CurrentYear from './CurrentYear';
-import HubSpotTracking from './HubSpotTracking';
+import HubspotTracking from './HubspotTracking';
 
 import './styles/Footer.scss';
 import SubscribeForm from './SubscribeForm';
@@ -65,7 +65,7 @@ function Footer() {
                     </div>
                 </div>
             </div>
-            <HubSpotTracking />
+            <HubspotTracking />
         </footer>
     )
 }
