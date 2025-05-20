@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 
 /**
- * HubSpotTracking - A component that embeds HubSpot tracking code into a React application
+ * HubspotTracking - A component that embeds HubSpot tracking code into a React application
  * 
  * This component handles loading the HubSpot tracking script only once,
  * even if the component is mounted multiple times or remounted.
  * 
  * @returns {null} This component doesn't render anything visible
  */
-const HubSpotTracking = () => {
+const HubspotTracking = () => {
   useEffect(() => {
     // Check if the script is already loaded
     if (!document.getElementById('hs-script-loader')) {
@@ -31,4 +31,4 @@ const HubSpotTracking = () => {
   return null;
 };
 
-export default HubSpotTracking;
+export default HubspotTracking;
