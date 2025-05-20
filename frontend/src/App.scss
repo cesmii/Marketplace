@@ -289,6 +289,7 @@ a {
 }
 
 .txt-search-ui-group {
+    border-radius: $inputControl-radius;
     box-sizing: border-box;
     box-shadow: 0px 4px 16px rgba( color('selectedBg'), 0.15);
 

@@ -22,7 +22,7 @@
 2. **Build/Run the front end (Using a node.js prompt):**
 
     ```ps
-    cd \front-end
+    cd \frontend
     npm install
     npm run start
     ```
