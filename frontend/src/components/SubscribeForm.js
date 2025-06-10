@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import Form from 'react-bootstrap/Form'
 import InputGroup from 'react-bootstrap/InputGroup'
-import Button from 'react-bootstrap/Button'
 import axiosInstance from "../services/AxiosService";
 
 import { generateLogMessageString, validate_Email } from '../utils/UtilityService'
@@ -110,9 +109,12 @@ function SubscribeForm() {
                 />
             </InputGroup>
             <InputGroup.Append>
-                <Button variant="primary" className="ml-2 auto-width px-3 btn-subscribe" onClick={onSubscribeClick} type="submit" >
-                    Subscribe
-                </Button>
+                <input 
+                    type="submit" 
+                    className="ml-2 auto-width px-3 btn-subscribe btn btn-primary" 
+                    onClick={onSubscribeClick} 
+                    value="Subscribe"
+                />
             </InputGroup.Append>
         </Form>
     )
